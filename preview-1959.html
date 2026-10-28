@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TURNSTILE — RetroMatch 1959-60 UI mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;500;700&family=Kaushan+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f4ecd6; --paper2:#ebdfc0; --ink:#1a1714;
+  --red:#c42b2b; --blue:#245f8f; --sky:#9cc5e0; --gold:#f2b632; --claret:#7e1f3a;
+  --slab:'Alfa Slab One','Rockwell','Clarendon','Roboto Slab',Georgia,serif;
+  --body:'Libre Baskerville','Baskerville','Palatino Linotype',Georgia,serif;
+  --cond:'Oswald','Arial Narrow','Helvetica Neue',Arial,sans-serif;
+  --script:'Kaushan Script','Brush Script MT','Segoe Script',cursive;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  background:#3b3a36;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.05) 1px,transparent 1.5px);background-size:8px 8px}
+a{color:inherit}
+.mag{max-width:1100px;margin:16px auto;background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' seed='9'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .3  0 0 0 0 .1  0 0 0 .16 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>"),
+  var(--paper);box-shadow:0 12px 40px rgba(0,0,0,.6);position:relative;overflow:hidden}
+.pad{padding:0 28px}
+
+/* ===== masthead ===== */
+.topbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;background:var(--ink);color:var(--paper);font-family:var(--cond);text-transform:uppercase;letter-spacing:.16em;font-size:12px;padding:6px 28px}
+.mast{padding:14px 28px 0;position:relative}
+.mast h1{margin:0;font-family:var(--slab);font-weight:400;font-size:clamp(50px,12.4vw,136px);line-height:.92;color:var(--red);letter-spacing:.005em;
+  text-shadow:4px 4px 0 var(--ink),7px 7px 0 var(--gold);text-transform:uppercase}
+.mast .sub{font-family:var(--script);font-size:clamp(18px,3.4vw,30px);color:var(--blue);margin:8px 0 0 4px;transform:rotate(-1.5deg);transform-origin:left}
+.mast .stamp{position:absolute;right:30px;bottom:-8px;width:clamp(78px,13vw,128px);aspect-ratio:1;border-radius:50%;background:var(--gold);border:3px solid var(--ink);display:grid;place-items:center;text-align:center;transform:rotate(10deg);font-family:var(--cond);text-transform:uppercase;line-height:1;font-size:clamp(11px,1.6vw,16px);letter-spacing:.06em;box-shadow:3px 3px 0 var(--ink)}
+.mast .stamp b{display:block;font-family:var(--slab);font-weight:400;font-size:clamp(22px,4.2vw,42px);color:var(--red)}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);margin:16px 0 0;border-top:4px solid var(--ink);border-bottom:4px solid var(--ink);background:var(--paper2)}
+.nav a{display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:14px;font-weight:500;border-right:2px solid var(--ink)}
+.nav a:last-child{border-right:0}
+.nav a i{font-style:normal;font-family:var(--slab);font-size:26px;color:var(--red);line-height:1}
+.nav a:hover,.nav a:focus-visible{background:var(--blue);color:var(--paper);outline:none}
+.nav a:hover i,.nav a:focus-visible i{color:var(--gold)}
+
+/* ===== section headers ===== */
+.spread{padding:34px 28px 0}
+.sec-h{display:flex;align-items:center;gap:14px;background:var(--blue);color:var(--paper);padding:10px 16px;margin:0 -28px 18px;border-top:4px solid var(--ink);border-bottom:4px solid var(--ink);
+  background-image:radial-gradient(circle at 3px 3px,rgba(255,255,255,.18) 1.4px,transparent 1.8px);background-size:8px 8px}
+.sec-h .no{flex:none;width:52px;height:52px;border-radius:50%;background:var(--gold);color:var(--ink);display:grid;place-items:center;font-family:var(--slab);font-size:28px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.sec-h h2{margin:0;font-family:var(--slab);font-weight:400;font-size:clamp(24px,4.6vw,44px);line-height:1;text-transform:uppercase;letter-spacing:.01em}
+.sec-h .tg{margin-left:auto;font-family:var(--script);font-size:20px;color:var(--gold);white-space:nowrap}
+h3{font-family:var(--slab);font-weight:400;font-size:22px;line-height:1.1;margin:0 0 6px}
+h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:14px;margin:0 0 6px;color:var(--red)}
+p{margin:0 0 9px}
+.dk{font-style:italic;font-size:16px}
+.lab{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px}
+.tag{display:inline-block;font-family:var(--cond);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:0 5px;border:1px solid var(--ink);vertical-align:2px;margin-left:4px;line-height:1.5}
+.tag.real{background:var(--blue);color:var(--paper);border-color:var(--blue)}
+.note{font-size:12.5px;font-style:italic;color:#4c453b;margin:8px 0 0}
+.grid{display:grid;gap:22px}
+.g-2{grid-template-columns:1fr 1fr}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.g-cov{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:start}
+.g-main{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+.card{background:var(--paper);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:12px 14px}
+.card.red{background:var(--red);color:var(--paper)} 
+.card.red h4{color:var(--gold)}
+.card.gold{background:var(--gold)}
+.card.gold h4{color:var(--red)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:14px;font-weight:500;color:var(--ink);background:var(--paper);border:3px solid var(--ink);padding:9px 16px;min-height:44px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.btn.primary{background:var(--red);color:var(--paper)}
+.btn:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink)}
+.btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+/* ===== cover ===== */
+.cover{position:relative;border:4px solid var(--ink);box-shadow:7px 7px 0 var(--ink);background:var(--gold);aspect-ratio:3/4;overflow:hidden}
+.cover canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cover .ban{position:absolute;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:10px 14px 12px}
+.cover .ban b{display:block;font-family:var(--slab);font-weight:400;font-size:clamp(22px,3.2vw,34px);line-height:1;color:var(--gold);text-transform:uppercase}
+.cover .ban span{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px}
+.cover .flash{position:absolute;right:10px;top:10px;background:var(--red);color:var(--paper);font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:13px;padding:5px 10px;border:2px solid var(--ink);transform:rotate(4deg);font-weight:700}
+.cover .ph{position:absolute;left:8px;top:8px;font-family:var(--cond);font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:var(--paper);border:1px solid var(--ink);padding:1px 5px}
+.lines{list-style:none;margin:0;padding:0}
+.lines li{display:flex;gap:12px;align-items:baseline;padding:8px 0;border-bottom:2px dotted var(--ink)}
+.lines li .pg{flex:none;font-family:var(--slab);font-size:24px;color:var(--red);width:30px}
+.lines li b{font-family:var(--script);font-weight:400;font-size:22px;color:var(--blue);display:block;line-height:1.1}
+.lines li span{font-size:14px}
+
+/* diary */
+.diary{list-style:none;margin:0;padding:0}
+.diary li{display:grid;grid-template-columns:54px 1fr auto;gap:8px;padding:7px 0;border-bottom:2px dotted var(--ink);align-items:baseline}
+.diary .d{font-family:var(--slab);font-size:20px;color:var(--red);line-height:1}
+.diary .t i{display:block;font-size:12.5px;color:#4c453b}
+.diary .r{font-family:var(--cond);font-weight:700;letter-spacing:.06em}
+.diary li.today{background:var(--ink);color:var(--paper);padding:8px 8px;margin:2px -8px}
+.diary li.today .d{color:var(--gold)} .diary li.today i{color:var(--sky)}
+.diary li.m .t{font-weight:700}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:0 0 6px}
+.stat div{border:3px solid var(--ink);padding:6px 4px;background:var(--paper)}
+.stat b{display:block;font-family:var(--slab);font-weight:400;font-size:30px;line-height:1;color:var(--red)}
+.stat span{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:11px}
+.ledger{width:100%;border-collapse:collapse;font-size:14px}
+.ledger td{padding:4px 0;border-bottom:2px dotted var(--ink)}
+.ledger td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ledger tr.tot td{font-weight:700;border-top:3px solid var(--ink);border-bottom:0}
+.newsl{list-style:none;margin:0;padding:0}
+.newsl li{padding:7px 0;border-bottom:2px dotted var(--ink);font-size:14px;line-height:1.35}
+.newsl li b{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;color:var(--red)}
+
+/* ===== team sheet ===== */
+.toggle{display:flex;margin:6px 0 16px;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);max-width:640px}
+.toggle button{flex:1;font-family:var(--slab);font-size:20px;padding:8px 8px;background:var(--paper);color:var(--ink);border:0;cursor:pointer;min-height:48px;line-height:1.1}
+.toggle button+button{border-left:3px solid var(--ink)}
+.toggle button small{display:block;font-family:var(--cond);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.toggle button[aria-pressed=true]{background:var(--red);color:var(--paper)}
+.sheetgrid{display:grid;grid-template-columns:minmax(260px,400px) 1fr;gap:26px;align-items:start}
+.pitch{position:relative;aspect-ratio:3/4;border:4px solid var(--ink);box-shadow:6px 6px 0 var(--ink);
+  background:repeating-linear-gradient(0deg,var(--sky) 0 12.5%,#b3d3e8 12.5% 25%)}
+.pitch .ln{position:absolute;border:2px solid var(--blue)}
+.pitch .half{left:0;right:0;top:50%;border-width:2px 0 0}
+.pitch .circ{left:36%;width:28%;top:calc(50% - 9.5%);aspect-ratio:1;border-radius:50%}
+.pitch .penT{left:22%;right:22%;top:0;height:16%;border-top:0}
+.pitch .penB{left:22%;right:22%;bottom:0;height:16%;border-bottom:0}
+.pitch .sixT{left:36%;right:36%;top:0;height:6%;border-top:0}
+.pitch .sixB{left:36%;right:36%;bottom:0;height:6%;border-bottom:0}
+.pitch .dir{position:absolute;top:5px;right:8px;font-family:var(--cond);font-size:11px;letter-spacing:.14em;color:var(--blue);font-weight:700}
+.pl{position:absolute;transform:translate(-50%,-50%);width:0;transition:left .45s ease,top .45s ease;z-index:2}
+.pl .sh{position:absolute;left:-16px;top:-17px;width:32px;height:34px;display:grid;place-items:center;font-family:var(--slab);font-size:15px;color:var(--paper);
+  background:var(--claret);clip-path:polygon(0 18%,26% 0,38% 10%,62% 10%,74% 0,100% 18%,86% 44%,80% 38%,80% 100%,20% 100%,20% 38%,14% 44%);text-shadow:none}
+.pl.gk .sh{background:var(--gold);color:var(--ink)}
+.pl .nm{position:absolute;left:0;top:19px;transform:translateX(-50%);font-family:var(--cond);font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:var(--paper);padding:0 4px;white-space:nowrap;border:1.5px solid var(--ink)}
+.xi{width:100%;border-collapse:collapse;font-size:14px}
+.xi th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:500;background:var(--ink);color:var(--paper);text-align:left;padding:5px 6px}
+.xi td{padding:5px 6px;border-bottom:2px dotted var(--ink)}
+.xi td.n{font-family:var(--slab);color:var(--red);width:34px}
+.xi td.p{font-family:var(--cond);letter-spacing:.08em;color:var(--blue);font-weight:700}
+.stars{color:var(--red);letter-spacing:1px;white-space:nowrap}
+.stars .o{color:#b9a98a}
+
+/* ===== table ===== */
+table.lg{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.lg th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:500;background:var(--ink);color:var(--paper);padding:5px 5px;text-align:right}
+table.lg th:nth-child(1),table.lg th:nth-child(2){text-align:left}
+table.lg td{padding:4px 5px;text-align:right;border-bottom:2px dotted var(--ink)}
+table.lg td:first-child{text-align:left;font-family:var(--slab);color:var(--red);width:30px}
+table.lg td:nth-child(2){text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+table.lg td.pts{font-weight:700}
+table.lg tr.me td{background:var(--claret);color:var(--paper);border-bottom-color:var(--paper)}
+table.lg tr.me td:first-child{color:var(--gold)}
+table.lg tr.cut td{border-bottom:4px solid var(--red)}
+
+/* ===== match day ===== */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;text-align:center;background:var(--red);color:var(--paper);border:4px solid var(--ink);box-shadow:7px 7px 0 var(--ink);padding:16px 10px;margin:0 0 24px;
+  background-image:radial-gradient(circle at 3px 3px,rgba(0,0,0,.16) 1.6px,transparent 2px);background-size:9px 9px}
+.vs .club{font-family:var(--slab);font-size:clamp(24px,5.2vw,52px);line-height:1;text-transform:uppercase;text-shadow:3px 3px 0 var(--ink)}
+.vs .club small{display:block;font-family:var(--cond);font-size:12px;letter-spacing:.16em;margin-top:8px;text-shadow:none;color:var(--gold)}
+.vs .v{font-family:var(--script);font-size:44px;color:var(--gold);text-shadow:2px 2px 0 var(--ink)}
+.form b{display:inline-grid;place-items:center;width:22px;height:22px;border:2px solid var(--ink);font-family:var(--cond);font-size:11px;font-weight:700;margin-right:3px;background:var(--paper)}
+.form b.W{background:var(--blue);color:var(--paper)} .form b.L{background:var(--red);color:var(--paper)}
+.dial{display:grid;grid-template-columns:86px 1fr 22px;gap:8px;align-items:center;font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:12px;margin-bottom:6px}
+.dial input[type=range]{accent-color:var(--red);width:100%;min-height:30px}
+.radio{display:flex;gap:8px;align-items:flex-start;margin:0 0 8px;font-size:14px}
+.radio input{margin-top:4px;accent-color:var(--red);width:16px;height:16px}
+.radio em{display:block;font-size:12.5px;color:#4c453b}
+.coupon div{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:2px dotted var(--ink);font-size:14px}
+.coupon .hl{background:var(--ink);color:var(--paper);font-weight:700;margin:0 -8px;padding:5px 8px}
+.kick{font-family:var(--slab);font-size:30px;line-height:1}
+.kick small{display:block;font-family:var(--cond);font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+.fine{margin-top:34px;background:var(--ink);color:var(--paper);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 28px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:11px}
+
+@media (max-width:860px){
+  .g-2,.g-3,.g-cov,.g-main,.sheetgrid{grid-template-columns:1fr}
+  .cover{width:100%;max-width:480px;margin:0 auto}
+}
+@media (max-width:560px){
+  .mag{margin:0}
+  .topbar,.fine{padding-left:14px;padding-right:14px}
+  .mast{padding:12px 14px 0}
+  .mast .stamp{display:none}
+  .mast h1{font-size:13.2vw}
+  .spread{padding:26px 14px 0}
+  .sec-h{margin:0 -14px 16px;padding:9px 12px;gap:10px}
+  .sec-h .no{width:42px;height:42px;font-size:22px}
+  .sec-h .tg{display:none}
+  .nav{grid-template-columns:1fr 1fr}
+  .nav a:nth-child(2){border-right:0}
+  .nav a:nth-child(-n+2){border-bottom:2px solid var(--ink)}
+  .vs{grid-template-columns:1fr;gap:4px}
+  .vs .v{font-size:32px}
+  .hide-s{display:none}
+  table.lg td:nth-child(2){max-width:140px}
+  .dial{grid-template-columns:76px 1fr 18px}
+  .pl .sh{left:-14px;top:-15px;width:28px;height:30px;font-size:13px}
+  .pl .nm{top:16px;font-size:10px}
+  .card{box-shadow:4px 4px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){.pl{transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="mag">
+
+  <div class="topbar"><span>No. 9 · September 1959</span><span>The magazine for the man at the turnstile</span><span>Price One Shilling</span></div>
+  <header class="mast">
+    <h1>Turnstile</h1>
+    <div class="sub">Every club, every Saturday, every side of the game</div>
+    <div class="stamp" aria-hidden="true"><div>Season<b>59-60</b>Opens</div></div>
+  </header>
+  <nav class="nav" aria-label="Contents">
+    <a href="#week"><i>1</i>This Week</a>
+    <a href="#sheet"><i>2</i>Your Team</a>
+    <a href="#table"><i>3</i>The Table</a>
+    <a href="#match"><i>4</i>Match Day</a>
+  </nav>
+
+  <!-- ===================== 1: THIS WEEK (cover) ===================== -->
+  <section id="week" class="spread">
+    <div class="sec-h"><span class="no">1</span><h2>This Week at Turf Moor</h2><span class="tg">Burnley F.C.</span></div>
+    <div class="grid g-cov">
+      <div class="cover" role="img" aria-label="Cover illustration: a footballer in claret shirt striking the ball (placeholder artwork)">
+        <canvas id="cv" width="600" height="800"></canvas>
+        <span class="ph">Cover art · placeholder</span>
+        <span class="flash">Top of the League!</span>
+        <div class="ban"><b>Burnley's flying start</b><span>Two games, two wins, eight goals</span></div>
+      </div>
+      <div>
+        <p class="lab" style="color:var(--red);margin-bottom:2px">Club notes · by our Burnley correspondent <span class="tag real">Real</span></p>
+        <h3 style="font-size:clamp(26px,4vw,40px)">Potts's Clarets start with two wins</h3>
+        <p class="dk">A 3-2 win at Leeds on the opening Saturday, then a 5-2 win over Everton at Turf Moor on Tuesday night, and Burnley lead the First Division.</p>
+        <p>Pilkington, Connelly and Pointer scored at Elland Road, and on Tuesday Connelly hit two, with Pilkington, Pointer and Robson also scoring. West Ham United are the visitors on Saturday afternoon.</p>
+        <p class="note" style="margin-top:0">Scores and scorers are checked against the club's season record. Nothing printed here describes Saturday's game.</p>
+        <div class="stat" style="margin-top:12px">
+          <div><b>2</b><span>Played</span></div><div><b>8</b><span>Goals for</span></div><div><b>1st</b><span>Place</span></div>
+        </div>
+        <ul class="lines" style="margin-top:8px">
+          <li><span class="pg">2</span><div><b>Pick your eleven</b><span>W-M or the new Brazilian 4-2-4?</span></div></li>
+          <li><span class="pg">3</span><div><b>The First Division table</b><span>Two points a win, goal average to part the equals.</span></div></li>
+          <li><span class="pg">4</span><div><b>Saturday: Burnley v West Ham</b><span>Team talk, instructions and the full afternoon's fixtures.</span></div></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid g-main" style="margin-top:26px">
+      <div class="card">
+        <h4>The Week</h4>
+        <ul class="diary">
+          <li class="m"><span class="d">Sat</span><span class="t">Leeds United (a)<i>Played. Opening day.</i></span><span class="r">W 3-2</span></li>
+          <li class="m"><span class="d">Tue</span><span class="t">Everton (h)<i>Played, Turf Moor. <span class="tag real" style="margin:0">Real</span></i></span><span class="r">W 5-2</span></li>
+          <li><span class="d">Wed</span><span class="t">Rest and massage<i>Treatment for knocks. (demo)</i></span></li>
+          <li><span class="d">Thu</span><span class="t">Ball work, five-a-side<i>Short passes, then shooting. (demo)</i></span></li>
+          <li class="today"><span class="d">Fri</span><span class="t">TODAY: Name the side<i>The team goes up on the board at noon.</i></span></li>
+          <li class="m"><span class="d">Sat</span><span class="t">Burnley v West Ham United<i>Turf Moor · afternoon</i></span></li>
+        </ul>
+        <div class="btns"><button class="btn" type="button">Training</button><button class="btn primary" type="button">Pick the team ›</button></div>
+      </div>
+      <div style="display:grid;gap:22px;align-content:start">
+        <div class="card gold">
+          <h4>The Club Ledger <span class="tag">Demo</span></h4>
+          <table class="ledger">
+            <tr><td>In the bank</td><td>£18,240</td></tr>
+            <tr><td>Wage bill, per week</td><td>£585</td></tr>
+            <tr><td>Last home gate</td><td>£3,910</td></tr>
+            <tr class="tot"><td>To spend on players</td><td>£12,000</td></tr>
+          </table>
+          <p class="note">Maximum wage £20 a week in the season. <span class="tag real">Real</span></p>
+        </div>
+        <div class="card">
+          <h4>Turf Moor Gossip</h4>
+          <ul class="newsl">
+            <li><b>Manager.</b> Harry Potts is in charge at Turf Moor. <span class="tag real">Real</span></li>
+            <li><b>Pitch.</b> The Turf Moor surface is firm and fast after the dry August. <span class="tag">Demo</span></li>
+            <li><b>Supporters.</b> The Cricket Field Stand is selling out early. <span class="tag">Demo</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2: YOUR TEAM ===================== -->
+  <section id="sheet" class="spread">
+    <div class="sec-h"><span class="no">2</span><h2>Pick Your Eleven</h2><span class="tg">Friday's big job</span></div>
+    <p class="dk" style="max-width:720px">Most English clubs still play the W-M. Since Brazil won the World Cup last summer, every manager has heard of 4-2-4. Choose your shape, then name the side.</p>
+    <div class="toggle" role="group" aria-label="Formation">
+      <button type="button" data-shape="wm" aria-pressed="true">W-M<small>Three backs · the English way</small></button>
+      <button type="button" data-shape="424" aria-pressed="false">4-2-4<small>Four back · the Brazilian idea</small></button>
+    </div>
+    <div class="sheetgrid">
+      <div class="pitch" id="pitch" aria-label="Formation diagram">
+        <div class="ln half"></div><div class="ln circ"></div><div class="ln penT"></div><div class="ln penB"></div><div class="ln sixT"></div><div class="ln sixB"></div>
+        <div class="dir">▲ ATTACK</div>
+      </div>
+      <div>
+        <table class="xi" id="xi">
+          <thead><tr><th>No.</th><th>Pos</th><th>Player</th><th>Form</th><th>Fit</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="card red" style="margin-top:18px">
+          <h4>No substitutes</h4>
+          <p style="margin:0;font-size:14px">Nobody may be sent on for an injured man. A hurt player limps on at outside-left or the side plays short.</p>
+        </div>
+        <p class="note">Players and positions come from the game's 1959-60 Burnley staff list. Form, fitness and which eleven are picked are an example, not the club's real team for 29 August. Shirt numbers follow the position-by-number custom.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 3: THE TABLE ===================== -->
+  <section id="table" class="spread">
+    <div class="sec-h"><span class="no">3</span><h2>First Division</h2><span class="tg">Where they stand</span></div>
+    <div class="grid g-main">
+      <div>
+        <table class="lg" id="lg">
+          <thead><tr><th>#</th><th>Club</th><th>P</th><th class="hide-s">W</th><th class="hide-s">D</th><th class="hide-s">L</th><th>F</th><th>A</th><th>Av</th><th>Pts</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note">Demo table. Every score except Burnley's two is made up. Burnley's row is built from their two real results, 3-2 at Leeds and 5-2 against Everton, and the two real defeats are on those clubs' lines. The bottom two clubs go down.</p>
+      </div>
+      <aside style="display:grid;gap:22px;align-content:start">
+        <div class="card gold">
+          <h4>How it works</h4>
+          <p style="font-size:14px;margin:0">Two points for a win, one for a draw. If clubs are level, the better goal average (goals for divided by goals against) goes above. The bottom two are relegated and the top Second Division pair come up.</p>
+        </div>
+        <div class="card">
+          <h4>Other tables</h4>
+          <div class="btns" style="margin-top:4px"><button class="btn" type="button">Div. Two</button><button class="btn" type="button">Div. Three</button><button class="btn" type="button">Div. Four</button></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== 4: MATCH DAY ===================== -->
+  <section id="match" class="spread">
+    <div class="sec-h"><span class="no">4</span><h2>Match Day</h2><span class="tg">Turf Moor · 3 p.m.</span></div>
+    <div class="vs">
+      <div class="club">Burnley<small>At home · Turf Moor</small></div>
+      <div class="v">v</div>
+      <div class="club">West Ham United<small>Visitors · Upton Park</small></div>
+    </div>
+    <div class="grid g-3">
+      <div class="card">
+        <h4>The Opposition</h4>
+        <p style="margin:0 0 4px;font-size:14px"><b>Manager:</b> Ted Fenton <span class="tag real">Real</span></p>
+        <p style="margin:0 0 4px;font-size:14px"><b>Colours:</b> claret and blue, as Burnley. <span class="tag real">Real</span></p>
+        <p style="margin:0 0 4px;font-size:14px"><b>Last four:</b> <span class="form"><b class="W">W</b><b>D</b><b class="L">L</b><b class="W">W</b></span> <span class="tag">Demo</span></p>
+        <p class="note" style="margin-top:6px">Both sides wear claret and blue, so one will change. Scouting report: neat on the ground, short of height at the back. <span class="tag">Demo</span></p>
+      </div>
+      <div class="card">
+        <h4>Instructions</h4>
+        <div class="dial"><label for="d1">Passing</label><input id="d1" type="range" min="1" max="5" value="3" oninput="this.nextElementSibling.value=this.value"><output>3</output></div>
+        <div class="dial"><label for="d2">Tackling</label><input id="d2" type="range" min="1" max="5" value="3" oninput="this.nextElementSibling.value=this.value"><output>3</output></div>
+        <div class="dial"><label for="d3">Wing play</label><input id="d3" type="range" min="1" max="5" value="4" oninput="this.nextElementSibling.value=this.value"><output>4</output></div>
+        <p class="note">Shape: <b id="shapeNow">W-M</b> · set on page 2. 1 is little and 5 is lots.</p>
+      </div>
+      <div class="card">
+        <h4>Dressing-room Talk</h4>
+        <label class="radio"><input type="radio" name="talk" checked><span>Play it simple<em>Calms the nerves.</em></span></label>
+        <label class="radio"><input type="radio" name="talk"><span>Get at them early<em>Risks tiring in the second half.</em></span></label>
+        <label class="radio"><input type="radio" name="talk"><span>Don't let their inside-forwards turn<em>Tightens the middle.</em></span></label>
+      </div>
+    </div>
+    <div class="grid g-2" style="margin-top:24px">
+      <div class="card">
+        <h4>Saturday's Fixtures</h4>
+        <div class="coupon">
+          <div class="hl"><span>Burnley v West Ham United</span><span>Turf Moor</span></div>
+          <div><span>Wolverhampton W. v Fulham</span><span>demo</span></div>
+          <div><span>Tottenham H. v Bolton W.</span><span>demo</span></div>
+          <div><span>Manchester U. v Arsenal</span><span>demo</span></div>
+          <div><span>Sheffield W. v Preston N.E.</span><span>demo</span></div>
+        </div>
+        <p class="note">Burnley v West Ham is the only real line. The rest are demo.</p>
+      </div>
+      <div class="card gold" style="display:flex;flex-direction:column;justify-content:space-between;gap:14px">
+        <h4 style="margin:0">Ready?</h4>
+        <div class="kick"><small>Kick-off</small>Three o'clock <span class="tag">Demo</span></div>
+        <div class="btns" style="margin:0"><button class="btn" type="button">‹ Back to the team</button><button class="btn primary" type="button">Play the match ›</button></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="fine"><span>RetroMatch '59 · UI mockup</span><span>Printed in red, blue and black</span><span>Placeholder art, no real photographs</span></div>
+</div>
+
+<script>
+/* ---- cover art: a footballer in a striking pose, rendered as a two-colour halftone ---- */
+(function(){
+  const c=document.getElementById('cv'); const W=c.width,H=c.height;
+  const x=c.getContext('2d');
+  // mask: draw the figure at full resolution on a hidden canvas (white = body)
+  const m=document.createElement('canvas'); m.width=W; m.height=H; const g=m.getContext('2d');
+  g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.strokeStyle='#fff'; g.fillStyle='#fff'; g.lineCap='round'; g.lineJoin='round';
+  const limb=(w,pts)=>{g.lineWidth=w;g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)g.lineTo(pts[i][0],pts[i][1]);g.stroke()};
+  limb(104,[[312,330],[300,470]]);                        // torso
+  limb(124,[[312,340],[312,340]]);                         // shoulders
+  limb(78,[[298,500],[262,598]]);                          // standing thigh
+  limb(56,[[262,598],[236,720]]);                          // standing shin
+  limb(34,[[236,722],[196,744]]);                          // standing boot
+  limb(80,[[316,502],[420,540]]);                          // kicking thigh
+  limb(56,[[420,540],[520,462]]);                          // kicking shin
+  limb(34,[[520,462],[558,424]]);                          // kicking boot
+  limb(40,[[270,336],[190,420]]);                          // left arm back
+  limb(36,[[190,420],[158,370]]);
+  limb(40,[[350,332],[438,400]]);                          // right arm out
+  limb(36,[[438,400],[500,386]]);
+  g.beginPath(); g.arc(344,232,52,0,7); g.fill();          // head
+  limb(34,[[336,270],[326,310]]);                          // neck
+  // shorts block (separate tone later)
+  const md=g.getImageData(0,0,W,H).data;
+  const inFig=(px,py)=>md[((py|0)*W+(px|0))*4]>128;
+  // background
+  x.fillStyle='#f2b632'; x.fillRect(0,0,W,H);
+  // sunburst
+  x.save(); x.translate(W*.55,H*.45);
+  for(let i=0;i<26;i++){x.rotate(Math.PI*2/26);x.fillStyle=i%2?'rgba(196,43,43,.0)':'rgba(196,43,43,.42)';x.beginPath();x.moveTo(0,0);x.lineTo(900,-60);x.lineTo(900,60);x.closePath();x.fill()}
+  x.restore();
+  // halftone dots over the whole image
+  const step=9, a=Math.PI/4, ca=Math.cos(a), sa=Math.sin(a);
+  for(let u=-W;u<W*2;u+=step){for(let v=-H;v<H*2;v+=step){
+    const px=u*ca-v*sa, py=u*sa+v*ca; if(px<2||py<2||px>=W-2||py>=H-2) continue;
+    if(inFig(px,py)){
+      // shading: darker lower-right, lighter upper-left; shorts region darker
+      const sh=.35+.5*((px/W)*.5+(py/H)*.5);
+      const shorts=(py>470&&py<560&&px>250&&px<470);
+      const t=shorts?.95:sh;
+      x.fillStyle=shorts?'#fff7e0':'#7e1f3a';
+      x.beginPath();x.arc(px,py,step*.62*Math.sqrt(Math.min(1,t)),0,7);x.fill();
+    } else {
+      const t=.10+.28*(py/H);
+      x.fillStyle='#245f8f';
+      x.beginPath();x.arc(px,py,step*.55*Math.sqrt(t),0,7);x.fill();
+    }
+  }}
+  // solid shirt number and ball
+  x.fillStyle='#f4ecd6'; x.font='900 74px "Alfa Slab One",Georgia,serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('9',304,404);
+  x.fillStyle='#f4ecd6'; x.strokeStyle='#1a1714'; x.lineWidth=5; x.beginPath(); x.arc(566,372,34,0,7); x.fill(); x.stroke();
+  x.fillStyle='#1a1714'; for(const [dx,dy] of [[0,0],[-17,-12],[16,-14],[-14,16],[18,14]]){x.beginPath();x.arc(566+dx,372+dy,7,0,7);x.fill()}
+  // figure outline in ink, drawn from the mask edge
+  x.fillStyle='#1a1714';
+  for(let py=2;py<H-2;py+=2){for(let px=2;px<W-2;px+=2){
+    if(inFig(px,py)&&(!inFig(px-3,py)||!inFig(px+3,py)||!inFig(px,py-3)||!inFig(px,py+3))) x.fillRect(px-1,py-1,3,3);
+  }}
+})();
+
+/* ---- team sheet ---- */
+const P = {
+  mcdonald:{no:1, name:'McDonald', gk:1, form:4, fit:5},
+  angus:{no:2, name:'Angus', form:4, fit:5},
+  elder:{no:3, name:'Elder', form:3, fit:5},
+  seith:{no:4, name:'Seith', form:4, fit:4},
+  cummings:{no:5, name:'Cummings', form:4, fit:5},
+  adamson:{no:6, name:'Adamson', form:5, fit:5},
+  connelly:{no:7, name:'Connelly', form:5, fit:5},
+  mcilroy:{no:8, name:'McIlroy', form:4, fit:4},
+  pointer:{no:9, name:'Pointer', form:4, fit:5},
+  robson:{no:10, name:'Robson', form:4, fit:5},
+  pilkington:{no:11, name:'Pilkington', form:5, fit:3}
+};
+const ORDER = ['mcdonald','angus','elder','seith','cummings','adamson','connelly','mcilroy','pointer','robson','pilkington'];
+const SHAPES = {
+  wm:{label:'W-M', at:{
+    mcdonald:[50,91], angus:[80,77], cummings:[50,79], elder:[20,77],
+    seith:[68,62], adamson:[32,62],
+    mcilroy:[66,45], robson:[34,45],
+    connelly:[88,24], pointer:[50,21], pilkington:[12,24]},
+    pos:{mcdonald:'GK',angus:'RB',cummings:'CH',elder:'LB',seith:'RH',adamson:'LH',mcilroy:'IR',robson:'IL',connelly:'OR',pointer:'CF',pilkington:'OL'}},
+  '424':{label:'4-2-4', at:{
+    mcdonald:[50,91], angus:[86,74], seith:[62,77], cummings:[38,77], elder:[14,74],
+    adamson:[62,55], mcilroy:[38,55],
+    connelly:[88,25], pointer:[63,19], robson:[37,19], pilkington:[12,25]},
+    pos:{mcdonald:'GK',angus:'RB',seith:'CB',cummings:'CB',elder:'LB',adamson:'HB',mcilroy:'HB',connelly:'OR',pointer:'CF',robson:'CF',pilkington:'OL'}}
+};
+const pitch=document.getElementById('pitch'), tbody=document.querySelector('#xi tbody'), els={};
+for(const k of ORDER){
+  const d=document.createElement('div'); d.className='pl'+(P[k].gk?' gk':'');
+  d.innerHTML='<div class="sh">'+P[k].no+'</div><div class="nm">'+P[k].name+'</div>';
+  pitch.appendChild(d); els[k]=d;
+}
+const stars=v=>'<span class="stars" aria-label="'+v+' out of 5">'+'★'.repeat(v)+'<span class="o">'+'★'.repeat(5-v)+'</span></span>';
+function setShape(s){
+  const S=SHAPES[s];
+  for(const k of ORDER){els[k].style.left=S.at[k][0]+'%';els[k].style.top=S.at[k][1]+'%'}
+  tbody.innerHTML=ORDER.map(k=>'<tr><td class="n">'+P[k].no+'</td><td class="p">'+S.pos[k]+'</td><td>'+P[k].name+'</td><td>'+stars(P[k].form)+'</td><td>'+stars(P[k].fit)+'</td></tr>').join('');
+  document.querySelectorAll('.toggle button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.shape===s));
+  document.getElementById('shapeNow').textContent=S.label;
+}
+document.querySelectorAll('.toggle button').forEach(b=>b.addEventListener('click',()=>setShape(b.dataset.shape)));
+setShape('wm');
+
+/* ---- league table: seeded demo, club strengths from the game's own 1959-60 ratings ---- */
+(function(){
+  const teams=[["Burnley",97],["Wolverhampton Wanderers",95],["Tottenham Hotspur",93],["West Bromwich Albion",91],["Sheffield Wednesday",89],["Bolton Wanderers",87],["Manchester United",85],["Newcastle United",83],["Preston North End",81],["Fulham",79],["Blackpool",77],["Leicester City",75],["Arsenal",73],["West Ham United",71],["Everton",69],["Manchester City",67],["Blackburn Rovers",65],["Chelsea",63],["Birmingham City",61],["Nottingham Forest",59],["Leeds United",57],["Luton Town",55]];
+  let seed=1959; const rnd=()=>(seed=(seed*1664525+1013904223)%4294967296)/4294967296;
+  const T={}; teams.forEach(([n,s])=>T[n]={n,p:0,w:0,d:0,l:0,f:0,a:0,s:.5+s/100});
+  const goals=(att,def,home)=>{let g=0;const p=.28*Math.pow(att/def,1.5)*(home?1.15:.9);for(let k=0;k<6;k++)if(rnd()<p)g++;return g};
+  const names=teams.map(t=>t[0]);
+  const play=(hn,an,hg,ag)=>{const h=T[hn],g=T[an];h.p++;g.p++;h.f+=hg;h.a+=ag;g.f+=ag;g.a+=hg;
+    if(hg>ag){h.w++;g.l++}else if(hg<ag){g.w++;h.l++}else{h.d++;g.d++}};
+  /* Burnley's two real results are fixed (REAL); every other game is a seeded demo */
+  const real=[["Leeds United","Burnley",2,3],["Burnley","Everton",5,2]];
+  for(const [h,a,hg,ag] of real){
+    play(h,a,hg,ag);
+    const rest=names.filter(n=>n!==h&&n!==a);
+    for(let i=rest.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[rest[i],rest[j]]=[rest[j],rest[i]]}
+    for(let i=0;i<rest.length;i+=2){const H=T[rest[i]],G=T[rest[i+1]];play(H.n,G.n,goals(H.s,G.s,true),goals(G.s,H.s,false))}
+  }
+  const rows=names.map(n=>{const t=T[n];t.pts=t.w*2+t.d;t.av=t.a?t.f/t.a:t.f;return t})
+    .sort((x,y)=>y.pts-x.pts||(y.n==='Burnley')-(x.n==='Burnley')||y.av-x.av||y.f-x.f);   /* Burnley led the real table after two games */
+  document.querySelector('#lg tbody').innerHTML=rows.map((t,i)=>
+    '<tr class="'+(t.n==='Burnley'?'me ':'')+(i===19?'cut':'')+'"><td>'+(i+1)+'</td><td>'+t.n+'</td><td>'+t.p+'</td><td class="hide-s">'+t.w+'</td><td class="hide-s">'+t.d+'</td><td class="hide-s">'+t.l+'</td><td>'+t.f+'</td><td>'+t.a+'</td><td>'+t.av.toFixed(2)+'</td><td class="pts">'+t.pts+'</td></tr>').join('');
+})();
+</script>
+</body>
+</html>

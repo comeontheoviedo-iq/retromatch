@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Saturday Pink — RetroMatch 1946-47 UI mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=UnifrakturMaguntia&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#f1c0ba; --pink2:#e9aca6; --pink3:#f7d3cd;
+  --ink:#17110f; --soft:#4b3733;
+  --disp:'Abril Fatface','Playfair Display','Didot','Bodoni MT',Georgia,serif;
+  --body:'Old Standard TT','Century Schoolbook','Times New Roman',Georgia,serif;
+  --cond:'Oswald','Arial Narrow','Helvetica Neue',Arial,sans-serif;
+  --black:'UnifrakturMaguntia','Old English Text MT',Georgia,serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#8d6b67;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.38;}
+.paper{
+  max-width:1080px;margin:18px auto;padding:18px 26px 26px;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .15  0 0 0 0 .12  0 0 0 .22 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"),
+    linear-gradient(90deg,rgba(120,40,30,.10),transparent 6%,transparent 94%,rgba(120,40,30,.12)),
+    var(--pink);
+  box-shadow:0 0 0 1px #5d413d,0 8px 30px rgba(0,0,0,.45);
+}
+/* ink on newsprint: a touch of bleed */
+.paper *{text-shadow:0 0 .6px rgba(23,17,15,.55)}
+a{color:inherit}
+.rule-t{border:0;border-top:4px solid var(--ink);border-bottom:1px solid var(--ink);height:4px;margin:6px 0}
+.rule-d{border:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);height:3px;margin:5px 0}
+.rule-dot{border:0;border-top:2px dotted var(--ink);margin:8px 0}
+
+/* masthead */
+.strip{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--cond);font-size:12px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:4px}
+.mast{text-align:center;padding:6px 0 10px}
+.mast .the{font-family:var(--black);font-size:30px;line-height:.8;display:block}
+.mast h1{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(54px,12.5vw,128px);line-height:.88;letter-spacing:.01em}
+.mast h1 span{display:inline-block;background:var(--ink);color:var(--pink);padding:0 .12em;margin-left:.06em;text-shadow:none}
+.edition{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:13px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:4px 2px;margin-top:6px}
+.edition b{background:var(--ink);color:var(--pink);padding:1px 8px;text-shadow:none}
+.austerity{font-style:italic;text-align:center;font-size:13px;margin:5px 0 0;color:var(--soft)}
+
+/* index (nav) */
+.index{display:grid;grid-template-columns:repeat(4,1fr);border:2px solid var(--ink);margin:12px 0 4px}
+.index a{display:block;text-decoration:none;padding:7px 10px;border-right:1px solid var(--ink);font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:13px}
+.index a:last-child{border-right:0}
+.index a b{display:block;font-family:var(--disp);font-weight:400;font-size:26px;line-height:1;letter-spacing:0}
+.index a:hover,.index a:focus{background:var(--ink);color:var(--pink);text-shadow:none;outline:none}
+
+/* page folio */
+.folio{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;border-top:4px solid var(--ink);padding-top:3px;margin-top:26px}
+.folio b{font-family:var(--disp);font-weight:400;font-size:20px;letter-spacing:0}
+.kicker{font-family:var(--cond);text-transform:uppercase;letter-spacing:.16em;font-size:12px;margin:8px 0 0}
+h2.hed{font-family:var(--disp);font-weight:400;font-size:clamp(30px,6vw,56px);line-height:.98;margin:2px 0 4px;text-transform:uppercase}
+h3.dk{font-family:var(--body);font-style:italic;font-weight:400;font-size:17px;margin:0 0 8px;border-bottom:1px solid var(--ink);padding-bottom:6px}
+h4.sh{font-family:var(--cond);font-weight:600;text-transform:uppercase;letter-spacing:.14em;font-size:13px;margin:0 0 4px;border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);padding:2px 0;text-align:center}
+.cols{column-count:2;column-gap:22px;column-rule:1px solid var(--ink);text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.cols p{margin:0 0 8px}
+.cols p:first-child::first-letter{font-family:var(--disp);float:left;font-size:48px;line-height:.82;padding:3px 5px 0 0}
+.tag{display:inline-block;font-family:var(--cond);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:0 4px;vertical-align:2px;margin-left:4px}
+.tag.real{background:var(--ink);color:var(--pink);text-shadow:none}
+.grid{display:grid;gap:18px}
+.g-main{grid-template-columns:2fr 1fr}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.g-2{grid-template-columns:1fr 1fr}
+.box{border:1px solid var(--ink);padding:8px 10px;background:rgba(247,211,205,.35)}
+.box.thick{border:3px double var(--ink)}
+.note{font-size:12px;font-style:italic;margin:6px 0 0;color:var(--soft)}
+.small{font-size:13px}
+
+/* the week: a timetable set like a classified column */
+.wk{list-style:none;margin:0;padding:0}
+.wk li{display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:1px dotted var(--ink)}
+.wk .d{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:13px;min-width:44px}
+.wk .t{flex:1}
+.wk .t i{display:block;font-size:12px;color:var(--soft)}
+.wk .r{font-family:var(--cond);font-weight:600;letter-spacing:.06em}
+.wk li.today{background:var(--ink);color:var(--pink);padding:5px 6px;margin:2px -4px}
+.wk li.today *{text-shadow:none}
+.wk li.today i{color:var(--pink3)}
+.wk li.match{font-weight:700}
+.ledger{width:100%;border-collapse:collapse;font-size:14px}
+.ledger td{padding:3px 0;border-bottom:1px dotted var(--ink)}
+.ledger td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ledger tr.tot td{font-weight:700;border-bottom:2px solid var(--ink);border-top:1px solid var(--ink)}
+.classif p{margin:0 0 7px;font-size:13px;line-height:1.3}
+.classif p b{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.btn{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--ink);background:transparent;border:2px solid var(--ink);padding:8px 14px;cursor:pointer;min-height:40px}
+.btn:hover,.btn.primary{background:var(--ink);color:var(--pink);text-shadow:none}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+/* team sheet */
+.toggle{display:flex;gap:0;margin:10px 0}
+.toggle button{flex:1;font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:15px;padding:8px 6px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;min-height:44px}
+.toggle button+button{border-left:0}
+.toggle button small{display:block;font-family:var(--body);text-transform:none;letter-spacing:0;font-style:italic;font-size:12px}
+.toggle button[aria-pressed=true]{background:var(--ink);color:var(--pink);text-shadow:none}
+.sheetgrid{display:grid;grid-template-columns:minmax(250px,380px) 1fr;gap:20px;align-items:start}
+.pitch{position:relative;aspect-ratio:3/4;border:3px double var(--ink);background:rgba(247,211,205,.35)}
+.pitch .ln{position:absolute;border:1.5px solid var(--ink)}
+.pitch .half{left:0;right:0;top:50%;border-width:1.5px 0 0}
+.pitch .circ{left:36%;width:28%;top:calc(50% - 9.5%);aspect-ratio:1;border-radius:50%}
+.pitch .penT{left:22%;right:22%;top:0;height:16%;border-top:0}
+.pitch .penB{left:22%;right:22%;bottom:0;height:16%;border-bottom:0}
+.pitch .sixT{left:36%;right:36%;top:0;height:6%;border-top:0}
+.pitch .sixB{left:36%;right:36%;bottom:0;height:6%;border-bottom:0}
+.pitch .dir{position:absolute;top:4px;right:6px;font-family:var(--cond);font-size:10px;letter-spacing:.14em}
+.pl{position:absolute;transform:translate(-50%,-50%);width:0;transition:left .45s ease,top .45s ease;z-index:2}
+.pl .dot{position:absolute;left:-15px;top:-15px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--pink);display:grid;place-items:center;font-family:var(--cond);font-size:11px;letter-spacing:.04em;text-shadow:none;border:2px solid var(--pink3);box-shadow:0 0 0 1.5px var(--ink)}
+.pl.gk .dot{background:var(--pink3);color:var(--ink)}
+.pl .nm{position:absolute;left:0;top:17px;transform:translateX(-50%);font-family:var(--cond);font-size:11px;letter-spacing:.04em;text-transform:uppercase;background:var(--pink);padding:0 3px;white-space:nowrap;border:1px solid var(--ink)}
+.xi{width:100%;border-collapse:collapse;font-size:14px}
+.xi th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11px;text-align:left;border-bottom:2px solid var(--ink);border-top:2px solid var(--ink);padding:3px 4px}
+.xi td{padding:4px;border-bottom:1px dotted var(--ink)}
+.xi td.p{font-family:var(--cond);letter-spacing:.08em}
+.stars{letter-spacing:1px;white-space:nowrap}
+.nosub{border:3px double var(--ink);padding:8px 10px;margin-top:10px;background:rgba(247,211,205,.35)}
+.nosub b{font-family:var(--disp);font-weight:400;font-size:22px;display:block;line-height:1}
+
+/* league table */
+table.lg{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.lg caption{font-family:var(--cond);text-transform:uppercase;letter-spacing:.14em;font-size:12px;text-align:left;padding-bottom:3px}
+table.lg th{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:11px;border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);padding:3px 4px;text-align:right}
+table.lg th:nth-child(2){text-align:left}
+table.lg td{padding:3px 4px;text-align:right;border-bottom:1px dotted var(--ink)}
+table.lg td:nth-child(2){text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+table.lg td:first-child{text-align:left;font-family:var(--cond);width:26px}
+table.lg td.pts{font-weight:700}
+table.lg tr.me td{background:var(--ink);color:var(--pink);text-shadow:none}
+table.lg tr.cut td{border-bottom:2px solid var(--ink)}
+
+/* today's match */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;text-align:center;border-top:4px solid var(--ink);border-bottom:4px solid var(--ink);padding:10px 0;margin:10px 0}
+.vs .club{font-family:var(--disp);font-size:clamp(24px,5.4vw,52px);line-height:.95;text-transform:uppercase}
+.vs .club small{display:block;font-family:var(--cond);font-size:12px;letter-spacing:.14em;margin-top:6px}
+.vs .v{font-family:var(--black);font-size:40px}
+.form b{display:inline-grid;place-items:center;width:20px;height:20px;border:1.5px solid var(--ink);font-family:var(--cond);font-size:11px;margin-right:2px}
+.form b.W{background:var(--ink);color:var(--pink);text-shadow:none}
+.form b.D{background:var(--pink3)}
+.dials{display:grid;grid-template-columns:auto 1fr auto;gap:6px 8px;align-items:center;font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:12px}
+.dials input[type=range]{accent-color:var(--ink);width:100%;min-height:28px}
+.radio{display:flex;gap:8px;align-items:flex-start;margin:0 0 7px;font-size:14px}
+.radio input{margin-top:4px;accent-color:var(--ink);width:16px;height:16px}
+.radio em{display:block;font-size:12px;color:var(--soft)}
+.coupon div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted var(--ink);padding:3px 0;font-size:14px}
+.coupon .hl{font-weight:700;background:var(--ink);color:var(--pink);padding:3px 6px;margin:0 -6px;text-shadow:none}
+.kick{font-family:var(--disp);font-size:28px;line-height:1}
+.kick small{display:block;font-family:var(--cond);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.fine{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:26px;border-top:4px solid var(--ink);padding-top:4px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+
+@media (max-width:820px){
+  .g-main,.g-3,.g-2,.sheetgrid{grid-template-columns:1fr}
+  .cols{column-count:1}
+}
+@media (max-width:560px){
+  body{font-size:15px}
+  .paper{margin:0;padding:12px 12px 20px}
+  .index{grid-template-columns:1fr 1fr}
+  .index a:nth-child(2){border-right:0}
+  .index a:nth-child(-n+2){border-bottom:1px solid var(--ink)}
+  .mast .the{font-size:24px}
+  .hide-s{display:none}
+  table.lg td:nth-child(2){max-width:150px}
+  .vs{grid-template-columns:1fr}
+  .vs .v{font-size:28px}
+  .pl .dot{left:-13px;top:-13px;width:26px;height:26px;font-size:10px}
+  .pl .nm{font-size:10px;top:15px}
+}
+@media (prefers-reduced-motion:reduce){.pl{transition:none}}
+</style>
+</head>
+<body>
+<div class="paper">
+
+  <div class="strip"><span>Saturday, September 14, 1946</span><span>No. 1,117 · Sports Final</span><span>Late results on page 3</span></div>
+  <header class="mast">
+    <span class="the">The</span>
+    <h1>Saturday <span>Pink</span></h1>
+  </header>
+  <div class="edition"><span>Football · Cricket · Racing · Boxing</span><b>Late Edition</b><span>Four pages</span></div>
+  <p class="austerity">Printed on reduced newsprint. Space is short, so please read the small type.</p>
+
+  <nav class="index" aria-label="Contents">
+    <a href="#week"><b>1</b>The Week at the Club</a>
+    <a href="#sheet"><b>2</b>The Team Sheet</a>
+    <a href="#table"><b>3</b>First Division Table</a>
+    <a href="#match"><b>4</b>Today's Match</a>
+  </nav>
+
+  <!-- ===================== PAGE 1 ===================== -->
+  <section id="week">
+    <div class="folio"><b>Page 1</b><span>The Week at Maine Road</span><span>Manchester United</span></div>
+    <div class="grid g-main" style="margin-top:8px">
+      <article>
+        <div class="kicker">Club notes · Our own correspondent <span class="tag real">Real</span></div>
+        <h2 class="hed">Four wins from four for Busby's United</h2>
+        <h3 class="dk">Thirteen goals scored and two against, with Pearson's three against Liverpool the high-water mark</h3>
+        <div class="cols">
+          <p>Manchester United go into Saturday's home match with Middlesbrough with a perfect record. Grimsby were beaten 2-1 on the opening day, Chelsea 3-0 and Charlton Athletic 3-1 away, and on Wednesday Liverpool were beaten 5-0, Stan Pearson scoring three.</p>
+          <p>The side play every home game at Maine Road, shared with their neighbours, City. Old Trafford is still bomb-damaged from the war, and the Board has no fixed date for a return.</p>
+          <p>Mr. Busby is in his first full season, and the side have been led by the forwards: Rowley has scored in all four games and Mitten in three. Chelsea come to Maine Road on Wednesday.</p>
+          <p class="small"><i>Results from the club's 1946-47 record. All four scores and the Pearson hat-trick are checked against the club's record. Nothing in this column describes Saturday's game.</i></p>
+        </div>
+        <hr class="rule-d">
+        <div class="grid g-2" style="margin-top:8px">
+          <div>
+            <h4 class="sh">The Week</h4>
+            <ul class="wk">
+              <li><span class="d">Mon</span><span class="t">Rest<i>Treatment for the two men with knocks. (demo)</i></span></li>
+              <li><span class="d">Tue</span><span class="t">Road work, ball practice<i>Laps of the pitch, then a practice game. (demo)</i></span></li>
+              <li class="match"><span class="d">Wed</span><span class="t">United v Liverpool, Maine Road<i>Played. <span class="tag real" style="color:inherit">Real</span></i></span><span class="r">W 5-0</span></li>
+              <li><span class="d">Thu</span><span class="t">Light work<i>Sprinting and shooting. (demo)</i></span></li>
+              <li class="today"><span class="d">Fri</span><span class="t">TODAY: Team to the directors<i>Name the eleven by five o'clock.</i></span></li>
+              <li class="match"><span class="d">Sat</span><span class="t">United v Middlesbrough<i>Maine Road · afternoon</i></span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="sh">The Club Ledger <span class="tag">Demo</span></h4>
+            <table class="ledger">
+              <tr><td>In the bank</td><td>£12,418 4s 0d</td></tr>
+              <tr><td>Wage bill, per week</td><td>£418 0s 0d</td></tr>
+              <tr><td>Last home gate</td><td>£6,940 10s 0d</td></tr>
+              <tr class="tot"><td>Left to spend on players</td><td>£8,000 0s 0d</td></tr>
+            </table>
+            <div class="btns"><button class="btn" type="button">Training</button><button class="btn primary" type="button">Name the team ›</button></div>
+          </div>
+        </div>
+      </article>
+
+      <aside>
+        <h4 class="sh">Football Notes</h4>
+        <div class="classif">
+          <p><b>Old Trafford.</b> Bombed in the war and still closed, so United share Maine Road with City. <span class="tag real">Real</span></p>
+          <p><b>Wednesday.</b> Chelsea at Maine Road, 18 September. <span class="tag real">Real</span></p>
+          <p><b>No substitutes.</b> A man hurt stays on, and the side plays short of him if he cannot continue. <span class="tag real">Real</span></p>
+          <p><b>Wanted</b>, sound left-half, good in the air. Apply Secretary, in confidence. <span class="tag">Demo</span></p>
+          <p><b>For sale</b>, set of first-team jerseys, red, well washed. Offers. <span class="tag">Demo</span></p>
+          <p><b>Lost</b>, one gold watch, on the terraces, K Stand end. Reward. <span class="tag">Demo</span></p>
+        </div>
+        <hr class="rule-dot">
+        <p class="note">REAL items come from the game's own sourced 1946-47 data or from the match record. DEMO items are placeholders.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 2 ===================== -->
+  <section id="sheet">
+    <div class="folio"><b>Page 2</b><span>The Team Sheet</span><span>Manchester United</span></div>
+    <div class="kicker">Selection · Friday</div>
+    <h2 class="hed">Pick the Eleven</h2>
+    <h3 class="dk">Choose the shape. Most First Division sides play the W-M; some of the old pyramid is still about.</h3>
+    <div class="toggle" role="group" aria-label="Formation">
+      <button type="button" data-shape="wm" aria-pressed="true">W-M<small>Three backs, two halves, five forwards in an M</small></button>
+      <button type="button" data-shape="pyr" aria-pressed="false">2-3-5<small>The old pyramid</small></button>
+    </div>
+    <div class="sheetgrid">
+      <div class="pitch" id="pitch" aria-label="Formation diagram">
+        <div class="ln half"></div><div class="ln circ"></div><div class="ln penT"></div><div class="ln penB"></div><div class="ln sixT"></div><div class="ln sixB"></div>
+        <div class="dir">▲ ATTACK</div>
+      </div>
+      <div>
+        <table class="xi" id="xi">
+          <thead><tr><th>Position</th><th>Player</th><th>Form</th><th>Fit</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="nosub">
+          <b>No substitutes</b>
+          <span class="small">Nobody can be sent on in the place of an injured man. Reserves are in the stand and may play next week. So keep the eleven fit.</span>
+          <div class="small" style="margin-top:5px"><b style="display:inline;font-family:var(--cond);font-size:12px;letter-spacing:.12em;text-transform:uppercase">Reserves at the ground:</b> Hanlon, Burke, Wrigglesworth <span class="tag">Demo</span></div>
+        </div>
+        <p class="note">Eleven names are real members of the 1946-47 playing staff. Form and fitness marks are a demo, and the choice of eleven is only an example.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 3 ===================== -->
+  <section id="table">
+    <div class="folio"><b>Page 3</b><span>Late Results &amp; Tables</span><span>Football League</span></div>
+    <div class="kicker">The Football League · Division One</div>
+    <h2 class="hed">How the Clubs Stand</h2>
+    <h3 class="dk">Two points for a win, one for a draw. Level on points, the better goal average goes above.</h3>
+    <div class="grid g-main">
+      <div>
+        <table class="lg" id="lg">
+          <caption>Division One · after four matches each</caption>
+          <thead><tr><th>#</th><th>Club</th><th>P</th><th class="hide-s">W</th><th class="hide-s">D</th><th class="hide-s">L</th><th>F</th><th>A</th><th>Av</th><th>Pts</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note">Demo table: every score except United's is made up, not historical. The Manchester United row is built from their four real results (four played, four won, 13 goals for, 2 against), so Grimsby, Chelsea, Charlton and Liverpool each carry the real defeat by United. The bottom two clubs go down to Division Two.</p>
+      </div>
+      <aside>
+        <h4 class="sh">Late Results</h4>
+        <div class="classif">
+          <p><b>First Division.</b> Demo scores only, as the table is a demo. A real classified column would run here in small type, club after club, with the scorers in brackets.</p>
+          <p style="font-size:12px;line-height:1.2">Chelsea 0, Manchester United 3 <i>(Wed 4 Sep)</i><br>Charlton Athletic 1, Manchester United 3 <i>(Sat 7 Sep)</i><br>Manchester United 5, Liverpool 0 <i>(Wed 11 Sep)</i></p>
+          <p class="note" style="margin-top:0">Those three are real, Manchester United's own results.</p>
+        </div>
+        <hr class="rule-dot">
+        <h4 class="sh">Other Divisions</h4>
+        <div class="btns" style="margin-top:6px"><button class="btn" type="button">Div. Two</button><button class="btn" type="button">Third South</button><button class="btn" type="button">Third North</button></div>
+        <p class="note">Div. Three is split North and South, as it was in 1946-47.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 4 ===================== -->
+  <section id="match">
+    <div class="folio"><b>Page 4</b><span>Today's Match</span><span>Maine Road</span></div>
+    <div class="kicker">The fixture · Saturday afternoon</div>
+    <div class="vs">
+      <div class="club">Manchester United<small>At home · Maine Road</small></div>
+      <div class="v">v</div>
+      <div class="club">Middlesbrough<small>Visitors · Ayresome Park</small></div>
+    </div>
+    <div class="grid g-3">
+      <div class="box">
+        <h4 class="sh">The Opposition</h4>
+        <div class="small"><b>Manager:</b> D. Jack <span class="tag real">Real</span></div>
+        <div class="small">Strip: red, white shorts <span class="tag real">Real</span></div>
+        <div class="small" style="margin:4px 0">Last four <span class="form"><b class="W">W</b><b class="D">D</b><b class="L">L</b><b class="W">W</b></span> <span class="tag">Demo</span></div>
+        <p class="note" style="margin-top:6px">Both clubs play in red, so the visitors will have to change. Scouting report: a big side, strong in the air, slow to turn. <span class="tag">Demo</span></p>
+      </div>
+      <div class="box">
+        <h4 class="sh">Instructions</h4>
+        <div class="dials">
+          <label for="d1">Passing</label><input id="d1" type="range" min="1" max="5" value="2" oninput="this.nextElementSibling.value=this.value"><output>2</output>
+          <label for="d2">Tackling</label><input id="d2" type="range" min="1" max="5" value="3" oninput="this.nextElementSibling.value=this.value"><output>3</output>
+          <label for="d3">Wing play</label><input id="d3" type="range" min="1" max="5" value="4" oninput="this.nextElementSibling.value=this.value"><output>4</output>
+        </div>
+        <p class="note">Shape: <b id="shapeNow">W-M</b> · chosen on page 2. 1 is short and 5 is long or hard.</p>
+      </div>
+      <div class="box">
+        <h4 class="sh">Dressing-room Talk</h4>
+        <label class="radio"><input type="radio" name="talk" checked><span>Play your own game<em>Settles the nerves.</em></span></label>
+        <label class="radio"><input type="radio" name="talk"><span>Mind the centre-forward<em>Keeps the defence tight.</em></span></label>
+        <label class="radio"><input type="radio" name="talk"><span>Give them one up front<em>Risks the counter.</em></span></label>
+      </div>
+    </div>
+    <div class="grid g-2" style="margin-top:14px">
+      <div class="box">
+        <h4 class="sh">Today's Fixtures</h4>
+        <div class="coupon">
+          <div class="hl"><span>Manchester United v Middlesbrough</span><span>Maine Rd</span></div>
+          <div><span>Liverpool v Blackpool</span><span>demo</span></div>
+          <div><span>Wolverhampton W. v Stoke City</span><span>demo</span></div>
+          <div><span>Arsenal v Everton</span><span>demo</span></div>
+          <div><span>Aston Villa v Sunderland</span><span>demo</span></div>
+        </div>
+        <p class="note">Only the United fixture is real. The other lines are demo.</p>
+      </div>
+      <div class="box" style="display:flex;flex-direction:column;justify-content:space-between;gap:10px">
+        <h4 class="sh" style="margin-bottom:0">Ready?</h4>
+        <div class="kick"><small>Kick-off</small>Three o'clock <span class="tag">Demo</span></div>
+        <div class="btns" style="margin:0"><button class="btn" type="button">‹ Back to the team</button><button class="btn primary" type="button">Play the match ›</button></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="fine"><span>RetroMatch '46 · UI mockup</span><span>Black ink on pink newsprint</span><span>Printed in England</span></div>
+</div>
+
+<script>
+/* ---- team sheet ---- */
+const P = {
+  crompton:{pos:'GK', name:'Crompton', form:3, fit:5, gk:1},
+  carey:{pos:'RB', name:'Carey', form:4, fit:5},
+  aston:{pos:'LB', name:'Aston', form:3, fit:4},
+  chilton:{pos:'CH', name:'Chilton', form:4, fit:5},
+  warner:{pos:'RH', name:'Warner', form:3, fit:5},
+  cockburn:{pos:'LH', name:'Cockburn', form:3, fit:3},
+  delaney:{pos:'OR', name:'Delaney', form:4, fit:5},
+  morris:{pos:'IR', name:'Morris', form:3, fit:5},
+  rowley:{pos:'CF', name:'Rowley', form:5, fit:5},
+  pearson:{pos:'IL', name:'Pearson', form:5, fit:4},
+  mitten:{pos:'OL', name:'Mitten', form:4, fit:5}
+};
+const ORDER = ['crompton','carey','aston','warner','chilton','cockburn','delaney','morris','rowley','pearson','mitten'];
+const SHAPES = {
+  wm:{label:'W-M', at:{
+    crompton:[50,91], carey:[80,77], chilton:[50,79], aston:[20,77],
+    warner:[68,62], cockburn:[32,62],
+    morris:[66,45], pearson:[34,45],
+    delaney:[88,24], rowley:[50,21], mitten:[12,24]}},
+  pyr:{label:'2-3-5', at:{
+    crompton:[50,91], carey:[70,77], aston:[30,77],
+    warner:[82,60], chilton:[50,62], cockburn:[18,60],
+    delaney:[91,27], morris:[71,22], rowley:[50,19], pearson:[29,22], mitten:[9,27]}}
+};
+const pitch = document.getElementById('pitch'), tbody = document.querySelector('#xi tbody'), els = {};
+for (const k of ORDER){
+  const d = document.createElement('div'); d.className='pl'+(P[k].gk?' gk':'');
+  d.innerHTML='<div class="dot">'+P[k].pos+'</div><div class="nm">'+P[k].name+'</div>';
+  pitch.appendChild(d); els[k]=d;
+}
+const stars = v => '<span class="stars" aria-label="'+v+' out of 5">'+'★'.repeat(v)+'☆'.repeat(5-v)+'</span>';
+function setShape(s){
+  const S=SHAPES[s];
+  for (const k of ORDER){
+    const at = S.at[k]; els[k].style.left = at[0]+'%'; els[k].style.top = at[1]+'%';
+  }
+  /* in the pyramid the left-back and right-back are the only two defenders, and the centre-half is a half-back */
+  const posOf = {crompton:'GK',carey:'RB',aston:'LB',chilton:s==='wm'?'CH':'CH',warner:'RH',cockburn:'LH',delaney:'OR',morris:'IR',rowley:'CF',pearson:'IL',mitten:'OL'};
+  tbody.innerHTML = ORDER.map(k=>'<tr><td class="p">'+posOf[k]+'</td><td>'+P[k].name+'</td><td>'+stars(P[k].form)+'</td><td>'+stars(P[k].fit)+'</td></tr>').join('');
+  document.querySelectorAll('.toggle button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.shape===s));
+  document.getElementById('shapeNow').textContent = S.label;
+}
+document.querySelectorAll('.toggle button').forEach(b=>b.addEventListener('click',()=>setShape(b.dataset.shape)));
+setShape('wm');
+
+/* ---- league table: seeded demo, club strengths from the game's own 1946-47 ratings ---- */
+(function(){
+  const teams = [["Liverpool",97],["Manchester United",96],["Wolverhampton Wanderers",94],["Stoke City",93],["Blackpool",92],["Sheffield United",91],["Preston North End",89],["Aston Villa",88],["Sunderland",87],["Everton",85],["Middlesbrough",84],["Portsmouth",83],["Arsenal",82],["Derby County",80],["Chelsea",79],["Grimsby Town",78],["Blackburn Rovers",76],["Bolton Wanderers",75],["Charlton Athletic",74],["Huddersfield Town",73],["Brentford",71],["Leeds United",70]];
+  let seed = 1946;
+  const rnd = ()=> (seed = (seed*1664525 + 1013904223) % 4294967296) / 4294967296;
+  const T = {}; teams.forEach(([n,s])=>T[n]={n,p:0,w:0,d:0,l:0,f:0,a:0,s:0.5+s/100});
+  const goals = (att,def,home)=>{let g=0;const p=0.28*Math.pow(att/def,1.6)*(home?1.15:0.9);for(let k=0;k<6;k++)if(rnd()<p)g++;return g};
+  const names = teams.map(t=>t[0]);
+  const play=(hn,an,hg,ag)=>{const h=T[hn],g=T[an];
+    h.p++;g.p++;h.f+=hg;h.a+=ag;g.f+=ag;g.a+=hg;
+    if(hg>ag){h.w++;g.l++}else if(hg<ag){g.w++;h.l++}else{h.d++;g.d++}};
+  /* United's four real results are fixed (REAL); every other game is a seeded demo */
+  const real = [["Manchester United","Grimsby Town",2,1],["Chelsea","Manchester United",0,3],["Charlton Athletic","Manchester United",1,3],["Manchester United","Liverpool",5,0]];
+  for (const [h,a,hg,ag] of real){
+    play(h,a,hg,ag);
+    const others = names.filter(n=>n!==h && n!==a);
+    for (let i=others.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[others[i],others[j]]=[others[j],others[i]]}
+    for (let i=0;i<others.length;i+=2){
+      const H=T[others[i]],G=T[others[i+1]];
+      play(H.n,G.n,goals(H.s,G.s,true),goals(G.s,H.s,false));
+    }
+  }
+  const rows = names.map(n=>{const t=T[n];t.pts=t.w*2+t.d;t.av=t.a?t.f/t.a:t.f;return t})
+    .sort((x,y)=>y.pts-x.pts||y.av-x.av||y.f-x.f);
+  document.querySelector('#lg tbody').innerHTML = rows.map((t,i)=>
+    '<tr class="'+(t.n==='Manchester United'?'me ':'')+(i===19?'cut':'')+'"><td>'+(i+1)+'</td><td>'+t.n+'</td><td>'+t.p+'</td><td class="hide-s">'+t.w+'</td><td class="hide-s">'+t.d+'</td><td class="hide-s">'+t.l+'</td><td>'+t.f+'</td><td>'+t.a+'</td><td>'+t.av.toFixed(2)+'</td><td class="pts">'+t.pts+'</td></tr>').join('');
+})();
+</script>
+</body>
+</html>
