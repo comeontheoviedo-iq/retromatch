@@ -26842,7 +26842,11 @@ function approachGoalRates(appr){ return APPROACH_GOAL_RATES[appr] || APPROACH_G
    points, the same +3 the background results use). There was none at all in this engine before, so
    your home and away games played identically. Neutral cup venues get none. Both figures are my
    tuning from simulated matches (checkplayergoalrate.js), not sourced numbers. */
-var ENGINE_GOAL_SCALE = 0.665, ENGINE_HOME_EDGE = 3;
+/* v310 : ENGINE_GOAL_SCALE 0.665 -> 0.69. Once the balance harness was fixed to press the real "go to lineup"
+   button (so weekly injury healing, AI injuries and news actually ran; it had been skipping them, which
+   piled up injuries and inflated goals via Stand-In depth), the live engine measured 2.58 goals a game
+   in 1946 and 2.50 in 1959 over 16 and 12 clubs, below the 2.6-2.8 target. +3.8% on the scale brings it back. */
+var ENGINE_GOAL_SCALE = 0.69, ENGINE_HOME_EDGE = 3;
 /* ---------- v112 GOAL LEVEL AND MATCH TEMPO. (1) ENGINE_GOAL_SCALE 0.73 -> 0.665. v111 tuned 0.73 on
    a test where both sides always played BALANCED against a 65-rated XI; played on real division fixtures
    with each side choosing its approach the way the AI does, this engine actually averaged about 3.2 goals a
@@ -29298,7 +29302,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v309';
+var RETROMATCH_VERSION = 'v310';
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
