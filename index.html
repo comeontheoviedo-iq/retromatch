@@ -167,6 +167,7 @@ footer.note{max-width:1060px; margin:12px auto 0; color:#888; font-size:13px; te
     <div class="view active" id="v-week">
       <h1 id="week-heading">Week 1</h1>
       <p class="sub" id="week-sub"></p>
+      <div class="box" id="season-summary-box" style="display:none;"></div>
       <div class="box" id="board-guidance-box" style="display:none;"></div>
       <div class="box"><div class="box-title">CLUB NEWS</div>
         <div class="news-filter-bar" id="news-filter-bar">
@@ -322,6 +323,7 @@ footer.note{max-width:1060px; margin:12px auto 0; color:#888; font-size:13px; te
       </div>
       <div class="box" style="margin-top:16px;"><div class="box-title">CLUB HISTORY</div><div id="club-history-box"></div></div>
       <div class="box" style="margin-top:16px;"><div class="box-title">SEASON RECORD</div><div id="season-history-box"><p class="sub">NO COMPLETED SEASONS YET.</p></div></div>
+      <div class="box" id="season-summary-reopen" style="display:none;"></div>
     </div>
 
     <div class="view" id="v-reserves">
@@ -935,7 +937,13 @@ function triggerBoardGuidance(reason){
   boardGuidance = {reason:reason, dismissed:false};
   if (typeof renderBoardGuidance === 'function') renderBoardGuidance();
 }
+/* v305 : where bank and manager reputation stood when this season (or this spell at the club) began, so the end-of-season
+   summary can say what changed. Taken in generateBoardTarget because every season start, new game and club move goes through it. */
+var seasonStartSnap = null;
+var boardVerdictLast = null;
+var seasonSummaryOpen = null; /* {idx, dismissed} : the once-only summary shown on the Week view after rollover */
 function generateBoardTarget(){
+  seasonStartSnap = {bank:Math.round(finances.bank), rep:Math.round(manager.rep || 50)};
   triggerBoardGuidance('SEASON START');
   var rep = Math.round(manager.rep || 50);
   if (divisionTier === 1){
@@ -953,21 +961,22 @@ function generateBoardTarget(){
   }
 }
 function judgeBoardTarget(position, fieldSize, promoted, relegated){
+  boardVerdictLast = null; /* v305 */
   if (!boardTarget) return;
   var topHalf = position <= Math.ceil(fieldSize/2);
   if (boardTarget.type==='survival'){
-    if (!relegated && position < fieldSize-1) { adjustManagerRep(3); addNews('board', 'BOARD TARGET MET: staying clear of the drop was the job this season, and it\'s done.'); }
-    else { adjustManagerRep(-6); addNews('board', 'BOARD TARGET MISSED: the season the board feared has come to pass.'); }
+    if (!relegated && position < fieldSize-1) { adjustManagerRep(3); boardVerdictLast = 'MET'; addNews('board', 'BOARD TARGET MET: staying clear of the drop was the job this season, and it\'s done.'); }
+    else { adjustManagerRep(-6); boardVerdictLast = 'MISSED'; addNews('board', 'BOARD TARGET MISSED: the season the board feared has come to pass.'); }
   } else if (boardTarget.type==='midtable'){
-    if (promoted) { adjustManagerRep(8); addNews('board', 'BOARD TARGET EXCEEDED: promotion was more than anyone at the club asked for this season.'); }
-    else if (topHalf || !relegated) { adjustManagerRep(3); addNews('board', 'BOARD TARGET MET: a season in keeping with what the board expected.'); }
-    else { adjustManagerRep(-6); addNews('board', 'BOARD TARGET MISSED: a bottom-half finish falls short of what was asked.'); }
+    if (promoted) { adjustManagerRep(8); boardVerdictLast = 'EXCEEDED'; addNews('board', 'BOARD TARGET EXCEEDED: promotion was more than anyone at the club asked for this season.'); }
+    else if (topHalf || !relegated) { adjustManagerRep(3); boardVerdictLast = 'MET'; addNews('board', 'BOARD TARGET MET: a season in keeping with what the board expected.'); }
+    else { adjustManagerRep(-6); boardVerdictLast = 'MISSED'; addNews('board', 'BOARD TARGET MISSED: a bottom-half finish falls short of what was asked.'); }
   } else if (boardTarget.type==='promotion'){
-    if (promoted) { adjustManagerRep(8); addNews('board', 'BOARD TARGET MET: promotion, exactly as asked of you.'); }
-    else { adjustManagerRep(-6); addNews('board', 'BOARD TARGET MISSED: promotion was the ask, and it hasn\'t come.'); }
+    if (promoted) { adjustManagerRep(8); boardVerdictLast = 'MET'; addNews('board', 'BOARD TARGET MET: promotion, exactly as asked of you.'); }
+    else { adjustManagerRep(-6); boardVerdictLast = 'MISSED'; addNews('board', 'BOARD TARGET MISSED: promotion was the ask, and it hasn\'t come.'); }
   } else if (boardTarget.type==='title'){
-    if (position===1) { adjustManagerRep(10); addNews('board', 'BOARD TARGET MET: champions, and everything the board hoped for.'); }
-    else { adjustManagerRep(-4); addNews('board', 'BOARD TARGET MISSED: no title this time, whatever else was achieved.'); }
+    if (position===1) { adjustManagerRep(10); boardVerdictLast = 'MET'; addNews('board', 'BOARD TARGET MET: champions, and everything the board hoped for.'); }
+    else { adjustManagerRep(-4); boardVerdictLast = 'MISSED'; addNews('board', 'BOARD TARGET MISSED: no title this time, whatever else was achieved.'); }
   }
 }
 /* ---------- PLAYER UNHAPPINESS: honestly modelled on the real power
@@ -12268,9 +12277,10 @@ function renderClub(){
   if (histBox) histBox.innerHTML = '<p class="sub">FOUNDED '+clubHistory.founded+' : ELECTED TO THE FOOTBALL LEAGUE '+clubHistory.leagueJoined+'.</p><p style="margin-top:6px;">'+clubHistory.note+'</p>';
   var seasonBox = document.getElementById('season-history-box');
   if (seasonBox){
-    seasonBox.innerHTML = seasonHistory.length ? seasonHistory.map(function(s){
-      return '<p class="news-item">'+s.label+': finished '+ordinal(s.position)+' with '+s.points+' points'+(s.cupRound?(', reached the FA Cup '+s.cupRound):'')+(s.topScorer?(', top scorer '+s.topScorer.toUpperCase()):'')+(s.promoted?' : PROMOTED.':(s.relegated?' : RELEGATED.':(s.reElectionScare?' : SURVIVED A RE-ELECTION VOTE.':'.')))+'</p>';
+    seasonBox.innerHTML = seasonHistory.length ? seasonHistory.map(function(s, si){
+      return '<p class="news-item">'+(s.summary ? '<button class="ss-open" data-i="'+si+'" style="padding:2px 8px;font-size:14px;margin-right:8px;">SUMMARY</button>' : '')+s.label+': finished '+ordinal(s.position)+' with '+s.points+' points'+(s.cupRound?(', reached the FA Cup '+s.cupRound):'')+(s.topScorer?(', top scorer '+s.topScorer.toUpperCase()):'')+(s.promoted?' : PROMOTED.':(s.relegated?' : RELEGATED.':(s.reElectionScare?' : SURVIVED A RE-ELECTION VOTE.':'.')))+'</p>';
     }).join('') : '<p class="sub">NO COMPLETED SEASONS YET.</p>';
+    seasonBox.querySelectorAll('.ss-open').forEach(function(b){ b.addEventListener('click', function(){ openSeasonSummaryFromHistory(parseInt(b.dataset.i,10)); }); }); /* v305 */
   }
 }
 renderClub();
@@ -16917,6 +16927,7 @@ function generateWeeklyNews(){
 var weekPhase = 'build-up'; /* 'midweek' (Wednesday check-in, no match) or 'build-up' (Saturday approaching) */
 function renderWeek(){
   var next = fixtures[fixtureIdx];
+  renderSeasonSummaryBox(); /* v305 */
   renderBoardGuidance(); /* v304 */
   document.getElementById('week-heading').textContent = fmtDate(currentDate);
   renderNewsFeed();
@@ -17129,7 +17140,7 @@ function buildSaveState(){
     blackBook:blackBook, scoutBrief:scoutBrief, signingHypeWeeksLeft:signingHypeWeeksLeft, signingHypeName:signingHypeName, pendingJobOffer:pendingJobOffer, pendingClubMove:pendingClubMove, pendingMidSeasonMove:pendingMidSeasonMove,
     openVacancies:openVacancies, /* v238 */
     englandJobOfferFired:englandJobOfferFired, pendingEnglandJobOffer:pendingEnglandJobOffer, isEnglandManager:isEnglandManager, englandXI:englandXI,
-    playerManagerId:playerManagerId, ourClubName:ourClubName, captainId:captainId, penaltyTakerId:penaltyTakerId, pendingUnhappyPlayerId:pendingUnhappyPlayerId, boardTarget:boardTarget, boardGuidance:boardGuidance, nextTargetId:nextTargetId, nextOfferId:nextOfferId,
+    playerManagerId:playerManagerId, ourClubName:ourClubName, captainId:captainId, penaltyTakerId:penaltyTakerId, pendingUnhappyPlayerId:pendingUnhappyPlayerId, boardTarget:boardTarget, boardGuidance:boardGuidance, seasonStartSnap:seasonStartSnap, seasonSummaryOpen:seasonSummaryOpen, nextTargetId:nextTargetId, nextOfferId:nextOfferId,
     scoutedPlayers:scoutedPlayers, pendingClubScoutTrips:pendingClubScoutTrips, clubSquads:clubSquads, aiClubForm:aiClubForm, aiClubInjuryCA:aiClubInjuryCA, aiClubBank:aiClubBank, aiClubLastGate:aiClubLastGate,
     retiredManagerCandidates:retiredManagerCandidates, /* v160 */
     headToHead:headToHead, /* v171 : fixed to persist -- was session-only before, silently losing all rivalry/revenge context on every reload */
@@ -17334,6 +17345,7 @@ function applyLoadedState(s, silent){
     manager = s.manager || manager;
     if (manager.rep === undefined) manager.rep = 50;
     if (manager.warningStage === undefined) manager.warningStage = 0;
+    seasonStartSnap = s.seasonStartSnap || null; seasonSummaryOpen = s.seasonSummaryOpen || null; /* v305 */
     boardGuidance = s.boardGuidance || null; /* v304 : old saves simply have none until the next season start / warning */
     lineupSlots = s.lineupSlots || [];
     substituteId = (typeof s.substituteId === 'number') ? s.substituteId : null; /* v157 : old saves predate this, defaults to none named */
@@ -25772,6 +25784,94 @@ function renderPreMatchPanels(){
   });
 }
 /* ============================================================================================
+   v305 : END-OF-SEASON SUMMARY
+   Built once, in processSeasonEnd, from the real final table row, the season's played fixtures, the squad's own
+   apps/goalsSeason counters, the board verdict judgeBoardTarget just reached, and the bank/rep snapshots taken at
+   season start -- all BEFORE startNewSeason resets any of it -- and stored on the seasonHistory entry itself, so it
+   is saved with the game and can be re-opened later from the Club Office's SEASON RECORD.
+   ============================================================================================ */
+function buildSeasonSummary(entry, fieldSize, warningReached){
+  var row = table[ourClubName] || {p:0,w:0,d:0,l:0,f:0,a:0,pts:0};
+  var games = [];
+  fixtures.forEach(function(fx, fi){
+    if (!fx || !fx.played || fx.isFriendly || fx.isTrial || !fx.res) return;
+    var m = /^(\d+)-(\d+)/.exec(fx.res); if (!m) return;
+    games.push({opp:fx.opp, us:parseInt(m[1],10), them:parseInt(m[2],10), home:!!fx.home, cup:!!fx.isCup, round:fx.roundName||null, date:(function(){ try { return fmtDate(fixtureDate(fi)); } catch(e){ return null; } })()});
+  });
+  var best = null, worst = null, run = 0, unbeaten = 0, wins = 0, winStreak = 0;
+  games.forEach(function(g){
+    var gd = g.us-g.them;
+    if (!best || gd > best.us-best.them || (gd === best.us-best.them && g.us > best.us)) best = g;
+    if (!worst || gd < worst.us-worst.them || (gd === worst.us-worst.them && g.us < worst.us)) worst = g;
+    if (g.us >= g.them){ run++; unbeaten = Math.max(unbeaten, run); } else run = 0;
+    if (g.us > g.them){ wins++; winStreak = Math.max(winStreak, wins); } else wins = 0;
+  });
+  var byGoals = squad.slice().sort(function(a,b){ return (b.goalsSeason||0)-(a.goalsSeason||0) || (b.apps||0)-(a.apps||0); })[0];
+  var byApps = squad.slice().sort(function(a,b){ return (b.apps||0)-(a.apps||0) || (b.goalsSeason||0)-(a.goalsSeason||0); })[0];
+  var bankNow = Math.round(finances.bank), repNow = Math.round(manager.rep || 50);
+  var events = [];
+  if (entry.position === 1) events.push('FINISHED TOP OF '+currentDivisionLabel.toUpperCase()+'.');
+  if (entry.promoted) events.push('PROMOTED.'); if (entry.relegated) events.push('RELEGATED.');
+  if (entry.reElectionScare) events.push('HAD TO SEEK RE-ELECTION TO THE LEAGUE.');
+  if (entry.cupRound === 'WON THE FA CUP') events.push('WON THE FA CUP.');
+  else if (entry.cupRound) events.push('REACHED THE FA CUP '+String(entry.cupRound).toUpperCase()+'.');
+  else events.push('NO FA CUP RUN TO SPEAK OF.');
+  if (warningReached >= 1) events.push(warningReached>=2 ? 'THE DIRECTORS GAVE YOU TWO WARNINGS.' : 'THE DIRECTORS GAVE YOU A WARNING.');
+  if (unbeaten >= 5) events.push('A RUN OF '+unbeaten+' GAMES UNBEATEN.');
+  if (winStreak >= 4) events.push(winStreak+' WINS IN A ROW AT ONE POINT.');
+  return {
+    label:entry.label, division:currentDivisionLabel, position:entry.position, of:fieldSize, points:entry.points,
+    p:row.p, w:row.w, d:row.d, l:row.l, f:row.f, a:row.a,
+    topScorer: byGoals && (byGoals.goalsSeason||0) > 0 ? {n:byGoals.n, g:byGoals.goalsSeason} : null,
+    topApps: byApps && (byApps.apps||0) > 0 ? {n:byApps.n, a:byApps.apps} : null,
+    best:best, worst:worst,
+    target: boardTarget ? boardTarget.label : null, verdict: boardVerdictLast,
+    bankStart: seasonStartSnap ? seasonStartSnap.bank : null, bankEnd: bankNow,
+    repStart: seasonStartSnap ? seasonStartSnap.rep : null, repEnd: repNow,
+    events:events
+  };
+}
+function ssMoney(n){ return (n<0?'-':'')+'£'+Math.abs(n).toLocaleString(); }
+function ssGameText(g){
+  if (!g) return 'NONE PLAYED';
+  return g.us+'-'+g.them+(g.home?' AT HOME TO ':' AWAY AT ')+String(g.opp).toUpperCase()+(g.cup?' (FA CUP'+(g.round?', '+String(g.round).toUpperCase():'')+')':'')+(g.date ? ', '+String(g.date).toUpperCase() : '');
+}
+function seasonSummaryHtml(S){
+  var rows = [];
+  var rowOf = function(k, v, cls){ rows.push('<tr><td class="field" style="padding-right:14px;white-space:nowrap;vertical-align:top;">'+k+'</td><td class="val'+(cls?' '+cls:'')+'">'+v+'</td></tr>'); };
+  rowOf('FINAL POSITION', ordinal(S.position)+' OF '+S.of+' IN '+String(S.division).toUpperCase()+' : '+S.points+' POINTS', S.position===1?'good':'');
+  rowOf('RECORD', 'P'+S.p+' W'+S.w+' D'+S.d+' L'+S.l+' : GOALS '+S.f+' FOR, '+S.a+' AGAINST ('+(S.f-S.a>=0?'+':'')+(S.f-S.a)+')');
+  rowOf('TOP SCORER', S.topScorer ? S.topScorer.n.toUpperCase()+' WITH '+S.topScorer.g+' GOAL'+(S.topScorer.g===1?'':'S') : 'NOBODY SCORED');
+  rowOf('MOST APPEARANCES', S.topApps ? S.topApps.n.toUpperCase()+' : '+S.topApps.a+' GAME'+(S.topApps.a===1?'':'S') : 'NONE RECORDED');
+  rowOf('BEST RESULT', ssGameText(S.best), 'good');
+  rowOf('WORST RESULT', ssGameText(S.worst), 'bad');
+  var vcls = S.verdict==='MISSED' ? 'bad' : S.verdict ? 'good' : '';
+  rowOf('BOARD TARGET', S.target ? S.target : 'NONE SET');
+  rowOf('BOARD VERDICT', S.verdict ? 'TARGET '+S.verdict : 'NO VERDICT', vcls);
+  if (S.bankStart !== null){ var db = S.bankEnd - S.bankStart; rowOf('FINANCES', ssMoney(S.bankStart)+' TO '+ssMoney(S.bankEnd)+' ('+(db>=0?'UP ':'DOWN ')+ssMoney(Math.abs(db))+')', db>=0?'good':'bad'); }
+  else rowOf('FINANCES', 'BANK NOW '+ssMoney(S.bankEnd)+' (STARTING FIGURE NOT RECORDED)');
+  if (S.repStart !== null){ var dr = S.repEnd - S.repStart; rowOf('MANAGER REPUTATION', S.repStart+' TO '+S.repEnd+' ('+(dr>=0?'+':'')+dr+')', dr>0?'good':dr<0?'bad':''); }
+  else rowOf('MANAGER REPUTATION', S.repEnd+'/100');
+  rowOf('NOTABLE', S.events.join(' '));
+  return '<table style="margin:6px 0 10px;">'+rows.join('')+'</table>';
+}
+function renderSeasonSummaryBox(){
+  var box = document.getElementById('season-summary-box'); if (!box) return;
+  var e = seasonSummaryOpen, S = e && seasonHistory[e.idx] && seasonHistory[e.idx].summary;
+  if (!e || e.dismissed || !S){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = '';
+  box.innerHTML = '<div class="box-title">SEASON REVIEW</div><p class="val">THE '+S.label+' SEASON : THE FINAL REPORT</p>'+seasonSummaryHtml(S)+
+    '<p><button id="ss-close" style="padding:2px 10px;font-size:15px;">CLOSE</button> <span class="sub">IT STAYS IN CLUB OFFICE UNDER SEASON RECORD.</span></p>';
+  document.getElementById('ss-close').addEventListener('click', function(){ seasonSummaryOpen.dismissed = true; renderSeasonSummaryBox(); });
+}
+function openSeasonSummaryFromHistory(i){
+  var box = document.getElementById('season-summary-reopen'), h = seasonHistory[i];
+  if (!box || !h || !h.summary) return;
+  box.style.display = '';
+  box.innerHTML = '<div class="box-title">SEASON REVIEW</div><p class="val">THE '+h.summary.label+' SEASON : THE FINAL REPORT</p>'+seasonSummaryHtml(h.summary)+'<p><button id="ss-reclose" style="padding:2px 10px;font-size:15px;">CLOSE</button></p>';
+  document.getElementById('ss-reclose').addEventListener('click', function(){ box.style.display = 'none'; box.innerHTML = ''; });
+}
+/* ============================================================================================
    v304 : BOARD EXPECTS / WHAT TO TRY
    A plain-English brief grounded only in real state : generateBoardTarget's target, the division and
    where our best available XI ranks against the real rivals (aiSquadXiMeanCA, the same measure the AI sides
@@ -27197,6 +27297,11 @@ function processSeasonEnd(){
   if (manager.warningStage >= 2){
     addNews('board', 'BOARDROOM: the directors met to discuss your position over the summer. After a long debate, and mindful that changing manager mid-tenure is not something this board does lightly, they have decided to back you for one more campaign.');
   }
+  try {
+    var sumEntry = seasonHistory[seasonHistory.length-1];
+    sumEntry.summary = buildSeasonSummary(sumEntry, fieldSize, manager.warningStage || 0); /* v305 : before the table, fixtures, apps and goals are reset */
+    seasonSummaryOpen = {idx:seasonHistory.length-1, dismissed:false};
+  } catch(e){ seasonSummaryOpen = null; }
   manager.warningStage = 0;
   startNewSeason(promoted ? 'promoted' : (relegated ? 'relegated' : 'stayed'));
 }
