@@ -727,6 +727,7 @@ var maxWageBySeasonYear = [
   {from:1946, cap:12},
   {from:1951, cap:14},
   {from:1953, cap:15},
+  {from:1957, cap:17}, /* v309 : the August 1957 rise to £17 (summer £14), sourced; the 1958 rise to £20 follows */
   {from:1958, cap:20},
   {from:1961, cap:100, abolished:true}
 ];
@@ -7975,6 +7976,7 @@ function advanceCupField(){
       if (survivors[0].n !== ourClubName){
         var finalLine = (lines.filter(function(l){ return l.indexOf(' *')<0; }).slice(-1)[0] || lines.slice(-1)[0] || '').replace(' *','');
         cupBracket.pendingWinnerNews = {name:survivors[0].n, dateIso:cupRoundDates[cupRoundNames.length-1], line:finalLine, beatUs: weAreInField};
+        cupBracket.finalLineSaved = finalLine; /* v309 : kept after the announcement, for the scripted real-final items (SIM_NEWS_RESOLVERS) */
       }
     }
   }
@@ -8503,6 +8505,9 @@ function clubBaseGate(name){
    for that season aren't reliably available (RSSSF has only partial
    tables), so these lists are the clubs that ARE confirmed, not exhaustive. */
 var midlandLeagueClubs = ["Grimsby Town Reserves","Nottingham Forest Reserves","Bradford Park Avenue Reserves","Scunthorpe & Lindsey United","Barnsley Reserves","York City Reserves"];
+/* v309 : the 1949-50 Midland League and North Eastern League memberships, for the 1950 era (RSSSF Midland League 1949-50 table; nonleaguematters.co.uk North Eastern League 1949-50). Scunthorpe & Lindsey United and Shrewsbury Town, both Midland League clubs then, are already in the 1950 Third Division (North) master list, so they are not repeated here. */
+var midlandLeagueClubs1950 = ["Nottingham Forest Reserves","Grimsby Town Reserves","Hull City Reserves","York City Reserves","Rotherham United Reserves","Bradford Park Avenue Reserves","Bradford City Reserves","Notts County Reserves","Mansfield Town Reserves","Lincoln City Reserves","Halifax Town Reserves","Doncaster Rovers Reserves","Peterborough United","Gainsborough Trinity","Goole Town","Denaby United","Scarborough","Grantham","Frickley Colliery","Worksop Town","Boston United","Ransome & Marles"];
+var northEasternLeagueClubs1950 = ["North Shields","West Stanley","Middlesbrough Reserves","Stockton","Sunderland Reserves","Blyth Spartans","Carlisle United Reserves","Horden Colliery Welfare","Workington","Spennymoor United","Hartlepools United Reserves","Consett","Murton Colliery Welfare","South Shields","Ashington","Gateshead Reserves","Annfield Plain","Darlington Reserves","Blackhall Colliery Welfare","Eppleton Colliery Welfare"];
 var northEasternLeagueClubs = ["Middlesbrough Reserves","Sunderland Reserves","South Shields","Ashington","Darlington Reserves","Gateshead Reserves","Stockton","Consett","Carlisle United Reserves","Blyth Spartans"];
 function applyGateTableToProfiles(){ Object.keys(CLUB_GATE_1946).forEach(function(n){ if (clubProfiles[n]) clubProfiles[n].capacity = CLUB_GATE_1946[n][1]; });
   /* v125 : a semi-final venue that is a club's own ground uses that club's one capacity figure, not a separate copy */
@@ -9019,8 +9024,12 @@ function initEuropeanCupForSeason(){
   var championName = divisionChampions && divisionChampions.D1;
   if (!championName) return; /* nobody recorded yet (the gate year reached before any season in this save has completed) -- nothing real to enter */
   if (europeanCup.active && europeanCup.label===seasonLabel) return; /* already built for this season (e.g. a reload mid-season) */
-  var entrants = [{n:championName, s: cupEntrantStrength(championName, 80)}];
-  EURO_GIANTS.forEach(function(g){ if (g.n!==championName) entrants.push({n:g.n, s:g.s}); });
+  /* v309 : history follows the sim. In real life the 1954-55 champions Chelsea were made to stay out of the first
+     European Cup (1955-56) by the Football League. If THIS game's champions that year are Chelsea (and the user isn't
+     Chelsea, whose decision it would be), they stay out here too, which is what the scripted headline says. */
+  var chelseaOut = (seasonLabel === '1955-56' && championName === 'Chelsea' && ourClubName !== 'Chelsea');
+  var entrants = chelseaOut ? [] : [{n:championName, s: cupEntrantStrength(championName, 80)}];
+  EURO_GIANTS.forEach(function(g){ if (g.n!==championName || chelseaOut) entrants.push({n:g.n, s:g.s}); });
   var needed = Math.max(0, 16 - entrants.length);
   for (var i=0;i<needed;i++) entrants.push(genEuroForeignClub(i, seasonLabel));
   europeanCup = {active:true, label:seasonLabel, entrants:entrants, alive:entrants.slice(), roundIdx:0,
@@ -9028,7 +9037,9 @@ function initEuropeanCupForSeason(){
     history:[], championName:null, drawnOurTie:false, ourOpp:null, ourAggA:0, ourAggB:0, ourLegsPlayed:0,
     ourResolved:false, ourWon:null, ourPendingDecider:false};
   var weAreIn = entrants.some(function(c){ return c.n===ourClubName; });
-  addNews('board', 'EUROPEAN CUP: '+championName+' enter the European Cup as champions, one of '+entrants.length+' clubs drawn into the field for '+seasonLabel+'.'+(weAreIn?' We are in it ourselves.':''));
+  recordHonour(seasonLabel, {euroEntrant: chelseaOut ? null : championName}); /* v309 : who the English entrant was, for the Manchester United 1956 item */
+  if (chelseaOut) addNews('rivals', 'CHELSEA STAY HOME: the champions Chelsea, invited into the brand-new European Cup, have withdrawn under pressure from the Football League Management Committee, who judged it not in the League\'s interests. The field of '+entrants.length+' goes ahead without an English club.');
+  else addNews('board', 'EUROPEAN CUP: '+championName+' enter the European Cup as champions, one of '+entrants.length+' clubs drawn into the field for '+seasonLabel+'.'+(weAreIn?' We are in it ourselves.':''));
 }
 function euroDecisiveMatch(a,b){
   var sc = simAiLeagueMatch(a,b), gA=sc[0], gB=sc[1];
@@ -9932,7 +9943,7 @@ var studyDestinations = [
    desc:"Vittorio Pozzo's system (2-3-2-3), a real hybrid between the old Pyramid and the WM, which won Italy the World Cup in both 1934 and 1938. You travel yourself.",
    unlockFormation:'metodo', formationLabel:"METODO (2-3-2-3) : Pozzo's hybrid system"},
   {key:'riverplate', kind:'formation', traveler:'manager', label:"ARGENTINA : RIVER PLATE'S \"LA MAQUINA\"", cost:260, weeks:6,
-   desc:"River Plate's forward line is the talk of Buenos Aires right now : fluid, constantly rotating positions, more about improvisation than a fixed shape. You travel yourself.",
+   desc:"River Plate's forward line was the talk of Buenos Aires in the 1940s : fluid, constantly rotating positions, more about improvisation than a fixed shape. You travel yourself.",
    unlockFormation:'lamaquina', formationLabel:"LA MAQUINA : fluid, rotating forward play"},
   {key:'brazil', kind:'training', traveler:'trainer', label:"BRAZIL : INDIVIDUAL TECHNIQUE", cost:150, weeks:5,
    desc:"Bert Symons, not you, makes this one : a trainer's trip to study the ball-work and close control the Brazilians are building their game around, rather than a tactical system to copy wholesale. Doesn't need you away from the club, so it can go ahead any time.",
@@ -13688,11 +13699,11 @@ function checkHistoricalOneOffs(){
    real person involved. */
 var historicalOneOffsPost1949 = [
    /* v308 : 1949-51 events for the 1950 era, each checked against a source (Wikipedia season/player pages, MUFC history, footballsite.co.uk). Dates are the real dates where the source gives a day; the two month-only ones are marked. */
-   {date:'1949-08-24', fired:false, id:'old_trafford_return', tag:'rivals', text:"HOME AT LAST: Old Trafford has reopened. Manchester United beat Bolton Wanderers 3-0 in front of 41,748 -- a Matt Gillies own goal, a Charlie Mitten penalty and a Jack Rowley strike -- in their first home game on the ground since German bombing wrecked it in March 1941. They've spent eight seasons sharing Maine Road with Manchester City."},
+   {date:'1949-08-24', fired:false, id:'old_trafford_return', tag:'rivals', text:"HOME AT LAST: Old Trafford has reopened. Manchester United have played their first home game on the ground since German bombing wrecked it in March 1941, in front of 41,748. They've spent eight seasons sharing Maine Road with Manchester City."},
    {date:'1950-04-29', fired:false, id:'facup_1950', tag:'rivals', text:"ARSENAL WIN THE CUP: Arsenal have beaten Liverpool 2-0 at Wembley in the FA Cup Final, Reg Lewis scoring both goals."},
    {date:'1950-05-06', fired:false, id:'pompey_title_1950', tag:'rivals', text:"PORTSMOUTH RETAIN THE TITLE: a 5-1 win over Aston Villa on the last day of the season has made Portsmouth back-to-back First Division champions. They finish level on 53 points with Wolverhampton Wanderers and take the title on goal average, 1.947 to 1.551. Tottenham Hotspur, Arthur Rowe's push-and-run side, have won the Second Division with 61 points, with Sheffield Wednesday the other side promoted."},
-   {date:'1950-05-08', fired:false, id:'franklin_bogota', tag:'rivals', text:"FRANKLIN GOES TO COLOMBIA: England centre-half Neil Franklin has left for Bogota to join Independiente Santa Fe, turning his back on the England squad for the World Cup in Brazil. He and Stoke team-mate George Mountford have been reported to be on about £60 a week plus a £2,000 signing-on fee, over four times the English maximum wage. Colombia's league is outside FIFA, so the move has no fee and no FIFA protection, and England manager Walter Winterbottom could not talk him out of it. Manchester United's Charlie Mitten, 'the Bogota Bandit', would join them there."},
-   {date:'1951-02-01', fired:false, id:'franklin_hull', tag:'rivals', text:"FRANKLIN SOLD TO HULL: Neil Franklin, home from Colombia by August last year and suspended indefinitely by Stoke and the FA, has been sold to Hull City of the Second Division for £22,500 this month."},
+   {date:'1950-05-08', fired:false, id:'franklin_bogota', tag:'rivals', text:"FRANKLIN GOES TO COLOMBIA: England centre-half Neil Franklin has left for Bogota to join Independiente Santa Fe, turning his back on the England squad for the World Cup in Brazil. He is reported to be on about £60 a week plus a £2,000 signing-on fee, over four times the English maximum wage. Colombia's league is outside FIFA, so the move has no fee and no FIFA protection, and England manager Walter Winterbottom could not talk him out of it."},
+   {date:'1951-02-01', fired:false, id:'franklin_hull', /* v309 : superseded by the real signing franklin_hull_1951 in realSchoolboyLegends, so this line is silent */ tag:'rivals', text:"FRANKLIN SOLD TO HULL: Neil Franklin, home from Colombia by August last year and suspended indefinitely by Stoke and the FA, has been sold to Hull City of the Second Division for £22,500 this month."},
    {date:'1951-06-02', fired:false, id:'workington_elected', tag:'board', text:"NEW BRIGHTON VOTED OUT: at the Football League's annual meeting, Workington have been elected to the Third Division North with 28 votes, replacing New Brighton, who got 18 and fail re-election. Accrington Stanley were re-elected with 46 votes."},
   {date:'1950-06-29', fired:false, id:'usa1950', tag:'rivals', text:"SHOCK IN BELO HORIZONTE: the United States have beaten England 1-0 at the World Cup in Brazil, Joe Gaetjens' deflected header enough to see off a side including Stanley Matthews' understudies. Some Fleet Street desks are said to have taken the wire result for a typing error."},
   {date:'1951-04-21', fired:false, id:'spurs_pushandrun', tag:'rivals', text:"PUSH AND RUN TAKE THE TITLE: Tottenham Hotspur have been confirmed First Division champions, promoted straight up from Division Two only twelve months ago. Arthur Rowe's whole approach -- give-and-go passing into space at pace rather than the long ball and rigid WM positions most of the League still swears by -- is being talked about as a genuine break from orthodoxy, not just a good side having a good season. (EXACT DATE UNCONFIRMED: the title win is solidly sourced to late April 1951, the specific calendar day is this session's placement, not an independently verified fixture date.)"},
@@ -13708,14 +13719,14 @@ var historicalOneOffsPost1949 = [
   {date:'1956-09-15', fired:false, id:'man_utd_euro', tag:'rivals', text:"UNITED DEFY THE LEAGUE: where Chelsea backed down last year, Manchester United's chairman Harold Hardman and manager Matt Busby have gone into Europe anyway, becoming the first English club to actually play in the European Cup. (EXACT DATE UNCONFIRMED : the season and the defiance itself are solid, the 15 September placing is a reasonable estimate for the tie, not a sourced fixture date.)"},
   {date:'1957-04-11', fired:false, id:'man_utd_euro_out', tag:'rivals', text:"UNITED'S EUROPEAN RUN ENDS: Manchester United's first European Cup campaign, which brought a 12-0 aggregate rout of Anderlecht along the way, has finished in the semi-final against holders Real Madrid, 5-3 on aggregate. Real Madrid went on to retain the trophy. (EXACT DATE UNCONFIRMED : the season, the Anderlecht scoreline and the semi-final exit are sourced, the calendar date here is an estimate.)"},
   {date:'1958-02-06', fired:false, id:'munich', tag:'rivals', text:''}, /* text built at fire time by munichDisasterFire() -- see comment above */
-  {date:'1956-02-22', fired:false, id:'floodlights', tag:'rivals', text:"UNDER THE LIGHTS: Portsmouth have beaten Newcastle United 2-0 at Fratton Park in the first Football League fixture ever played under permanent floodlights. A handful of friendlies have used floodlights before now, but this is the first time it's counted. More grounds are expected to follow suit before long."},
-  {date:'1955-08-20', fired:false, id:'southend_roots_hall', tag:'rivals', text:"SOUTHEND ON THE MOVE: Southend United have played their first match at Roots Hall, a new ground on Victoria Avenue, beating Norwich City there. The Southend Stadium on Grainger Road, their home since 1920, is now behind them for good."},
+  {date:'1956-02-22', fired:false, id:'floodlights', tag:'rivals', text:"UNDER THE LIGHTS: Portsmouth have hosted, at Fratton Park, the first Football League fixture ever played under permanent floodlights. A handful of friendlies have used floodlights before now, but this is the first time it's counted. More grounds are expected to follow suit before long."},
+  {date:'1955-08-20', fired:false, id:'southend_roots_hall', tag:'rivals', text:"SOUTHEND ON THE MOVE: Southend United have played their first match at Roots Hall, a new ground on Victoria Avenue. The Southend Stadium on Grainger Road, their home since 1920, is now behind them for good."},
   {date:'1962-03-11', fired:false, id:'accrington_resign', tag:'board', text:"ACCRINGTON STANLEY RESIGN FROM THE LEAGUE: Accrington Stanley have resigned from the Football League, their application accepted by League Secretary Alan Hardaker, their last League fixture a 4-0 defeat at Crewe Alexandra on 2 March. Chairman Edwin Slinger had already quit a month ago, revealing debts of around £4,000 in unpaid transfer fees plus a similar sum owed to the Inland Revenue -- money the club has never found. One of the League's twelve founder members in 1888 is gone from it. They'll carry on for now in the Lancashire Combination, but there's no League return in sight, and in four years' time the club will be wound up altogether."},
   {date:'1958-06-17', fired:false, id:'wc1958_out', tag:'rivals', text:"ENGLAND OUT WITHOUT A WIN: England are out of the World Cup in Sweden, beaten 1-0 by the Soviet Union in a play-off after finishing level on points following three straight draws in the group (2-2 with the USSR, 0-0 with Brazil, who went on to win the tournament with a teenage forward named Pele, and 2-2 with Austria). Not a single win in the whole tournament, played in the shadow of Munich four months on. (EXACT DATES: the play-off's 17 June is sourced ; the three group games' own calendar dates within the tournament's 8-17 June window were not independently pinned down this pass.)"},
   {date:'1959-01-15', fired:false, id:'worcester_liverpool', tag:'rivals', text:"WORCESTER STUN LIVERPOOL: non-league Worcester City have knocked Liverpool out of the FA Cup third round 2-1, a result already being ranked alongside the USA's 1950 World Cup shock for sheer disbelief. Eight of the Worcester side were at work on building sites and in offices that same morning."},
   {date:'1959-04-04', fired:false, id:'jeff_hall_death', tag:'rivals', text:"JEFF HALL DIES: the Birmingham City and England full-back has died of polio, aged 29, a fortnight after playing a First Division match at Portsmouth. No upside to report here, only the facts: within weeks of his death and his widow's public appeals, demand for the polio vaccine has risen sharply enough that clinics around the country are reporting themselves out of stock."},
   {date:'1959-05-02', fired:false, id:'forest_luton_cup', tag:'rivals', text:"FOREST WIN THE CUP: Nottingham Forest have beaten Luton Town 2-1 at Wembley to win the FA Cup, playing the last half hour with ten men after Roy Dwight broke his leg."},
-  {date:'1959-04-25', fired:false, id:'billy_wright_retires', tag:'rivals', text:"WRIGHT CALLS IT A DAY: Billy Wright has retired from playing, a then-world-record 105 England caps behind him and three First Division titles won as Wolverhampton Wanderers' captain in the last six seasons. As clean an end to a career as the game has seen. (EXACT DATE UNCONFIRMED: the retirement is solidly sourced to April/May 1959, the specific calendar day is this session's placement, not an independently verified date.)"},
+  {date:'1959-04-25', fired:false, id:'billy_wright_retires', tag:'rivals', text:"WRIGHT CALLS IT A DAY: Billy Wright has retired from playing, a then-world-record 105 England caps behind him after a career spent entirely at Wolverhampton Wanderers. As clean an end to a career as the game has seen. "},
   {date:'1960-10-15', fired:false, id:'eastham_move', tag:'rivals', text:"EASTHAM GOES TO ARSENAL: Newcastle United have sold George Eastham to Arsenal for £47,500, ending a year-long standoff in which Eastham refused to play rather than accept Newcastle's terms under the retain-and-transfer system. The transfer is settled, but Eastham's fight with the system that held him isn't finished : he's taking it to the courts. (EXACT DATE UNCONFIRMED : month is sourced, day is an estimate.)"},
   {date:'1961-01-18', fired:false, id:'wage_abolished', tag:'board', text:"MAXIMUM WAGE ABOLISHED: with the PFA's players' strike three days from going ahead, the Football League has caved and scrapped the maximum wage outright, Jimmy Hill's campaign winning in full at the negotiating table. For the first time in the League's history, a professional footballer's pay is whatever a club is willing to offer him."},
   {date:'1961-01-25', fired:false, id:'haynes_100', tag:'rivals', text:"FIRST £100 MAN: Fulham and England captain Johnny Haynes has become the first £100-a-week footballer in Britain, in the immediate aftermath of the maximum wage's abolition. (EXACT DATE UNCONFIRMED : the fact and rough timing are sourced, this exact day is an estimate.)"},
@@ -13723,7 +13734,7 @@ var historicalOneOffsPost1949 = [
   {date:'1961-09-05', fired:false, id:'league_cup_first', tag:'rivals', text:"THE LEAGUE CUP: Aston Villa have won the brand-new Football League Cup's first final, beating Rotherham United 3-2 on aggregate over two legs. Several of the biggest clubs (Arsenal, Tottenham and Wolves among them) declined to enter this inaugural competition at all, unconvinced it's worth the fixture congestion. (EXACT DATE: season and result are sourced, the calendar day is this session's own recollection, not independently re-verified.)"},
   {date:'1962-06-10', fired:false, id:'wc1962_out', tag:'rivals', text:"BRAZIL DO IT AGAIN: England are out of the World Cup in Chile, beaten 3-1 in the quarter-final by holders Brazil, Garrincha the outstanding player on the pitch with two goals. Brazil go on to defend the trophy."},
   {date:'1962-07-10', fired:false, id:'law_man_utd', tag:'rivals', text:"LAW COMES HOME: Denis Law has joined Manchester United from Torino for £115,000, a new British transfer record less than a year after his own British record move the other way."},
-  {date:'1964-08-22', fired:false, id:'match_of_the_day', tag:'rivals', text:"ON THE WIRELESS AND NOW ON THE SCREEN: the BBC has broadcast the first Match of the Day, a highlights programme on the new BBC2 channel showing Liverpool's 3-2 win over Arsenal at Anfield. Barely 20,000 sets are thought to have tuned in, fewer than were actually inside the ground, but the BBC clearly means to keep it going."},
+  {date:'1964-08-22', fired:false, id:'match_of_the_day', tag:'rivals', text:"ON THE WIRELESS AND NOW ON THE SCREEN: the BBC has broadcast the first Match of the Day, a highlights programme on the new BBC2 channel, from Anfield. Barely 20,000 sets are thought to have tuned in, fewer than were actually inside the ground, but the BBC clearly means to keep it going."},
   {date:'1963-08-01', fired:false, id:'eastham_ruling', tag:'board', text:"RETAIN-AND-TRANSFER STRUCK DOWN: Mr Justice Wilberforce has found for George Eastham in his case against Newcastle United, ruling the retain-and-transfer system an unreasonable restraint of trade. Transfer fees between clubs aren't touched by the judgment, but a club's old power to hold a man's registration indefinitely, on its own terms, whether he likes it or not, has just lost its legal footing after seventy years. (YEAR CONFIRMED, EXACT DATE NOT : sources agree on 1963, the calendar day wasn't found in this research pass.)"},
   {date:'1963-05-15', fired:false, id:'spurs_cwc', tag:'rivals', text:"SPURS WIN EUROPE: Tottenham Hotspur have beaten Atletico Madrid 5-1 to win the European Cup Winners' Cup, the first British club ever to win a European trophy. (EXACT DATE: season and result are sourced, the calendar day is this session's own recollection, not independently re-verified.)"},
   {date:'1965-05-19', fired:false, id:'west_ham_cwc', tag:'rivals', text:"WEST HAM WIN AT WEMBLEY: West Ham United have beaten 1860 Munich 2-0 to win the European Cup Winners' Cup on home soil at Wembley. (EXACT DATE: season and result are sourced, the calendar day is this session's own recollection, not independently re-verified.)"},
@@ -13825,10 +13836,250 @@ function silenceHistoryBeforeStart(){
   historicalOneOffs.forEach(function(e){ if (!e.fired){ e.fired = true; n++; } }); /* 1946-49 kit/rationing notes : all before either start */
   return n;
 }
+/* ---------- v309 : HISTORY PLAYS OUT UNLESS THE GAME CHANGES IT (user brief). Every scripted real-result headline
+   below used to fire on its real date whatever the simulation had actually produced, so a game in which Burnley
+   won the 1950-51 title still ran "PUSH AND RUN TAKE THE TITLE" for Tottenham. Each such entry now has a RESOLVER
+   in SIM_NEWS_RESOLVERS, called on and after the entry's date, which returns one of:
+     a string    : post this (the real text where the simulation agrees with history, otherwise a text built from the
+                   simulation's own result);
+     null        : stay silent for good (the simulation went a different way, or the sim already tells this story);
+     undefined   : the simulated result isn't known yet, ask again tomorrow (dropped silently after a window).
+   Real transfers, England's internationals and other events the simulation does not play are untouched. */
+var SIM_NEWS_RESOLVERS = {};
+var SIM_NEWS_WAIT_DAYS = 100;
+function simPrevLabel(label){ var y = parseInt(String(label).split('-')[0], 10); return (y-1)+'-'+String(y).slice(2); }
+function simHonour(label){ return (honoursHistory||[]).find(function(h){ return h.label === label; }) || null; }
+function simPriorChampion(label, key){
+  var h = simHonour(simPrevLabel(label));
+  if (h && h[key]) return h[key];
+  var r = REAL_PRIOR_CHAMPIONS[label];
+  return r ? r[key] : null;
+}
+function simTableFor(key){
+  var t;
+  if (ourDivisionKey() === key) t = table; else { var d = aiBgDivFor(key); t = d && d.table; }
+  return t || null;
+}
+function simTableRows(key){
+  var t = simTableFor(key); if (!t) return null;
+  var rows = Object.keys(t).filter(function(n){ return t[n] && t[n].p>0; }).map(function(n){ return {n:n, p:t[n].p, pts:t[n].pts, f:t[n].f, a:t[n].a}; });
+  rows.sort(function(x,y){ return y.pts-x.pts || (y.f-y.a)-(x.f-x.a) || y.f-x.f; });
+  return rows;
+}
+function simSeasonComplete(key){
+  var t = simTableFor(key); if (!t) return false;
+  var N = Object.keys(t).length, rows = simTableRows(key);
+  return N >= 4 && rows.length === N && rows.every(function(r){ return r.p >= 2*(N-1); });
+}
+function simMgrOk(club, name){ /* only rivals in the user's own division carry a tracked manager; for anyone else history stands */
+  var r = (rivals||[]).find(function(x){ return x.n === club; });
+  if (!r) return true;
+  return !!r.mgr && String(r.mgr).indexOf(name) >= 0;
+}
+function simTitleBase(rows, club){
+  var top = rows[0], sec = rows[1], gap = top.pts - sec.pts;
+  return club+' have won the First Division with '+top.pts+' points, '+(gap>0 ? gap+' clear of ' : 'level on points with and ahead on the tie-break over ')+sec.n+'.';
+}
+function simTitleResolve(label, club, build){
+  if (seasonLabel !== label) return null; /* that season is already gone (or never reached) in this save */
+  if (!simSeasonComplete('D1')) return undefined;
+  var rows = simTableRows('D1');
+  if (rows[0].n !== club || club === ourClubName) return null;
+  return build(rows);
+}
+function simD2Clause(){
+  if (!simSeasonComplete('D2')) return '';
+  var r2 = simTableRows('D2');
+  return ' '+r2[0].n+' have won the Second Division with '+r2[0].pts+' points, with '+r2[1].n+' second.';
+}
+SIM_NEWS_RESOLVERS.pompey_title_1950 = function(){
+  return simTitleResolve('1949-50', 'Portsmouth', function(rows){
+    var back = simPriorChampion('1949-50','D1') === 'Portsmouth';
+    return (back ? 'PORTSMOUTH RETAIN THE TITLE: ' : 'PORTSMOUTH ARE CHAMPIONS: ')+simTitleBase(rows,'Portsmouth')+(back?' Back-to-back First Division champions.':'')+simD2Clause();
+  });
+};
+SIM_NEWS_RESOLVERS.spurs_pushandrun = function(){
+  return simTitleResolve('1950-51', 'Tottenham Hotspur', function(rows){
+    var up = simPriorChampion('1950-51','D2') === 'Tottenham Hotspur';
+    return 'PUSH AND RUN TAKE THE TITLE: '+simTitleBase(rows,'Tottenham Hotspur')+(up?' Promoted straight up from Division Two only twelve months ago.':'')+
+      (simMgrOk('Tottenham Hotspur','Arthur Rowe') ? " Arthur Rowe's give-and-go approach, passing into space at pace rather than the long ball and rigid WM positions most of the League still swears by, is being talked about as a genuine break from orthodoxy." : '')+simD2Clause();
+  });
+};
+SIM_NEWS_RESOLVERS.man_utd_first_title = function(){
+  return simTitleResolve('1951-52', 'Manchester United', function(rows){
+    var earlier = (honoursHistory||[]).some(function(h){ return h.D1 === 'Manchester United' && h.label !== '1951-52'; });
+    var busby = simMgrOk('Manchester United','Matt Busby');
+    return 'UNITED ARE CHAMPIONS: '+simTitleBase(rows,'Manchester United')+(earlier ? '' : ' Their first First Division title in 41 years'+(busby?', and Matt Busby\'s first League championship as manager.':'.'))+simD2Clause();
+  });
+};
+function simCupResolve(label, win, lose, sw, sl, text){
+  if (!cupBracket) return undefined;
+  if (seasonLabel !== label) return null;
+  if (!cupBracket.championName || cupBracket.pendingWinnerNews) return undefined; /* the sim's own FA CUP WINNERS item is posted first */
+  if (cupBracket.championName === ourClubName) return null; /* our own Cup win tells its own story */
+  var m = /^(.+?) (\d+)-(\d+) (.+?)( \(.*\))?$/.exec(String(cupBracket.finalLineSaved||''));
+  if (!m) return null;
+  var champ = cupBracket.championName.toUpperCase(), a = m[1], b = m[4], ga = +m[2], gb = +m[3];
+  var champGoals = (a === champ) ? ga : gb, otherGoals = (a === champ) ? gb : ga, other = (a === champ) ? b : a;
+  if (champ === win.toUpperCase() && other === lose.toUpperCase() && champGoals === sw && otherGoals === sl) return text;
+  return null;
+}
+SIM_NEWS_RESOLVERS.facup_1950 = function(e){ return simCupResolve('1949-50','Arsenal','Liverpool',2,0,e.text); };
+SIM_NEWS_RESOLVERS.milburn_double = function(e){ return simCupResolve('1950-51','Newcastle United','Blackpool',2,0,e.text); };
+SIM_NEWS_RESOLVERS.newcastle_cup_double = function(e){ return simCupResolve('1951-52','Newcastle United','Arsenal',1,0,e.text); };
+SIM_NEWS_RESOLVERS.matthews_final = function(e){ return simCupResolve('1952-53','Blackpool','Bolton Wanderers',4,3,e.text); };
+SIM_NEWS_RESOLVERS.forest_luton_cup = function(e){ return simCupResolve('1958-59','Nottingham Forest','Luton Town',2,1,e.text); };
+SIM_NEWS_RESOLVERS.worcester_liverpool = function(e){
+  if (!cupBracket || seasonLabel !== '1958-59') return null;
+  var r3 = (cupBracket.history||[]).find(function(h){ return h.roundName === 'Third Round'; });
+  if (!r3) return undefined;
+  var hit = r3.lines.some(function(l){ return /^WORCESTER CITY 2-1 LIVERPOOL\b/.test(String(l).replace(/ \*$/,'')); });
+  return hit ? e.text : null;
+};
+SIM_NEWS_RESOLVERS.chelsea_euro_withdraw = function(e){
+  var h = simHonour('1954-55');
+  if (!h || h.D1 !== 'Chelsea' || ourClubName === 'Chelsea') return null; /* the sim lets whoever its champions are enter, or the user decides */
+  return e.text;
+};
+SIM_NEWS_RESOLVERS.man_utd_euro = function(){
+  if (seasonLabel !== '1956-57') return null;
+  if (!europeanCup || europeanCup.label !== '1956-57') return undefined;
+  if (ourClubName === 'Manchester United' || !(europeanCup.entrants||[]).some(function(c){ return c.n === 'Manchester United'; })) return null;
+  var h55 = simHonour('1955-56'), h54 = simHonour('1954-55');
+  if (h55 && h55.euroEntrant) return null; /* an English club already played in 1955-56 here, so United weren't the first */
+  var chel = h54 && h54.D1 === 'Chelsea' && ourClubName !== 'Chelsea';
+  return 'UNITED DEFY THE LEAGUE: '+(chel ? 'where Chelsea backed down last year, ' : '')+'Manchester United '+
+    (simMgrOk('Manchester United','Matt Busby') ? "(chairman Harold Hardman and manager Matt Busby behind the decision) " : '')+
+    'have entered the European Cup as First Division champions, becoming the first English club to play in it.';
+};
+SIM_NEWS_RESOLVERS.man_utd_euro_out = function(){
+  if (seasonLabel !== '1956-57') return null;
+  if (!europeanCup || europeanCup.label !== '1956-57') return undefined;
+  var semi = (europeanCup.history||[]).find(function(h){ return /semi/i.test(h.roundName||''); });
+  if (!semi) return undefined;
+  if (ourClubName === 'Manchester United') return null;
+  var out = null;
+  semi.lines.forEach(function(l){
+    var u = l.indexOf('MANCHESTER UNITED'), r = l.indexOf('REAL MADRID'), m = /\((\d+)-(\d+) agg/.exec(l);
+    if (u<0 || r<0 || !m) return;
+    var aggA = +m[1], aggB = +m[2], aIsUnited = u < r;
+    var uGoals = aIsUnited ? aggA : aggB, rGoals = aIsUnited ? aggB : aggA;
+    if (rGoals > uGoals){
+      var h55 = simHonour('1955-56'), holders = h55 && h55.europeanCup === 'Real Madrid';
+      out = "UNITED'S EUROPEAN RUN ENDS: Manchester United's first European Cup campaign has finished in the semi-final against "+(holders?'holders ':'')+'Real Madrid, '+rGoals+'-'+uGoals+' on aggregate.';
+    }
+  });
+  return out;
+};
+function simContinentalWinner(kind, label){ /* 'europeanCup' or 'cwc' : the winner if known, '' if the competition ended with none, undefined if not decided yet */
+  var live = (kind === 'europeanCup') ? europeanCup : cupWinnersCup;
+  if (live && live.label === label && live.championName) return live.championName;
+  var h = simHonour(label);
+  if (h && h[kind]) return h[kind];
+  if (live && live.label === label && live.active) return undefined;
+  return (seasonLabel > label) ? '' : undefined;
+}
+function simEnglishTrophyBefore(label){
+  return (honoursHistory||[]).some(function(h){
+    if (h.label >= label) return false;
+    return [h.europeanCup, h.cwc, h.fairsCup].some(function(n){ return n && clubProfiles[n]; });
+  });
+}
+SIM_NEWS_RESOLVERS.spurs_cwc = function(){
+  var w = simContinentalWinner('cwc','1962-63');
+  if (w === undefined || w === '' || w !== 'Tottenham Hotspur' || ourClubName === w) return w === undefined ? undefined : null;
+  return 'SPURS WIN EUROPE: Tottenham Hotspur have won the European Cup Winners\' Cup'+(simEnglishTrophyBefore('1962-63') ? '.' : ', the first British club ever to win a European trophy.');
+};
+SIM_NEWS_RESOLVERS.west_ham_cwc = function(){
+  var w = simContinentalWinner('cwc','1964-65');
+  if (w === undefined) return undefined;
+  if (w !== 'West Ham United' || ourClubName === w) return null;
+  var venue = (typeof cwcFinalVenueLabel==='function') ? cwcFinalVenueLabel('1964-65') : '';
+  return 'WEST HAM WIN THE CUP WINNERS\' CUP: West Ham United have won the European Cup Winners\' Cup'+(/Wembley/.test(venue) ? ', the Final played at Wembley, on home soil.' : '.');
+};
+SIM_NEWS_RESOLVERS.manutd_eurocup_1968 = function(){
+  var w = simContinentalWinner('europeanCup','1967-68');
+  if (w === undefined) return undefined;
+  if (w !== 'Manchester United' || ourClubName === w) return null;
+  var first = !simEnglishTrophyBefore('1967-68') && !(honoursHistory||[]).some(function(h){ return h.label < '1967-68' && h.europeanCup && clubProfiles[h.europeanCup]; });
+  return 'UNITED WIN EUROPE: Manchester United have won the European Cup'+(first?', the first English club to do so':'')+', a decade on from Munich.'+(simMgrOk('Manchester United','Matt Busby') ? " Matt Busby's long pursuit of the trophy that cost him so much is finally won." : '');
+};
+SIM_NEWS_RESOLVERS.accrington_resign = function(){ return null; }; /* v309 : the sim does not play Accrington's real 1962 collapse; dropped rather than contradict it */
+SIM_NEWS_RESOLVERS.workington_elected = function(){ return null; }; /* v309 : the re-election vote is now played in the sim (runReElection, REAL_REELECTIONS) and reports itself */
+SIM_NEWS_RESOLVERS.franklin_hull = function(){ return null; }; /* v309 : the move is now a real signing (realSchoolboyLegends, id franklin_hull_1951), with consent where the user's club is involved */
+SIM_NEWS_RESOLVERS.franklin_bogota = function(e){
+  var stokeSq = (ourClubName === 'Stoke City') ? null : ensureClubSquad('Stoke City');
+  var mine = squad.some(function(p){ return p.n === 'Neil Franklin'; });
+  if (ourClubName === 'Stoke City' && mine)
+    return "COLOMBIA CALLING: Neil Franklin, England's centre-half, has been offered a lucrative contract by Independiente Santa Fe of Bogota, on reports of about £60 a week plus a £2,000 signing-on fee, over four times the English maximum wage. Colombia's league is outside FIFA. He is your player and the decision is yours: the board will not let him go unless you allow it.";
+  if (mine) return null;
+  var man = stokeSq && stokeSq.find(function(p){ return p.n === 'Neil Franklin'; });
+  if (!man) return null; /* he isn't a Stoke player in this save any more */
+  clubSquads['Stoke City'] = stokeSq.filter(function(p){ return p.n !== 'Neil Franklin'; });
+  return e.text;
+};
+/* v309 : scripted moves of the real Colombian exodus, kept out of any club's squad until the real return: Franklin
+   re-enters at Hull City in Feb 1951 (see franklin_hull_1951), through the same realSigningFire route as every
+   other real transfer, so a user at Stoke or Hull keeps the decision. */
+function simPostSeasonTitleNews(){ /* called at season end : fire the matching scripted title item now if its date is still ahead, else post a generated one */
+  var rows = simTableRows('D1');
+  if (!rows || !rows.length) return;
+  var top = rows[0], shown = false;
+  historicalOneOffsPost1949.forEach(function(e){
+    if (e.fired || !SIM_NEWS_RESOLVERS[e.id] || !/^(pompey_title_1950|spurs_pushandrun|man_utd_first_title)$/.test(e.id)) return;
+    var out = SIM_NEWS_RESOLVERS[e.id](e);
+    if (out === undefined) return;
+    e.fired = true;
+    if (out){ e.shown = true; addNews(e.tag, out); shown = true; }
+  });
+  if (shown || top.n === ourClubName) return;
+  if (historicalOneOffsPost1949.some(function(e){ return e.shown && /^(pompey_title_1950|spurs_pushandrun|man_utd_first_title)$/.test(e.id) && e.date.slice(0,4) === String(parseInt(seasonLabel.split('-')[0],10)+1); })) return;
+  var gap = top.pts - (rows[1] ? rows[1].pts : 0);
+  addNews('rivals', 'FIRST DIVISION CHAMPIONS: '+top.n.toUpperCase()+' have won the First Division title with '+top.pts+' points'+(rows[1] ? (gap>0 ? ', '+gap+' clear of '+rows[1].n : ', level with '+rows[1].n+' but ahead on the tie-break') : '')+'.');
+}
+/* v309 : REAL MID-SEASON MANAGER CHANGES, 1950-51 (Wikipedia club/manager pages; the 1950 master lists above now hold the
+   manager in post at the 1949 start). Each step applies only to a club in the user's division whose manager is still the
+   one the real change replaced (so the sim's own sackings stand, the user's club is never touched, and a division rebuilt
+   at a new season gets the change again silently), and is reported once. Month-only sources use the 1st of the month. */
+var MANAGER_TIMELINE_1950 = [
+  {date:'1950-06-01', club:'Manchester City', from:'Jock Thomson', to:'Les McDowall', text:'MANAGER: Les McDowall has been appointed manager of Manchester City, succeeding Jock Thomson.'},
+  {date:'1950-08-01', club:'West Ham United', from:'Charlie Paynter', to:'Ted Fenton', text:'MANAGER: Ted Fenton has succeeded Charlie Paynter as manager of West Ham United.'},
+  {date:'1950-10-01', club:'Bolton Wanderers', from:'Walter Rowley', to:'Bill Ridding', text:'MANAGER: Bill Ridding has taken over as manager of Bolton Wanderers from Walter Rowley.'},
+  {date:'1950-11-01', club:'Torquay United', from:'Bob John', to:'Alex Massie', text:'MANAGER: Alex Massie has been appointed manager of Torquay United, succeeding Bob John.'},
+  {date:'1950-11-01', club:'Crystal Palace', from:'Ronnie Rooke (player-manager)', to:'Fred Dawes and Charlie Slade (joint)', text:'MANAGER: Crystal Palace have replaced player-manager Ronnie Rooke with Fred Dawes and Charlie Slade, who will run the club jointly.'},
+  {date:'1950-11-01', club:'Oldham Athletic', from:'Billy Wootton', to:'George Hardwick (player-manager)', text:'MANAGER: George Hardwick has been appointed player-manager of Oldham Athletic.'},
+  {date:'1950-12-14', club:'Newcastle United', from:'George Martin', to:'Stan Seymour', text:'MANAGER: Stan Seymour has taken charge of Newcastle United after George Martin\'s departure.'},
+  {date:'1951-03-05', club:'Liverpool', from:'George Kay', to:'Don Welsh', text:'MANAGER: Don Welsh has been appointed manager of Liverpool, succeeding George Kay.'},
+  {date:'1951-03-05', club:'Brighton & Hove Albion', from:'Don Welsh', to:'Billy Lane', text:'MANAGER: Billy Lane has taken over as manager of Brighton & Hove Albion after Don Welsh\'s move to Liverpool.'},
+  {date:'1951-03-05', club:'Halifax Town', from:'Jack Breedon', to:'Billy Wootton', text:'MANAGER: Billy Wootton has been appointed manager of Halifax Town.'}
+];
+function checkManagerTimeline1950(){
+  if (gameEra !== '1950') return;
+  var today = isoOf(currentDate);
+  MANAGER_TIMELINE_1950.forEach(function(st){
+    if (st.date > today) return;
+    var r = (rivals||[]).find(function(x){ return x.n === st.club; });
+    if (!r || r.mgr !== st.from) return;
+    r.mgr = st.to;
+    if (!st.said){ st.said = true; addNews('rivals', st.text); }
+  });
+}
 function checkHistoricalOneOffsPost1949(){
   var today = isoOf(currentDate);
   historicalOneOffsPost1949.forEach(function(e){
     if (e.fired || e.date > today) return;
+    var rs = SIM_NEWS_RESOLVERS[e.id];
+    if (rs){ /* v309 : see SIM_NEWS_RESOLVERS */
+      var out;
+      try { out = rs(e); } catch(err){ out = null; }
+      if (out === undefined){
+        if ((Date.parse(today) - Date.parse(e.date))/864e5 > SIM_NEWS_WAIT_DAYS) e.fired = true; /* the sim never produced the result in time : drop it */
+        return;
+      }
+      e.fired = true;
+      if (out){ e.shown = true; addNews(e.tag, out); }
+      return;
+    }
     e.fired = true;
     if (e.id === 'munich'){ addNews(e.tag, munichDisasterFire()); return; }
     if (e.id === 'eastham_ruling'){ addNews(e.tag, eastham1963Fire(e.text)); renderContractsBox(); return; }
@@ -16143,6 +16394,18 @@ var realSchoolboyLegends = [
     note:"West Ham United have signed goalkeeper Shaka Hislop from Newcastle United on a free transfer in the summer of 1998, making his debut in a 1-0 win at Sheffield Wednesday on 15 August 1998. (VERIFIED : Wikipedia and westhamtillidie.com both independently confirm free transfer, so fee:0 is a confirmed fact, not a gap -- no evidence was found for the prior pass's claim of an earlier failed move/medical to Newcastle, which neither source mentions and may be a conflation with a different player's story.)"},
   {name:"Paolo Di Canio", pos:"Winger", club:"West Ham United", fromClub:"Sheffield Wednesday", fee:1500000, triggerYear:1999, triggerMonth:0, kind:'signing', age:30, rep:4, nation:"Italy", spikeAttrs:['shooting','pace'], fired:false,
     note:"West Ham United have paid Sheffield Wednesday £1.5million for Italian winger Paolo Di Canio in January 1999 -- he arrives under a cloud after shoving referee Paul Alcock, but will become an Upton Park cult hero. (EXACT DAY UNCONFIRMED.)"},
+  /* ---- v309 : real moves of 1949-51 for the 1950 era (and any other era's game, which reaches them on the same dates). Each is a
+     signing between AI clubs unless the user's club is the seller or the buyer, when the usual consent/offer route applies. */
+  {id:'revie_hull_1949', name:"Don Revie", pos:"Inside-Forward", club:"Hull City", fromClub:"Leicester City", fee:19000, triggerYear:1949, triggerMonth:10, kind:'signing', age:22, rep:3, spikeAttrs:['passing','tackling'], fired:false,
+    note:"Hull City have paid Leicester City a fee reported at £19,000 for inside-forward Don Revie in November 1949. (Wikipedia gives £19,000; at least one other account says £20,000.)"},
+  {id:'allen_wba_1950', name:"Ronnie Allen", pos:"Centre-Forward", club:"West Bromwich Albion", fromClub:"Port Vale", fee:20000, triggerYear:1950, triggerMonth:2, kind:'signing', age:20, rep:4, spikeAttrs:['shooting','heading'], fired:false,
+    note:"West Bromwich Albion have signed Port Vale's centre-forward Ronnie Allen for £20,000 in March 1950. (VERIFIED : Wikipedia.)"},
+  {id:'paul_city_1950', name:"Roy Paul", pos:"Wing-Half", club:"Manchester City", fromClub:"Swansea Town", fee:19500, triggerYear:1950, triggerMonth:5, kind:'signing', age:29, rep:4, nation:"Wales", spikeAttrs:['tackling','passing'], fired:false,
+    note:"Manchester City have signed Swansea Town's Welsh wing-half Roy Paul for £19,500 in June 1950. (VERIFIED : Wikipedia.)"},
+  {id:'mitten_fulham_1951', name:"Charlie Mitten", pos:"Outside-Left", club:"Fulham", fromClub:"Manchester United", fee:22000, triggerYear:1951, triggerMonth:11, kind:'signing', age:30, rep:3, spikeAttrs:['dribbling','crossing'], fired:false,
+    note:"Fulham have paid Manchester United £22,000 for outside-left Charlie Mitten in December 1951, after his year in Colombia. (VERIFIED : Wikipedia.)"},
+  {id:'franklin_hull_1951', name:"Neil Franklin", pos:"Centre-Half", club:"Hull City", fromClub:"Stoke City", fee:22500, triggerYear:1951, triggerMonth:1, kind:'signing', age:28, rep:4, spikeAttrs:['heading','tackling'], fired:false,
+    note:"Hull City of the Second Division have signed England centre-half Neil Franklin from Stoke City for £22,500 this month, after his return from Colombia and a long suspension. (VERIFIED : Wikipedia.)"},
 ];
 /* pristine copy, so a save from before v115 can pick up entries added since it was made (see applyLoadedState) */
 var realSchoolboyLegendsDefault = JSON.parse(JSON.stringify(realSchoolboyLegends));
@@ -17014,6 +17277,7 @@ function generateWeeklyNews(){
   checkFutureLegends();
   checkHistoricalOneOffs();
   checkHistoricalOneOffsPost1949();
+  checkManagerTimeline1950(); /* v309 */
   checkRealRetirements(); /* v249 */
   if (typeof announceCupWinnerIfDue==='function') announceCupWinnerIfDue(); /* v127 */
   checkRealSchoolboyLegends();
@@ -18155,8 +18419,8 @@ function initGameStateFresh(){
     if (!div.clubs.some(function(c){ return c.n===ourClubName; })) return;
     div.clubs = div.clubs.filter(function(c){ return c.n !== ourClubName; }); delete div.table[ourClubName];
   });
-  midlandLeague = makeDivision("Midland League", midlandLeagueClubs, 44);
-  northEasternLeague = makeDivision("North Eastern League", northEasternLeagueClubs, 55);
+  midlandLeague = makeDivision("Midland League", gameEra==="1950" ? midlandLeagueClubs1950 : midlandLeagueClubs, 44); /* v309 */
+  northEasternLeague = makeDivision("North Eastern League", gameEra==="1950" ? northEasternLeagueClubs1950 : northEasternLeagueClubs, 55);
   tactics = {formation:'235', approach:'balanced', style:'direct'};
   unlockedFormations = [];
   activeTrip = null;
@@ -19647,12 +19911,12 @@ CLUB_1950_FIRST_NAMES.forEach(function(n){ clubColours1950_FIRST[n] = clubColour
 clubColours1950_FIRST["Manchester United"] = "RED, BLACK SHORTS"; /* v132 Part O3 V3: black shorts worn Mar 1949 - Aug 1955; the 1946-47 "RED, WHITE SHORTS" is specifically flagged wrong for this era */
 clubColours1950_FIRST["Bolton Wanderers"] = "WHITE, BLACK SHORTS"; /* v132 Part O3 V2: black shorts and red/black socks from 14 Jan 1950 through the whole 1950-51 season; navy shorts (the 1946-47 kit) returned only in 1951-52 */
 var firstDivisionMasterClubs1950_FIRST = [
-  {n:"Liverpool", s:84, mgr:"George Kay (until 30 Jan 1951; then Don Welsh from 5 Mar 1951)", ground:"Anfield"},
+  {n:"Liverpool", s:84, mgr:"George Kay", ground:"Anfield"},
   {n:"Manchester United", s:92, mgr:"Matt Busby", ground:"Old Trafford (returned from Maine Road, 24 Aug 1949; reopened without roofs, restored by 1951)"},
   {n:"Wolverhampton Wanderers", s:95, mgr:"Stan Cullis", ground:"Molineux"},
   {n:"Stoke City", s:64, mgr:"Bob McGrory", ground:"Victoria Ground"},
   {n:"Blackpool", s:85, mgr:"Joe Smith", ground:"Bloomfield Road"},
-  {n:"Newcastle United", s:90, mgr:"George Martin (until 14 Dec 1950; then Stan Seymour)", ground:"St James' Park"},
+  {n:"Newcastle United", s:90, mgr:"George Martin", ground:"St James' Park"},
   {n:"Tottenham Hotspur", s:89, mgr:"Arthur Rowe", ground:"White Hart Lane"},
   {n:"West Bromwich Albion", s:74, mgr:"Jack Smith", ground:"The Hawthorns"},
   {n:"Aston Villa", s:77, mgr:"Management committee (no permanent manager, Aug-Dec 1950); George Martin from Dec 1950", ground:"Villa Park"},
@@ -19664,7 +19928,7 @@ var firstDivisionMasterClubs1950_FIRST = [
   {n:"Derby County", s:79, mgr:"Stuart McMillan", ground:"Baseball Ground"},
   {n:"Chelsea", s:75, mgr:"Billy Birrell", ground:"Stamford Bridge"},
   {n:"Fulham", s:67, mgr:"Bill Dodgin Sr (team manager; Frank Osborne, general manager, above him)", ground:"Craven Cottage"},
-  {n:"Bolton Wanderers", s:69, mgr:"Walter Rowley (until Oct 1950; then Bill Ridding from 1 Oct 1950)", ground:"Burnden Park"},
+  {n:"Bolton Wanderers", s:69, mgr:"Walter Rowley", ground:"Burnden Park"},
   {n:"Charlton Athletic", s:62, mgr:"Jimmy Seed", ground:"The Valley"},
   {n:"Huddersfield Town", s:72, mgr:"George Stephenson", ground:"Leeds Road"},
   {n:"Sheffield Wednesday", s:70, mgr:"Eric Taylor (secretary-manager)", ground:"Hillsborough"},
@@ -20366,7 +20630,7 @@ var clubColours1950_SECOND = {}; /* v133: Part V3 confirms none of these 22 club
 CLUB_1950_SECOND_NAMES.forEach(function(n){ clubColours1950_SECOND[n] = clubColours1946[n]; });
 var secondDivisionMasterClubs1950_SECOND = [
   {n:"Preston North End", s:84, mgr:"Will Scott", ground:"Deepdale"},
-  {n:"Manchester City", s:88, mgr:"Les McDowall", ground:"Maine Road"},
+  {n:"Manchester City", s:88, mgr:"Jock Thomson", ground:"Maine Road"},
   {n:"Cardiff City", s:72, mgr:"Cyril Spiers", ground:"Ninian Park"},
   {n:"Birmingham City", s:80, mgr:"Bob Brocklebank", ground:"St Andrew's"},
   {n:"Leeds United", s:86, mgr:"Major Frank Buckley", ground:"Elland Road"},
@@ -20377,7 +20641,7 @@ var secondDivisionMasterClubs1950_SECOND = [
   {n:"Hull City", s:82, mgr:"Raich Carter (player-manager)", ground:"Boothferry Park"},
   {n:"Doncaster Rovers", s:74, mgr:"Peter Doherty (player-manager)", ground:"Belle Vue"},
   {n:"Southampton", s:90, mgr:"Sid Cann", ground:"The Dell"},
-  {n:"West Ham United", s:52, mgr:"Ted Fenton", ground:"Upton Park"},
+  {n:"West Ham United", s:52, mgr:"Charlie Paynter", ground:"Upton Park"},
   {n:"Leicester City", s:60, mgr:"Norman Bullock", ground:"Filbert Street"},
   {n:"Barnsley", s:64, mgr:"Angus Seed", ground:"Oakwell"},
   {n:"Queens Park Rangers", s:50, mgr:"Dave Mangnall", ground:"Loftus Road"},
@@ -20986,10 +21250,10 @@ var thirdDivisionSouthMasterClubs1950_THIRDSOUTH = [
   {n:"Northampton Town", s:85, mgr:"Bob Dennison", ground:"County Ground"},
   {n:"Southend United", s:82, mgr:"Harry Warren", ground:"Southend Stadium"},
   {n:"Nottingham Forest", s:80, mgr:"Billy Walker", ground:"The City Ground"},
-  {n:"Torquay United", s:75, mgr:"Bob John (until Nov 1950; then Alex Massie from Nov 1950)", ground:"Plainmoor"},
+  {n:"Torquay United", s:75, mgr:"Bob John", ground:"Plainmoor"},
   {n:"Watford", s:72, mgr:"Ron Gray", ground:"Vicarage Road"},
-  {n:"Crystal Palace", s:70, mgr:"Ronnie Rooke (player-manager, until Nov 1950); then Fred Dawes and Charlie Slade jointly from Nov 1950", ground:"Selhurst Park"},
-  {n:"Brighton & Hove Albion", s:67, mgr:"Don Welsh (until 5 Mar 1951); then Billy Lane from 1951", ground:"Goldstone Ground"},
+  {n:"Crystal Palace", s:70, mgr:"Ronnie Rooke (player-manager)", ground:"Selhurst Park"},
+  {n:"Brighton & Hove Albion", s:67, mgr:"Don Welsh", ground:"Goldstone Ground"},
   {n:"Bristol Rovers", s:65, mgr:"Bert Tann", ground:"Eastville Stadium"},
   {n:"Reading", s:62, mgr:"Ted Drake", ground:"Elm Park"},
   {n:"Norwich City", s:60, mgr:"Norman Low", ground:"Carrow Road"},
@@ -21115,7 +21379,7 @@ var thirdDivisionNorthMasterClubs1950_THIRDNORTH = [
   {n:"Mansfield Town", s:70, mgr:"Freddie Steele (player-manager)", ground:"Field Mill"},
   {n:"Carlisle United", s:67, mgr:"Bill Shankly", ground:"Brunton Park"},
   {n:"Stockport County", s:64, mgr:"Andy Beattie", ground:"Edgeley Park"},
-  {n:"Oldham Athletic", s:61, mgr:"Billy Wootton (until Sep 1950); vacancy Sep-Nov 1950; then George Hardwick (player-manager) from Nov 1950", ground:"Boundary Park"},
+  {n:"Oldham Athletic", s:61, mgr:"Billy Wootton", ground:"Boundary Park"},
   {n:"Chester", s:59, mgr:"Frank Brown", ground:"Sealand Road"},
   {n:"Accrington Stanley", s:56, mgr:"Walter Crook", ground:"Peel Park"},
   {n:"New Brighton", s:53, mgr:null, ground:"Tower Athletic Ground"},
@@ -21125,7 +21389,7 @@ var thirdDivisionNorthMasterClubs1950_THIRDNORTH = [
   {n:"Hartlepools United", s:41, mgr:"Fred Westgarth", ground:"Victoria Ground"},
   {n:"Bradford City", s:39, mgr:"David Steele", ground:"Valley Parade"},
   {n:"Wrexham", s:36, mgr:"Vacancy (Aug-Nov 1950); then Peter Jackson from 20 Nov 1950", ground:"The Racecourse Ground"},
-  {n:"Halifax Town", s:33, mgr:"Jack Breedon (until 1950, month unknown); then Billy Wootton from 5 Mar 1951", ground:"The Shay"},
+  {n:"Halifax Town", s:33, mgr:"Jack Breedon", ground:"The Shay"},
   {n:"York City", s:30, mgr:"Dick Duckworth", ground:"Bootham Crescent"},
   {n:"Bradford Park Avenue", s:79, mgr:"Fred Emery", ground:"Park Avenue"},
   {n:"Shrewsbury Town", s:55, mgr:"Sammy Crooks (secretary-manager)", ground:"Gay Meadow"},
@@ -21398,7 +21662,23 @@ clubProfiles1950_THIRDNORTH["Scunthorpe & Lindsey United"] = {
   note: "1950-51 THIRD DIVISION NORTH PROFILE (v135, real sourced data, BRAND NEW CLUB): Scunthorpe & Lindsey United had no clubProfiles entry anywhere in the game before this pass (it previously appeared only as a bare name, with no rating, in the non-League midlandLeagueClubs pool) -- elected to the Football League for the first time at the 3 June 1950 ballot, ahead of Workington and Wigan Athletic (Part X0/BB0). Ground is the Old Show Ground, capacity 23,000 -- the Part K record-rounded-down rule applied to the 23,935 FA Cup record of 30 Jan 1954, reasoned safe back to 1950 since no stand changes touched the ground before the 1958 fire/rebuild (Part X0 #3/X2, V2); manager Leslie Jones, appointed Jun 1950, the club's first-ever Football League manager, resigned end of 1950-51 (Part X1/BB1, V1); squad is the real 23-name 1950-51 season-opening list from Part U24 (11v11.com, V2) -- Scunthorpe's 11v11 page was a full League-era page under the modern slug and loaded on the first try, so no fallback to a non-League roster was needed. COLOURS, PER DIRECT RESEARCH FOLLOW-UP, Oct 2026: previously an honest UNKNOWN COLOURS placeholder, because the 1949-50/1950-51 kit periods on historicalkits.co.uk are image-only with no text description, and the modern club's 'claret and blue' wasn't safe to backdate on that evidence alone. Resolved now by a better source -- the club's OWN official history page (scunthorpe-united.co.uk/club/history/kits), which gives a specific, dated 1945-1950 period (covering their actual Football League entry) as 'claret shirts with blue trim, white shorts', distinct from the vaguer modern 'claret and blue' and specifically spanning the point this profile needed. Cross-checked against Wikipedia, which confirms claret and blue as the club's longstanding scheme but without era-specific dating of its own.",
   rawSquad: SQUADS_1950_THIRDNORTH["Scunthorpe & Lindsey United"], capacity: CLUB_GATE_1950_THIRDNORTH["Scunthorpe & Lindsey United"][1]
 };
-var clubSquads1950_THIRDNORTH = {}; /* seed store, same deliberately-empty-at-load pattern as the other three divisions' squad stores above. */
+var clubSquads1950_THIRDNORTH = {};
+/* v309 : REWIND THE 1950 SQUADS TO WHERE THESE MEN WERE AT THE 1949 START, so their real moves can be played (as signings,
+   with consent where the user's club is involved) on their real dates instead of being already done: Don Revie (Leicester City,
+   to Hull City Nov 1949), Ronnie Allen (Port Vale, to West Bromwich Albion Mar 1950), Roy Paul (Swansea Town, to Manchester City
+   Jun 1950), Charlie Mitten (Manchester United, to Fulham Dec 1951) and Neil Franklin (Stoke City, to Colombia May 1950, Hull
+   City Feb 1951). Edits the shared arrays in place, which the club profiles reference. Sources: the players' and clubs'
+   Wikipedia pages. */
+(function(){
+  var ALL = [SQUADS_1950_FIRST, SQUADS_1950_SECOND, SQUADS_1950_THIRDSOUTH, SQUADS_1950_THIRDNORTH];
+  function take(name){ var out = null; ALL.forEach(function(S){ Object.keys(S).forEach(function(c){ var i = S[c].findIndex(function(p){ return p.n === name; }); if (i >= 0 && !out){ out = S[c].splice(i,1)[0]; } }); }); return out; }
+  function put(club, p){ ALL.forEach(function(S){ if (S[club] && !S[club].some(function(x){ return x.n === p.n; })) S[club].push(p); }); }
+  var revie = take("Don Revie"); put("Leicester City", revie || {n:"Don Revie", pos:"Inside-Forward", rep:3}); /* the 1950 data had him at Hull already */
+  var allen = take("Ronnie Allen"); if (allen) put("Port Vale", allen);
+  var paul = take("Roy Paul"); if (paul) put("Swansea Town", paul);
+  put("Stoke City", {n:"Neil Franklin", pos:"Centre-Half", rep:4});
+  put("Manchester United", {n:"Charlie Mitten", pos:"Outside-Left", rep:3});
+})(); /* seed store, same deliberately-empty-at-load pattern as the other three divisions' squad stores above. */
 
 function clubColourLabel(name){
   return clubColours1946[name] ? ('('+clubColours1946[name]+')') : (name===ourClubName ? ('('+clubProfiles[ourClubName].colours+')') : '(COLOURS UNCONFIRMED FOR THIS OPPONENT)');
@@ -25299,13 +25579,19 @@ function buildGenericRawSquad(strength){
    or a division's .clubs for Midland/North Eastern League) -- the elected
    replacement is removed from here, same as being promoted out of it.
    divLabel: for news/clubProfiles text only. */
+/* v309 : a real re-election result the sim replays when it arises : if THIS game's bottom club is the real one, the real
+   outcome applies (New Brighton were voted out of the Third Division (North) in June 1951, Workington elected, 28 votes
+   to 18). Otherwise the vote stays random, as before. Never forced on the user's own club. */
+var REAL_REELECTIONS = {'1950-51|Third Division (North)': {out:'New Brighton', in:'Workington', note:' At the vote Workington polled 28 votes to New Brighton\'s 18.'}};
 function runReElection(members, table, feederPools, divLabel){
   var allFeederEntries = [].concat.apply([], feederPools.filter(Boolean));
   if (!members || members.length < 3 || !allFeederEntries.length) return;
   var ranked = members.map(function(c){ var t = table[c.n] || {pts:0,f:0,a:0}; return {ref:c, pts:t.pts||0, gd:(t.f||0)-(t.a||0)}; })
     .sort(function(a,b){ return a.pts-b.pts || a.gd-b.gd; });
   var bottom = ranked[0]; if (!bottom) return;
-  if (Math.random() >= REELECTION_CHANCE){
+  var forced = REAL_REELECTIONS[seasonLabel+'|'+divLabel];
+  if (forced && (bottom.ref.n !== forced.out || ourClubName === forced.out || ourClubName === forced.in)) forced = null;
+  if (!forced && Math.random() >= REELECTION_CHANCE){
     addNews('board', 'RE-ELECTION AT THE AGM: '+bottom.ref.n+' finished bottom of '+divLabel+' and had to seek re-election -- survived the vote, as was nearly always the case at this level.');
     return;
   }
@@ -25314,12 +25600,12 @@ function runReElection(members, table, feederPools, divLabel){
      voted into the Third Division (North) alongside Darlington. If no senior club is left in the feeders, the bottom
      club keeps its place. */
   var pool = allFeederEntries.filter(function(c){ return !/ Reserves$/.test(c.n); }).sort(function(a,b){ return b.s-a.s; });
-  if (!pool.length){
+  if (!pool.length && !forced){
     addNews('board', 'RE-ELECTION AT THE AGM: '+bottom.ref.n+' finished bottom of '+divLabel+' and had to seek re-election -- with no senior non-league club to put up against them, they were re-elected.');
     return;
   }
   var candidates = pool.slice(0, Math.min(3, pool.length));
-  var chosen = candidates[Math.floor(Math.random()*candidates.length)];
+  var chosen = forced ? (allFeederEntries.find(function(c){ return c.n === forced.in; }) || {n:forced.in, s:60}) : candidates[Math.floor(Math.random()*candidates.length)];
   feederPools.forEach(function(fp){ if (!fp) return; var idx = fp.indexOf(chosen); if (idx>=0) fp.splice(idx,1); });
   var outIdx = members.indexOf(bottom.ref); if (outIdx>=0) members.splice(outIdx,1);
   members.push({n:chosen.n, s:chosen.s, mgr:pick(firstNamePool)+' '+pick(surnamePool), ground:chosen.n+' Ground'});
@@ -25331,7 +25617,7 @@ function runReElection(members, table, feederPools, divLabel){
       rawSquad: buildGenericRawSquad(chosen.s)
     };
   }
-  addNews('board', 'VOTED OUT: '+bottom.ref.n+' lost their re-election bid at the '+divLabel+' AGM and drop out of the Football League. '+chosen.n+' are elected in their place for '+nextSeasonLabel()+'.');
+  addNews('board', 'VOTED OUT: '+bottom.ref.n+' lost their re-election bid at the '+divLabel+' AGM and drop out of the Football League. '+chosen.n+' are elected in their place for '+nextSeasonLabel()+'.'+(forced ? forced.note : ''));
 }
 function deriveBrowseSquad(clubName){
   if (clubName === ourClubName) return squad;
@@ -27538,6 +27824,7 @@ function checkMathematicalCertainties(){
 function processSeasonEnd(){
   recordDivisionChampions(); /* v127 : before any table is reset or clubs move */
   recordFaCupWinner(); /* v236 : before cupBracket resets for the next season -- see lastFaCupWinnerName */
+  try { simPostSeasonTitleNews(); } catch(err){} /* v309 : the sim's own champions get a headline; the real scripted one only if it agrees */
   var position = ourPosition();
   var pts = table[ourClubName].pts;
   var fieldSize = Object.keys(table).length;
@@ -29010,6 +29297,8 @@ renderScoutingPrep();
    loadSaveFile()/applyLoadedState() path the in-game footer button uses).
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
+/* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
+var RETROMATCH_VERSION = 'v309';
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
@@ -29021,6 +29310,7 @@ function showHomeScreen(){
   box.innerHTML =
     '<p style="margin:0 0 4px; color:var(--dos-yellow); font-size:44px; letter-spacing:2px;">RETROMATCH</p>'+
     '<p class="sub" style="margin:0 0 34px; font-size:18px; color:var(--dos-white);">ENGLISH FOOTBALL, 1946-47</p>'+
+    '<p id="home-version" class="sub" style="margin:-26px 0 26px; font-size:12px; color:var(--dos-grey, #888);">'+RETROMATCH_VERSION+'</p>'+
     '<button id="home-newgame" style="display:block; width:100%; padding:10px; font-size:18px; margin-bottom:10px;">START NEW GAME</button>'+
     '<button id="home-loadgame" style="display:block; width:100%; padding:10px; font-size:18px; margin-bottom:10px;"'+(hasSave?'':' disabled')+'>LOAD GAME'+(hasSave?' (SLOTS)':' (NO SAVE FOUND)')+'</button>'+
     '<button id="home-loadfile" style="display:block; width:100%; padding:10px; font-size:18px;">LOAD FILE...</button>'+
