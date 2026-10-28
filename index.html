@@ -1341,6 +1341,43 @@ function aiSquadTarget(clubName, fallbackS){
   var band = AI_TIER_BAND[d.tier];
   return band.lo + q*(band.hi-band.lo);
 }
+/* ---------- v302 : ONE STRENGTH SOURCE FOR EVERY AI CLUB (balance harness finding, balance-findings.md section 2A).
+   Two strengths existed for the same club : the AI-v-AI league and the displayed rating read aiXiStrength (aiSquadTarget
+   through the club's own `s`, fixed per season), but the matches YOU play use the club's persistent real squad (clubSquads), and that squad
+   only ever grew : growth for every man up to 26, decline only from 31, retirement only from 39, youth intake at the
+   club's AVERAGE level. Result : a passive manager's opponents were +3 to +5 CA stronger than their displayed rating
+   by season five (1946), worth roughly 7 points a season. Now, at every close season, each club's real squad is
+   slid back so its match XI (the same 1-2-3-5 shape, same ordering, buildOppMatchXI uses) sits where the AI-v-AI
+   engine already assumes it : aiXiStrength + AI_ANCHOR_OFFSET (0 : the two sources now agree from the first day).
+   A dead band keeps normal year-to-year wobble (and real standouts rising and falling) inside +/-AI_ANCHOR_DEADBAND. */
+var AI_ANCHOR_OFFSET = 0.0, AI_ANCHOR_DEADBAND = 0.75;
+function aiSquadXiMeanCA(squadArr){
+  /* mean CA of the XI buildOppMatchXI would field from this persistent squad : best by rep then ca in each line, 1 GK / 2 FB / 3 HB / 5 FWD. null if it cannot field eleven real men. */
+  if (!squadArr || !squadArr.length) return null;
+  var pools = {GK:[], FB:[], HB:[], FWD:[]};
+  squadArr.forEach(function(p){ (pools[p.slot] || pools.FWD).push(p); });
+  Object.keys(pools).forEach(function(k){ pools[k].sort(function(a,b){ return ((b.rep||0)-(a.rep||0)) || (b.ca-a.ca); }); });
+  var sum = 0, n = 0;
+  [['GK',1],['FB',2],['HB',3],['FWD',5]].forEach(function(g){ pools[g[0]].slice(0,g[1]).forEach(function(p){ sum += p.ca; n++; }); });
+  return n===11 ? sum/n : null;
+}
+function anchorAiSquadToTarget(name){
+  /* returns the shift applied (0 inside the dead band, or when the club has no target/squad yet) */
+  var sq = clubSquads[name]; if (!sq || sq.length<11) return 0;
+  var rs = clubRatingLookup(name); if (typeof rs!=='number') return 0;
+  var ref = aiXiStrength({n:name, s:rs}); /* the XI the AI-v-AI engine rates this club at : aiSquadTarget through the club's own researched rep shape */
+  var mean = aiSquadXiMeanCA(sq); if (mean===null || typeof ref!=='number' || !isFinite(ref)) return 0;
+  var delta = (ref + AI_ANCHOR_OFFSET) - mean;
+  if (Math.abs(delta) <= AI_ANCHOR_DEADBAND) return 0;
+  sq.forEach(function(p){
+    var nca = Math.round(clamp(p.ca + delta, 15, 97));
+    if (nca===p.ca) return;
+    p.ca = nca;
+    p.rep = repNearestCA(nca);
+    if (p.attrs){ Object.assign(p.attrs, buildAttributes(nca, p.slot, (nca+p.age)*11 + (p.n||'').length)); reapplyPermanentBonusAfterRebuild(p.attrs); }
+  });
+  return delta;
+}
 /* the typical star level of a club's own best XI (4 and 5-star men counted as
    3), so a club whose research has a lot of 3-star regulars has those regulars
    AT its target, not 7 points above it. For an all-2-star placeholder squad
@@ -2139,6 +2176,14 @@ function developAiSquadPlayerForSeason(p, appsLastSeason){
     var gain = Math.min(growthRoom, base*ageMult);
     if (gain >= 0.4){
       p.ca = Math.round(clamp(p.ca + gain, 15, 99));
+      p.rep = repNearestCA(p.ca);
+      Object.assign(p.attrs, buildAttributes(p.ca, p.slot, (p.ca+p.age)*11 + p.n.length));
+      reapplyPermanentBonusAfterRebuild(p.attrs);
+    }
+  } else if (p.age >= 27 && p.age <= 30){
+    /* v302 : the plateau years were free of any decline at all (balance harness) : a small chance of losing a point, so a club's league-mean XI stays flat instead of ratcheting up */
+    if (Math.random() < 0.08){
+      p.ca = Math.round(clamp(p.ca - 1, 15, 99));
       p.rep = repNearestCA(p.ca);
       Object.assign(p.attrs, buildAttributes(p.ca, p.slot, (p.ca+p.age)*11 + p.n.length));
       reapplyPermanentBonusAfterRebuild(p.attrs);
@@ -12030,6 +12075,8 @@ function renderLineupSlots(){
   var gSum = lineupGambleSummary();
   gSum.capOn = (typeof captainId!=='undefined' && captainId!==null && captainId!==undefined) && lineupSlots.some(function(s){return s.playerId===captainId;}); /* v301 */
   var gSumHtml = gSum.count ? '<p id="lineup-gamble-summary" class="val warn" style="margin:8px 0 3px;">WARNING : '+gSum.count+(gSum.count>1?' MEN ARE':' MAN IS')+' OUT OF HIS OWN LINE : TEAM STRENGTH x'+gSum.atkMult.toFixed(3)+' (ABOUT -'+gSum.caLost+' ABILITY POINTS)'+(gSum.defMult>1?', GOALS CONCEDED x'+gSum.defMult.toFixed(2):'')+'. SWAP THEM, OR IT COSTS YOU ON THE DAY.</p>' : '';
+  var rr = lineupRealRating();
+  var rrHtml = rr ? '<p id="lineup-real-rating" class="sub" style="margin:8px 0 3px;">XI RATING (AS THE MATCH WILL USE IT) : <span class="val">'+rr.real.toFixed(1)+'</span>'+(rr.bestAvailable!==null && rr.bestAvailable-rr.real>=0.5 ? ' &nbsp; (YOUR BEST AVAILABLE ELEVEN IS '+rr.bestAvailable.toFixed(1)+')' : '')+(rr.opp!==null ? ' &nbsp; NEXT : '+rr.oppName.toUpperCase()+' <span class="val">'+rr.opp.toFixed(1)+'</span> &nbsp; GAP <span class="val '+(rr.real-rr.opp>=0?'ok':'warn')+'">'+(rr.real-rr.opp>=0?'+':'')+(rr.real-rr.opp).toFixed(1)+'</span>' : '')+'</p>' : '';
   box.innerHTML = lineupSlots.map(function(s,i){
     var options = (s.playerId===null ? '<option value="" selected disabled>-- CHOOSE A PLAYER --</option>' : '') + lineup.map(function(id){
       var p = squad.find(function(x){return x.id===id;});
@@ -12040,7 +12087,7 @@ function renderLineupSlots(){
     var gw = gp ? gambleWarningFor(gp, s.slot, gSum.capOn) : null;
     var gLabel = gw ? ' <span class="val warn gamble-warn" data-gamble-idx="'+i+'">OUT OF POSITION : A NATURAL '+({GK:'GOALKEEPER',FB:'FULL-BACK',HB:'HALF-BACK',FWD:'FORWARD'}[gp.slot]||gp.slot)+' : -'+gw.atkPct+'% ATTACK'+(gw.defPct>0?', +'+gw.defPct+'% GOALS AGAINST':'')+'</span>' : '';
     return '<p style="margin:3px 0;"><span class="sub" style="display:inline-block;width:170px;">'+(i+1)+'. '+s.slot+needsLabel+'</span><select data-idx="'+i+'" style="font-size:15px;">'+options+'</select>'+gLabel+'</p>';
-  }).join('') + gSumHtml;
+  }).join('') + gSumHtml + rrHtml;
   box.querySelectorAll('select').forEach(function(sel){
     sel.addEventListener('change', function(){
       var idx = parseInt(this.dataset.idx,10);
@@ -24662,6 +24709,7 @@ function allAiInjuryRollPools(){
   if (typeof isthmianLeague !== 'undefined') pools.push(isthmianLeague);
   return pools;
 }
+var AI_INJURY_WEEKLY_CHANCE = 0.09;
 function tickAllAiInjuries(){
   Object.keys(aiClubInjuryCA).forEach(function(name){
     var o = aiClubInjuryCA[name];
@@ -24671,8 +24719,8 @@ function tickAllAiInjuries(){
   allAiInjuryRollPools().forEach(function(clubs){
     clubs.forEach(function(c){
       if (!c || c.n===ourClubName || aiClubInjuryCA[c.n]) return;
-      if (Math.random() < 0.05){ /* roughly half your own 9% weekly rate, since this stands in for one key absence out of a whole XI rather than any one of a full squad */
-        aiClubInjuryCA[c.n] = { amount: 3 + Math.random()*5, weeks: 1 + Math.floor(Math.random()*3) };
+      if (Math.random() < AI_INJURY_WEEKLY_CHANCE){ /* v302 : was 5%, -3..-8, 1-3 weeks (about -0.5 CA on average against your own men's real 9%-per-player weekly rate and real stand-ins) : now 9%, -3..-9, 1-4 weeks, about -1.1 CA, so a club's depth knocks cost it what they cost you */
+        aiClubInjuryCA[c.n] = { amount: 3 + Math.random()*6, weeks: 1 + Math.floor(Math.random()*4) };
       }
     });
   });
@@ -24836,7 +24884,7 @@ function ensureClubSquad(clubName){
      risk now that something does. Guarded here rather than moved, since relocating a var declaration this deep
      into the file risks its own knock-on ordering issues elsewhere. */
   if (!clubSquads) clubSquads = {};
-  if (!clubSquads[clubName]) clubSquads[clubName] = initClubSquad(clubName);
+  if (!clubSquads[clubName]){ clubSquads[clubName] = initClubSquad(clubName); try{ anchorAiSquadToTarget(clubName); }catch(e){} } /* v302 : a brand-new squad starts on its target band too, not +1 above it */
   return clubSquads[clubName];
 }
 /* Statistical approximation of one match's effect on a club's persistent
@@ -25573,17 +25621,45 @@ function positionalFitMultipliers(){
   });
   return {atk: clamp(atk, 0.78, 1), def: clamp(def, 1, 1.5), gambles: gambles};
 }
-function ourStrengthAvg(){
-  var base = live.ourXI.reduce(function(s,p){return s+effectiveCA(p);},0) / live.ourXI.length;
-  base *= positionalFitMultipliers().atk;
+/* v302 : the part of our strength that depends only on WHO is playing and HOW they line up (not on the opponent, the
+   scouting week or the team talk), pulled out so the lineup screen can show the very number the match engine will use. */
+function xiBaseStrength(xi, atkMult){
+  var base = xi.reduce(function(s,p){return s+effectiveCA(p);},0) / xi.length;
+  base *= atkMult;
   if (tactics.formation==='wm') base *= 0.97; /* the newer system asks more of players unfamiliar with it : a small teething penalty */
   if (tactics.formation==='wm' && tactics.style==='arsenal') base *= 1.02; /* the drilled, fast-counter version, done properly, is worth a little more */
   if (tactics.formation==='235' && tactics.style==='combination') base *= 1.02; /* patient combination play suits a technical side, in a small way */
-  base *= formationEffects(live.ourXI).str; /* v110 : foreign systems and push-and-run cost ability until learned (was a flat x1.06/x1.04/x1.10 for Danubian/Metodo/La Maquina) */
+  base *= formationEffects(xi).str; /* v110 : foreign systems and push-and-run cost ability until learned (was a flat x1.06/x1.04/x1.10 for Danubian/Metodo/La Maquina) */
+  return base;
+}
+function ourStrengthAvg(){
+  var base = xiBaseStrength(live.ourXI, positionalFitMultipliers().atk);
   /* v109 : approach no longer changes strength here : see approachGoalRates() */
   if (tacticalWrinkle && live.f) base *= wrinkleBonusFor(live.f.opp); /* the marking confusion is worth something in itself, on top of who ends up scoring */
   if (live.teamTalkAtk) base *= live.teamTalkAtk;
   return base;
+}
+/* v302 : SHOW THE RIGHT RATING (balance-findings.md proposal 5). What the lineup screen now prints is the real engine
+   number : the picked eleven's effective ability (form and fitness included) after the out-of-position and system
+   effects, and the next league/cup opponent's real match XI plus his form, so the gap you read is the gap you play at.
+   Returns null until a full eleven is in the slots. */
+function lineupRealRating(){
+  if (typeof lineupSlots==='undefined' || !lineupSlots || lineupSlots.length!==11) return null;
+  var xi = lineupSlots.map(function(s){ return squad.find(function(x){return x.id===s.playerId;}); });
+  if (xi.some(function(p){return !p;})) return null;
+  var g = lineupGambleSummary();
+  var real = xiBaseStrength(xi, g.atkMult);
+  var best = squad.filter(function(p){ return !unavailableReason(p); }).map(function(p){return effectiveCA(p);}).sort(function(a,b){return b-a;}).slice(0,11);
+  var bestAvg = best.length ? best.reduce(function(s,v){return s+v;},0)/best.length : null;
+  var out = {real: real, bestAvailable: bestAvg, oppName: null, opp: null};
+  var nf = (typeof fixtures!=='undefined' && fixtures) ? fixtures[fixtureIdx] : null;
+  if (nf && nf.opp){
+    var oppMean = null;
+    try { oppMean = aiSquadXiMeanCA(ensureClubSquad(nf.opp)); } catch (e) { oppMean = null; }
+    if (oppMean===null && typeof nf.s==='number') oppMean = nf.s;
+    if (oppMean!==null){ out.oppName = nf.opp; out.opp = oppMean + aiFormCA(nf.opp); }
+  }
+  return out;
 }
 function oppStrengthAvg(){
   var base = live.oppSquad.reduce(function(s,p){return s+p.ca;},0) / live.oppSquad.length;
@@ -27696,21 +27772,28 @@ function startNewSeason(outcome){
     clubSquads[name].forEach(function(p){ developAiSquadPlayerForSeason(p, p.apps); });
     clubSquads[name].forEach(function(p){ p.age++; p.apps = 0; p.goalsSeason = 0; });
     clubSquads[name] = clubSquads[name].filter(function(p){
-      var retiring = p.age>=39 && Math.random()<0.4;
+      /* v302 : retirement now starts at 36 and rises (15/30/50/70%) instead of a flat 40% from 39, so veterans leave on a realistic curve and the age profile stops drifting */
+      var retChance = p.age>=39 ? 0.7 : p.age===38 ? 0.5 : p.age===37 ? 0.3 : p.age===36 ? 0.15 : 0;
+      var retiring = retChance>0 && Math.random()<retChance;
       if (retiring) addRetiredManagerCandidate(p.n, name, p.ca, p.rep, false); /* v160 : same real-into-management chance as our own retiring men, see the block comment on retiredManagerCandidates above */
       return !retiring;
     });
     if (clubSquads[name].length < 16 && clubSquads[name].length > 0){ /* only top up clubs that actually have a squad built yet -- an unbuilt (empty, not-yet-looked-at) club stays empty until initClubSquad first builds it */
-      var target = aiSquadTarget(name, null), centre = aiRepCentre(name);
-      for (var yi=0; yi<3; yi++){
+      var target = aiSquadTarget(name, null);
+      /* v302 : intake now fills the squad back to 18 (not a flat 3) and arrives at ENTRY level, 8-12 CA under the club's target, in the line the squad is shortest of (it used to arrive at the club's average level in a random line) */
+      var want = {GK:2, FB:4, HB:5, FWD:7};
+      var need = Math.min(7, Math.max(2, 18 - clubSquads[name].length));
+      for (var yi=0; yi<need; yi++){
         var yAge = 18 + Math.floor(Math.random()*4);
-        var yCa = target!==null ? clamp(target + centre + (Math.random()-0.5)*10, 15, 95) : (25 + Math.floor(Math.random()*20));
-        var ySlot = pick(['GK','FB','HB','FWD']); /* FIXED A REAL BUG HERE, caught in my own verification pass before publishing: roleWeights (what buildAttributes actually indexes into) only has entries for GK/FB/HB/FWD -- the DEF/MID codes I first used here don't exist in that table, so buildAttributes silently got an undefined weights object and crashed the instant it tried to read w.shooting. */
+        var yCa = target!==null ? clamp(target - 8 - Math.random()*4, 15, 95) : (25 + Math.floor(Math.random()*20));
+        var have = {GK:0, FB:0, HB:0, FWD:0}; clubSquads[name].forEach(function(q){ if (have[q.slot]!==undefined) have[q.slot]++; });
+        var ySlot = 'FWD', worst = 1e9; ['GK','FB','HB','FWD'].forEach(function(k){ var r = have[k]/want[k]; if (r<worst){ worst = r; ySlot = k; } }); /* FIXED A REAL BUG HERE (v139) : roleWeights (what buildAttributes indexes into) only has GK/FB/HB/FWD entries -- the DEF/MID codes first used here do not exist in that table */
         var yAttrs = buildAttributes(Math.round(yCa), ySlot, yi*3.1 + name.length);
         applyRawTalentSpikes(yAttrs);
         clubSquads[name].push({n:genMarketPlayerName(), pos:ySlot==='GK'?'Goalkeeper':ySlot==='FB'?'Full-back':ySlot==='HB'?'Half-back':'Centre-Forward', slot:ySlot, rep:1, ca:Math.round(yCa), pa:rollPotential(Math.round(yCa), yAge), age:yAge, apps:0, goalsSeason:0, attrs:yAttrs, aiv:2});
       }
     }
+    anchorAiSquadToTarget(name); /* v302 : last, so growth, ageing, retirement and intake all settle first and the club's XI lands back on its target band */
   });
   southernTable = {}; southernLeague.forEach(function(r){ southernTable[r.n]={p:0,w:0,d:0,l:0,f:0,a:0,pts:0}; });
   southernLastLines = [];
