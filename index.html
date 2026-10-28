@@ -13687,6 +13687,13 @@ function checkHistoricalOneOffs(){
    Lawton's) for a save where the player has personally taken charge of the
    real person involved. */
 var historicalOneOffsPost1949 = [
+   /* v308 : 1949-51 events for the 1950 era, each checked against a source (Wikipedia season/player pages, MUFC history, footballsite.co.uk). Dates are the real dates where the source gives a day; the two month-only ones are marked. */
+   {date:'1949-08-24', fired:false, id:'old_trafford_return', tag:'rivals', text:"HOME AT LAST: Old Trafford has reopened. Manchester United beat Bolton Wanderers 3-0 in front of 41,748 -- a Matt Gillies own goal, a Charlie Mitten penalty and a Jack Rowley strike -- in their first home game on the ground since German bombing wrecked it in March 1941. They've spent eight seasons sharing Maine Road with Manchester City."},
+   {date:'1950-04-29', fired:false, id:'facup_1950', tag:'rivals', text:"ARSENAL WIN THE CUP: Arsenal have beaten Liverpool 2-0 at Wembley in the FA Cup Final, Reg Lewis scoring both goals."},
+   {date:'1950-05-06', fired:false, id:'pompey_title_1950', tag:'rivals', text:"PORTSMOUTH RETAIN THE TITLE: a 5-1 win over Aston Villa on the last day of the season has made Portsmouth back-to-back First Division champions. They finish level on 53 points with Wolverhampton Wanderers and take the title on goal average, 1.947 to 1.551. Tottenham Hotspur, Arthur Rowe's push-and-run side, have won the Second Division with 61 points, with Sheffield Wednesday the other side promoted."},
+   {date:'1950-05-08', fired:false, id:'franklin_bogota', tag:'rivals', text:"FRANKLIN GOES TO COLOMBIA: England centre-half Neil Franklin has left for Bogota to join Independiente Santa Fe, turning his back on the England squad for the World Cup in Brazil. He and Stoke team-mate George Mountford have been reported to be on about £60 a week plus a £2,000 signing-on fee, over four times the English maximum wage. Colombia's league is outside FIFA, so the move has no fee and no FIFA protection, and England manager Walter Winterbottom could not talk him out of it. Manchester United's Charlie Mitten, 'the Bogota Bandit', would join them there."},
+   {date:'1951-02-01', fired:false, id:'franklin_hull', tag:'rivals', text:"FRANKLIN SOLD TO HULL: Neil Franklin, home from Colombia by August last year and suspended indefinitely by Stoke and the FA, has been sold to Hull City of the Second Division for £22,500 this month."},
+   {date:'1951-06-02', fired:false, id:'workington_elected', tag:'board', text:"NEW BRIGHTON VOTED OUT: at the Football League's annual meeting, Workington have been elected to the Third Division North with 28 votes, replacing New Brighton, who got 18 and fail re-election. Accrington Stanley were re-elected with 46 votes."},
   {date:'1950-06-29', fired:false, id:'usa1950', tag:'rivals', text:"SHOCK IN BELO HORIZONTE: the United States have beaten England 1-0 at the World Cup in Brazil, Joe Gaetjens' deflected header enough to see off a side including Stanley Matthews' understudies. Some Fleet Street desks are said to have taken the wire result for a typing error."},
   {date:'1951-04-21', fired:false, id:'spurs_pushandrun', tag:'rivals', text:"PUSH AND RUN TAKE THE TITLE: Tottenham Hotspur have been confirmed First Division champions, promoted straight up from Division Two only twelve months ago. Arthur Rowe's whole approach -- give-and-go passing into space at pace rather than the long ball and rigid WM positions most of the League still swears by -- is being talked about as a genuine break from orthodoxy, not just a good side having a good season. (EXACT DATE UNCONFIRMED: the title win is solidly sourced to late April 1951, the specific calendar day is this session's placement, not an independently verified fixture date.)"},
   {date:'1951-04-28', fired:false, id:'milburn_double', tag:'rivals', text:"MILBURN'S TWO AT WEMBLEY: Newcastle United have beaten Blackpool 2-0 in the FA Cup Final, both goals from Jackie Milburn, the second a thumping half-volley moments after the first, both laid on from almost identical long balls over the top. Newcastle's fourth Cup win."},
@@ -13793,6 +13800,30 @@ function eastham1963Fire(baseText){
   });
   if (!affected.length) return baseText+" Nobody at the club is currently on the retain list, so nothing changes here today -- but the option itself is gone for good from this point on.";
   return baseText+" "+affected.length+" man"+(affected.length>1?'ren':'')+" still on the club's own retain list -- "+affected.map(function(p){return p.n;}).join(', ')+" -- "+(affected.length>1?'are':'is')+" put back on proper wages at once, the ruling reaching all the way down to this dressing-room the same day it's handed down.";
+}
+/* v308 REAL BUG FIX (found auditing the 1950 era): a brand-new 1950- or 1959-era game started with every
+   scripted history entry reset to unfired, so the first weekly news pass dumped the WHOLE backlog of
+   everything dated before the start date as "new" -- 52 items on day one of a 1950 game (1945-1949 debut,
+   signing and Lawton-transfer headlines, all of which the 1950-51 squads already reflect), 249 on day one
+   of a 1959 game (including the 1958 Munich crash, the 1959 FA Cup Final and Forest's win over Luton, and
+   the Duncan Edwards removal). Same cure as intlFiredBackfill() already applies to the international
+   calendar: silently mark anything that already lies in the past of the era's start date as known, no news.
+   Entries dated to the START YEAR with no month stay live (they fire in the first weeks, as in 1946).
+   A 1946 game is untouched (its start is the data's own first date). */
+function silenceHistoryBeforeStart(){
+  if (gameEra !== '1950' && gameEra !== '1959') return 0;
+  var y = currentDate.getFullYear(), m = currentDate.getMonth(), today = isoOf(currentDate), n = 0;
+  futureLegends.forEach(function(e){
+    var past = (e.month===undefined) ? (y > e.year) : (y > e.year || (y === e.year && m >= e.month));
+    if (past && !e.fired){ e.fired = true; n++; }
+  });
+  realSchoolboyLegends.forEach(function(e){
+    var past = y > e.triggerYear || (y === e.triggerYear && e.triggerMonth!==undefined && m >= e.triggerMonth);
+    if (past && !e.fired){ e.fired = true; n++; }
+  });
+  historicalOneOffsPost1949.forEach(function(e){ if (e.date <= today && !e.fired){ e.fired = true; n++; } });
+  historicalOneOffs.forEach(function(e){ if (!e.fired){ e.fired = true; n++; } }); /* 1946-49 kit/rationing notes : all before either start */
+  return n;
 }
 function checkHistoricalOneOffsPost1949(){
   var today = isoOf(currentDate);
@@ -14998,6 +15029,8 @@ var realSchoolboyLegends = [
     note:"Charlton Athletic have brought over Stuart Leary, a 17-year-old South African forward from Cape Town Clyde -- no fee involved, just a long way from home on the strength of a scouting tip."},
   {name:"Jackie Sewell", pos:"Inside-Forward", club:"Sheffield Wednesday", fromClub:"Notts County", fee:34500, triggerYear:1951, triggerMonth:2, kind:'signing', age:24, rep:5, spikeAttrs:['shooting','passing'], fired:false,
     note:"Sheffield Wednesday have paid Notts County a new British record fee, £34,500, for inside-forward Jackie Sewell -- eye-watering money for a Second Division move."},
+  {name:"Trevor Ford", pos:"Centre-Forward", club:"Sunderland", fromClub:"Aston Villa", fee:30000, triggerYear:1950, triggerMonth:9, kind:'signing', age:27, rep:5, spikeAttrs:['shooting','heading'], nation:'Wales', fired:false, /* v308 : Wikipedia (Trevor Ford): October 1950, £30,000, a British record at the time; Jackie Sewell's £34,500 broke it in March 1951 (the entry above) */
+    note:"Sunderland have paid Aston Villa £30,000 for Welsh international centre-forward Trevor Ford -- a new British record fee. Villa's top scorer in each of the last three seasons, he moves to Roker Park to lead the 'Bank of England club's' attack."},
   {name:"Harry Oscroft", pos:"Outside-Left", club:"Stoke City", fromClub:"Mansfield Town", fee:8000, triggerYear:1950, triggerMonth:0, kind:'signing', age:24, rep:3, spikeAttrs:['pace','passing'], fired:false,
     note:"Stoke City have paid Mansfield Town £8,000 (plus Verdi Godwin making the move the other way) for outside-left Harry Oscroft, in with the deal that eventually saw Freddie Steele head to Mansfield as manager."},
   {name:"Fred Pickering", pos:"Centre-Forward", club:"Everton", fromClub:"Blackburn Rovers", fee:80000, triggerYear:1964, triggerMonth:2, kind:'signing', age:23, rep:4, spikeAttrs:['shooting','heading'], fired:false,
@@ -18141,6 +18174,8 @@ function initGameStateFresh(){
   futureLegends.forEach(function(e){ e.fired = false; });
   historicalOneOffs.forEach(function(e){ e.fired = false; });
   realSchoolboyLegends.forEach(function(e){ e.fired = false; });
+  historicalOneOffsPost1949.forEach(function(e){ e.fired = false; }); /* v308 : this list was never reset between games in one page session */
+  silenceHistoryBeforeStart(); /* v308 */
   weekPhase = 'build-up';
   manager = {name:'', age:35, rep:50};
   playerManagerId = null;
