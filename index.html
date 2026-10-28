@@ -11825,6 +11825,56 @@ function fallbackPositionBias(p, kind){
   if (kind==='centrehalf') return 0.25*norm(p.tackling) + 0.10*norm(p.heading) - 0.05*norm(p.passing);
   return 0;
 }
+/* v301 : line-consistency helpers shared by the auto XI and the lineup-screen warning. These mirror
+   positionSlotBucket / positionalFitMultipliers further down (kept as their own small tables here because
+   renderLineup runs at load, before that later var is assigned). A man is "cross-line" when his own broad
+   line (p.slot : GK / FB / HB / FWD) is not the line of the shirt he is named in : exactly the case the match
+   engine charges for. */
+var CROSS_LINE_CHARGE = 10;
+var GAMBLE_ATK_PENALTY = 0.94, GAMBLE_ATK_PENALTY_CAPTAIN = 0.955;
+var GAMBLE_DEF_PENALTY = 1.12, GAMBLE_DEF_PENALTY_CAPTAIN = 1.09;
+var SLOT_LINE = {
+  'GOALKEEPER':'GK', 'RIGHT-BACK':'FB', 'LEFT-BACK':'FB',
+  'RIGHT-HALF':'HB', 'CENTRE-HALF':'HB', 'LEFT-HALF':'HB',
+  'OUTSIDE-RIGHT':'FWD', 'INSIDE-RIGHT':'FWD', 'CENTRE-FORWARD':'FWD', 'INSIDE-LEFT':'FWD', 'OUTSIDE-LEFT':'FWD'
+};
+function isCrossLineSelection(p, slotName){
+  var want = SLOT_LINE[slotName];
+  return !!(p && p.slot && want && p.slot!==want);
+}
+/* v301 : the size of one man's gamble, in the same terms positionalFitMultipliers applies it :
+   {atkPct, defPct} or null when he is in his own line. */
+function gambleWarningFor(p, slotName, captainOnPitch){
+  if (!isCrossLineSelection(p, slotName)) return null;
+  var want = SLOT_LINE[slotName];
+  var atk = captainOnPitch ? GAMBLE_ATK_PENALTY_CAPTAIN : GAMBLE_ATK_PENALTY;
+  var def = captainOnPitch ? GAMBLE_DEF_PENALTY_CAPTAIN : GAMBLE_DEF_PENALTY;
+  return {atkPct: Math.round((1-atk)*1000)/10, defPct: (want==='GK'||want==='FB'||want==='HB') ? Math.round((def-1)*1000)/10 : 0};
+}
+/* v301 : whole-XI summary for the lineup screen, from lineupSlots directly (no live match needed) :
+   {count, atkMult, defMult, caLost, items:[{idx,slot,name,natural,atkPct,defPct}]}. Uses the same
+   0.78 / 1.5 clamps positionalFitMultipliers does. caLost is the average-ability cost, in rating points,
+   of the attack penalty on the XI as it stands. */
+function lineupGambleSummary(){
+  var out = {count:0, atkMult:1, defMult:1, caLost:0, items:[]};
+  if (typeof lineupSlots==='undefined' || !lineupSlots || lineupSlots.length!==11) return out;
+  var capOn = (typeof captainId!=='undefined' && captainId!==null && captainId!==undefined) && lineupSlots.some(function(s){return s.playerId===captainId;});
+  var caSum = 0, caN = 0;
+  lineupSlots.forEach(function(s, idx){
+    var p = squad.find(function(x){return x.id===s.playerId;});
+    if (!p) return;
+    caSum += effectiveCA(p); caN++;
+    var g = gambleWarningFor(p, s.slot, capOn);
+    if (!g) return;
+    out.count++;
+    out.atkMult *= (capOn ? GAMBLE_ATK_PENALTY_CAPTAIN : GAMBLE_ATK_PENALTY);
+    if (g.defPct>0) out.defMult *= (capOn ? GAMBLE_DEF_PENALTY_CAPTAIN : GAMBLE_DEF_PENALTY);
+    out.items.push({idx:idx, slot:s.slot, name:p.n, natural:p.slot, atkPct:g.atkPct, defPct:g.defPct});
+  });
+  out.atkMult = clamp(out.atkMult, 0.78, 1); out.defMult = clamp(out.defMult, 1, 1.5);
+  out.caLost = caN ? Math.round(caSum/caN*(1-out.atkMult)*10)/10 : 0;
+  return out;
+}
 var shirtSlotDefs = [
   {slot:'GOALKEEPER', scorer:function(p){ return p.slot==='GK'?2:0; }},
   {slot:'RIGHT-BACK', scorer:function(p){ return p.slot==='FB'?2:(p.slot==='HB'?0.3:0); }},
@@ -11870,28 +11920,57 @@ function autoAssignSlotsForPlayers(players){
      which shirt number comes first in the list. Ties (truly equal scores with no exact match
      available to break them) still resolve to rep/array order, same as before, since there's no real
      position signal left to prefer one over the other at that point. */
-  var remainingPlayers = (players||[]).slice();
-  var openSlots = shirtSlotDefs.slice();
-  var result = [];
-  while (openSlots.length){
-    var bestSlotIdx=-1, bestPlayerIdx=-1, bestScore=-1;
-    openSlots.forEach(function(def, si){
-      remainingPlayers.forEach(function(p, pi){
-        var s = def.scorer(p);
-        if (s>bestScore){ bestScore=s; bestSlotIdx=si; bestPlayerIdx=pi; }
-      });
+  /* v301 REAL FIX, FOUND PLAYTESTING ALDERSHOT (1946) : the v235 greedy match above is still greedy, and it scored
+     a man by his printed position text ONLY -- never by his broad line (p.slot), which is what the match engine's
+     positionalFitMultipliers() actually penalises. Tommy Mycock ("Inside-Forward / Wing-Half", slot FWD) scored 2
+     for RIGHT-HALF on the regex, so he took shirt 4 first; that left three natural half-backs and four forwards
+     for the remaining slots, and Dennis Lievesley (a Centre-Half, slot HB) was dumped at INSIDE-LEFT -- TWO cross-line
+     gambles (-6% attack each, +12% goals-against on the half-back one) in a squad that could have been picked with
+     NONE : 1 GK, 2 FB, 3 HB and 5 FWD fills the eleven shirts exactly. Greedy cannot see that a locally-best pairing
+     wastes the globally-best one. Now an exact OPTIMAL assignment (dynamic programming over the 2^11 sets of filled
+     shirts, ~250k steps, no libraries) that maximises the total of the same scorers shirtSlotDefs already uses,
+     MINUS a heavy cross-line charge (CROSS_LINE_CHARGE, bigger than any score swing a same-line shuffle could ever
+     win back), so the fewest possible gambles are named and, among equal-gamble layouts, the best real-position
+     matches win -- Mortensen still gets CENTRE-FORWARD (v235) because that total is higher than any alternative.
+     A forced gamble (say the eleven really has six forwards) is still made, but now only when unavoidable, and the
+     lineup screen says so (see gambleWarningFor / lineupGambleSummary). Ties resolve to array (rep) order as before. */
+  var list = (players||[]).slice();
+  var nS = shirtSlotDefs.length, nP = list.length, FULL = (1<<nS);
+  var NEG = -1e12;
+  var score = list.map(function(p){
+    return shirtSlotDefs.map(function(def){
+      var sc = def.scorer(p) + 1000; /* +1000 per man placed : fill as many shirts as there are players before anything else */
+      if (isCrossLineSelection(p, def.slot)) sc -= CROSS_LINE_CHARGE;
+      return sc;
     });
-    if (bestSlotIdx<0) break; /* no players left at all */
-    var chosenDef = openSlots[bestSlotIdx];
-    var chosenPlayer = remainingPlayers.length ? remainingPlayers[bestPlayerIdx] : null;
-    if (chosenPlayer){ remainingPlayers.splice(bestPlayerIdx,1); }
-    result.push({slot:chosenDef.slot, player:chosenPlayer, _origIdx: shirtSlotDefs.indexOf(chosenDef)});
-    openSlots.splice(bestSlotIdx,1);
+  });
+  var dp = []; for (var m0=0;m0<FULL;m0++) dp.push(NEG); dp[0]=0;
+  var choice = []; /* choice[i][mask] = slot index the i-th player took to reach that mask, or -1 for "sat out" */
+  for (var i=0;i<nP;i++){
+    var ndp = dp.slice(), ch = new Array(FULL);
+    for (var mk=0;mk<FULL;mk++){ if (dp[mk]>NEG) ch[mk] = -1; }
+    for (var mk2=0;mk2<FULL;mk2++){
+      if (dp[mk2]<=NEG) continue;
+      for (var si=0;si<nS;si++){
+        if (mk2 & (1<<si)) continue;
+        var nm = mk2 | (1<<si), v = dp[mk2] + score[i][si];
+        if (v > ndp[nm]){ ndp[nm] = v; ch[nm] = si; }
+      }
+    }
+    choice.push(ch); dp = ndp;
   }
-  /* any slot nobody was ever scored for (no players at all) still needs an explicit null entry */
-  shirtSlotDefs.forEach(function(def){ if (!result.some(function(r){ return r.slot===def.slot; })) result.push({slot:def.slot, player:null, _origIdx: shirtSlotDefs.indexOf(def)}); });
-  result.sort(function(a,b){ return a._origIdx-b._origIdx; });
-  return result.map(function(r){ return {slot:r.slot, player:r.player}; });
+  var want = Math.min(nP, nS), bestMask = -1, bestVal = NEG;
+  for (var mk3=0;mk3<FULL;mk3++){
+    var pc=0, t=mk3; while(t){ pc += t&1; t >>= 1; }
+    if (pc===want && dp[mk3]>bestVal){ bestVal = dp[mk3]; bestMask = mk3; }
+  }
+  var bySlot = new Array(nS); for (var k=0;k<nS;k++) bySlot[k]=null;
+  var maskNow = bestMask;
+  for (var j=nP-1;j>=0 && maskNow>0;j--){
+    var c = choice[j][maskNow];
+    if (c>=0){ bySlot[c] = list[j]; maskNow &= ~(1<<c); }
+  }
+  return shirtSlotDefs.map(function(def, idx){ return {slot:def.slot, player:bySlot[idx]}; });
 }
 function autoAssignSlots(ids){
   var players = ids.map(function(id){ return squad.find(function(p){return p.id===id;}); }).filter(Boolean);
@@ -11919,7 +11998,7 @@ function reconcileLineupSlots(){
     var def = shirtSlotDefs.find(function(d){return d.slot===s.slot;});
     var scorer = def ? def.scorer : function(){return 0;};
     var best=null, bestScore=-1;
-    unassignedPlayers.forEach(function(p){ var sc=scorer(p); if (sc>bestScore){ bestScore=sc; best=p; } });
+    unassignedPlayers.forEach(function(p){ var sc=scorer(p) - (isCrossLineSelection(p, s.slot)?CROSS_LINE_CHARGE:0); /* v301 : a man dropped into a vacated shirt prefers his own line, same rule as the full auto XI */ if (sc>bestScore){ bestScore=sc; best=p; } });
     if (best){ s.playerId = best.id; unassignedPlayers.splice(unassignedPlayers.indexOf(best),1); }
   });
 }
@@ -11948,14 +12027,20 @@ function renderLineupSlots(){
   } else {
     reconcileLineupSlots();
   }
+  var gSum = lineupGambleSummary();
+  gSum.capOn = (typeof captainId!=='undefined' && captainId!==null && captainId!==undefined) && lineupSlots.some(function(s){return s.playerId===captainId;}); /* v301 */
+  var gSumHtml = gSum.count ? '<p id="lineup-gamble-summary" class="val warn" style="margin:8px 0 3px;">WARNING : '+gSum.count+(gSum.count>1?' MEN ARE':' MAN IS')+' OUT OF HIS OWN LINE : TEAM STRENGTH x'+gSum.atkMult.toFixed(3)+' (ABOUT -'+gSum.caLost+' ABILITY POINTS)'+(gSum.defMult>1?', GOALS CONCEDED x'+gSum.defMult.toFixed(2):'')+'. SWAP THEM, OR IT COSTS YOU ON THE DAY.</p>' : '';
   box.innerHTML = lineupSlots.map(function(s,i){
     var options = (s.playerId===null ? '<option value="" selected disabled>-- CHOOSE A PLAYER --</option>' : '') + lineup.map(function(id){
       var p = squad.find(function(x){return x.id===id;});
       return '<option value="'+id+'"'+(s.playerId===id?' selected':'')+'>'+p.n.toUpperCase()+'</option>';
     }).join('');
     var needsLabel = s.playerId===null ? ' <span class="val warn">NEEDS A PLAYER</span>' : '';
-    return '<p style="margin:3px 0;"><span class="sub" style="display:inline-block;width:170px;">'+(i+1)+'. '+s.slot+needsLabel+'</span><select data-idx="'+i+'" style="font-size:15px;">'+options+'</select></p>';
-  }).join('');
+    var gp = s.playerId===null ? null : squad.find(function(x){return x.id===s.playerId;});
+    var gw = gp ? gambleWarningFor(gp, s.slot, gSum.capOn) : null;
+    var gLabel = gw ? ' <span class="val warn gamble-warn" data-gamble-idx="'+i+'">OUT OF POSITION : A NATURAL '+({GK:'GOALKEEPER',FB:'FULL-BACK',HB:'HALF-BACK',FWD:'FORWARD'}[gp.slot]||gp.slot)+' : -'+gw.atkPct+'% ATTACK'+(gw.defPct>0?', +'+gw.defPct+'% GOALS AGAINST':'')+'</span>' : '';
+    return '<p style="margin:3px 0;"><span class="sub" style="display:inline-block;width:170px;">'+(i+1)+'. '+s.slot+needsLabel+'</span><select data-idx="'+i+'" style="font-size:15px;">'+options+'</select>'+gLabel+'</p>';
+  }).join('') + gSumHtml;
   box.querySelectorAll('select').forEach(function(sel){
     sel.addEventListener('change', function(){
       var idx = parseInt(this.dataset.idx,10);
@@ -25481,8 +25566,8 @@ function positionalFitMultipliers(){
        otherwise would : a small softening of the gamble penalty, not a
        removal of it. */
     var capOnPitch = live.ourXI.some(function(x){return x.id===captainId;});
-    var atkPenalty = capOnPitch ? 0.955 : 0.94;
-    var defPenalty = capOnPitch ? 1.09 : 1.12;
+    var atkPenalty = capOnPitch ? GAMBLE_ATK_PENALTY_CAPTAIN : GAMBLE_ATK_PENALTY; /* v301 : constants shared with the lineup-screen warning */
+    var defPenalty = capOnPitch ? GAMBLE_DEF_PENALTY_CAPTAIN : GAMBLE_DEF_PENALTY;
     atk *= atkPenalty;
     if (wantBucket==='GK' || wantBucket==='FB' || wantBucket==='HB') def *= defPenalty; /* a defensive-line gamble is riskier than an attacking one */
   });
