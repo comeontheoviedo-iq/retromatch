@@ -167,6 +167,7 @@ footer.note{max-width:1060px; margin:12px auto 0; color:#888; font-size:13px; te
     <div class="view active" id="v-week">
       <h1 id="week-heading">Week 1</h1>
       <p class="sub" id="week-sub"></p>
+      <div class="box" id="board-guidance-box" style="display:none;"></div>
       <div class="box"><div class="box-title">CLUB NEWS</div>
         <div class="news-filter-bar" id="news-filter-bar">
           <button class="newsfilter active" data-tag="all">ALL</button>
@@ -926,7 +927,16 @@ function renewPlayer(id){
    specific real season -- it's a plausible, reasoned expectation, not
    invented from nothing. */
 var boardTarget = null;
+/* v304 : BOARD EXPECTS / WHAT TO TRY. {reason, dismissed}. Set whenever a board target is (re)generated -- new game,
+   new season, a move to a new club -- and whenever manager.warningStage rises (checkManagerJobSecurity). The box on the
+   Week view reads everything else live from the real state, so nothing here can go stale. */
+var boardGuidance = null;
+function triggerBoardGuidance(reason){
+  boardGuidance = {reason:reason, dismissed:false};
+  if (typeof renderBoardGuidance === 'function') renderBoardGuidance();
+}
 function generateBoardTarget(){
+  triggerBoardGuidance('SEASON START');
   var rep = Math.round(manager.rep || 50);
   if (divisionTier === 1){
     boardTarget = rep < 35 ? {type:'survival', label:'STAY CLEAR OF THE BOTTOM OF THE TABLE : the board want no repeat of a re-election scare.'}
@@ -16907,6 +16917,7 @@ function generateWeeklyNews(){
 var weekPhase = 'build-up'; /* 'midweek' (Wednesday check-in, no match) or 'build-up' (Saturday approaching) */
 function renderWeek(){
   var next = fixtures[fixtureIdx];
+  renderBoardGuidance(); /* v304 */
   document.getElementById('week-heading').textContent = fmtDate(currentDate);
   renderNewsFeed();
   var btn = document.getElementById('btn-goto-lineup');
@@ -17118,7 +17129,7 @@ function buildSaveState(){
     blackBook:blackBook, scoutBrief:scoutBrief, signingHypeWeeksLeft:signingHypeWeeksLeft, signingHypeName:signingHypeName, pendingJobOffer:pendingJobOffer, pendingClubMove:pendingClubMove, pendingMidSeasonMove:pendingMidSeasonMove,
     openVacancies:openVacancies, /* v238 */
     englandJobOfferFired:englandJobOfferFired, pendingEnglandJobOffer:pendingEnglandJobOffer, isEnglandManager:isEnglandManager, englandXI:englandXI,
-    playerManagerId:playerManagerId, ourClubName:ourClubName, captainId:captainId, penaltyTakerId:penaltyTakerId, pendingUnhappyPlayerId:pendingUnhappyPlayerId, boardTarget:boardTarget, nextTargetId:nextTargetId, nextOfferId:nextOfferId,
+    playerManagerId:playerManagerId, ourClubName:ourClubName, captainId:captainId, penaltyTakerId:penaltyTakerId, pendingUnhappyPlayerId:pendingUnhappyPlayerId, boardTarget:boardTarget, boardGuidance:boardGuidance, nextTargetId:nextTargetId, nextOfferId:nextOfferId,
     scoutedPlayers:scoutedPlayers, pendingClubScoutTrips:pendingClubScoutTrips, clubSquads:clubSquads, aiClubForm:aiClubForm, aiClubInjuryCA:aiClubInjuryCA, aiClubBank:aiClubBank, aiClubLastGate:aiClubLastGate,
     retiredManagerCandidates:retiredManagerCandidates, /* v160 */
     headToHead:headToHead, /* v171 : fixed to persist -- was session-only before, silently losing all rivalry/revenge context on every reload */
@@ -17323,6 +17334,7 @@ function applyLoadedState(s, silent){
     manager = s.manager || manager;
     if (manager.rep === undefined) manager.rep = 50;
     if (manager.warningStage === undefined) manager.warningStage = 0;
+    boardGuidance = s.boardGuidance || null; /* v304 : old saves simply have none until the next season start / warning */
     lineupSlots = s.lineupSlots || [];
     substituteId = (typeof s.substituteId === 'number') ? s.substituteId : null; /* v157 : old saves predate this, defaults to none named */
     seasonNumber = s.seasonNumber || 1; seasonLabel = s.seasonLabel || '1946-47'; seasonHistory = s.seasonHistory || []; divisionChampions = s.divisionChampions || null;
@@ -25759,6 +25771,146 @@ function renderPreMatchPanels(){
     body.innerHTML = preMatchPanelHtml();
   });
 }
+/* ============================================================================================
+   v304 : BOARD EXPECTS / WHAT TO TRY
+   A plain-English brief grounded only in real state : generateBoardTarget's target, the division and
+   where our best available XI ranks against the real rivals (aiSquadXiMeanCA, the same measure the AI sides
+   are built from), manager.rep, manager.warningStage, finances.bank against the real weekly wage bill,
+   and gaps by position in the squad we can actually field. Every hint names a real action and carries a
+   button that does it (or opens the right tab).
+   ============================================================================================ */
+var BG_SCOUT_POS = {'GOALKEEPER':'Goalkeeper','CENTRE-HALF':'Centre-Half','CENTRE-FORWARD':'Centre-Forward','OUTSIDE-RIGHT':'Outside-Right','OUTSIDE-LEFT':'Outside-Left'};
+function bgTierName(){ return divisionTier===3 ? 'FIRST DIVISION' : divisionTier===2 ? 'SECOND DIVISION' : divisionTier===1 ? 'THIRD DIVISION' : 'FOURTH DIVISION'; }
+function bgFitSquad(){ return squad.filter(function(p){ return !unavailableReason(p); }); }
+function bgBestXiRank(){
+  /* {rank, of} : our best available XI vs every rival's, or null if it cannot be worked out */
+  try {
+    var mine = aiSquadXiMeanCA(bgFitSquad()); if (mine===null) return null;
+    var better = 0, n = 0;
+    (rivals||[]).forEach(function(r){
+      if (!r || r.n===ourClubName) return;
+      var sq = ensureClubSquad(r.n), m = sq ? aiSquadXiMeanCA(sq) : null;
+      if (m===null) return;
+      n++; if (m > mine) better++;
+    });
+    return n ? {rank:better+1, of:n+1} : null;
+  } catch(e){ return null; }
+}
+function bgSquadGaps(){
+  var fit = bgFitSquad(), gaps = [];
+  var cnt = {GK:0, FB:0, HB:0, FWD:0};
+  fit.forEach(function(p){ cnt[p.slot] = (cnt[p.slot]||0)+1; });
+  [['GOALKEEPER',1.5,'GOALKEEPER'],['CENTRE-HALF',1.5,'CENTRE-HALF'],['CENTRE-FORWARD',1.5,'CENTRE-FORWARD'],['OUTSIDE-RIGHT',1,'OUTSIDE-RIGHT'],['OUTSIDE-LEFT',1,'OUTSIDE-LEFT']].forEach(function(g){
+    var def = shirtSlotDefs.filter(function(d){ return d.slot===g[0]; })[0], best = 0;
+    fit.forEach(function(p){ best = Math.max(best, def.scorer(p)); });
+    if (best < g[1]) gaps.push({label:g[2], scout:BG_SCOUT_POS[g[0]], kind:'natural'});
+  });
+  if (cnt.FB < 2) gaps.push({label:'FULL-BACK', scout:'Full-Back', kind:'short', n:cnt.FB, need:2});
+  if (cnt.HB < 3) gaps.push({label:'WING-HALF', scout:'Wing-Half', kind:'short', n:cnt.HB, need:3});
+  if (cnt.FWD < 5) gaps.push({label:'FORWARD', scout:'Inside-Forward', kind:'short', n:cnt.FWD, need:5});
+  if (cnt.GK < 1 && !gaps.some(function(g){return g.label==='GOALKEEPER';})) gaps.push({label:'GOALKEEPER', scout:'Goalkeeper', kind:'short', n:0, need:1});
+  /* depth only, when nothing worse : no cover at all for a line */
+  var thin = [];
+  if (cnt.GK < 2) thin.push('GOALKEEPER'); if (cnt.FB < 3) thin.push('FULL-BACK');
+  return {gaps:gaps, thin:thin, counts:cnt};
+}
+function bgWageBill(){
+  var cap = maxWageForSeason();
+  return squad.reduce(function(sum,p){ return sum + (p.retained ? 0 : Math.min(p.wage||0, cap)); }, 0);
+}
+function bgWeakestTrainable(){
+  var xi = bgFitSquad().slice().sort(function(a,b){ return effectiveCA(b)-effectiveCA(a); }).slice(0,11);
+  if (!xi.length) return null;
+  var avg = function(k){ return xi.reduce(function(t,p){ return t+(p[k]||0); },0)/xi.length; };
+  var opts = [{k:'stamina', focus:'stamina', name:'STAMINA & DISCIPLINE', what:'STAMINA'}, {k:'passing', focus:'ball', name:'BALL PRACTICE', what:'PASSING'}, {k:'shooting', focus:'ball', name:'BALL PRACTICE', what:'SHOOTING'}];
+  opts.forEach(function(o){ o.v = avg(o.k); });
+  opts.sort(function(a,b){ return a.v-b.v; });
+  return opts[0];
+}
+function boardGuidanceReport(){
+  var rep = Math.round(manager.rep || 50), stage = manager.warningStage || 0;
+  var rk = bgBestXiRank(), gp = bgSquadGaps();
+  var bank = Math.round(finances.bank), bill = bgWageBill(), weekly = bill + 18;
+  var runway = weekly > 0 ? bank/weekly : 99;
+  var loseStreak = recentForm.slice(-5).filter(function(v){return v===-1;}).length;
+  var lines = [];
+  lines.push({k:'THE BOARD EXPECTS', v:(boardTarget ? boardTarget.label : 'NOTHING IN PARTICULAR'), cls:''});
+  lines.push({k:'CLUB', v:bgTierName()+(rk ? ' : BEST AVAILABLE XI RANKS '+ordinal(rk.rank)+' OF '+rk.of+' ON PAPER' : ''), cls:(rk && rk.rank > rk.of*0.66) ? 'warn' : ''});
+  lines.push({k:'YOUR STANDING', v:'MANAGER REPUTATION '+rep+'/100'+(rep<35?' (THIN : THE BOARD EXPECTS LITTLE AND FORGIVES LESS)':rep<65?' (STEADY)':' (HIGH : THE BOARD EXPECTS MORE)'), cls:rep<35?'warn':''});
+  lines.push({k:'BOARD PATIENCE', v:stage===0 ? 'NO WARNING ISSUED' : stage===1 ? 'FIRST WARNING GIVEN : '+loseStreak+' DEFEAT'+(loseStreak===1?'':'S')+' IN THE LAST 5' : 'SECOND WARNING GIVEN : YOUR POSITION IS TO BE REVIEWED AT SEASON\'S END', cls:stage? 'bad':'good'});
+  lines.push({k:'BANK', v:'£'+bank.toLocaleString()+' AGAINST £'+weekly.toLocaleString()+' A WEEK IN WAGES AND UPKEEP'+(bank<0 ? ' : OVERDRAWN' : runway<10 ? ' : ABOUT '+Math.max(0,Math.floor(runway))+' WEEKS OF BILLS' : ''), cls:(bank<0 || runway<6)?'bad':runway<10?'warn':''});
+  var hints = [];
+  /* 1 : squad gaps by position */
+  if (gp.gaps.length){
+    var g = gp.gaps[0], others = gp.gaps.slice(1).map(function(x){return x.label;});
+    var txt = g.kind==='natural'
+      ? 'NO FIT NATURAL '+g.label+' IN THE SQUAD : SOMEONE WOULD BE PLAYING OUT OF POSITION. SEND A SCOUT FOR A '+g.scout.toUpperCase()+', THEN SIGN HIM IN TRANSFERS.'
+      : 'ONLY '+g.n+' FIT '+g.label+(g.n===1?'':'S')+' AGAINST '+g.need+' NEEDED FOR A SIDE. SEND A SCOUT FOR A '+g.scout.toUpperCase()+', THEN SIGN HIM IN TRANSFERS.';
+    if (others.length) txt += ' ALSO SHORT AT : '+others.join(', ')+'.';
+    hints.push({pri:(stage?92:90), text:txt, go:'transfers', btn:(scoutBrief && scoutBrief.pos===g.scout) ? 'OPEN TRANSFERS (SCOUT ALREADY SENT)' : 'SEND SCOUT FOR A '+g.scout.toUpperCase(), scout:(scoutBrief ? null : g.scout)});
+  } else if (gp.thin.length){
+    hints.push({pri:45, text:'NO COVER IF ONE GOES DOWN AT '+gp.thin.join(' OR ')+'. A CHEAP SIGNING IN TRANSFERS KEEPS A BAD WEEK FROM BECOMING A BAD MONTH.', go:'transfers', btn:'OPEN TRANSFERS'});
+  }
+  /* 2 : money */
+  if (bank < 0 || runway < 10){
+    var cap = maxWageForSeason(), xiIds = bgFitSquad().slice().sort(function(a,b){ return effectiveCA(b)-effectiveCA(a); }).slice(0,11).map(function(p){return p.id;});
+    var spare = squad.filter(function(p){ return xiIds.indexOf(p.id)<0 && !p.retained && p.id!==playerManagerId && (p.wage||0)>0; }).sort(function(a,b){ return Math.min(b.wage,cap)-Math.min(a.wage,cap); })[0];
+    var t = 'THE BANK IS THIN. CUT WAGES IN CLUB OFFICE'+(spare ? ' : '+spare.n.toUpperCase()+' (£'+Math.min(spare.wage,cap)+' A WEEK) IS NOT IN YOUR BEST ELEVEN, SO LIST OR RELEASE HIM' : ' : LIST OR RELEASE ANYONE NOT IN YOUR BEST ELEVEN')+(retainAndTransferEnded() ? '.' : ', OR PLACE HIM ON RETAIN (NO PAY).');
+    hints.push({pri:(bank<0 || runway<6)?88:60, text:t, go:'club', btn:'GO TO CLUB OFFICE'});
+  }
+  /* 3 : results / approach */
+  if (stage >= 1){
+    hints.push({pri:95, text:'RESULTS ARE WHAT THE DIRECTORS ARE WATCHING. NAME YOUR BEST AVAILABLE ELEVEN IN LINEUP (THE PRE-MATCH PANEL SHOWS WHERE THE GAME IS BEING LOST) AND, WHILE THE RUN LASTS, TRY THE DEFENSIVE APPROACH IN TACTICS : A POINT BEATS ANOTHER DEFEAT.', go:'tactics', btn:'GO TO TACTICS'});
+  } else if (rk && rk.rank > rk.of*0.66){
+    hints.push({pri:65, text:'ON PAPER YOU ARE '+ordinal(rk.rank)+' OF '+rk.of+'. AGAINST THE STRONGER SIDES A DEFENSIVE APPROACH IN TACTICS PROTECTS A POINT, AND THE PRE-MATCH PANEL BEFORE EACH GAME SHOWS WHAT IS MOVING EITHER SIDE.', go:'tactics', btn:'GO TO TACTICS'});
+  } else if (rk){
+    hints.push({pri:40, text:'ON PAPER YOU ARE '+ordinal(rk.rank)+' OF '+rk.of+', SO THE TARGET IS WITHIN REACH. PICK YOUR BEST FIT ELEVEN IN LINEUP EACH WEEK AND READ THE PRE-MATCH PANEL BEFORE KICK-OFF.', go:'lineup', btn:'GO TO LINEUP'});
+  }
+  /* 4 : manager reputation */
+  if (rep < 35 && stage === 0){
+    hints.push({pri:55, text:'AT REPUTATION '+rep+' FOUR DEFEATS IN FIVE WOULD DRAW A WARNING FROM THE DIRECTORS. MEETING THE TARGET ABOVE ADDS TO IT, MISSING IT TAKES IT AWAY : PROTECT THE RUN OF RESULTS FIRST.', go:'club', btn:'GO TO CLUB OFFICE'});
+  }
+  /* 5 : training */
+  var wk = bgWeakestTrainable();
+  if (wk){
+    var on = (training.focus === wk.focus);
+    hints.push({pri:50, text:'THE WEAKEST OF YOUR BEST ELEVEN IS '+wk.what+' (AVERAGE '+wk.v.toFixed(1)+' OUT OF 20). '+(on ? 'TRAINING IS ALREADY ON '+wk.name+' : KEEP IT THERE, IT BUILDS A LITTLE EACH WEEK.' : 'SET THE WEEK\'S TRAINING TO '+wk.name+' : IT BUILDS A LITTLE EACH WEEK AND CARRIES INTO SATURDAY.'), go:'training', btn:on?'OPEN TRAINING':'GO TO TRAINING'});
+  }
+  hints.sort(function(a,b){ return b.pri-a.pri; });
+  hints = hints.slice(0,4);
+  if (hints.length < 2) hints.push({pri:1, text:'PICK YOUR BEST FIT ELEVEN IN LINEUP EACH WEEK AND READ THE PRE-MATCH PANEL BEFORE KICK-OFF.', go:'lineup', btn:'GO TO LINEUP'});
+  return {lines:lines, hints:hints, reason:(boardGuidance ? boardGuidance.reason : null)};
+}
+function renderBoardGuidance(){
+  var box = document.getElementById('board-guidance-box'); if (!box) return;
+  if (!boardGuidance || typeof squad==='undefined' || !squad || !squad.length || !manager || !manager.name){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = '';
+  if (boardGuidance.dismissed){
+    box.innerHTML = '<div class="box-title">BOARD EXPECTS / WHAT TO TRY</div><p class="sub"><button id="bg-show" style="padding:2px 10px;font-size:15px;">SHOW THE BOARD\'S BRIEF</button></p>';
+    document.getElementById('bg-show').addEventListener('click', function(){ boardGuidance.dismissed = false; renderBoardGuidance(); });
+    return;
+  }
+  var r = boardGuidanceReport();
+  var head = r.reason==='SEASON START' ? 'THE '+seasonLabel+' SEASON : THE BOARD\'S BRIEF' : r.reason==='FIRST WARNING' ? 'THE DIRECTORS HAVE GIVEN A FIRST WARNING' : r.reason==='SECOND WARNING' ? 'THE CHAIRMAN HAS GIVEN A SECOND WARNING' : 'THE BOARD\'S BRIEF';
+  var h = '<div class="box-title">BOARD EXPECTS / WHAT TO TRY</div><p class="val'+(/WARNING/.test(r.reason||'')?' bad':'')+'">'+head+'</p>';
+  h += '<table style="margin:6px 0 10px;">'+r.lines.map(function(l){ return '<tr><td class="field" style="padding-right:14px;white-space:nowrap;">'+l.k+'</td><td class="val'+(l.cls?' '+l.cls:'')+'">'+l.v+'</td></tr>'; }).join('')+'</table>';
+  h += '<p class="field">WHAT TO TRY</p>';
+  h += r.hints.map(function(x,i){ return '<p style="margin:6px 0;">'+(i+1)+'. '+x.text+' <button class="bg-go" data-i="'+i+'" style="padding:2px 10px;font-size:15px;">'+x.btn+'</button></p>'; }).join('');
+  h += '<p style="margin-top:10px;"><button id="bg-dismiss" style="padding:2px 10px;font-size:15px;">DISMISS</button></p>';
+  box.innerHTML = h;
+  box.querySelectorAll('.bg-go').forEach(function(b){
+    b.addEventListener('click', function(){
+      var x = r.hints[parseInt(b.dataset.i,10)];
+      if (x.scout){
+        scoutBrief = {pos:x.scout, attr:null};
+        addNews('board', 'Word goes out to the scouts: find us a '+x.scout.toLowerCase()+'.');
+        renderScoutBriefBox(); renderScoutingNetworkBox(); renderYouthProspectsBox();
+      }
+      gotoView(x.go);
+    });
+  });
+  document.getElementById('bg-dismiss').addEventListener('click', function(){ boardGuidance.dismissed = true; renderBoardGuidance(); });
+}
 /* v302 : SHOW THE RIGHT RATING (balance-findings.md proposal 5). What the lineup screen now prints is the real engine
    number : the picked eleven's effective ability (form and fitness included) after the out-of-position and system
    effects, and the next league/cup opponent's real match XI plus his form, so the gap you read is the gap you play at.
@@ -26639,9 +26791,11 @@ function checkManagerJobSecurity(){
   if (manager.rep <= 20 && lossStreak >= 4 && (manager.warningStage||0) === 0){
     manager.warningStage = 1;
     addNews('board', 'BOARDROOM: results like these can\'t continue indefinitely. The directors have made their patience known, in no uncertain terms.');
+    triggerBoardGuidance('FIRST WARNING'); /* v304 */
   } else if (manager.rep <= 10 && lossStreak >= 4 && manager.warningStage === 1){
     manager.warningStage = 2;
     addNews('board', 'BOARDROOM: a second, sterner word from the chairman. Your position will be reviewed when the season ends if results don\'t turn around.');
+    triggerBoardGuidance('SECOND WARNING'); /* v304 */
   }
 }
 /* RIVAL MANAGERS: kept deliberately rare, calibrated to roughly 0-2 changes
