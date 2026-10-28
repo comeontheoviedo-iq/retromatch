@@ -79,6 +79,18 @@ tbody tr.zone-warn td:first-child{border-left:4px solid var(--dos-yellow);}
 .val.good{color:var(--dos-green);}
 .val.bad{color:var(--dos-red);}
 .val.warn{color:var(--dos-yellow);}
+/* v306 : CONTRAST in the season review, its re-open copy and the board's brief. Dark green, dark red and brown on the pink
+   (and worse on the darker striped rows) measured 1.1-2.2 : 1. Inside those three boxes the status colours become DOS-style
+   chips : bright green / amber / salmon on the near-black ink colour (about 9-15 : 1), the labels become cream-on-ink like a
+   table heading, and the stripe is dropped so plain ink text sits on the plain pink (about 4 : 1) instead of on the dark stripe. */
+#season-summary-box tbody tr:nth-child(odd) td, #season-summary-reopen tbody tr:nth-child(odd) td, #board-guidance-box tbody tr:nth-child(odd) td{background:transparent;}
+#season-summary-box td, #season-summary-reopen td, #board-guidance-box td{border-bottom:1px solid var(--ink);}
+#season-summary-box td.field, #season-summary-reopen td.field, #board-guidance-box td.field{background:var(--ink)!important; color:var(--dos-white); font-size:16px;}
+#season-summary-box .val.good, #season-summary-reopen .val.good, #board-guidance-box .val.good{background:var(--ink); color:#7dff9a; padding:0 6px;}
+#season-summary-box .val.bad, #season-summary-reopen .val.bad, #board-guidance-box .val.bad{background:var(--ink); color:#ff9a8a; padding:0 6px;}
+#season-summary-box .val.warn, #season-summary-reopen .val.warn, #board-guidance-box .val.warn{background:var(--ink); color:#ffd866; padding:0 6px;}
+#season-summary-box td.val.good, #season-summary-reopen td.val.good, #board-guidance-box td.val.good, #season-summary-box td.val.bad, #season-summary-reopen td.val.bad, #board-guidance-box td.val.bad, #season-summary-box td.val.warn, #season-summary-reopen td.val.warn, #board-guidance-box td.val.warn{background:var(--ink)!important;}
+#season-summary-box .sub, #season-summary-reopen .sub, #board-guidance-box .sub, #board-guidance-box p.field{color:var(--ink);}
 .statline{display:flex; align-items:center; gap:8px; margin:3px 0; font-size:17px;}
 .statline .lbl{width:110px; color:var(--dos-cyan); flex:none;}
 .bar{font-family:var(--font-dos); color:var(--dos-green); letter-spacing:0px;}
@@ -114,6 +126,13 @@ blockquote{margin:0; padding:8px 12px; border-left:4px solid var(--dos-yellow); 
 .hotkeys{display:flex; flex-wrap:wrap; gap:0; border-top:2px solid var(--dos-grey); background:var(--dos-blue); font-size:16px;}
 .hotkeys span{padding:5px 12px; color:var(--ink);}
 .hotkeys b{background:var(--ink); color:var(--dos-white); padding:0 5px; margin-right:5px;}
+/* v306 : autosave indicator -- a chip in the footer bar, light text on ink */
+#autosave-indicator{background:var(--ink)!important; padding:1px 8px!important; margin:3px 6px; font-size:15px;}
+#autosave-indicator.as-ok{color:#7dff9a!important;} #autosave-indicator.as-busy{color:#ffd866!important;} #autosave-indicator.as-bad{color:#ff9a8a!important;}
+#saves-box .sv-label{white-space:nowrap; vertical-align:top; background:var(--ink); color:var(--dos-white); padding:3px 10px; width:1%;}
+#saves-box td{vertical-align:top; border-bottom:1px solid var(--ink); color:var(--ink);} #saves-box tbody tr:nth-child(odd) td{background:transparent;} #saves-box tr:hover td{background:transparent; color:var(--ink);} #saves-box tr:hover td.sv-label{background:var(--ink); color:var(--dos-white);}
+#saves-box tbody tr:nth-child(odd) td.sv-label, #saves-box tbody tr:nth-child(even) td.sv-label{background:var(--ink); color:var(--dos-white);} #saves-box .sv-name{font-family:var(--font-dos);}
+#saves-box .sv-small{font-size:15px;} #saves-box button{padding:2px 8px; font-size:15px;} #saves-box #saves-msg{color:var(--ink);}
 footer.note{max-width:1060px; margin:12px auto 0; color:#888; font-size:13px; text-align:center; font-family:Arial,sans-serif;}
 .lineup-count{font-size:19px; margin-bottom:10px;}
 .lineup-count .ok{color:var(--dos-green);}
@@ -530,7 +549,7 @@ footer.note{max-width:1060px; margin:12px auto 0; color:#888; font-size:13px; te
     </div>
   </div>
 
-  <div class="hotkeys"><span id="hk-help" style="cursor:pointer;"><b>F1</b>HELP</span><span id="hk-save" style="cursor:pointer;"><b>F2</b>SAVE</span><span id="hk-load" style="cursor:pointer;"><b>F3</b>LOAD</span><span id="hk-download-save" style="cursor:pointer;" title="Download the current save as a file you can keep or share.">SAVE FILE</span><span id="hk-load-file" style="cursor:pointer;" title="Load a save from a .json file.">LOAD FILE</span><input type="file" id="load-file-input" accept=".json,application/json" style="display:none"><span id="hk-continue" style="cursor:pointer;"><b>F9</b>CONTINUE</span><span id="hk-menu" style="cursor:pointer;"><b>ESC</b>MENU</span><span id="hk-newgame" style="cursor:pointer;"><b>-</b>NEW GAME</span></div>
+  <div class="hotkeys"><span id="hk-help" style="cursor:pointer;"><b>F1</b>HELP</span><span id="hk-save" style="cursor:pointer;"><b>F2</b>SAVE</span><span id="hk-load" style="cursor:pointer;"><b>F3</b>LOAD</span><span id="hk-download-save" style="cursor:pointer;" title="Download the current save as a file you can keep or share.">SAVE FILE</span><span id="hk-load-file" style="cursor:pointer;" title="Load a save from a .json file.">LOAD FILE</span><input type="file" id="load-file-input" accept=".json,application/json" style="display:none"><span id="hk-continue" style="cursor:pointer;"><b>F9</b>CONTINUE</span><span id="hk-menu" style="cursor:pointer;"><b>ESC</b>MENU</span><span id="autosave-indicator" class="as-ok" title="The game saves itself after each week and at season rollover (open SAVE / LOAD to see it).">AUTOSAVE : READY</span><span id="hk-newgame" style="cursor:pointer;"><b>-</b>NEW GAME</span></div>
 </div>
 <div id="club-detail-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:52; align-items:center; justify-content:center; padding:20px;">
   <div style="max-width:760px; width:100%; max-height:86vh; overflow-y:auto; background:#e8dfc4; border:3px solid #3a3020; padding:0; font-family:var(--font-dos); color:#2a2418; box-shadow:0 0 0 6px #b8ac86;">
@@ -942,11 +961,15 @@ function triggerBoardGuidance(reason){
 var seasonStartSnap = null;
 var boardVerdictLast = null;
 var seasonSummaryOpen = null; /* {idx, dismissed} : the once-only summary shown on the Week view after rollover */
-function generateBoardTarget(){
+function generateBoardTarget(newlyPromoted){
   seasonStartSnap = {bank:Math.round(finances.bank), rep:Math.round(manager.rep || 50)};
   triggerBoardGuidance('SEASON START');
   var rep = Math.round(manager.rep || 50);
-  if (divisionTier === 1){
+  if (divisionTier === 0){ /* v306 : Fourth Division (1958 on) used to fall through to the First Division wording */
+    boardTarget = rep < 35 ? {type:'survival', label:'FINISH ABOVE THE RE-ELECTION PLACES in Fourth Division.'}
+      : rep < 65 ? {type:'midtable', label:'A COMFORTABLE MID-TABLE FINISH in Fourth Division.'}
+      : {type:'promotion', label:'PUSH FOR PROMOTION out of Fourth Division.'};
+  } else if (divisionTier === 1){
     boardTarget = rep < 35 ? {type:'survival', label:'STAY CLEAR OF THE BOTTOM OF THE TABLE : the board want no repeat of a re-election scare.'}
       : rep < 65 ? {type:'midtable', label:'A COMFORTABLE MID-TABLE FINISH in '+thirdDivName(divisionRegion)+'.'}
       : {type:'promotion', label:'PUSH FOR PROMOTION : the board believe this squad can top '+thirdDivName(divisionRegion)+'.'};
@@ -958,6 +981,23 @@ function generateBoardTarget(){
     boardTarget = rep < 35 ? {type:'survival', label:'AVOID RELEGATION out of First Division.'}
       : rep < 65 ? {type:'midtable', label:'ESTABLISH THE CLUB IN FIRST DIVISION : a mid-table finish would be well received.'}
       : {type:'title', label:'CHALLENGE FOR THE FIRST DIVISION TITLE.'};
+  }
+  /* v306 : the reputation figure alone ignores the squad actually in the dressing room. A manager whose rep was lifted
+     by promotion could be told to push for the next one with an XI ranked bottom of the division. So the target is held
+     down by where the best available XI really ranks, and a newly promoted side is simply asked to stay up. */
+  var rk = null; try { rk = bgBestXiRank(); } catch(e){ rk = null; }
+  var frac = rk ? rk.rank / rk.of : null;
+  var tierName = divisionTier===3 ? 'First Division' : divisionTier===2 ? 'Second Division' : divisionTier===1 ? thirdDivName(divisionRegion) : 'Fourth Division';
+  var survivalLabel = divisionTier===0 ? 'FINISH ABOVE THE RE-ELECTION PLACES in Fourth Division.'
+    : divisionTier===1 ? 'STAY CLEAR OF THE BOTTOM OF THE TABLE : the board want no repeat of a re-election scare.'
+    : 'AVOID RELEGATION out of '+tierName+'.';
+  if (frac !== null && frac > 0.66){
+    if (boardTarget.type !== 'survival') boardTarget = {type:'survival', label:survivalLabel+' The squad ranks '+ordinal(rk.rank)+' of '+rk.of+' on paper.'};
+  } else if (newlyPromoted){
+    if (frac === null || frac > 0.33) boardTarget = {type:'survival', label:'SURVIVAL IN '+tierName.toUpperCase()+' : a newly promoted side, the board ask only that the club stays up.'};
+    else if (boardTarget.type === 'promotion' || boardTarget.type === 'title') boardTarget = {type:'midtable', label:'ESTABLISH THE CLUB IN '+tierName.toUpperCase()+' : a newly promoted side with a decent squad, a mid-table finish would be well received.'};
+  } else if (frac !== null && frac > 0.4 && (boardTarget.type === 'promotion' || boardTarget.type === 'title')){
+    boardTarget = {type:'midtable', label:'A SAFE MID-TABLE SEASON in '+tierName+' : the squad ranks '+ordinal(rk.rank)+' of '+rk.of+' on paper, so the board temper their hopes.'};
   }
 }
 function judgeBoardTarget(position, fieldSize, promoted, relegated){
@@ -16926,6 +16966,7 @@ function generateWeeklyNews(){
 }
 var weekPhase = 'build-up'; /* 'midweek' (Wednesday check-in, no match) or 'build-up' (Saturday approaching) */
 function renderWeek(){
+  maybeAutosave(); /* v306 */
   var next = fixtures[fixtureIdx];
   renderSeasonSummaryBox(); /* v305 */
   renderBoardGuidance(); /* v304 */
@@ -17153,11 +17194,174 @@ function buildSaveState(){
     gameEra:gameEra, stub1950Active:stub1950Active, stub1959Active:stub1959Active /* v131 : without these, reloading a 1950-51 save on a fresh page load left gameEra defaulted back to '1946' and the stub overlay never reapplied to clubProfiles/clubColours1946/CLUB_GATE_1946, so a saved 1950-51 game would come back showing real 1946-47 club data mixed with the saved 1950 squad/table state. Restored in applyLoadedState below. v259 : stub1959Active added, same reasoning, for the newly-unlocked 1959-60 era. */
   };
 }
-function saveGame(){
+/* ---------- v306 : NAMED SAVE SLOTS + AUTOSAVE. Three named slots and one autosave, each its own localStorage key, plus a small
+   metadata record per slot (name, club, season, game date, when saved, size) so the dialog can list them without parsing
+   half a megabyte of JSON per row. The old single save ('the-gaffer-save-v1') is moved into slot 1 once, by
+   migrateLegacySave(), and only removed after the copy reads back identical. The .json file export / import below is
+   untouched and still works from the footer buttons and from the dialog. A failed write (storage full) throws BEFORE any
+   old data is replaced, so a full browser can never destroy the slot being overwritten. */
+var SAVE_SLOT_COUNT = 3;
+var SAVE_SLOT_PREFIX = 'retromatch-slot-';
+var AUTOSAVE_KEY = 'retromatch-autosave';
+var SAVE_META_KEY = 'retromatch-slots-meta';
+var activeSlot = null; /* the slot last saved to or loaded from : what a bare saveGame() writes to */
+var autosaveArmed = false, lastAutosaveKey = null, autosaveTimer = null;
+function slotKey(slot){ return slot==='auto' ? AUTOSAVE_KEY : SAVE_SLOT_PREFIX+slot; }
+function readSlotMeta(){ try{ var m = JSON.parse(localStorage.getItem(SAVE_META_KEY)||'{}'); return (m && typeof m==='object') ? m : {}; }catch(e){ return {}; } }
+function writeSlotMeta(m){ try{ localStorage.setItem(SAVE_META_KEY, JSON.stringify(m)); }catch(e){} }
+function saveStamp(){ var d = new Date(); function z(n){ return (n<10?'0':'')+n; } return z(d.getDate())+'/'+z(d.getMonth()+1)+' '+z(d.getHours())+':'+z(d.getMinutes()); }
+function slotMetaFor(state, raw, name){
+  var gd = ''; try{ gd = fmtDate(new Date(state.currentDate)); }catch(e){}
+  return {name:name, club:state.ourClubName||'', season:state.seasonLabel||'', division:state.currentDivisionShort||'', week:state.week, gameDate:gd, savedAt:saveStamp(), savedMs:Date.now(), kb:Math.round(raw.length/1024)};
+}
+function slotInfo(slot){
+  var raw = null; try{ raw = localStorage.getItem(slotKey(slot)); }catch(e){}
+  if (!raw) return null;
+  var m = readSlotMeta()[slot];
+  return m || {name:(slot==='auto'?'AUTOSAVE':'SLOT '+slot), club:'', season:'', division:'', week:'', gameDate:'', savedAt:'', kb:Math.round(raw.length/1024)};
+}
+function anySavedGame(){ return slotInfo(1)||slotInfo(2)||slotInfo(3)||slotInfo('auto') ? true : false; }
+function cleanSlotName(n, slot){ n = String(n||'').replace(/[<>&"]/g,'').replace(/\s+/g,' ').trim().slice(0,24); return n || (slot==='auto' ? 'AUTOSAVE' : 'SLOT '+slot); }
+/* writes the current game to a slot; throws if storage refuses (nothing is changed in that case) */
+function writeSlot(slot, name){
+  var state = buildSaveState(), raw = JSON.stringify(state);
+  localStorage.setItem(slotKey(slot), raw);
+  var m = readSlotMeta(); m[slot] = slotMetaFor(state, raw, cleanSlotName(name, slot)); writeSlotMeta(m);
+  return m[slot];
+}
+function saveGame(slot, name){
+  slot = slot || activeSlot || 1;
+  var prev = slotInfo(slot);
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify(buildSaveState()));
-    addNews('board', 'GAME SAVED.');
-  }catch(e){ addNews('board', 'SAVE FAILED : BROWSER STORAGE MAY BE UNAVAILABLE.'); }
+    var meta = writeSlot(slot, name || (prev && prev.name));
+    activeSlot = slot;
+    addNews('board', 'GAME SAVED TO SLOT '+slot+' : '+meta.name.toUpperCase()+'.');
+    return true;
+  }catch(e){ addNews('board', 'SAVE FAILED : BROWSER STORAGE MAY BE FULL OR UNAVAILABLE. DELETE ANOTHER SLOT OR USE SAVE FILE. THE OLD SAVE IN SLOT '+slot+' IS UNTOUCHED.'); return false; }
+}
+function loadFromSlot(slot, silent){
+  var raw; try{ raw = localStorage.getItem(slotKey(slot)); }catch(e){ raw = null; }
+  if (!raw){ if (!silent) addNews('board', 'NO SAVED GAME IN THAT SLOT.'); return false; }
+  try{
+    applyLoadedState(JSON.parse(raw), silent);
+  }catch(e){ if (!silent) addNews('board', 'LOAD FAILED : SAVE DATA MAY BE CORRUPT.'); return false; }
+  if (slot !== 'auto') activeSlot = slot;
+  autosaveArmed = true; lastAutosaveKey = autosaveKeyNow();
+  refreshAutosaveIndicator();
+  return true;
+}
+function loadGame(silent){ /* kept for older callers : the active slot, else the newest saved one */
+  var pick = activeSlot && slotInfo(activeSlot) ? activeSlot : null;
+  if (!pick){ var best = -1; [1,2,3,'auto'].forEach(function(sl){ var i = slotInfo(sl); if (i && (i.savedMs||0) >= best){ best = i.savedMs||0; pick = sl; } }); }
+  if (!pick){ if (!silent) addNews('board', 'NO SAVED GAME FOUND.'); return false; }
+  return loadFromSlot(pick, silent);
+}
+function deleteSlot(slot){
+  try{ localStorage.removeItem(slotKey(slot)); }catch(e){}
+  var m = readSlotMeta(); delete m[slot]; writeSlotMeta(m);
+  if (activeSlot === slot) activeSlot = null;
+  refreshAutosaveIndicator();
+}
+function renameSlot(slot, name){
+  var m = readSlotMeta(), info = slotInfo(slot); if (!info) return false;
+  m[slot] = Object.assign({}, info, {name:cleanSlotName(name, slot)}); writeSlotMeta(m); return true;
+}
+/* the old single-slot save becomes slot 1 : copied, read back and compared, and only then removed */
+function migrateLegacySave(){
+  var raw; try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){ return false; }
+  if (!raw) return false;
+  var target = null; [1,2,3].forEach(function(sl){ if (target===null && !slotInfo(sl)) target = sl; });
+  if (target === null) return false; /* every slot already used : leave the old save where it is rather than overwrite anything */
+  try{
+    var st = JSON.parse(raw);
+    localStorage.setItem(slotKey(target), raw);
+    if (localStorage.getItem(slotKey(target)) !== raw) return false;
+    var m = readSlotMeta(); m[target] = slotMetaFor(st, raw, cleanSlotName('OLD SAVE', target)); writeSlotMeta(m);
+    localStorage.removeItem(SAVE_KEY);
+    activeSlot = target;
+    return true;
+  }catch(e){ return false; }
+}
+function autosaveKeyNow(){ return [ourClubName, seasonLabel, week, fixtureIdx, seasonEndPending?1:0].join('|'); }
+function setAutosaveIndicator(text, cls){
+  var el = document.getElementById('autosave-indicator'); if (!el) return;
+  el.textContent = text; el.className = 'as-'+(cls||'ok');
+}
+function refreshAutosaveIndicator(){
+  var i = slotInfo('auto');
+  setAutosaveIndicator(i ? 'AUTOSAVED '+(i.savedAt||'').split(' ').pop()+' : '+(i.season||'')+' WEEK '+i.week : 'AUTOSAVE : READY', 'ok');
+}
+function maybeAutosave(){
+  if (!autosaveArmed || typeof manager==='undefined' || !manager || !manager.name || !squad || !squad.length) return;
+  var k = autosaveKeyNow(); if (k === lastAutosaveKey) return;
+  lastAutosaveKey = k;
+  if (autosaveTimer) clearTimeout(autosaveTimer);
+  setAutosaveIndicator('AUTOSAVING...', 'busy');
+  autosaveTimer = setTimeout(doAutosave, 60); /* after the screen has finished drawing, so the save never holds up the render */
+}
+function doAutosave(){
+  autosaveTimer = null;
+  try{
+    var meta = writeSlot('auto', 'AUTOSAVE');
+    setAutosaveIndicator('AUTOSAVED '+meta.savedAt.split(' ').pop()+' : '+meta.season+' WEEK '+meta.week, 'ok');
+  }catch(e){ setAutosaveIndicator('AUTOSAVE FAILED : STORAGE FULL', 'bad'); }
+}
+/* the SAVES dialog : opened by F2 / F3, the footer buttons and the title screen's LOAD GAME */
+function openSavesDialog(onLoaded, fromHome){
+  var ex = document.getElementById('saves-overlay'); if (ex) ex.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'saves-overlay';
+  overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9995; display:flex; align-items:center; justify-content:center; padding:14px;';
+  var box = document.createElement('div');
+  box.id = 'saves-box';
+  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:16px 20px; max-width:860px; width:100%; max-height:92vh; overflow-y:auto; font-size:18px; line-height:1.3;';
+  overlay.appendChild(box); document.body.appendChild(overlay);
+  var msg = '';
+  function canSave(){ return !fromHome && typeof manager!=='undefined' && manager && manager.name && squad && squad.length; }
+  function esc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+  function draw(){
+    var rows = [1,2,3,'auto'].map(function(sl){
+      var i = slotInfo(sl), label = sl==='auto' ? 'AUTOSAVE' : 'SLOT '+sl;
+      var detail = i ? '<b>'+esc(i.name).toUpperCase()+'</b><br>'+esc((i.club||'').toUpperCase())+(i.season ? ' : '+esc(i.season)+' '+esc((i.division||'').toUpperCase()) : '')+(i.gameDate ? ' : '+esc(i.gameDate).toUpperCase() : '')+'<br><span class="sv-small">SAVED '+esc(i.savedAt)+' : '+i.kb+' KB</span>' : '<span class="sv-small">EMPTY</span>';
+      var nameIn = sl==='auto' ? '' : '<input class="sv-name" data-slot="'+sl+'" maxlength="24" value="'+esc(i ? i.name : '')+'" placeholder="NAME THIS SAVE" style="width:150px; font-size:16px; margin-right:6px;">';
+      var acts = nameIn+
+        (sl==='auto' ? '' : '<button data-act="save" data-slot="'+sl+'"'+(canSave()?'':' disabled')+'>SAVE</button> ')+
+        '<button data-act="load" data-slot="'+sl+'"'+(i?'':' disabled')+'>LOAD</button> '+
+        (sl==='auto' ? '' : '<button data-act="rename" data-slot="'+sl+'"'+(i?'':' disabled')+'>RENAME</button> ')+
+        '<button data-act="delete" data-slot="'+sl+'"'+(i?'':' disabled')+'>DELETE</button>';
+      return '<tr><td class="sv-label">'+label+(String(activeSlot)===String(sl)?' *':'')+'</td><td>'+detail+'</td><td style="white-space:nowrap;">'+acts+'</td></tr>';
+    }).join('');
+    box.innerHTML = '<p style="margin:0 0 8px; font-size:22px;">SAVED GAMES</p>'+
+      '<table id="saves-table" style="width:100%;">'+rows+'</table>'+
+      '<p class="sv-small" style="margin:8px 0 0;">* LAST USED SLOT. THE AUTOSAVE IS WRITTEN AFTER EACH WEEK AND AT SEASON ROLLOVER. SAVE FILES (.JSON) STILL WORK : '+
+      (fromHome ? 'USE LOAD FILE ON THE TITLE SCREEN.' : '<button data-act="file-save">SAVE FILE</button> <button data-act="file-load">LOAD FILE</button>')+'</p>'+
+      '<p id="saves-msg" style="margin:8px 0 0; min-height:1.3em; font-weight:700;">'+esc(msg)+'</p>'+
+      '<p style="margin:6px 0 0;"><button data-act="close" id="saves-close">CLOSE</button></p>';
+  }
+  function done(){ overlay.remove(); }
+  box.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('button[data-act]') : null; if (!b) return;
+    var act = b.getAttribute('data-act'), sl = b.getAttribute('data-slot'); if (sl && sl!=='auto') sl = parseInt(sl, 10);
+    var nameEl = sl && sl!=='auto' ? box.querySelector('.sv-name[data-slot="'+sl+'"]') : null;
+    var nm = nameEl ? nameEl.value : '';
+    if (act==='close'){ done(); return; }
+    if (act==='file-save'){ done(); downloadSaveFile(); return; }
+    if (act==='file-load'){ done(); document.getElementById('load-file-input').click(); return; }
+    if (act==='save'){
+      var doSave = function(){ msg = saveGame(sl, nm || undefined) ? 'SAVED TO SLOT '+sl+'.' : 'SAVE FAILED : STORAGE FULL ? DELETE ANOTHER SLOT OR USE SAVE FILE.'; draw(); };
+      var cur = slotInfo(sl);
+      if (cur) showConfirmDialog('Overwrite SLOT '+sl+' ('+esc(cur.name)+' : '+esc(cur.club)+' '+esc(cur.season)+') with the game you are playing now?', doSave, 'YES : OVERWRITE', 'NO : CANCEL');
+      else doSave();
+    } else if (act==='load'){
+      var doLoad = function(){ if (loadFromSlot(sl, false)){ done(); if (onLoaded) onLoaded(); } else { msg = 'THAT SAVE COULD NOT BE LOADED.'; draw(); } };
+      if (fromHome) doLoad(); else showConfirmDialog('Load '+(sl==='auto'?'the AUTOSAVE':'SLOT '+sl)+'? Anything not saved in the game you are playing now is lost.', doLoad, 'YES : LOAD', 'NO : CANCEL');
+    } else if (act==='rename'){
+      msg = renameSlot(sl, nm) ? 'RENAMED.' : 'NOTHING TO RENAME.'; draw();
+    } else if (act==='delete'){
+      showConfirmDialog('Delete '+(sl==='auto'?'the AUTOSAVE':'SLOT '+sl)+' for good?', function(){ deleteSlot(sl); msg = 'DELETED.'; draw(); }, 'YES : DELETE', 'NO : CANCEL');
+    }
+  });
+  draw();
 }
 /* DOWNLOADABLE SAVE FILE: browser localStorage never leaves this one browser
    -- it can't be shared, backed up, or handed over for a bug to be diagnosed
@@ -17219,15 +17423,6 @@ function loadSaveFile(file){
   };
   reader.onerror = function(){ addNews('board', 'LOAD FAILED : COULD NOT READ THE FILE.'); };
   reader.readAsText(file);
-}
-function loadGame(silent){
-  var raw;
-  try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){ raw = null; }
-  if (!raw){ if (!silent) addNews('board', 'NO SAVED GAME FOUND.'); return; }
-  try{
-    var s = JSON.parse(raw);
-    applyLoadedState(s, silent);
-  }catch(e){ if (!silent) addNews('board', 'LOAD FAILED : SAVE DATA MAY BE CORRUPT.'); }
 }
 /* Shared by loadGame() (localStorage) and loadSaveFile() (an uploaded .json) :
    every migration/back-compat rule for an older save format lives here once,
@@ -17548,14 +17743,14 @@ function pressContinue(){
 }
 document.addEventListener('keydown', function(e){
   if (e.key==='F1'){ e.preventDefault(); document.getElementById('help-overlay').style.display==='flex' ? hideHelp() : showHelp(); }
-  else if (e.key==='F2'){ e.preventDefault(); saveGame(); }
-  else if (e.key==='F3'){ e.preventDefault(); loadGame(); }
+  else if (e.key==='F2'){ e.preventDefault(); openSavesDialog(); }
+  else if (e.key==='F3'){ e.preventDefault(); openSavesDialog(); }
   else if (e.key==='F9'){ e.preventDefault(); pressContinue(); }
   else if (e.key==='Escape'){ e.preventDefault(); hideHelp(); gotoView('week'); }
 });
 document.getElementById('hk-help').addEventListener('click', function(){ document.getElementById('help-overlay').style.display==='flex' ? hideHelp() : showHelp(); });
-document.getElementById('hk-save').addEventListener('click', saveGame);
-document.getElementById('hk-load').addEventListener('click', loadGame);
+document.getElementById('hk-save').addEventListener('click', function(){ openSavesDialog(); });
+document.getElementById('hk-load').addEventListener('click', function(){ openSavesDialog(); });
 document.getElementById('hk-download-save').addEventListener('click', downloadSaveFile);
 document.getElementById('hk-load-file').addEventListener('click', function(){ document.getElementById('load-file-input').click(); });
 document.getElementById('load-file-input').addEventListener('change', function(e){
@@ -17895,7 +18090,8 @@ function resetTacticsAndTrainingUI(){
   document.getElementById('training-note').innerHTML = '<p class="sub">Back to the standard English method : fitness and discipline, the way it\'s always been done here.</p>';
 }
 function startBrandNewGame(){
-  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  /* v306 : the save slots are kept (the old single save used to be wiped here); the autosave arms and is replaced as you play */
+  autosaveArmed = true; lastAutosaveKey = null; activeSlot = null;
   createdClubReplacements = []; /* v296 BUGFIX : cleared here, before any CREATE A CLUB flow in this brand new game can push its own entry, so stripStaleClubProfiles()'s createdClubReplacements carve-out (see that function's own v296 comment) only ever protects THIS game's own fictional club, never a stale one left over from an earlier same-tab game that this very function is otherwise responsible for cleaning up. */
   showEraPicker(function(era){
     gameEra = era;
@@ -18442,7 +18638,7 @@ function showConfirmDialog(message, onYes, yesLabel, noLabel){
   document.body.appendChild(overlay);
 }
 document.getElementById('hk-newgame').addEventListener('click', function(){
-  showConfirmDialog('Wipe your saved game and start the 1946-47 season over from scratch?', startBrandNewGame);
+  showConfirmDialog('Start a new game? Anything not saved in the game you are playing now is lost. Your save slots are kept.', startBrandNewGame, 'YES : NEW GAME');
 });
 
 /* ---------- COMMENTARY BANK ---------- */
@@ -28070,7 +28266,7 @@ function startNewSeason(outcome){
     aiBgDivFor(key).clubs = aiNextMembers[key].map(function(nm){ return aiRealProfile(nm, key); });
   });
   fourthDivisionJustRestructured = false;
-  generateBoardTarget();
+  generateBoardTarget(outcome === 'promoted'); /* v306 */
   pendingUnhappyPlayerId = null;
   /* FIXED A REAL BUG HERE: pendingScoutTrips and pendingNegotiations both
      track their due date as "resolveWeek", a number compared directly
@@ -28701,7 +28897,7 @@ renderScoutingPrep();
    dialog raised from here still shows on top of it correctly. */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
-  var hasSave; try{ hasSave = !!localStorage.getItem(SAVE_KEY); }catch(e){ hasSave = false; }
+  var hasSave = anySavedGame();
   var overlay = document.createElement('div');
   overlay.id = 'home-screen-overlay';
   overlay.style.cssText = 'position:fixed; inset:0; background:var(--ink); z-index:9990; display:flex; align-items:center; justify-content:center; flex-direction:column;';
@@ -28711,7 +28907,7 @@ function showHomeScreen(){
     '<p style="margin:0 0 4px; color:var(--dos-yellow); font-size:44px; letter-spacing:2px;">RETROMATCH</p>'+
     '<p class="sub" style="margin:0 0 34px; font-size:18px; color:var(--dos-white);">ENGLISH FOOTBALL, 1946-47</p>'+
     '<button id="home-newgame" style="display:block; width:100%; padding:10px; font-size:18px; margin-bottom:10px;">START NEW GAME</button>'+
-    '<button id="home-loadgame" style="display:block; width:100%; padding:10px; font-size:18px; margin-bottom:10px;"'+(hasSave?'':' disabled')+'>LOAD GAME'+(hasSave?'':' (NO SAVE FOUND)')+'</button>'+
+    '<button id="home-loadgame" style="display:block; width:100%; padding:10px; font-size:18px; margin-bottom:10px;"'+(hasSave?'':' disabled')+'>LOAD GAME'+(hasSave?' (SLOTS)':' (NO SAVE FOUND)')+'</button>'+
     '<button id="home-loadfile" style="display:block; width:100%; padding:10px; font-size:18px;">LOAD FILE...</button>'+
     '<input type="file" id="home-load-file-input" accept=".json,application/json" style="display:none">'+
     '<p class="sub" id="home-loadfile-error" style="color:var(--dos-red); min-height:1.2em; margin-top:10px;"></p>';
@@ -28719,17 +28915,11 @@ function showHomeScreen(){
   document.body.appendChild(overlay);
 
   document.getElementById('home-newgame').addEventListener('click', function(){
-    if (hasSave){
-      showConfirmDialog('Wipe your saved game and start the 1946-47 season over from scratch?', function(){ overlay.remove(); startBrandNewGame(); });
-    } else {
-      overlay.remove(); startBrandNewGame();
-    }
+    overlay.remove(); startBrandNewGame(); /* v306 : no wipe warning, saved slots are never deleted by starting a new game */
   });
   if (hasSave){
     document.getElementById('home-loadgame').addEventListener('click', function(){
-      overlay.remove();
-      loadGame(false);
-      if (!manager.name) showManagerSetup();
+      openSavesDialog(function(){ overlay.remove(); if (!manager.name) showManagerSetup(); }, true);
     });
   }
   document.getElementById('home-loadfile').addEventListener('click', function(){
@@ -28757,6 +28947,8 @@ function showHomeScreen(){
   });
 }
 
+migrateLegacySave(); /* v306 : the old single save becomes slot 1 before the title screen counts what is saved */
+refreshAutosaveIndicator();
 showHomeScreen();
 </script>
 
