@@ -1,4 +1,267 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}/*PROG-CSS-START*/
+#programme-body .pitch{position:relative;width:100%;aspect-ratio:120/70}
+#programme-body .pitch svg{position:absolute;inset:0;width:100%;height:100%}
+#programme-body .pitch .pl{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center;line-height:1}
+#programme-body .pitch .gl{position:absolute;top:50%;transform:translateY(-50%);}
+#programme-body .lists{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+#programme-body .lists ol{list-style:none;margin:0;padding:0}
+#programme-body .lists li{display:flex;gap:6px;align-items:baseline}
+#programme-body .lists li b{min-width:1.6em;text-align:right}
+#programme-body .hts{display:grid;grid-template-columns:repeat(13,1fr);gap:3px}
+#programme-body .hts i,#programme-body .board i{font-style:normal;display:block;text-align:center}
+#programme-body .keylist{columns:2;column-gap:16px;margin:0;padding:0;list-style:none}
+#programme-body .keylist li{break-inside:avoid;display:flex;gap:6px;align-items:baseline}
+#programme-body .keylist li b{min-width:1.3em}
+#programme-body .p46{--ink:#241d17;--paper:#e5dbbb;--fade:#4b4036;
+ background:var(--paper);color:var(--ink);font-family:'Old Standard TT',Georgia,serif;font-size:15px;line-height:1.35;position:relative;
+ box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.4);padding:0}
+#programme-body .p46::before{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.55;z-index:3;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .36  0 0 0 0 .22  0 0 0 .55 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+#programme-body .p46::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;background:linear-gradient(90deg,rgba(90,60,20,.18),transparent 6%,transparent 94%,rgba(90,60,20,.22)),linear-gradient(180deg,rgba(90,60,20,.16),transparent 5%,transparent 95%,rgba(90,60,20,.2))}
+#programme-body .p46 .pg{padding:18px 26px 22px;position:relative}
+#programme-body .p46 .fold{height:0;border-top:1px dashed rgba(36,29,23,.45);margin:0 0;position:relative;z-index:4}
+#programme-body .p46 .fold span{position:absolute;right:10px;top:-8px;font:9px 'Oswald';letter-spacing:.2em;text-transform:uppercase;background:var(--paper);padding:0 6px;color:var(--fade)}
+#programme-body .p46 .foldv{box-shadow:inset 0 0 0 0}
+#programme-body .p46 .lab{font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;letter-spacing:.2em;font-size:11px}
+#programme-body .p46 .toprow{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--ink);padding-bottom:5px;margin-bottom:8px}
+#programme-body .p46 .price{border:2px solid var(--ink);padding:3px 10px 1px;font:700 22px 'Abril Fatface',serif;line-height:1;transform:rotate(-2deg)}
+#programme-body .p46 .price small{font:500 9px 'Oswald';letter-spacing:.2em;display:block;text-align:center}
+#programme-body .p46 .mast{text-align:center;border-top:4px double var(--ink);border-bottom:4px double var(--ink);padding:8px 0 6px;margin:2px 0 8px}
+#programme-body .p46 .mast h1{margin:0;font:400 clamp(40px,10vw,76px)/.95 'Abril Fatface',serif;letter-spacing:.01em;text-transform:uppercase}
+#programme-body .p46 .mast .fc{font:500 15px 'Oswald';letter-spacing:.5em;text-transform:uppercase;margin-top:4px}
+#programme-body .p46 .banner{background:var(--ink);color:var(--paper);text-align:center;font:500 18px 'Oswald';letter-spacing:.45em;text-transform:uppercase;padding:5px 0 3px;margin:0 0 10px;transform:rotate(-.4deg)}
+#programme-body .p46 .sketch{border:2px solid var(--ink);padding:3px;margin-bottom:10px}
+#programme-body .p46 .sketch svg{display:block;width:100%;height:auto}
+#programme-body .p46 .sketch .cap{font:italic 11px 'Old Standard TT';text-align:center;padding-top:3px;border-top:1px solid var(--ink);margin-top:3px}
+#programme-body .p46 .fix{text-align:center}
+#programme-body .p46 .fix .date{font:500 13px 'Oswald';letter-spacing:.25em;text-transform:uppercase}
+#programme-body .p46 .fix .vs{font:400 clamp(18px,4.4vw,31px)/1.05 'Abril Fatface',serif;text-transform:uppercase;margin:3px 0}
+#programme-body .p46 .fix .vs{white-space:nowrap}
+#programme-body .p46 .fix .vs em{font:italic 400 .5em 'Old Standard TT';text-transform:none;padding:0 .3em}
+#programme-body .p46 .imprint{font:italic 10.5px 'Old Standard TT';text-align:center;border-top:1px solid var(--ink);margin-top:10px;padding-top:4px;color:var(--fade)}
+#programme-body .p46 h2{font:400 22px/1 'Abril Fatface',serif;margin:0 0 6px;text-transform:uppercase;letter-spacing:.02em}
+#programme-body .p46 h3{font:500 12px 'Oswald';letter-spacing:.22em;text-transform:uppercase;margin:0 0 6px;border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);padding:2px 0;text-align:center}
+#programme-body .p46 .field{border:2px solid var(--ink);padding:8px 10px 6px;margin-bottom:12px}
+#programme-body .p46 .field .ttl{text-align:center;font:italic 14px 'Old Standard TT';margin-bottom:4px}
+#programme-body .p46 .pitch .pl b{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink);background:var(--paper);display:grid;place-items:center;font:700 12px 'Old Standard TT'}
+#programme-body .p46 .pitch .pl.aw b{background:var(--ink);color:var(--paper)}
+#programme-body .p46 .pitch .gk b{border-style:double;border-width:3px}
+#programme-body .p46 .lists{font-size:13px;margin-top:7px}
+#programme-body .p46 .lists h4{margin:0 0 2px;font:700 14px 'Old Standard TT';border-bottom:1px solid var(--ink)}
+#programme-body .p46 .lists h4 span{font:italic 400 11px 'Old Standard TT'}
+#programme-body .p46 .twocol{display:grid;grid-template-columns:1.55fr 1fr;gap:0 20px}
+#programme-body .p46 .notes{column-rule:1px solid var(--ink);font-size:13.5px;text-align:justify;hyphens:auto}
+#programme-body .p46 .notes p{margin:0 0 7px}
+#programme-body .p46 .notes p:first-of-type::first-letter{font:400 44px/.8 'Abril Fatface';float:left;padding:3px 3px 0 0;margin-right:-1px}
+#programme-body .p46 .notes h5{margin:8px 0 3px;font:500 11px 'Oswald';letter-spacing:.2em;text-transform:uppercase;text-align:left}
+#programme-body .p46 table{width:100%;border-collapse:collapse;font-size:12.5px}
+#programme-body .p46 th{font:500 10px 'Oswald';letter-spacing:.15em;text-align:right;border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);padding:2px 3px}
+#programme-body .p46 th:first-child,#programme-body .p46 td:first-child{text-align:left}
+#programme-body .p46 td{padding:1px 3px;text-align:right;border-bottom:1px dotted rgba(36,29,23,.5)}
+#programme-body .p46 tr.me td{font-weight:700;background:rgba(36,29,23,.12)}
+#programme-body .p46 .board{background:var(--ink);padding:5px;margin:4px 0 8px}
+#programme-body .p46 .board i{background:var(--paper);color:var(--ink);font:700 12px 'Old Standard TT';padding:2px 0;border:1px solid var(--ink)}
+#programme-body .p46 .board i s{display:block;text-decoration:none;font:500 9px 'Oswald';letter-spacing:.1em;border-top:1px solid var(--ink);margin-top:1px;color:var(--fade)}
+#programme-body .p46 .key{font-size:11.5px;line-height:1.28}
+#programme-body .p46 .key h6{margin:3px 0 1px;font:500 10px 'Oswald';letter-spacing:.2em;text-transform:uppercase;border-bottom:1px solid var(--ink)}
+#programme-body .p46 .key li.us{font-weight:700}
+#programme-body .p46 .kg{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+#programme-body .p46 .kg>div.full{grid-column:1/-1}
+#programme-body .p46 .kg h6{margin-top:6px}
+#programme-body .p46 .ads{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#programme-body .p46 .ad{border:2px solid var(--ink);padding:8px 8px 7px;text-align:center;position:relative}
+#programme-body .p46 .ad.dbl{border:4px double var(--ink)}
+#programme-body .p46 .ad .big{font:400 25px/1 'Abril Fatface',serif;text-transform:uppercase}
+#programme-body .p46 .ad .sm{font:italic 12px 'Old Standard TT'}
+#programme-body .p46 .ad .lab{font-size:10px}
+#programme-body .p46 .ad hr{border:0;border-top:1px solid var(--ink);margin:5px 14px}
+#programme-body .p46 .ad .blk{font:400 26px/1 'UnifrakturMaguntia',serif}
+#programme-body .p46 .ad.rev{background:var(--ink);color:var(--paper)}
+#programme-body .p46 .ad.rev hr{border-color:var(--paper)}
+#programme-body .p46 .adhead{text-align:center;font:italic 13px 'Old Standard TT';margin:0 0 6px}
+#programme-body .p46 .next{text-align:center;margin:14px 0 8px;font:700 15px 'Old Standard TT'}
+#programme-body .p46 .closer{text-align:center;position:relative;z-index:5}
+#programme-body .p46 .closer button{font:500 15px 'Oswald';letter-spacing:.2em;text-transform:uppercase;background:transparent;border:3px solid var(--ink);color:var(--ink);padding:6px 20px;cursor:pointer}
+#programme-body .p46 .pageno{position:absolute;bottom:4px;left:0;right:0;text-align:center;font:italic 10px 'Old Standard TT';color:var(--fade)}
+#programme-body .p46 .rationing{border:1px dashed var(--ink);padding:5px 8px;font:italic 11.5px 'Old Standard TT';text-align:center;margin:10px 0 0}
+#programme-body .p59{--ink:#1a1816;--spot:#b32a24;--paper:#f2ebd4;--tint:rgba(179,42,36,.18);
+ background:var(--paper);color:var(--ink);font-family:'Libre Baskerville',Georgia,serif;font-size:14px;line-height:1.45;box-shadow:0 12px 40px rgba(0,0,0,.6);position:relative;overflow:hidden}
+#programme-body .p59 .cover{position:relative;background:var(--spot);color:var(--paper);padding:0 0 0;overflow:hidden;border-bottom:6px solid var(--ink)}
+#programme-body .p59 .stripes{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 46px,rgba(242,235,212,.9) 46px 92px)}
+#programme-body .p59 .cv-in{position:relative;padding:22px 22px 18px}
+#programme-body .p59 .cv-top{display:flex;justify-content:space-between;align-items:center;font:500 12px 'Oswald';letter-spacing:.25em;text-transform:uppercase}
+#programme-body .p59 .cv-top span{background:var(--ink);color:var(--paper);padding:4px 10px 2px}
+#programme-body .p59 .plate{background:var(--paper);color:var(--ink);border:4px solid var(--ink);margin:16px 0 14px;padding:12px 14px 10px;text-align:center;box-shadow:7px 7px 0 var(--ink)}
+#programme-body .p59 .plate h1{margin:0;font:400 clamp(38px,9.5vw,70px)/.95 'Alfa Slab One',serif;text-transform:uppercase;color:var(--spot);text-shadow:3px 3px 0 var(--ink)}
+#programme-body .p59 .plate .fcl{font:500 14px 'Oswald';letter-spacing:.5em;text-transform:uppercase;margin-top:6px}
+#programme-body .p59 .plate .scr{font:400 28px/1 'Kaushan Script',cursive;color:var(--ink);margin-top:4px}
+#programme-body .p59 .cv-mid{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center}
+#programme-body .p59 .ball svg{width:100%;height:auto;display:block}
+#programme-body .p59 .cv-fix{background:var(--ink);color:var(--paper);padding:10px 14px 9px;text-align:center}
+#programme-body .p59 .cv-fix .d{font:500 12px 'Oswald';letter-spacing:.25em;text-transform:uppercase;color:#f0c2ba}
+#programme-body .p59 .cv-fix .v{font:400 clamp(20px,4.6vw,30px)/1.1 'Alfa Slab One'}
+#programme-body .p59 .cv-fix .v em{font:400 .8em 'Kaushan Script';padding:0 .2em;color:#f0c2ba}
+#programme-body .p59 .cv-fix .k{font:500 12px 'Oswald';letter-spacing:.2em;text-transform:uppercase;margin-top:3px}
+#programme-body .p59 .cv-foot>span:first-child{background:var(--ink);color:var(--paper);padding:5px 10px 3px;align-self:flex-end}
+#programme-body .p59 .cv-foot{display:flex;align-items:flex-end;justify-content:space-between;margin-top:12px;font:500 12px 'Oswald';letter-spacing:.2em;text-transform:uppercase}
+#programme-body .p59 .cv-foot .pr{font:400 26px/1 'Alfa Slab One';letter-spacing:0;text-transform:none;background:var(--paper);color:var(--spot);padding:3px 10px 0;border:3px solid var(--ink)}
+#programme-body .p59 .body{padding:18px 22px 22px}
+#programme-body .p59 h2{margin:0 0 8px;font:400 24px/1 'Alfa Slab One';color:var(--spot);text-transform:uppercase;display:flex;align-items:center;gap:10px}
+#programme-body .p59 h2::after{content:"";flex:1;height:7px;background:radial-gradient(circle,var(--ink) 1.4px,transparent 1.6px) 0 0/6px 7px repeat-x}
+#programme-body .p59 h3{font:500 12px 'Oswald';letter-spacing:.22em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:3px 8px 1px;margin:0 0 6px;display:inline-block}
+#programme-body .p59 .sec{margin-bottom:18px}
+#programme-body .p59 .intro{border-left:6px solid var(--spot);padding:2px 0 2px 12px;font-style:italic;font-size:13.5px}
+#programme-body .p59 .field{border:3px solid var(--ink);background:linear-gradient(0deg,var(--tint),var(--tint)),var(--paper);padding:8px 10px 6px}
+#programme-body .p59 .field .ttl{display:flex;justify-content:space-between;font:500 11px 'Oswald';letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}
+#programme-body .p59 .pitch .pl b{width:25px;height:25px;border-radius:50%;background:var(--paper);border:2px solid var(--ink);font:400 12px 'Alfa Slab One';display:grid;place-items:center;padding-top:1px}
+#programme-body .p59 .pitch .pl.aw b{background:var(--spot);color:var(--paper);border-color:var(--ink)}
+#programme-body .p59 .pitch .gk b{border-radius:4px}
+#programme-body .p59 .lists{font-size:12.5px;margin-top:8px}
+#programme-body .p59 .lists h4{margin:0 0 3px;font:400 14px 'Alfa Slab One';color:var(--spot);text-transform:uppercase}
+#programme-body .p59 .lists h4 span{font:italic 400 11px 'Libre Baskerville';color:var(--ink);text-transform:none}
+#programme-body .p59 .lists li{border-bottom:1px dotted var(--ink);padding:1px 0}
+#programme-body .p59 .cols2{display:grid;grid-template-columns:1.35fr 1fr;gap:18px}
+#programme-body .p59 .pen{column-count:1}
+#programme-body .p59 .pen article{border-top:3px solid var(--ink);padding:5px 0 9px;display:grid;grid-template-columns:44px 1fr;gap:10px}
+#programme-body .p59 .pen article:first-of-type{border-top:0}
+#programme-body .p59 .pen .no{font:400 30px/1 'Alfa Slab One';color:var(--spot);text-align:center;background:var(--tint);border:2px solid var(--ink);padding:6px 0 2px;height:max-content}
+#programme-body .p59 .pen h4{margin:0;font:400 15px 'Alfa Slab One';text-transform:uppercase}
+#programme-body .p59 .pen .st{font:500 10.5px 'Oswald';letter-spacing:.14em;text-transform:uppercase;color:var(--spot);margin:1px 0 3px}
+#programme-body .p59 .pen p{margin:0;font-size:12.5px}
+#programme-body .p59 table{width:100%;border-collapse:collapse;font-size:12px}
+#programme-body .p59 th{font:500 10px 'Oswald';letter-spacing:.15em;text-align:right;background:var(--ink);color:var(--paper);padding:3px 4px 1px}
+#programme-body .p59 th:first-child,#programme-body .p59 td:first-child{text-align:left}
+#programme-body .p59 td{padding:2px 4px;text-align:right;border-bottom:1px solid rgba(26,24,22,.35)}
+#programme-body .p59 tr.me td{background:var(--tint);font-weight:700;border-bottom:1px solid var(--spot)}
+#programme-body .p59 .board{display:grid;gap:3px;margin:5px 0 8px;background:var(--ink);padding:5px}
+#programme-body .p59 .board i{background:var(--paper);font:400 12px 'Alfa Slab One';padding:2px 0 0;border-bottom:3px solid var(--spot)}
+#programme-body .p59 .board i s{display:block;text-decoration:none;font:500 10px 'Oswald';letter-spacing:.1em;color:var(--spot);padding-bottom:1px}
+#programme-body .p59 .key{font-size:11px}
+#programme-body .p59 .ads{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#programme-body .p59 .ad{border:3px solid var(--ink);padding:9px 8px 8px;text-align:center;background:var(--paper)}
+#programme-body .p59 .ad .big{font:400 22px/1 'Alfa Slab One';text-transform:uppercase}
+#programme-body .p59 .ad .scr{font:400 22px/1 'Kaushan Script'}
+#programme-body .p59 .ad .sm{font-size:11px;font-style:italic}
+#programme-body .p59 .ad.red{background:var(--spot);color:var(--paper)}
+#programme-body .p59 .ad.red .big{color:var(--paper)}
+#programme-body .p59 .ad.blk{background:var(--ink);color:var(--paper)}
+#programme-body .p59 .ad.blk .big{color:#f0c2ba}
+#programme-body .p59 .ad .lab{font:500 10px 'Oswald';letter-spacing:.2em;text-transform:uppercase}
+#programme-body .p59 .ad.wide{grid-column:span 2}
+#programme-body .p59 .foot{display:flex;justify-content:space-between;align-items:center;border-top:6px solid var(--ink);padding-top:12px;margin-top:6px;gap:12px;flex-wrap:wrap}
+#programme-body .p59 .foot .n{font:700 14px 'Libre Baskerville'}
+#programme-body .p59 .foot button{font:500 15px 'Oswald';letter-spacing:.22em;text-transform:uppercase;background:var(--spot);color:var(--paper);border:3px solid var(--ink);padding:7px 22px 5px;cursor:pointer;box-shadow:4px 4px 0 var(--ink)}
+#programme-body .p66{--ink:#10203f;--or:#f4621f;--aq:#12a6b8;--yl:#ffc928;--pk:#e8336d;--paper:#fffdf6;
+ background:var(--paper);color:var(--ink);font-family:'Zilla Slab',Georgia,serif;font-size:15.5px;line-height:1.38;box-shadow:0 14px 44px rgba(0,0,0,.65);position:relative;overflow:hidden}
+#programme-body .p66::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;background:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.22) 42%,rgba(255,255,255,0) 54%)}
+#programme-body .p66 .cover{position:relative;height:430px;background:var(--or);overflow:hidden;color:#fff}
+#programme-body .p66 .cover .op{position:absolute;right:-120px;top:-60px;width:520px;height:520px;border-radius:50%;
+ background:repeating-radial-gradient(circle,var(--yl) 0 22px,var(--or) 22px 44px)}
+#programme-body .p66 .cover .op2{position:absolute;left:-90px;bottom:-110px;width:330px;height:330px;border-radius:50%;
+ background:repeating-radial-gradient(circle,var(--aq) 0 18px,var(--ink) 18px 36px)}
+#programme-body .p66 .cover .bar{position:absolute;left:0;right:0;top:0;height:34px;background:var(--ink);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font:700 13px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase}
+#programme-body .p66 .cover .bar b{color:var(--yl)}
+#programme-body .p66 .cover .mast{position:absolute;left:18px;right:18px;top:54px}
+#programme-body .p66 .cover h1{margin:0;font:800 clamp(52px,13.5vw,104px)/.82 'Barlow Condensed',Impact,sans-serif;text-transform:uppercase;color:#fff;letter-spacing:-.01em;text-shadow:5px 5px 0 var(--ink)}
+#programme-body .p66 .cover h1 span{color:var(--yl)}
+#programme-body .p66 .cover .strap{display:inline-block;margin-top:10px;background:var(--ink);color:#fff;font:700 17px 'Barlow Condensed';letter-spacing:.3em;text-transform:uppercase;padding:4px 12px 2px}
+#programme-body .p66 .cover .match{position:absolute;left:0;bottom:0;right:0;background:rgba(16,32,63,.94);color:#fff;padding:14px 18px 13px;display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px}
+#programme-body .p66 .cover .match .a{font:700 14px 'Barlow Condensed';letter-spacing:.24em;text-transform:uppercase;color:var(--yl)}
+#programme-body .p66 .cover .match .b{font:800 clamp(26px,6vw,40px)/1 'Barlow Condensed';text-transform:uppercase}
+#programme-body .p66 .cover .match .b em{font:400 .55em 'Alfa Slab One';color:var(--or);padding:0 .35em;vertical-align:.12em}
+#programme-body .p66 .cover .match .p{background:var(--yl);color:var(--ink);font:800 32px/1 'Barlow Condensed';padding:6px 12px 3px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;text-align:center}
+#programme-body .p66 .cover .match .p small{display:block;font:700 10px 'Barlow Condensed';letter-spacing:.2em}
+#programme-body .p66 .burst{position:absolute;right:20px;top:138px;width:132px;height:132px;display:grid;place-items:center;text-align:center;color:var(--ink);font:800 19px/.98 'Barlow Condensed';text-transform:uppercase;transform:rotate(9deg);z-index:3}
+#programme-body .p66 .burst svg{position:absolute;inset:0;width:100%;height:100%}
+#programme-body .p66 .burst span{position:relative}
+#programme-body .p66 .burst b{display:block;font:800 36px/.9 'Barlow Condensed'}
+#programme-body .p66 .stripe{height:12px;background:linear-gradient(90deg,var(--or) 0 25%,var(--yl) 25% 50%,var(--aq) 50% 75%,var(--pk) 75%)}
+#programme-body .p66 .body{padding:20px 22px 24px}
+#programme-body .p66 h2{margin:0 0 8px;font:800 31px/.9 'Barlow Condensed';text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:10px}
+#programme-body .p66 h2 i{font-style:normal;background:var(--or);color:#fff;font-size:15px;padding:3px 7px 1px;letter-spacing:.14em}
+#programme-body .p66 .sec{margin-bottom:20px}
+#programme-body .p66 .welcome{font:italic 400 17px/1.35 'Zilla Slab';border-left:8px solid var(--aq);padding:2px 0 2px 14px}
+#programme-body .p66 .field{background:#2b9a4a;background:linear-gradient(90deg,rgba(255,255,255,.07) 0 12.5%,transparent 12.5% 25%,rgba(255,255,255,.07) 25% 37.5%,transparent 37.5% 50%,rgba(255,255,255,.07) 50% 62.5%,transparent 62.5% 75%,rgba(255,255,255,.07) 75% 87.5%,transparent 87.5%),#2b9a4a;border:5px solid var(--ink);padding:10px 10px 6px;color:#fff}
+#programme-body .p66 .field .ttl{display:flex;justify-content:space-between;font:700 13px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}
+#programme-body .p66 .pitch .pl b{width:27px;height:27px;border-radius:5px;background:#fff;color:var(--ink);font:800 16px 'Barlow Condensed';display:grid;place-items:center;border-bottom:4px solid var(--or);padding-top:2px}
+#programme-body .p66 .pitch .pl.aw b{background:var(--ink);color:#fff;border-bottom-color:var(--yl)}
+#programme-body .p66 .pitch .gk b{background:var(--yl);color:var(--ink)}
+#programme-body .p66 .lists{margin-top:10px;font-size:14px}
+#programme-body .p66 .lists h4{margin:0 0 4px;font:800 21px/1 'Barlow Condensed';text-transform:uppercase;padding:3px 8px 1px;color:#fff}
+#programme-body .p66 .lists .hm h4{background:var(--or)}
+#programme-body .p66 .lists .aw h4{background:var(--ink)}
+#programme-body .p66 .lists h4 span{font:400 12px 'Zilla Slab';text-transform:none;opacity:.9;margin-left:4px;letter-spacing:0}
+#programme-body .p66 .lists li{border-bottom:1px solid #d7d3c4;padding:1px 0}
+#programme-body .p66 .lists li b{font:800 17px 'Barlow Condensed';color:var(--or);min-width:1.7em}
+#programme-body .p66 .lists .aw li b{color:var(--aq)}
+#programme-body .p66 .lists.simple{color:var(--ink)}
+#programme-body .p66 .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#programme-body .p66 .visitors{background:var(--ink);color:#fff;padding:14px 16px 12px;position:relative;overflow:hidden}
+#programme-body .p66 .visitors::before{content:"";position:absolute;right:-50px;top:-50px;width:150px;height:150px;border-radius:50%;background:repeating-radial-gradient(circle,var(--aq) 0 8px,transparent 8px 16px);opacity:.55}
+#programme-body .p66 .visitors h2{color:var(--yl);position:relative}
+#programme-body .p66 .visitors p{margin:0 0 6px;text-shadow:0 0 6px #10203f,0 0 3px #10203f;font-size:14.5px;position:relative}
+#programme-body .p66 .visitors .cap{font:700 12px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;color:var(--aq);position:relative}
+#programme-body .p66 table{width:100%;border-collapse:collapse;font-size:13.5px}
+#programme-body .p66 th{font:700 12px 'Barlow Condensed';letter-spacing:.14em;text-align:right;background:var(--ink);color:#fff;padding:4px 4px 2px}
+#programme-body .p66 th:first-child,#programme-body .p66 td:first-child{text-align:left}
+#programme-body .p66 td{padding:2px 4px;text-align:right;border-bottom:1px solid #ddd9c8}
+#programme-body .p66 tr.me td{background:var(--yl);font-weight:700}
+#programme-body .p66 td:nth-child(2){text-align:left}
+#programme-body .p66 th:nth-child(2){text-align:left}
+#programme-body .p66 td.pos{font:800 15px 'Barlow Condensed';color:var(--or);width:26px}
+#programme-body .p66 .wc{border:4px solid var(--ink);background:linear-gradient(135deg,#fff 0 55%,var(--yl) 55%);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+#programme-body .p66 .wc .big{font:800 62px/.8 'Barlow Condensed';color:var(--or);text-shadow:3px 3px 0 var(--ink);text-align:center}
+#programme-body .p66 .wc .big small{display:block;font:700 15px 'Barlow Condensed';letter-spacing:.2em;color:var(--ink);text-shadow:none}
+#programme-body .p66 .wc p{margin:0;font-size:14px}
+#programme-body .p66 .wc p b{font:800 18px 'Barlow Condensed';text-transform:uppercase;color:var(--ink);display:block}
+#programme-body .p66 .board{display:grid;gap:4px;margin:6px 0 8px;background:var(--ink);padding:6px}
+#programme-body .p66 .board i{background:#fff;font:800 15px 'Barlow Condensed';padding:2px 0 0;border-bottom:4px solid var(--or)}
+#programme-body .p66 .board i s{display:block;text-decoration:none;font:700 11px 'Barlow Condensed';color:var(--or)}
+#programme-body .p66 .key{font-size:12px;line-height:1.28}
+#programme-body .p66 .ads{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+#programme-body .p66 .ad{padding:12px 10px 10px;text-align:center;grid-column:span 2;min-height:130px;display:flex;flex-direction:column;justify-content:center}
+#programme-body .p66 .ad .big{font:800 33px/.88 'Barlow Condensed';text-transform:uppercase}
+#programme-body .p66 .ad .alfa{font:400 26px/1 'Alfa Slab One'}
+#programme-body .p66 .ad .sm{font-size:12.5px;margin-top:5px}
+#programme-body .p66 .ad .lab{font:700 11px 'Barlow Condensed';letter-spacing:.24em;text-transform:uppercase}
+#programme-body .p66 .ad.a1{background:var(--aq);color:#fff}
+#programme-body .p66 .ad.a2{background:var(--yl);color:var(--ink)}
+#programme-body .p66 .ad.a3{background:var(--pk);color:#fff}
+#programme-body .p66 .ad.a4{background:var(--ink);color:#fff;grid-column:span 3}
+#programme-body .p66 .ad.a4 .big{color:var(--yl)}
+#programme-body .p66 .ad.a5{background:#fff;border:5px solid var(--or);color:var(--ink);grid-column:span 3}
+#programme-body .p66 .ad.a5 .big{color:var(--or)}
+#programme-body .p66 .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:6px solid var(--ink);padding-top:12px}
+#programme-body .p66 .foot .n{font:800 20px 'Barlow Condensed';text-transform:uppercase}
+#programme-body .p66 .foot button{font:800 18px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;background:var(--or);color:#fff;border:0;padding:9px 26px 6px;cursor:pointer;box-shadow:4px 4px 0 var(--ink)}
+@media (max-width:560px){#programme-body .p46 .fix .vs{white-space:normal}
+#programme-body .p46 .twocol,#programme-body .p59 .cols2,#programme-body .p66 .two{grid-template-columns:1fr}
+#programme-body .p59 .ads{grid-template-columns:1fr 1fr}
+#programme-body .p59 .ad.wide{grid-column:span 2}
+#programme-body .p59 .cv-mid{grid-template-columns:90px 1fr}
+#programme-body .p66 .ads{grid-template-columns:1fr 1fr}
+#programme-body .p66 .ad,#programme-body .p66 .ad.a4,#programme-body .p66 .ad.a5{grid-column:span 1}
+#programme-body .lists{grid-template-columns:1fr}
+#programme-body .keylist{columns:1}
+#programme-body .p66 .burst{width:96px;height:96px;font-size:14px;top:150px}
+#programme-body .p66 .burst b{font-size:26px}
+#programme-body .p66 .cover{height:400px}}
+#programme-body h1::before,#programme-body h2::before{content:none}
+#programme-body .p46 .fix .vs{white-space:normal;text-wrap:balance}
+#programme-body .p66 .field .ttl{display:flex;justify-content:space-between;gap:14px;flex-wrap:nowrap;font-size:clamp(7.5px,1.45vw,11px);letter-spacing:.06em}#programme-body .p66 .field .ttl span{white-space:nowrap}
+#programme-body .keylist.progfix{display:block;columns:auto;margin:0;padding:0;list-style:none}
+#programme-body .keylist.progfix li{display:flex;gap:10px;padding:1px 0;border:0}
+#programme-body .keylist.progfix li b{flex:0 0 5.5em}
+#programme-body{display:block;text-transform:none;letter-spacing:normal;text-align:left;font-weight:400;font-style:normal;line-height:normal;color:#222;font-size:16px}
+#programme-body .pnote{font:italic 12px 'Old Standard TT',Georgia,serif;margin:4px 0 0;opacity:.8}
+#programme-body .kg1{margin-bottom:4px}
+#programme-body .kg1 h6{margin:6px 0 2px;font:600 11px 'Oswald',sans-serif;letter-spacing:.18em;text-transform:uppercase}
+#programme-body .keylist.progfix li b{min-width:5.5em}
+#programme-body a.pclose{font:600 11px 'Oswald',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:inherit;text-decoration:underline;cursor:pointer;padding:2px 4px}
+#programme-frame .prog-bar{position:sticky;top:0;z-index:60;text-align:right;height:0}
+#programme-frame .prog-bar a{position:relative;top:6px;right:8px;display:inline-block;font:600 11px 'Oswald',sans-serif;letter-spacing:.14em;text-transform:uppercase;background:rgba(20,17,15,.88);color:#e8dcc0;padding:3px 8px;text-decoration:none;border-radius:2px}
+/*PROG-CSS-END*/
+</style></head><body>
 <title>RetroMatch</title>
 <style>
 :root{
@@ -1647,10 +1910,10 @@ body.theme-programme #theme-pitch .pl .nm{top:19px; font-family:var(--t-cond); f
     <div id="club-detail-body" style="padding:18px 22px;"></div>
   </div>
 </div>
-<div id="programme-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:51; align-items:center; justify-content:center; padding:20px;">
-  <div style="max-width:620px; width:100%; max-height:86vh; overflow-y:auto; background:#e8dfc4; border:3px solid #3a3020; padding:0; font-family:var(--font-dos); color:#2a2418; box-shadow:0 0 0 6px #b8ac86;">
-    <div id="programme-body" style="padding:18px 22px;"></div>
-    <div style="text-align:center; padding:10px 0 16px;"><button id="programme-close">CLOSE</button></div>
+<div id="programme-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:51; align-items:center; justify-content:center; padding:12px;">
+  <div id="programme-frame" style="max-width:780px; width:100%; max-height:94vh; overflow-y:auto;">
+    <div class="prog-bar"><a href="#" id="programme-close">close &#10005;</a></div>
+    <div id="programme-body"></div>
   </div>
 </div>
 <div id="help-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:50; align-items:center; justify-content:center; padding:20px;">
@@ -9872,6 +10135,7 @@ function simulateDivisionWeek(div, occupied){
      would run. */
   var target = 2*(div.clubs.length-1);
   var pool = (occupied ? div.clubs.filter(function(c){ return !occupied[c.n]; }) : div.clubs.slice()).filter(function(c){ return div.table[c.n].p < target; });
+  var __progPlanned = progTakePlan(progDivKeyOf(div), pool); /* v324 : see the matchday programme's half-time key */
   /* REAL BUG FIX, PER DIRECT USER REPORT ("the vidiprinter has been reporting the same fixtures for the last
      few weeks... other than the score"): confirmed by direct reproduction, not just a code read -- 12 simulated
      weeks of a fresh game straight through this exact function showed Liverpool v Manchester United, Wolves v
@@ -9889,7 +10153,7 @@ function simulateDivisionWeek(div, occupied){
      function exists for is untouched, only the previously-nonexistent tie-breaking is fixed. */
   for (var si = pool.length - 1; si > 0; si--){ var sj = Math.floor(Math.random() * (si + 1)); var stmp = pool[si]; pool[si] = pool[sj]; pool[sj] = stmp; }
   pool.sort(function(a,b){ return div.table[a.n].p - div.table[b.n].p; });
-  var pairs = [];
+  var pairs = __progPlanned.slice();
   while (pool.length>=2){
     var a = pool.shift();
     var b = pool.shift();
@@ -30235,170 +30499,636 @@ function buildOpponentPreviewLineup(oppName, strength){
    real 1946-47 programme (or a Cup Final card decades earlier) laid it
    out, goalkeeper at the outer edge, forwards massed nearest the halfway
    line. Order matches formationSlotLabels : [GK,RB,LB,RH,CH,LH,OR,IR,CF,IL,OL]. */
-function pitchPlanRow(names, indices, mirror){
-  /* real shirt numbers (1-11), not just names : the field-plan diagram is
-     built from formationSlotLabels order, so a slot's index is its real
-     shirt number minus one. No tactical marker of any kind here any more :
-     a printed matchday programme, set days before kick-off, could never
-     have shown a manager's touchline wrinkle to the paying public.
-     FIXED A REAL BUG HERE: both teams share one pitch on this diagram, home
-     at the bottom attacking up the page, away at the top attacking down it
-     -- which means they're mirror images of each other, not identical
-     copies. A shirt number is assigned by ITS OWN team's attacking
-     direction (an outside-right, 7, plays on that team's right as THEY
-     attack), so home's right and away's right land on opposite sides of
-     the page. Printing both rows left-to-right in the same fixed order
-     (as this used to) put the away side's numbers on the wrong touchline
-     entirely -- 7 shown out on the left, 11 out on the right, the exact
-     reverse of where they actually line up. Mirroring the away row fixes
-     it, so shirt 7 always sits on the same physical side of the diagram
-     as the goal that team is actually attacking. */
-  var idxs = mirror ? indices.slice().reverse() : indices;
-  return '<div style="display:flex; justify-content:space-around; margin:6px 0;">'+idxs.map(function(i){
-    var label = (i+1)+'. '+(names[i]||'-').toUpperCase();
-    return '<span style="text-align:center; flex:1; padding:0 2px; font-size:13px; line-height:1.2;">'+label+'</span>';
-  }).join('')+'</div>';
+/*PROG-JS-START*/
+/* ================= v324 : ERA MATCHDAY PROGRAMMES =================
+   1946/1950 : a cheap folded sheet (2d), a plain numbered name list, club notes, a half-time scoreboard key.
+   1959      : a two-colour programme (3d), plain numbered list, pen portraits.
+   1966      : a glossy issue (6d), "Today's Visitors", and a pitch drawn in each side's REAL formation.
+   Everything printed is read from the save (table, results, squad, profiles, fixtures); nothing is repeated
+   boilerplate : the copy is chosen by a seeded pick from fact-based templates, keyed on this fixture. */
+var PROG_SKETCH = '<svg viewBox="0 0 600 190" aria-hidden="true">     <defs>      <pattern id="pgh1" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><line x1="0" y1="0" x2="0" y2="5" stroke="#241d17" stroke-width="1.1"/></pattern>      <pattern id="pgh2" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><line x1="0" y1="0" x2="0" y2="3" stroke="#241d17" stroke-width="1"/></pattern>      <pattern id="pgh3" width="8" height="4" patternUnits="userSpaceOnUse"><line x1="0" y1="2" x2="8" y2="2" stroke="#241d17" stroke-width=".8"/></pattern>      <pattern id="pgh4" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#241d17"/></pattern>     </defs>     <rect width="600" height="190" fill="#e5dbbb"/>     <g stroke="#241d17" stroke-width="1.2" fill="none"><path d="M0 28 q40 -6 80 0 t90 0 t90 0 t90 0 t90 0 t90 0" opacity=".5"/><path d="M0 40 q50 -5 100 0 t100 0 t100 0 t100 0 t100 0 t100 0" opacity=".4"/><path d="M0 52 q60 -4 120 0 t120 0 t120 0 t120 0 t120 0" opacity=".3"/></g>     <!-- hills -->     <path d="M0 108 Q60 66 140 92 T290 80 T440 90 T600 70 V128 H0Z" fill="url(#pgh2)" stroke="#241d17" stroke-width="1.5"/>     <!-- chimneys with smoke -->     <g fill="url(#pgh1)" stroke="#241d17" stroke-width="1.5"><rect x="22" y="48" width="9" height="62"/><rect x="48" y="62" width="8" height="48"/><rect x="545" y="52" width="10" height="58"/></g>     <g fill="none" stroke="#241d17" stroke-width="1.4" stroke-linecap="round"><path d="M27 46 q-6 -8 2 -14 t-2 -16 q8 -8 18 -8"/><path d="M52 60 q-5 -8 3 -12 t-2 -12 q6 -6 14 -6"/><path d="M550 50 q-6 -8 2 -13 t-2 -14 q8 -8 20 -8"/></g>     <!-- terraced houses -->     <g stroke="#241d17" stroke-width="1.2" fill="#e5dbbb"><path d="M60 110 V92 l12 -9 12 9 V110Z"/><path d="M84 110 V90 l12 -9 12 9 V110Z"/><path d="M108 110 V92 l12 -9 12 9 V110Z"/><path d="M470 110 V92 l12 -9 12 9 V110Z"/><path d="M494 110 V90 l12 -9 12 9 V110Z"/></g>     <!-- main stand -->     <g stroke="#241d17" stroke-width="2" stroke-linejoin="round">      <path d="M150 112 V70 H430 V112Z" fill="#e5dbbb"/>      <path d="M140 70 L160 48 H420 L440 70Z" fill="url(#pgh1)"/>      <path d="M150 70 H430" />      <rect x="150" y="76" width="280" height="12" fill="url(#pgh3)" stroke-width="1"/>      <path d="M150 112 L430 112" />     </g>          <!-- terrace crowd dots -->     <rect x="155" y="90" width="270" height="20" fill="url(#pgh4)"/>     <g stroke="#241d17" stroke-width="1.4"><path d="M190 90 V112 M230 90 V112 M270 90 V112 M310 90 V112 M350 90 V112 M390 90 V112"/></g>     <!-- Cowshed / open terrace left, covered end right -->     <g stroke="#241d17" stroke-width="1.6"><path d="M40 112 L96 112 L96 100 L56 100Z" fill="url(#pgh3)"/><path d="M458 112 H560 V94 H476Z" fill="url(#pgh3)"/><path d="M458 94 L560 94" stroke-width="2"/></g>     <!-- turnstile block -->     <g stroke="#241d17" stroke-width="1.6" fill="#e5dbbb"><rect x="104" y="96" width="30" height="16"/><path d="M104 96 l15 -10 15 10" fill="url(#pgh1)"/><rect x="114" y="102" width="10" height="10" fill="#241d17"/></g>     <!-- pitch foreground -->     <path d="M0 190 V128 H600 V190Z" fill="url(#pgh2)"/>     <path d="M0 128 H600" stroke="#241d17" stroke-width="2"/>               <!-- flag -->     <path d="M196 48 V28" stroke="#241d17" stroke-width="2"/><path d="M196 28 l22 5 -22 6Z" fill="#241d17"/>     <g fill="none" stroke="#241d17" stroke-width="1.2"><path d="M380 22 q6 -5 12 0 q6 -5 12 0 M410 14 q5 -4 10 0 q5 -4 10 0 M340 12 q5 -4 10 0 q5 -4 10 0"/></g>    </svg>';
+var PROG_BALL = '<svg viewBox="0 0 120 120" aria-hidden="true">       <circle cx="60" cy="60" r="54" fill="#f2ebd4" stroke="#1a1816" stroke-width="5"/>       <g fill="none" stroke="#1a1816" stroke-width="3"><path d="M10 40 Q60 62 110 40"/><path d="M8 80 Q60 58 112 80"/><path d="M42 8 Q30 60 42 112"/><path d="M78 8 Q90 60 78 112"/></g>       <g stroke="#b32a24" stroke-width="2.4" stroke-dasharray="3 3.5" fill="none"><path d="M10 40 Q60 62 110 40" transform="translate(0 -5)"/><path d="M8 80 Q60 58 112 80" transform="translate(0 5)"/></g>       <path d="M20 22 Q60 -2 100 22 Q60 14 20 22Z" fill="#b32a24" opacity=".0"/>      </svg>';
+var PROG_PLAN = {key:null, divs:{}};
+function progEra(){ var e = isSco() ? scoEra : gameEra; return e==='1966' ? '66' : e==='1959' ? '59' : '46'; }
+function progEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function progHash(s){ var h=2166136261; s=String(s); for (var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function progRng(seed){ var a=seed>>>0; return function(){ a=(a+0x6D2B79F5)>>>0; var t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+function progPickOne(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+function progShuffle(rng, arr){ var a=arr.slice(); for (var i=a.length-1;i>0;i--){ var j=Math.floor(rng()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+var PROG_WORDS = ['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+var PROG_ORD = ['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth','thirteenth','fourteenth','fifteenth','sixteenth','seventeenth','eighteenth','nineteenth','twentieth','twenty-first','twenty-second','twenty-third','twenty-fourth'];
+function progPl(n, w){ n=Math.round(n); return n+' '+w+(n===1?'':'s'); }
+function progNum(n, era){ n = Math.round(n); return (era==='46' && n>=0 && n<=12) ? PROG_WORDS[n] : String(n); }
+function progOrd(n, era){ n = Math.round(n); if (era==='46' && n>=1 && n<PROG_ORD.length) return PROG_ORD[n]; var s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function progFitStyle(text, em, max){
+  var L = 0; String(text).split(/\s+/).forEach(function(w){ if (w.length>L) L = w.length; });
+  var z = Math.round(L*em*100)/100;
+  return ' style="font-size:min('+max+'px,calc((min(100vw,780px) - 90px)/'+z+'))"';
 }
-function buildPitchPlanHTML(names, teamLabel, formationLine, forwardsFirst){
-  var rowsInOrder = [
-    pitchPlanRow(names, [0], forwardsFirst),
-    pitchPlanRow(names, [1,2], forwardsFirst),
-    pitchPlanRow(names, [3,4,5], forwardsFirst),
-    pitchPlanRow(names, [6,7,8,9,10], forwardsFirst)
+function progCap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function progTitle(s){ return String(s||'').toLowerCase().replace(/(^|[\s(])([a-z])/g, function(m,a,b){ return a+b.toUpperCase(); }); }
+var PROG_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var PROG_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+function progOrdDay(n){ var s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function progDateLong(d, withDay){ return (withDay===false?'':PROG_DAYS[d.getDay()]+', ')+progOrdDay(d.getDate())+' '+PROG_MONTHS[d.getMonth()]+', '+d.getFullYear(); }
+function progDateShort(d){ return PROG_DAYS[d.getDay()].slice(0,3)+' '+d.getDate()+' '+PROG_MONTHS[d.getMonth()].slice(0,3); }
+function progKO(d){ var k = String(kickoffTimeFor(d)||'3.00 P.M.').toLowerCase().replace(/\s+/g,' ').replace(/\.00\b/,'.0'); return k; }
+function progShapeOfKey(k){ if (typeof FORMATION_TIMELINE!=='undefined' && FORMATION_TIMELINE && FORMATION_TIMELINE[k]) return FORMATION_TIMELINE[k].shape; return k==='wm' ? 'wm' : 'pyr'; }
+function progOurShape(){ return eraPitchShapeKey(); }
+function progOppShape(opp){ return progShapeOfKey(clubFormation(opp)); }
+function progShapeName(shape){ return ERA_SHAPE_NAME[shape] || shape; }
+
+/* ---------- today's competition, kind of day ---------- */
+function progKind(f){
+  if (f.isFriendly) return f.isTrial ? 'trial' : 'friendly';
+  if (f.isLCup) return 'lcup';
+  if (f.isCup) return 'cup';
+  if (f.euroLeg || /cup winners|fairs|european|champion clubs|uefa/i.test(f.roundName||'')) return 'euro';
+  if (f.roundName) return 'other';
+  return 'league';
+}
+function progCompLabel(f){
+  var k = progKind(f);
+  if (k==='trial') return 'Trial match';
+  if (k==='friendly') return 'Friendly';
+  if (k==='cup') return (isSco() ? 'Scottish Cup' : 'F.A. Challenge Cup')+(f.roundName?', '+f.roundName.replace(/\s*\(.*\)\s*$/,function(m){ return ' '+m.trim(); }):'');
+  if (k==='lcup' || k==='euro' || k==='other') return f.roundName || 'Cup tie';
+  return (isSco() ? 'Scottish League' : 'Football League')+' · '+progTitle(currentDivisionLabel);
+}
+function progColours(name){
+  var c = (clubProfiles[name] && clubProfiles[name].colours) || (typeof clubColours1946!=='undefined' && clubColours1946[name]) || null;
+  return c ? progTitle(c) : null;
+}
+function progSortedTable(){
+  return Object.keys(table).map(function(n){ var t=table[n]; return Object.assign({name:n},t,{gd:t.f-t.a}); }).sort(function(a,b){ return b.pts-a.pts || b.gd-a.gd || b.f-a.f; });
+}
+function progResults(){
+  var out = [];
+  for (var i=0;i<fixtureIdx && i<fixtures.length;i++){
+    var g = fixtures[i]; if (!g.played || g.isFriendly || !g.res) continue;
+    var m = /^(\d+)-(\d+)/.exec(g.res); if (!m) continue;
+    var u = +m[1], t = +m[2];
+    out.push({i:i, opp:g.opp, us:u, them:t, home:!!g.home, o:u>t?'W':u<t?'L':'D', cup:!!g.isCup, round:g.roundName, lcup:!!g.isLCup});
+  }
+  return out;
+}
+
+/* ---------- the day plan : the other clubs' pairings, honoured by the sim ---------- */
+function progPlanKeyNow(){ return seasonLabel+'|'+fixtureIdx; }
+function progDivList(){
+  var L = [];
+  if (isSco()){ L.push({key:'own', title:progTitle(currentDivisionLabel), own:true}); return L; }
+  var ok = {'D1':'D1','D2':'D2','D3':'D3','D4':'D4','3S':'D3','3N':'D4'}[ourDivisionKey()], fc = (typeof fourthDivisionCreated!=='undefined' && fourthDivisionCreated);
+  var defs = [
+    {id:'D1', div:firstDivision, title:'First Division', skip:divisionTier===3},
+    {id:'D2', div:secondDivision, title:'Second Division', skip:divisionTier===2},
+    {id:'D3', div:thirdDivisionSouthBg, title:fc?'Third Division':'Third Division (South)', skip:weAreInThird('S')},
+    {id:'D4', div:thirdDivisionNorth, title:fc?'Fourth Division':'Third Division (North)', skip:weAreInThird('N')}
   ];
-  if (forwardsFirst) rowsInOrder.reverse();
-  var label = '<div style="text-align:center; font-weight:bold; font-size:14px; letter-spacing:1px;">'+teamLabel+'</div>'+
-              '<div style="text-align:center; font-size:11px; margin-bottom:2px;">'+formationLine+'</div>';
-  return forwardsFirst ? (rowsInOrder.join('') + label) : (label + rowsInOrder.join(''));
+  var ownPlaced = false;
+  defs.forEach(function(d){
+    if (d.id===ok){ L.push({key:'own', title:progTitle(currentDivisionLabel), own:true}); ownPlaced = true; return; }
+    if (d.skip || !d.div || !d.div.clubs) return;
+    L.push({key:d.id, div:d.div, title:d.title});
+  });
+  if (!ownPlaced) L.push({key:'own', title:progTitle(currentDivisionLabel), own:true});
+  return L;
 }
+function progDivKeyOf(div){
+  if (typeof firstDivision!=='undefined' && div===firstDivision) return 'D1';
+  if (typeof secondDivision!=='undefined' && div===secondDivision) return 'D2';
+  if (typeof thirdDivisionSouthBg!=='undefined' && div===thirdDivisionSouthBg) return 'D3';
+  if (typeof thirdDivisionNorth!=='undefined' && div===thirdDivisionNorth) return 'D4';
+  return null;
+}
+function progPairUp(pool, pOf, rng){
+  pool = progShuffle(rng, pool);
+  pool.sort(function(a,b){ return pOf(a) - pOf(b); });
+  var pairs = [];
+  while (pool.length>=2){ var a=pool.shift(), b=pool.shift(); pairs.push([a.n,b.n]); }
+  return pairs;
+}
+function progClearLeagueDay(f){
+  if (!f || progKind(f)!=='league') return false;
+  if (typeof cupRoundDates!=='undefined' && cupRoundDates){
+    var iso = isoOf(fixtureDate(fixtureIdx));
+    if (cupRoundDates.indexOf(iso)>=0) return false;
+  }
+  return true;
+}
+function progEnsurePlan(f){
+  if (!progClearLeagueDay(f)) return null;
+  var key = progPlanKeyNow();
+  if (PROG_PLAN.key===key) return PROG_PLAN;
+  PROG_PLAN = {key:key, divs:{}};
+  var occ = clubsOccupiedByCupOn(isoOf(fixtureDate(fixtureIdx)));
+  var rng = Math.random;
+  progDivList().forEach(function(d){
+    if (d.own){
+      var target = 2*rivals.length;
+      var pool = rivals.filter(function(r){ return r.n !== f.opp && !occ[r.n] && table[r.n] && table[r.n].p < target; });
+      PROG_PLAN.divs.own = progPairUp(pool, function(r){ return table[r.n].p; }, rng);
+    } else {
+      var dv = d.div, tg = 2*(dv.clubs.length-1);
+      var pl = dv.clubs.filter(function(c){ return !occ[c.n]; }).filter(function(c){ return dv.table[c.n].p < tg; });
+      PROG_PLAN.divs[d.key] = progPairUp(pl, function(c){ return dv.table[c.n].p; }, rng);
+    }
+  });
+  return PROG_PLAN;
+}
+/* called by the two league sims : takes the planned pairs whose clubs are still eligible out of the pool (in place) */
+function progTakePlan(key, pool){
+  /* the own-division sim (the vidiprinter) runs after finishMatch has stepped fixtureIdx on, the background divisions before it */
+  var okKey = PROG_PLAN.key === progPlanKeyNow() || (key==='own' && PROG_PLAN.key === seasonLabel+'|'+(fixtureIdx-1));
+  if (!key || !okKey || !PROG_PLAN.divs[key]) return [];
+  var planned = PROG_PLAN.divs[key]; delete PROG_PLAN.divs[key];
+  var byName = {}; pool.forEach(function(c){ byName[c.n] = c; });
+  var out = [];
+  planned.forEach(function(pr){
+    var a = byName[pr[0]], b = byName[pr[1]];
+    if (a && b && a!==b){ out.push([a,b]); delete byName[pr[0]]; delete byName[pr[1]]; }
+  });
+  for (var i=pool.length-1;i>=0;i--){ if (!byName[pool[i].n]) pool.splice(i,1); }
+  return out;
+}
+
+/* ---------- line-ups ---------- */
+function progOurXI(){
+  var ps;
+  if (lineupSlots && lineupSlots.length===11) ps = lineupSlots.map(function(s){ return squad.find(function(x){ return x.id===s.playerId; }) || null; });
+  else if (lineup && lineup.length===11){
+    var chosen = lineup.map(function(id){ return squad.find(function(x){ return x.id===id; }); }).filter(Boolean);
+    if (chosen.length!==11) return null;
+    ps = autoAssignSlotsForPlayers(chosen).map(function(r){ return r.player || null; });
+  } else return null;
+  return ps.length===11 ? ps : null;
+}
+function progOppXI(f){
+  try { var a = buildOpponentPreviewLineup(f.opp, f.s); if (a && a.length===11) return a; } catch(e){}
+  return null;
+}
+
+/* ---------- facts : each returns {k:kind, t:text} or null ---------- */
+function progContext(f){
+  var era = progEra();
+  var us = ourClubName, host = f.home ? us : f.opp, guest = f.home ? f.opp : us;
+  var rows = progSortedTable();
+  var rank = {}; rows.forEach(function(r,i){ rank[r.name]=i+1; });
+  var res = progResults();
+  var ctx = {era:era, f:f, us:us, opp:f.opp, host:host, guest:guest, rows:rows, rank:rank, res:res, kind:progKind(f), date:fixtureDate(fixtureIdx),
+             hostProf: clubProfiles[host]||null, oppProf: clubProfiles[f.opp]||null, usProf: clubProfiles[us]||null};
+  ctx.played = rows.reduce(function(s,r){ return s+r.p; },0);
+  ctx.rival = rivals.find(function(r){ return r.n===f.opp; }) || null;
+  ctx.xi = progOurXI();
+  ctx.ourShape = progOurShape(); ctx.oppShape = progOppShape(f.opp);
+  return ctx;
+}
+function progFacts(c, rng){
+  var E = c.era, F = [];
+  function add(k, v){ if (v) F.push({k:k, t:v}); }
+  function one(arr){ return progPickOne(rng, arr); }
+  var N = function(n){ return progNum(n, E); }, O = function(n){ return progOrd(n, E); };
+  var us=c.us, opp=c.opp, host=c.host, guest=c.guest, f=c.f;
+  var div = progTitle(currentDivisionLabel), hr = c.rows.find(function(r){ return r.name===host; }), ur = c.rows.find(function(r){ return r.name===us; }), orow = c.rows.find(function(r){ return r.name===opp; });
+  var leagueDay = c.kind==='league';
+  /* the grounds and the clubs */
+  if (c.hostProf && c.hostProf.ground && c.hostProf.founded){
+    add('ground', one([
+      'Founded in '+c.hostProf.founded+', '+host+' welcome visitors today to '+c.hostProf.ground+'.',
+      c.hostProf.ground+' is home to '+host+', a club dating from '+c.hostProf.founded+'.',
+      host+' (formed '+c.hostProf.founded+') play at '+c.hostProf.ground+'.'
+    ]));
+  }
+  if (c.hostProf && c.hostProf.nickname){
+    add('nick', one([
+      host+' are known to their followers as '+c.hostProf.nickname+'.',
+      'To the terraces, '+host+' are simply '+c.hostProf.nickname+'.'
+    ]));
+  }
+  if (c.oppProf && c.oppProf.nickname && c.oppProf.founded){
+    add('oppnick', one([
+      'The opposition, '+c.oppProf.nickname+', were formed in '+c.oppProf.founded+'.',
+      opp+' (known as '+c.oppProf.nickname+') date from '+c.oppProf.founded+'.'
+    ]));
+  }
+  if (c.rival && c.rival.mgr){
+    add('oppmgr', one([
+      opp+' are managed by '+c.rival.mgr+'.',
+      'In charge of '+opp+' is '+c.rival.mgr+'.',
+      'The visitors\' manager is '+c.rival.mgr+'.'
+    ]));
+  }
+  /* derby */
+  var rivalsHost = (c.hostProf && c.hostProf.localRivals) || [];
+  if (rivalsHost.indexOf(guest)>=0 || ((clubProfiles[guest]||{}).localRivals||[]).indexOf(host)>=0){
+    add('derby', one([
+      guest+' and '+host+' are near neighbours, and a local derby always draws a crowd.',
+      'A local meeting today : '+guest+' are among '+host+'\'s closest neighbours.'
+    ]));
+  }
+  /* league standing */
+  if (leagueDay && c.played>0 && hr){
+    var pos = c.rank[host];
+    add('stand', one([
+      host+' stand '+O(pos)+' in the '+div+', with '+N(hr.pts)+' point'+(hr.pts===1?'':'s')+' from '+N(hr.p)+' game'+(hr.p===1?'':'s')+'.',
+      'The table shows '+host+' '+O(pos)+', '+N(hr.pts)+' point'+(hr.pts===1?'':'s')+' from '+N(hr.p)+'.',
+      'After '+N(hr.p)+' match'+(hr.p===1?'':'es')+', '+host+' lie '+O(pos)+' with '+N(hr.pts)+'.'
+    ]));
+    var ld = c.rows[0];
+    if (ld && ld.name!==host && ld.name!==guest) add('leader', one([
+      ld.name+' head the '+div+' with '+N(ld.pts)+' point'+(ld.pts===1?'':'s')+' from '+N(ld.p)+'.',
+      'At the top, '+ld.name+' have '+N(ld.pts)+' point'+(ld.pts===1?'':'s')+'.'
+    ]));
+    add('goals', one([
+      host+' have scored '+N(hr.f)+' and conceded '+N(hr.a)+' in '+N(hr.p)+' match'+(hr.p===1?'':'es')+'.',
+      'Goals so far for '+host+' : '+N(hr.f)+' for, '+N(hr.a)+' against.'
+    ]));
+    if (orow && opp!==host) add('oppstand', one([
+      opp+' arrive '+O(c.rank[opp])+' in the table, '+N(orow.pts)+' point'+(orow.pts===1?'':'s')+' from '+N(orow.p)+' game'+(orow.p===1?'':'s')+'.',
+      'The visitors sit '+O(c.rank[opp])+' with '+N(orow.pts)+'.'
+    ]));
+    var left = fixtures.slice(fixtureIdx+1).filter(function(g){ return !g.isFriendly && !g.isCup && !g.isLCup && !g.roundName; }).length;
+    if (left>0) add('remain', one([
+      N(left)+' league match'+(left===1?'':'es')+' remain after today.',
+      (left===1?'There is one League fixture still to come once today\'s is played.':'There are '+N(left)+' League fixtures still to come once today\'s is played.')
+    ]));
+  }
+  /* results and form */
+  var last5 = c.res.slice(-5);
+  if (last5.length>=2){
+    var w=last5.filter(function(r){return r.o==='W';}).length, d=last5.filter(function(r){return r.o==='D';}).length, l=last5.length-w-d;
+    add('form', one([
+      'In '+us+'\'s last '+N(last5.length)+' matches : won '+N(w)+', drawn '+N(d)+', lost '+N(l)+'.',
+      'Over their last '+N(last5.length)+' games '+us+' have won '+N(w)+', drawn '+N(d)+' and lost '+N(l)+'.'
+    ]));
+    var run = 0; for (var i=c.res.length-1;i>=0 && c.res[i].o!=='L'; i--) run++;
+    if (run>=3) add('unbeaten', one([us+' have not been beaten in '+N(run)+' matches.', 'An unbeaten run of '+N(run)+' for '+us+'.']));
+    var wins = 0; for (var j=c.res.length-1;j>=0 && c.res[j].o==='W'; j--) wins++;
+    if (wins>=2) add('wins', one([us+' have won their last '+N(wins)+' in a row.', N(wins)+' successive wins for '+us+' going into today.']));
+    var lr = c.res[c.res.length-1];
+    add('lastres', one([
+      'Last time out '+us+' '+(lr.o==='W'?'won':lr.o==='D'?'drew':'lost')+' '+lr.us+'–'+lr.them+' '+(lr.home?'at home to ':'away to ')+lr.opp+'.',
+      us+'\'s last result : '+lr.us+'–'+lr.them+' '+(lr.home?'v. ':'at ')+lr.opp+'.'
+    ]));
+  }
+  var h2h = headToHead && headToHead[opp];
+  if (h2h && h2h.score){
+    var sc = h2h.score.split('-'), who = h2h.res==='win' ? us+' won' : h2h.res==='loss' ? opp+' won' : 'honours were even';
+    add('h2h', one([
+      'When the clubs last met ('+h2h.seasonLabel+') the score was '+sc[0]+'–'+sc[1]+' ('+us+' first) and '+who+'.',
+      'The last meeting with '+opp+' ('+h2h.seasonLabel+'), '+us+' '+sc[0]+'–'+sc[1]+': '+who+'.'
+    ]));
+  }
+  /* cup */
+  var cupRun = c.res.filter(function(r){ return r.cup; });
+  if (c.kind==='cup' && cupRun.length){
+    add('cuprun', one([
+      'The road to today : '+cupRun.map(function(r){ return (r.round||'')+', '+r.us+'–'+r.them+' '+(r.home?'v.':'at')+' '+r.opp; }).join('; ')+'.',
+      us+' have reached today\'s tie with '+N(cupRun.length)+' cup result'+(cupRun.length===1?'':'s')+' behind them : '+cupRun.map(function(r){ return r.us+'–'+r.them+' '+(r.home?'v.':'at')+' '+r.opp; }).join(', ')+'.'
+    ]));
+  }
+  if (c.kind==='cup' || c.kind==='lcup' || c.kind==='euro'){
+    if (f.roundName) add('round', one([
+      'Today\'s tie is in the '+f.roundName+'.',
+      'The competition today : '+f.roundName+'.'
+    ]));
+  }
+  /* squad */
+  var sq = squad.slice();
+  var scorers = sq.filter(function(p){ return (p.goalsSeason||0)>0; }).sort(function(a,b){ return b.goalsSeason-a.goalsSeason; });
+  if (scorers.length) add('scorer', one([
+    scorers[0].n+' leads the '+us+' scorers with '+N(scorers[0].goalsSeason)+' goal'+(scorers[0].goalsSeason===1?'':'s')+' this season.',
+    'Top of the '+us+' scoring list : '+scorers[0].n+', '+N(scorers[0].goalsSeason)+'.'
+  ]));
+  var inj = sq.filter(function(p){ return (p.injuredWeeks||0)>0; });
+  if (inj.length){
+    var p0 = inj[0];
+    add('inj', one([
+      p0.n+' is still receiving treatment and will be missed'+(inj.length>1 ? ' ; '+N(inj.length-1)+' other'+(inj.length>2?'s':'')+' on the injury list' : '')+'.',
+      'The trainer reports '+p0.n+' not yet fit'+(inj.length>1 ? ', and '+N(inj.length-1)+' more on the list' : '')+'.'
+    ]));
+  } else {
+    add('inj', one([ 'The trainer has no injuries to report.', 'No names on the injury list this week.', 'The treatment room is empty today.' ]));
+  }
+  if (c.xi){
+    var xi = c.xi.filter(Boolean);
+    if (xi.length===11){
+      var avg = Math.round(xi.reduce(function(s,p){ return s+p.age; },0)/11);
+      var young = xi.slice().sort(function(a,b){ return a.age-b.age; })[0], old = xi.slice().sort(function(a,b){ return b.age-a.age; })[0];
+      add('ages', one([
+        'The average age of today\'s eleven is '+N(avg)+'.',
+        young.n+' is the youngest of '+us+'\'s eleven, at '+N(young.age)+'.',
+        old.n+', at '+N(old.age)+', is the senior man of the side.'
+      ]));
+      var capd = xi.filter(function(p){ return (p.caps||0)>0; }).sort(function(a,b){ return b.caps-a.caps; })[0];
+      if (capd) add('caps', one([
+        capd.n+' brings '+N(capd.caps)+' cap'+(capd.caps===1?'':'s')+(capd.nation?' for '+capd.nation:'')+' into the side.',
+        'Capped '+N(capd.caps)+' time'+(capd.caps===1?'':'s')+(capd.nation?' by '+capd.nation:'')+', '+capd.n+' is in the eleven.'
+      ]));
+      var appd = xi.filter(function(p){ return (p.apps||0)>0; }).sort(function(a,b){ return b.apps-a.apps; })[0];
+      if (appd) add('apps', one([
+        appd.n+' has made '+N(appd.apps)+' appearance'+(appd.apps===1?'':'s')+' this season.',
+        'Ever-present figure : '+appd.n+', with '+N(appd.apps)+' game'+(appd.apps===1?'':'s')+' to his name this season.'
+      ]));
+    }
+  }
+  if (seasonHistory && seasonHistory.length){
+    var sh = seasonHistory[seasonHistory.length-1];
+    if (sh && sh.position) add('lastseason', one([
+      'Last season ('+sh.label+') '+us+' finished '+O(sh.position)+'.',
+      'In '+sh.label+' the club ended '+O(sh.position)+'.'
+    ]));
+  }
+  /* formations as played */
+  add('shapes', one([
+    us+' line up in the '+progShapeName(c.ourShape)+', '+opp+' in the '+progShapeName(c.oppShape)+'.',
+    'The shapes today : '+us+' '+progShapeName(c.ourShape)+', '+opp+' '+progShapeName(c.oppShape)+'.'
+  ]));
+  /* ahead */
+  var nh = progNextHome();
+  if (nh) add('nexthome', one([
+    'Our next home match is against '+nh.opp+' on '+progDateLong(nh.d)+'.',
+    'Home again on '+progDateShort(nh.d)+' : '+nh.opp+' are the visitors.'
+  ]));
+  return F;
+}
+function progNextHome(){
+  for (var i=fixtureIdx+1;i<fixtures.length;i++){ var g=fixtures[i]; if (g.home && !g.isFriendly) return {opp:g.opp, d:fixtureDate(i), g:g}; }
+  return null;
+}
+/* choose n facts of different kinds, preferring `want` kinds first */
+function progChoose(F, rng, n, want, avoid){
+  var used = {}, out = [];
+  (avoid||[]).forEach(function(k){ used[k]=true; });
+  (want||[]).forEach(function(k){ if (out.length>=n) return; var c = F.filter(function(x){ return x.k===k && !used[x.k]; }); if (c.length){ out.push(c[0]); used[k]=true; } });
+  progShuffle(rng, F).forEach(function(x){ if (out.length<n && !used[x.k]){ out.push(x); used[x.k]=true; } });
+  return out;
+}
+
+/* ---------- today's other matches (the half-time key) ---------- */
+function progKeyGroups(f){
+  var plan = progEnsurePlan(f); if (!plan) return null;
+  var cap = {'46':44, '59':33, '66':26}[progEra()], groups = [], L = progDivList(), total = 0;
+  L.forEach(function(d){
+    var pairs = (plan.divs[d.key] || []).map(function(p){ return {a:p[0], b:p[1]}; });
+    if (d.own) pairs = pairs.concat([{a:f.home?ourClubName:f.opp, b:f.home?f.opp:ourClubName, us:true}]);
+    if (d.own) pairs.sort(function(x,y){ return (y.us?1:0)-(x.us?1:0); });
+    groups.push({title:d.title, pairs:pairs, own:!!d.own});
+  });
+  groups = groups.filter(function(g){ return g.pairs.length; });
+  var keep = [], used = 0;
+  groups.forEach(function(g){ if (g.own || used+g.pairs.length<=cap){ keep.push(g); used += g.pairs.length; } });
+  var n = 0; keep.forEach(function(g){ g.pairs.forEach(function(p){ p.l = progLetter(n++); }); });
+  return keep;
+}
+function progLetter(i){ return i<26 ? String.fromCharCode(65+i) : String.fromCharCode(97+(i-26)%26); }
+
+/* ---------- renderers ---------- */
+function progPitchPos(shape, i, home){
+  var p = ERA_PITCH[shape][i]; var depth = 4 + (91-p[1])/73*43; var lat = p[0];
+  return home ? {left:depth, top:lat} : {left:100-depth, top:100-lat};
+}
+function progPitchHTML(c, ours, theirs){
+  var homeShape = c.f.home ? c.ourShape : c.oppShape, awayShape = c.f.home ? c.oppShape : c.ourShape;
+  var h = '<div class="pitch" data-home-shape="'+homeShape+'" data-away-shape="'+awayShape+'">'
+   + '<svg viewBox="0 0 120 70" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="rgba(255,255,255,.85)" stroke-width=".7" vector-effect="non-scaling-stroke"><rect x="2" y="2" width="116" height="66"/><path d="M60 2 V68"/><circle cx="60" cy="35" r="8.5"/><rect x="2" y="17" width="16" height="36"/><rect x="2" y="26" width="6" height="18"/><rect x="102" y="17" width="16" height="36"/><rect x="112" y="26" width="6" height="18"/><path d="M18 29 a8 8 0 0 1 0 12 M102 29 a8 8 0 0 0 0 12"/></g><g fill="rgba(255,255,255,.85)"><circle cx="60" cy="35" r=".9"/><circle cx="12" cy="35" r=".7"/><circle cx="108" cy="35" r=".7"/></g></svg>';
+  [[true,homeShape],[false,awayShape]].forEach(function(s){
+    for (var i=0;i<11;i++){ var pos = progPitchPos(s[1], i, s[0]);
+      h += '<div class="pl '+(s[0]?'hm':'aw')+(i===0?' gk':'')+'" data-side="'+(s[0]?'home':'away')+'" data-shirt="'+(i+1)+'" style="left:'+pos.left.toFixed(1)+'%;top:'+pos.top.toFixed(1)+'%"><b>'+(i+1)+'</b></div>'; }
+  });
+  return h+'</div>';
+}
+function progListsHTML(c, homeNames, awayNames, hTitle, hNote, aTitle, aNote){
+  function li(arr){ var o=''; for (var i=0;i<11;i++) o += '<li><b>'+(i+1)+'.</b><span>'+progEsc(arr && arr[i] ? arr[i] : '—')+'</span></li>'; return o; }
+  return '<div class="lists"><div class="hm"><h4>'+progEsc(hTitle)+(hNote?' <span>'+progEsc(hNote)+'</span>':'')+'</h4><ol>'+li(homeNames)+'</ol></div><div class="aw"><h4>'+progEsc(aTitle)+(aNote?' <span>'+progEsc(aNote)+'</span>':'')+'</h4><ol>'+li(awayNames)+'</ol></div></div>';
+}
+function progTableHTML(c, rowsN, withGD){
+  if (c.played<=0) return '';
+  var centre = c.rank[c.host] ? c.host : c.us; var pos = c.rank[centre]; if (!pos) return '';
+  var n = c.rows.length, start = Math.max(0, Math.min(n-rowsN, pos-1-Math.floor(rowsN/2)));
+  var sl = c.rows.slice(start, start+rowsN), o = '<table><thead><tr>'+(withGD?'<th></th>':'')+'<th>Club</th><th>P</th>'+(withGD?'<th>GD</th>':'')+'<th>Pts</th></tr></thead><tbody>';
+  sl.forEach(function(r,i){
+    var rk = start+i+1, me = r.name===centre;
+    var gd = r.f-r.a; var gds = gd>0?'+'+gd:gd<0?'\u2212'+Math.abs(gd):'0';
+    o += '<tr'+(me?' class="me"':'')+'>'+(withGD?'<td class="pos">'+rk+'</td>':'')+'<td>'+(withGD?'':rk+' ')+progEsc(r.name)+'</td><td>'+r.p+'</td>'+(withGD?'<td>'+gds+'</td>':'')+'<td>'+r.pts+'</td></tr>';
+  });
+  return o+'</tbody></table>';
+}
+function progKeyHTML(c, groups, mode){
+  if (!groups) return '';
+  var board = '', key = '';
+  groups.forEach(function(g){ g.pairs.forEach(function(p){ board += '<i>'+p.l+'<s>– –</s></i>'; }); });
+  groups.forEach(function(g){
+    key += '<div class="kg1"><h6>'+progEsc(g.title)+'</h6><ul class="keylist">';
+    g.pairs.forEach(function(p){ key += '<li'+(p.us?' class="us"':'')+' data-a="'+progEsc(p.a)+'" data-b="'+progEsc(p.b)+'"><b>'+p.l+'</b><span>'+progEsc(p.a)+' v '+progEsc(p.b)+(p.us?' (this match)':'')+'</span></li>'; });
+    key += '</ul></div>';
+  });
+  var total = groups.reduce(function(s,g){ return s+g.pairs.length; },0);
+  return '<div class="board hts" style="grid-template-columns:repeat('+Math.min(13,Math.max(6,Math.ceil(total/(mode==='46'?2:2))))+',1fr)">'+board+'</div><div class="key" data-total="'+total+'">'+key+'</div>';
+}
+function progFixturesHTML(c){
+  var o = '<ul class="keylist progfix">', n = 0;
+  for (var i=fixtureIdx+1;i<fixtures.length && n<6;i++){ var g=fixtures[i]; if (g.isFriendly) continue;
+    o += '<li><b>'+progEsc(progDateShort(fixtureDate(i)))+'</b><span>'+(g.home?'v. ':'at ')+progEsc(g.opp)+(g.roundName?' ('+progEsc(g.roundName)+')':'')+'</span></li>'; n++; }
+  return n ? o+'</ul>' : '';
+}
+function progStrength(p){
+  var at = p.attrs || p, names = {shooting:'shooting', passing:'passing', tackling:'tackling', heading:'heading', pace:'pace', stamina:'stamina', handling:'handling'}, best = null;
+  Object.keys(names).forEach(function(k){ if (p.slot==='GK' || p.pos==='Goalkeeper' ? k!=='handling' : k==='handling') return; var v = at[k]; if (typeof v==='number' && (!best || v>best.v)) best = {n:names[k], v:v}; });
+  return best && best.v>=14 ? best : null;
+}
+function progPortraits(c, rng){
+  if (!c.xi) return [];
+  function one2(a){ return progPickOne(rng, a); }
+  var out = [];
+  var pick = progShuffle(rng, c.xi.map(function(p,i){ return {p:p,i:i}; }).filter(function(x){ return x.p; }));
+  pick.slice(0,3).sort(function(a,b){ return a.i-b.i; }).forEach(function(x){
+    var p = x.p, bits = [], N = function(n){ return String(Math.round(n)); };
+    var mine = (p.seasonHistory||[]).filter(function(h){ return h.club===c.us; });
+    var other = (p.seasonHistory||[]).filter(function(h){ return h.club && h.club!==c.us; }).slice(-1)[0];
+    var facts = [];
+    if ((p.goalsSeason||0)>0) facts.push(p.n+' has scored '+N(p.goalsSeason)+' this season in '+N(p.apps||0)+' appearance'+(p.apps===1?'':'s')+'.');
+    else if ((p.apps||0)>0) facts.push('Has played '+N(p.apps)+' time'+(p.apps===1?'':'s')+' for the club this season.');
+    if ((p.caps||0)>0) facts.push('Capped '+N(p.caps)+' time'+(p.caps===1?'':'s')+(p.nation?' by '+p.nation:'')+'.');
+    else if (p.nation && p.nation!=='England' && !isSco()) facts.push('A '+p.nation+' player.');
+    if (mine.length) facts.push('In his '+progOrd(mine.length+1,'59')+' season with the club.');
+    if (other && other.apps) facts.push('Before joining : '+N(other.apps)+' game'+(other.apps===1?'':'s')+(other.goals?' and '+N(other.goals)+' goal'+(other.goals===1?'':'s'):'')+' for '+other.club+' in '+other.label+'.');
+    if ((p.motmCount||0)>0) facts.push('Man of the match '+N(p.motmCount)+' time'+(p.motmCount===1?'':'s')+' this term.');
+    var q = progStrength(p); if (q) facts.push(one2([ 'His best quality is '+q.n+' ('+N(q.v)+' out of 20).', 'Strongest suit : '+q.n+', rated '+N(q.v)+'.' ]));
+    if (!facts.length) facts.push('Wears the No. '+(x.i+1)+' shirt today, aged '+N(p.age)+'.');
+    out.push({no:x.i+1, name:p.n, st:(p.pos||'')+' · Age '+N(p.age), text:progShuffle(rng, facts).slice(0,2).join(' ')});
+  });
+  return out;
+}
+function progVisitors(c, rng){
+  var E='66', f=c.f, opp=c.opp, byUs = !f.home, team = byUs ? c.us : opp;
+  var P = byUs ? clubProfiles[c.us] : c.oppProf, R = byUs ? null : c.rival, shape = byUs ? c.ourShape : c.oppShape;
+  var mgr = byUs ? (manager && manager.name && manager.name!=='Manager' ? manager.name : null) : (R && R.mgr);
+  var cap = progEsc(team)+(P&&P.founded?' · Founded '+P.founded:'')+(P&&P.nickname?' · '+progEsc(P.nickname):'');
+  var S = []; try { S = byUs ? squad : (ensureClubSquad(opp) || []); } catch(e){}
+  var sents = [];
+  function one(arr){ return progPickOne(rng, arr); }
+  var sh = progShapeName(shape);
+  if (mgr) sents.push(one(['Manager '+mgr+' has the visitors playing a '+sh+'.', mgr+'\'s side line up in a '+sh+' today.', 'The visitors, under '+mgr+', favour the '+sh+'.']));
+  else sents.push(one([team+' arrive in a '+sh+'.', 'The visitors line up in a '+sh+'.']));
+  var orow = c.rows.find(function(r){ return r.name===team; });
+  if (orow && orow.p>0) sents.push(one([
+    'They are '+progOrd(c.rank[team],E)+' in the table with '+progPl(orow.pts,'point')+' from '+Math.round(orow.p)+', having scored '+Math.round(orow.f)+' and let in '+Math.round(orow.a)+'.',
+    'Currently '+progOrd(c.rank[team],E)+', '+progPl(orow.pts,'point')+' from '+progPl(orow.p,'game')+'.',
+    progPl(orow.f,'goal')+' scored and '+Math.round(orow.a)+' conceded so far puts them '+progOrd(c.rank[team],E)+'.'
+  ]));
+  var h2h = headToHead && headToHead[opp];
+  if (h2h && h2h.score){ var s2=h2h.score.split('-'); sents.push(one([
+    'When the sides last met ('+h2h.seasonLabel+') it finished '+c.us+' '+s2[0]+', '+opp+' '+s2[1]+'.',
+    'Last meeting : '+h2h.seasonLabel+', '+c.us+' '+s2[0]+'–'+s2[1]+'.'
+  ])); }
+  var sc = S.filter(function(p){ return (p.goalsSeason||0)>0; }).sort(function(a,b){ return b.goalsSeason-a.goalsSeason; })[0];
+  if (sc) sents.push(one([ 'Watch '+sc.n+', who has '+Math.round(sc.goalsSeason)+' goal'+(Math.round(sc.goalsSeason)===1?'':'s')+' this season.', sc.n+' leads their scoring with '+Math.round(sc.goalsSeason)+'.' ]));
+  var star = S.slice().sort(function(a,b){ return (b.rep-a.rep) || (b.ca-a.ca); })[0];
+  if (star && star.n) sents.push(one([ 'The best-known name in their side is '+star.n+(star.age?', aged '+Math.round(star.age):'')+'.', 'Their man to watch : '+star.n+(star.pos?', '+String(star.pos).toLowerCase():'')+'.' ]));
+  var capd = S.filter(function(p){ return (p.caps||0)>0; }).sort(function(a,b){ return b.caps-a.caps; })[0];
+  if (capd) sents.push(capd.n+' has '+Math.round(capd.caps)+' cap'+(Math.round(capd.caps)===1?'':'s')+((capd.nation||capd.nat)?' for '+(capd.nation||capd.nat):'')+'.');
+  if (P && P.localRivals && P.localRivals.indexOf(byUs?opp:c.us)>=0) sents.push('The two clubs are local rivals.');
+  var chosen = sents.slice(0,1).concat(progShuffle(rng, sents.slice(1)).slice(0,2));
+  return {cap:cap, paras:chosen};
+}
+function progBurst(c, rng){
+  var f = c.f, k = c.kind;
+  if (k==='cup') return [progEsc(isSco()?'Scottish<br>Cup':'F.A.<br>Cup'), progCapRound(f)];
+  if (k==='lcup' || k==='euro') return [progEsc((f.roundName||'Cup').split(',')[0]), ''];
+  if (c.era==='66' && seasonLabel==='1966-67') return ['England<br>world<br>champions','1966'];
+  var hr = c.rows[0];
+  if (k==='league' && c.played>0 && hr && hr.name===c.us) return ['Top of<br>the<br>table',''];
+  if (k==='friendly' || k==='trial') return [k==='trial'?'Trial<br>match':'Friendly',''];
+  return ['Season<br>'+progEsc(seasonLabel.replace('-','–')),''];
+}
+function progCapRound(f){ return progEsc((f.roundName||'').replace(/\s*\(.*\)/,'')); }
+function progNo(){
+  var n = 0; for (var i=0;i<=fixtureIdx && i<fixtures.length;i++){ var g=fixtures[i]; if (g.home && !g.isFriendly) n++; }
+  return Math.max(1,n);
+}
+var PROG_PRICE = {'46':['2d.','3d.'], '59':['3d.','4d.'], '66':['6d.','9d.']};
+function progPrice(c){ return PROG_PRICE[c.era][(c.kind==='cup'||c.kind==='lcup'||c.kind==='euro')?1:0]; }
+function progCloseHTML(){ return '<a href="#" class="pclose" data-prog-close="1">close ✕</a>'; }
+
+function progBuild46(c, rng, F){
+  var f=c.f, d=c.date, ko=progKO(d), season = seasonLabel.replace('-','–');
+  var ground = cupVenueText(f).split(',')[0];
+  var notes = progChoose(F, rng, 3, [], ['inj','shapes','nexthome']);
+  var inj = F.filter(function(x){ return x.k==='inj'; })[0];
+  var home = f.home ? ourClubName : f.opp, away = f.home ? f.opp : ourClubName;
+  var ourN = (c.xi||[]).map(function(p){ return p ? p.n : null; }), oppN = progOppXI(f) || [];
+  var hN = f.home ? ourN : oppN, aN = f.home ? oppN : ourN;
+  var hc = progColours(home), ac = progColours(away);
+  var groups = progKeyGroups(f);
+  var o = '<article class="p46" data-era="46" data-kind="'+c.kind+'">';
+  o += '<section class="pg"><div class="toprow"><div class="price"><small>PRICE</small>'+progPrice(c)+'</div><div class="lab">Season '+progEsc(season)+' &nbsp;·&nbsp; No. '+progNo()+'</div></div>'
+    + '<div class="mast"><h1'+progFitStyle(home,0.74,76)+'>'+progEsc(home)+'</h1><div class="fc">Football Club</div></div><div class="banner">Official Programme</div>'
+    + '<div class="sketch">'+PROG_SKETCH+'<div class="cap">The '+progEsc(home)+' ground'+(ground?', '+progEsc(ground):'')+'</div></div>'
+    + '<div class="fix"><div class="date">'+progDateLong(d)+'</div><div class="vs">'+progEsc(home)+' <em>v.</em> '+progEsc(away)+'</div><div class="lab">'+progEsc(progCompLabel(f))+' · Kick-off '+progEsc(ko)+'</div></div>'
+    + '<div class="pageno">— 1 —</div></section><div class="fold"><span>fold</span></div>';
+  o += '<section class="pg"><h3>The teams</h3><div class="field"><div class="ttl">'+progEsc(home)+(hc?' ('+progEsc(hc)+')':'')+' &nbsp;—&nbsp; '+progEsc(away)+(ac?' ('+progEsc(ac)+')':'')+'</div>'
+    + progListsHTML(c, hN, aN, home, hc?'('+hc+')':'', away, ac?'('+ac+')':'') + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div>'
+    + '<div class="twocol"><div class="notes" style="padding-right:12px"><h2>Notes from the Club</h2>'
+    + notes.map(function(n){ return '<p data-k="'+n.k+'">'+progEsc(n.t)+'</p>'; }).join('')
+    + (inj ? '<h5>Trainer\'s report</h5><p data-k="inj">'+progEsc(inj.t)+'</p>' : '') + '</div>'
+    + '<div>'+(progTableHTML(c,4,false) ? '<h3>'+progEsc(progTitle(currentDivisionLabel))+' — nearby</h3>'+progTableHTML(c,4,false)+'<div style="font:italic 10.5px \'Old Standard TT\';margin-top:3px">Two points for a win. One for a draw.</div>' : '')+'</div></div>'
+    + '<div class="pageno">— 2 &amp; 3 —</div></section><div class="fold"><span>fold</span></div>';
+  o += '<section class="pg">';
+  if (groups){
+    o += '<h3>Half-time scoreboard — how to read it</h3><p style="margin:0 0 5px;font-size:12.5px;text-align:justify">The half-time scores of the other matches are hung on the board at the ground in the order of the letters printed below. Look for the letter against the match you want, then read off the score.</p>'+progKeyHTML(c, groups, '46');
+  } else {
+    o += '<h3>Fixtures to come</h3>'+progFixturesHTML(c);
+  }
+  var nh = progNextHome();
+  o += (nh ? '<div class="next">Next home match: v. '+progEsc(nh.opp)+' &nbsp;·&nbsp; '+progEsc(progDateLong(nh.d))+'</div>' : '')+'<div class="closer">'+progCloseHTML()+'</div><div class="pageno">— 4 —</div></section></article>';
+  return o;
+}
+function progBuild59(c, rng, F){
+  var f=c.f, d=c.date, ko=progKO(d), season = seasonLabel.replace('-','–');
+  var home = f.home ? ourClubName : f.opp, away = f.home ? f.opp : ourClubName;
+  var ourN = (c.xi||[]).map(function(p){ return p ? p.n : null; }), oppN = progOppXI(f) || [];
+  var hN = f.home ? ourN : oppN, aN = f.home ? oppN : ourN;
+  var hc = progColours(home), ac = progColours(away);
+  var ground = cupVenueText(f).split(',')[0];
+  var nick = (clubProfiles[home]||{}).nickname;
+  var intro = progChoose(F, rng, 1, ['derby','round','stand','form'], ['inj'])[0];
+  var pen = progPortraits(c, rng);
+  var groups = progKeyGroups(f);
+  var nh = progNextHome();
+  var o = '<article class="p59" data-era="59" data-kind="'+c.kind+'"><header class="cover"><div class="stripes"></div><div class="cv-in">'
+   + '<div class="cv-top"><span>Official Programme</span><span>Season '+progEsc(season)+'</span></div>'
+   + '<div class="plate"><h1'+progFitStyle(home,1.0,70)+'>'+progEsc(home)+'</h1><div class="fcl">Football Club</div>'+(nick?'<div class="scr">'+progEsc(nick)+'</div>':'')+'</div>'
+   + '<div class="cv-mid"><div class="ball">'+PROG_BALL+'</div><div class="cv-fix"><div class="d">'+progDateLong(d)+'</div><div class="v">'+progEsc(home)+' <em>v.</em> '+progEsc(away)+'</div><div class="k">'+progEsc(progCompLabel(f))+' · Kick-off '+progEsc(ko)+'</div></div></div>'
+   + '<div class="cv-foot"><span>'+progEsc(ground||'')+'</span><span class="pr">'+progPrice(c)+'</span></div></div></header><div class="body">'
+   + (intro ? '<div class="sec"><div class="intro" data-k="'+intro.k+'">'+progEsc(intro.t)+'</div></div>' : '')
+   + '<div class="sec"><h2>Teams</h2><div class="field"><div class="ttl"><span>'+progEsc(home)+' · '+progEsc(progShapeName(f.home?c.ourShape:c.oppShape))+(hc?' ('+progEsc(hc)+')':'')+'</span><span>'+progEsc(away)+' · '+progEsc(progShapeName(f.home?c.oppShape:c.ourShape))+(ac?' ('+progEsc(ac)+')':'')+'</span></div>'
+   + progListsHTML(c, hN, aN, home, '', away, '') + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div></div>'
+   + '<div class="cols2"><div class="sec"><h2>Pen portraits</h2><div class="pen">'
+   + pen.map(function(p){ return '<article><div class="no">'+p.no+'</div><div><h4>'+progEsc(p.name)+'</h4><div class="st">'+progEsc(p.st)+'</div><p>'+progEsc(p.text)+'</p></div></article>'; }).join('')
+   + (pen.length ? '' : '<p>Our side has not yet been selected.</p>') + '</div></div><div>'
+   + (progTableHTML(c,5,false) ? '<div class="sec"><h3>'+progEsc(progTitle(currentDivisionLabel))+' — nearby</h3>'+progTableHTML(c,5,false)+'</div>' : '')
+   + '<div class="sec"><h3>'+(groups?'Half-time scores':'Fixtures to come')+'</h3>'+(groups ? progKeyHTML(c, groups, '59') : progFixturesHTML(c))+'</div></div></div>'
+   + '<div class="foot"><span class="n">'+(nh?'Next home match: v. '+progEsc(nh.opp)+' · '+progEsc(progDateLong(nh.d)):'')+'</span>'+progCloseHTML()+'</div></div></article>';
+  return o;
+}
+function progBuild66(c, rng, F){
+  var f=c.f, d=c.date, ko=progKO(d);
+  var home = f.home ? ourClubName : f.opp, away = f.home ? f.opp : ourClubName;
+  var ourN = (c.xi||[]).map(function(p){ return p ? p.n : null; }), oppN = progOppXI(f) || [];
+  var hN = f.home ? ourN : oppN, aN = f.home ? oppN : ourN;
+  var hc = progColours(home), ac = progColours(away);
+  var nick = (clubProfiles[home]||{}).nickname;
+  var vis = progVisitors(c, rng);
+  var welcome = progChoose(F, rng, 1, ['derby','round','stand','form'], ['inj'])[0];
+  var groups = progKeyGroups(f);
+  var burst = progBurst(c, rng), nh = progNextHome();
+  var hs = f.home?c.ourShape:c.oppShape, as = f.home?c.oppShape:c.ourShape;
+  var wc = (seasonLabel==='1966-67') ? progPick66WC(rng) : null;
+  var o = '<article class="p66" data-era="66" data-kind="'+c.kind+'"><header class="cover"><div class="op"></div><div class="op2"></div>'
+   + '<div class="bar"><span>Official matchday programme</span><b>'+progPrice(c)+'</b></div>'
+   + '<div class="mast"><h1'+progFitStyle(home,0.5,104)+'>'+progEsc(home).replace(/ (\S+)$/,'<br><span>$1</span>')+'</h1><span class="strap">'+(nick?progEsc(nick)+' · ':'')+progEsc(progTitle(currentDivisionLabel))+'</span></div>'
+   + '<div class="burst"><svg viewBox="0 0 100 100"><polygon fill="#ffc928" stroke="#10203f" stroke-width="2.5" points="50,2 58,20 76,8 76,28 96,28 84,46 98,60 78,64 82,84 62,78 54,98 44,80 26,94 26,74 6,70 18,54 4,38 24,36 20,16 40,22"/></svg><span>'+burst[0]+(burst[1]?'<b>'+burst[1]+'</b>':'')+'</span></div>'
+   + '<div class="match"><div><div class="a">'+progDateLong(d)+' · '+progEsc(ko)+'</div><div class="b">'+progEsc(home)+' <em>v</em> '+progEsc(away)+'</div><div class="a" style="font-size:.8em">'+progEsc(progCompLabel(f))+'</div></div><div class="p"><small>PRICE</small>'+progPrice(c)+'</div></div></header><div class="stripe"></div><div class="body">'
+   + (welcome ? '<div class="sec"><div class="welcome" data-k="'+welcome.k+'">'+progEsc(welcome.t)+'</div></div>' : '')
+   + '<div class="sec"><h2>Line-ups <i>'+progEsc(progShapeName(hs))+' v '+progEsc(progShapeName(as))+'</i></h2><div class="field"><div class="ttl"><span>'+progEsc(home)+(hc?' ('+progEsc(hc)+')':'')+'</span><span>'+progEsc(away)+(ac?' ('+progEsc(ac)+')':'')+'</span></div>'+progPitchHTML(c)+'</div>'
+   + progListsHTML(c, hN, aN, home, '', away, '') + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div>'
+   + '<div class="sec two"><div class="visitors"><h2>Today\'s visitors</h2><div class="cap">'+vis.cap+'</div>'+vis.paras.map(function(p){ return '<p>'+progEsc(p)+'</p>'; }).join('')+'</div>'
+   + '<div>'+(progTableHTML(c,5,true) ? '<h2>League table <i>'+progEsc(progTitle(currentDivisionShort||''))+'</i></h2>'+progTableHTML(c,5,true) : '<h2>Fixtures to come</h2>'+progFixturesHTML(c))+'</div></div>'
+   + (wc ? '<div class="sec"><div class="wc"><div class="big">'+wc.big+'<small>'+wc.small+'</small></div><p><b>'+wc.head+'</b>'+wc.text+'</p></div></div>' : '')
+   + (groups ? '<div class="sec"><h2>Half-time scores <i>letters A–z</i></h2>'+progKeyHTML(c, groups, '66')+'</div>' : '')
+   + '<div class="foot"><span class="n">'+(nh?'Next home match: v. '+progEsc(nh.opp)+' · '+progEsc(progDateShort(nh.d)):'')+'</span>'+progCloseHTML()+'</div></div></article>';
+  return o;
+}
+function progPick66WC(rng){
+  return progPickOne(rng, [
+    {big:'4–2', small:'WEMBLEY', head:'World Cup Final, 30th July 1966', text:'England beat West Germany 4–2 after extra time at Wembley.'},
+    {big:'3', small:'HURST', head:'A hat-trick in the Final', text:'Geoff Hurst scored three as England won the World Cup, the first man to do so in a Final.'},
+    {big:'2–1', small:'THE SEMI', head:'Portugal beaten at Wembley', text:'Bobby Charlton scored both goals in England\'s 2–1 semi-final win over Portugal.'},
+    {big:'66', small:'CAPTAIN', head:'Bobby Moore lifts the trophy', text:'England\'s captain received the Jules Rimet Trophy from the Queen on 30th July 1966.'}
+  ]);
+}
+
 function showMatchdayProgramme(){
   var f = fixtures[fixtureIdx];
   var box = document.getElementById('programme-body');
   if (!f){ box.innerHTML = '<p>NO FIXTURE TO PREVIEW.</p>'; }
   else {
-    var homeTeam = f.home ? ourClubName.toUpperCase() : f.opp.toUpperCase();
-    var awayTeam = f.home ? f.opp.toUpperCase() : ourClubName.toUpperCase();
-    var kit = programmeKitLabels(f.home?ourClubName:f.opp, f.home?f.opp:ourClubName);
-    var ground = cupVenueText(f).toUpperCase();
-    var ourNames = (lineupSlots.length===11) ? lineupSlots.map(function(s){ var p=squad.find(function(x){return x.id===s.playerId;}); return p?p.n:'-'; }) : lineup.map(function(id){ var p=squad.find(function(x){return x.id===id;}); return p?p.n:'-'; });
-    var oppNames = buildOpponentPreviewLineup(f.opp, f.s);
-    var homeNames = f.home ? ourNames : oppNames;
-    var awayNames = f.home ? oppNames : ourNames;
-    var tableRows = Object.keys(table).map(function(n){return Object.assign({name:n},table[n]);}).sort(function(a,b){return b.pts-a.pts || (b.f-b.a)-(a.f-a.a);});
-    /* HOST-RELATIVE, NOT ALWAYS-US : a programme sold at the ground is that
-       ground's own programme, home or away. Everything on it — which club's
-       league position anchors the table snippet, which club's name gets the
-       asterisk, whose future fixture is trailed at the foot — should be
-       about whoever is actually HOSTING today, not always Aldershot (or
-       whichever club is being managed). Fixed a real bug here : an away
-       programme used to still centre the table on our own position and mark
-       us with the asterisk, which is exactly backwards for a card being
-       handed out at somebody else's turnstile. */
-    var hostName = f.home ? ourClubName : f.opp;
-    var hostPos = tableRows.findIndex(function(r){return r.name===hostName;}) + 1;
-    var tableSnippet = tableRows.slice(Math.max(0,hostPos-3), hostPos+2).map(function(r,i){
-      var rank = Math.max(0,hostPos-3)+i+1;
-      return rank+'. '+r.name.toUpperCase()+' — '+r.pts+' PTS'+(r.name===hostName?' *':'');
-    }).join('<br>');
-    /* NEXT HOME MATCH : only ever known for certain when WE are the host,
-       since our own fixture list is the only one this game actually tracks
-       match-by-match — the away team's real future fixtures aren't modelled
-       in enough detail to state one honestly, so the line is dropped rather
-       than mislabelling our own next home game as theirs. */
-    var nextHomeNote;
-    if (f.home){
-      var nextHomeIdx = -1;
-      for (var k=fixtureIdx+1;k<fixtures.length;k++){ if (fixtures[k].home){ nextHomeIdx=k; break; } }
-      nextHomeNote = nextHomeIdx>=0 ? ('NEXT HOME MATCH: V '+fixtures[nextHomeIdx].opp.toUpperCase()) : 'NO FURTHER HOME FIXTURES ARRANGED.';
-    } else {
-      nextHomeNote = '';
-    }
-    /* DIRECTORS' BOX NOTE: a home programme is written for the host's own
-       crowd, who don't need their own club's history recited to them, but DO
-       plausibly get a line introducing whichever side is visiting. Away, the
-       programme in your hands is the HOST's, welcoming a visiting Aldershot
-       (or whichever club you are) to THEIR crowd — so that's the one
-       occasion a short history note on your own club actually belongs here.
-       Fixed a real bug here too : the welcome line named the HOST club but
-       then sent the visitors to OUR OWN ground ("Swindon welcome Aldershot
-       to the Recreation Ground") rather than the ground the match is
-       actually being played at — now uses the host's real ground. */
-    var directorsNote = f.home
-      ? 'FROM THE DIRECTORS\' BOX: the board welcome today\'s visitors, '+f.opp.toUpperCase()+', and thank supporters for their continued patience with the turnstiles, given the times.'
-      : 'FROM THE DIRECTORS\' BOX: '+f.opp+' welcome '+ourClubName+' to '+oppGround(f.opp)+' today. '+clubHistory.note.split('.')[0]+'.';
-    /* ADVERTISERS: local to whichever ground you're actually standing in —
-       your own club's when home, a generic but clearly invented set tied to
-       the host's name when away, rather than always plugging Aldershot's
-       own shops regardless of where the match is being played. */
-    var adHost = f.home ? ourClubName : f.opp;
-    var advertisers = 'SUPPORT OUR ADVERTISERS — WHITTAKER\'S OUTFITTERS, HIGH STREET · THE '+adHost.toUpperCase()+' ARMS · GEO. PULLEY, TOBACCONIST';
-    /* CUP PROGRAMMES: a real FA Cup tie's programme was never just another
-       match card -- clubs treated it as an occasion, often a special
-       souvenir cover and a dearer price than the usual league programme,
-       and Third Round Day specifically (the day the big First and Second
-       Division names enter) was, and still is, one of the biggest single
-       days in the English football calendar. Previously every single
-       programme, cup or league, was identical -- same "TWOPENCE" match
-       card, same divisional-table box, which made a Cup tie feel like just
-       another fixture. This branch gives a cup programme its own header,
-       price, a short line of Cup pedigree in place of the league table
-       (nobody buying a programme for a one-off Cup tie cares about your
-       league position that week), and real fanfare for Third Round Day and
-       the season's final rounds specifically. */
-    var bodyBoxHTML;
-    if (f.isCup){
-      var roundKey = (f.roundName||'').replace(' (Replay)','');
-      var isReplayTie = /\(Replay\)/.test(f.roundName||'');
-      var ourCupRun = fixtures.filter(function(x){ return x.isCup && x.played; }).map(function(x){
-        return x.roundName.toUpperCase()+': '+(x.home?ourClubName:x.opp).toUpperCase()+' '+x.res.split(' ')[0].split('-').join('-')+' '+(x.home?x.opp:ourClubName).toUpperCase();
-      });
-      var runSnippet = ourCupRun.length ? ourCupRun.join('<br>') : 'A CLEAN SHEET SO FAR THIS SEASON — NO CUP-TIES PLAYED YET.';
-      var occasionNote;
-      if (roundKey === 'Third Round') occasionNote = 'THIRD ROUND DAY: the biggest afternoon in the football calendar — every First and Second Division club is finally in the hat alongside the rest of us, and for one Saturday the whole country\'s attention is on the Cup.';
-      else if (roundKey === 'Semi-Final') occasionNote = 'A SEMI-FINAL: one of only four teams left in the country, and a Cup Final within touching distance.';
-      else if (roundKey === 'Final') occasionNote = 'THE FA CUP FINAL: the showpiece of the English game — whatever happens over the ninety minutes, today is a day this club will remember.';
-      else if (roundKey === 'Quarter-Final') occasionNote = 'A QUARTER-FINAL: the last eight in the country, with a semi-final place on the line.';
-      else occasionNote = 'A giant-killing is always in the air on Cup day — anything can happen once the whistle goes, and that\'s exactly what keeps the whole country watching.';
-      bodyBoxHTML =
-        '<div style="text-align:center; border-bottom:2px solid #3a3020; padding-bottom:8px; margin-bottom:10px;">'+
-          '<div style="font-size:13px; letter-spacing:2px;">SOUVENIR PROGRAMME &nbsp;·&nbsp; THE FOOTBALL ASSOCIATION CHALLENGE CUP &nbsp;·&nbsp; THREEPENCE</div>'+
-          '<div style="font-size:11px; letter-spacing:1px; margin-top:2px;">'+roundKey.toUpperCase()+(isReplayTie?' REPLAY':'')+'</div>'+
-          '<div style="font-size:26px; margin:4px 0;">'+homeTeam+' v '+awayTeam+'</div>'+
-          '<div style="font-size:13px;">'+ground+' &nbsp;·&nbsp; '+fmtDate(currentDate)+' &nbsp;·&nbsp; KICK-OFF '+kickoffTimeFor(currentDate)+'</div>'+
-        '</div>'+
-        '<div style="font-size:13px; font-style:italic; margin-bottom:10px;">'+occasionNote+'</div>'+
-        '<div style="border:1px solid #3a3020; padding:10px 6px; margin-bottom:10px;">'+
-          '<div style="text-align:center; font-size:11px; letter-spacing:1px; margin-bottom:2px;">PLAN OF THE FIELD OF PLAY</div>'+
-          buildPitchPlanHTML(homeNames, homeTeam, kit.homeLabel, false)+
-          '<div style="text-align:center; font-size:11px; letter-spacing:3px; border-top:1px dashed #3a3020; border-bottom:1px dashed #3a3020; padding:4px 0; margin:6px 0;">— HALF-WAY LINE —</div>'+
-          buildPitchPlanHTML(awayNames, awayTeam, kit.awayLabel, true)+
-        '</div>'+
-        '<div style="font-size:13px; margin-bottom:8px;"><b>'+ourClubName.toUpperCase()+'\'S ROAD TO '+roundKey.toUpperCase()+'</b><br>'+runSnippet+'</div>'+
-        '<div style="font-size:12px; border-top:1px dashed #3a3020; padding-top:6px;">'+advertisers+'</div>';
-    } else {
-      bodyBoxHTML =
-        '<div style="text-align:center; border-bottom:2px solid #3a3020; padding-bottom:8px; margin-bottom:10px;">'+
-          '<div style="font-size:13px; letter-spacing:2px;">OFFICIAL MATCH CARD &nbsp;·&nbsp; TWOPENCE</div>'+
-          '<div style="font-size:26px; margin:4px 0;">'+homeTeam+' v '+awayTeam+'</div>'+
-          '<div style="font-size:13px;">'+ground+' &nbsp;·&nbsp; '+fmtDate(currentDate)+' &nbsp;·&nbsp; KICK-OFF '+kickoffTimeFor(currentDate)+'</div>'+
-        '</div>'+
-        '<div style="font-size:13px; font-style:italic; margin-bottom:10px;">'+directorsNote+'</div>'+
-        '<div style="border:1px solid #3a3020; padding:10px 6px; margin-bottom:10px;">'+
-          '<div style="text-align:center; font-size:11px; letter-spacing:1px; margin-bottom:2px;">PLAN OF THE FIELD OF PLAY</div>'+
-          buildPitchPlanHTML(homeNames, homeTeam, kit.homeLabel, false)+
-          '<div style="text-align:center; font-size:11px; letter-spacing:3px; border-top:1px dashed #3a3020; border-bottom:1px dashed #3a3020; padding:4px 0; margin:6px 0;">— HALF-WAY LINE —</div>'+
-          buildPitchPlanHTML(awayNames, awayTeam, kit.awayLabel, true)+
-        '</div>'+
-        '<div style="font-size:13px; margin-bottom:8px;"><b>'+currentDivisionLabel+' TABLE (NEARBY POSITIONS)</b><br>'+tableSnippet+'<br><span style="font-size:11px;">* '+hostName.toUpperCase()+'</span></div>'+
-        '<div style="font-size:12px; border-top:1px dashed #3a3020; padding-top:6px; margin-bottom:6px;">'+advertisers+'</div>'+
-        (nextHomeNote ? '<div style="font-size:13px;">'+nextHomeNote+'</div>' : '');
-    }
-    box.innerHTML = bodyBoxHTML;
+    var c = progContext(f);
+    var rng = progRng(progHash(ourClubName+'|'+seasonLabel+'|'+fixtureIdx+'|'+f.opp));
+    var F = progFacts(c, rng);
+    var html = c.era==='66' ? progBuild66(c, rng, F) : c.era==='59' ? progBuild59(c, rng, F) : progBuild46(c, rng, F);
+    box.innerHTML = html;
   }
   document.getElementById('programme-overlay').style.display = 'flex';
+  var fr = document.getElementById('programme-frame'); if (fr) fr.scrollTop = 0;
 }
+
+/*PROG-JS-END*/
 document.getElementById('btn-programme').addEventListener('click', showMatchdayProgramme);
-document.getElementById('programme-close').addEventListener('click', function(){ document.getElementById('programme-overlay').style.display = 'none'; });
+function progClose(e){ if (e && e.preventDefault) e.preventDefault(); document.getElementById('programme-overlay').style.display = 'none'; }
+document.getElementById('programme-close').addEventListener('click', progClose);
+document.getElementById('programme-body').addEventListener('click', function(e){ var t = e.target; if (t && t.getAttribute && t.getAttribute('data-prog-close')) progClose(e); });
 /* ---------- CLUB BROWSING & PERSISTENT SQUADS (Stages 1+2 of the
    scouting/transfer overhaul): click any club name anywhere in the League
    Table page (your own division, the three background divisions) to see
@@ -32703,6 +33433,7 @@ function simulateVidiprinter(excludeOpp){
      least-played-first so nobody quietly falls behind for the whole season. */
   var target = 2*rivals.length;
   var pool = rivals.filter(function(r){ return r.n !== excludeOpp && !occupiedToday[r.n] && table[r.n].p < target; }).slice();
+  var __progPlanned = progTakePlan('own', pool); /* v324 : the pairings the matchday programme's half-time key printed */
   /* v265 REAL BUG FIX, PER DIRECT USER REPORT ("I am seeing Coventry vs Portsmouth come up week after week
      again"): this is the OWN-division sibling of simulateDivisionWeek's v260 fix above, and it had the exact
      same flaw -- confirmed by checking a real save (Ipswich Town, week 11 of 1947-48), where Coventry City and
@@ -32716,7 +33447,7 @@ function simulateVidiprinter(excludeOpp){
      always sorts to the front regardless of the shuffle, since games-played remains the sort's primary key. */
   for (var vsi = pool.length - 1; vsi > 0; vsi--){ var vsj = Math.floor(Math.random() * (vsi + 1)); var vstmp = pool[vsi]; pool[vsi] = pool[vsj]; pool[vsj] = vstmp; }
   pool.sort(function(a,b){ return table[a.n].p - table[b.n].p; });
-  var pairs = [];
+  var pairs = __progPlanned.slice();
   while (pool.length>=2){
     var a = pool.shift();
     var b = pool.shift();
@@ -35393,7 +36124,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v323a'; /* v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v324'; /* v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
