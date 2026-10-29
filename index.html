@@ -20578,7 +20578,7 @@ function showEraPicker(onChoose){
   overlay.id = 'era-picker-overlay';
   overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;';
   var box = document.createElement('div');
-  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:480px; width:90%; font-size:18px; line-height:1.4;';
+  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:480px; width:90%; font-size:18px; line-height:1.4; max-height:90vh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; box-sizing:border-box;';
   box.innerHTML = '<p style="margin:0 0 14px; color:var(--dos-yellow); font-size:22px;">CHOOSE YOUR ERA</p>'+
     '<button class="era-pick-btn" data-era="1946" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1946-47<br><span class="sub" style="display:inline;">BRITAIN RETURNS TO FOOTBALL AFTER THE WAR : RATIONING, BOMB-DAMAGED GROUNDS, AND CROWDS BIGGER THAN THE GAME HAS EVER SEEN BEFORE OR SINCE.</span></button>'+
     '<button class="era-pick-btn" data-era="1950" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1949-50<br><span class="sub" style="display:inline;">REBUILT GROUNDS, EXPANDED THIRD DIVISIONS, AND A SEASON THAT ENDS WITH ENGLAND OFF TO BRAZIL FOR THE COUNTRY\'S FIRST EVER WORLD CUP.</span></button>'+
@@ -20617,7 +20617,7 @@ function showClubPicker(clubNames, onChoose){
   overlay.id = 'club-picker-overlay';
   overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;';
   var box = document.createElement('div');
-  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:480px; width:90%; font-size:18px; line-height:1.4; max-height:80vh; overflow-y:auto;';
+  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:480px; width:90%; font-size:18px; line-height:1.4; max-height:90vh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; box-sizing:border-box;';
   var names = (clubNames || Object.keys(clubProfiles)).slice().sort();
   /* v114 : grouped under each club's real 1946-47 division, which is where a new game now starts it (see
      realStartingDivisionFor). Third Division (North) clubs are listed but can't be picked : the game has no
@@ -21033,7 +21033,7 @@ function showManagerSetup(){
   overlay.id = 'manager-setup-overlay';
   overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;';
   var box = document.createElement('div');
-  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:420px; width:90%; font-size:19px; line-height:1.4;';
+  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:420px; width:90%; font-size:19px; line-height:1.4; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; box-sizing:border-box;';
   var pmPositions = ['Goalkeeper','Full-Back','Centre-Half','Left-Half','Wing-Half','Winger','Inside-Forward','Centre-Forward'];
   box.innerHTML = '<p style="margin:0 0 14px; color:var(--dos-yellow); font-size:22px;">WHO\'S IN CHARGE?</p>'+
     '<p class="sub" style="margin:0 0 14px;">'+ourClubName.toUpperCase()+(/F\.?C\.?$/i.test(ourClubName)?'':' F.C.')+' NEED A NAME FOR THE NEW SECRETARY-MANAGER.</p>'+
@@ -21088,7 +21088,7 @@ function showConfirmDialog(message, onYes, yesLabel, noLabel){
   overlay.id = 'confirm-overlay';
   overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; display:flex; align-items:center; justify-content:center;';
   var box = document.createElement('div');
-  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:440px; font-size:19px; line-height:1.4;';
+  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:440px; font-size:19px; line-height:1.4; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; box-sizing:border-box;';
   box.innerHTML = '<p style="margin:0 0 16px;">'+message+'</p>';
   var yesBtn = document.createElement('button'); yesBtn.textContent = yesLabel || 'YES : START OVER'; yesBtn.style.cssText='margin-right:10px; padding:4px 14px;';
   var noBtn = document.createElement('button'); noBtn.textContent = noLabel || 'NO : CANCEL'; noBtn.style.padding='4px 14px';
@@ -34752,7 +34752,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v321'; /* v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v321a'; /* v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
