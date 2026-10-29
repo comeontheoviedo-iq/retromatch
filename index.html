@@ -1069,6 +1069,7 @@ body.theme-programme #theme-pitch .pl .nm{top:19px; font-family:var(--t-cond); f
         <a class="navlink" data-view="fixtures">FI<span class="hot">X</span>TURES</a>
         <a class="navlink" data-view="table"><span class="hot">T</span>ABLE</a>
         <a class="navlink" data-view="cup">FA C<span class="hot">U</span>P</a>
+        <a class="navlink" data-view="europe">E<span class="hot">U</span>ROPE</a>
         <a class="navlink" data-view="honours">H<span class="hot">O</span>NOURS</a>
       </div>
     </div>
@@ -1391,11 +1392,17 @@ body.theme-programme #theme-pitch .pl .nm{top:19px; font-family:var(--t-cond); f
       <div id="worldcup-body"></div>
     </div>
 
+    <div class="view" id="v-europe">
+      <h1>Europe</h1>
+      <p class="sub">THE EUROPEAN CUP, THE CUP WINNERS' CUP AND THE FAIRS CUP (UEFA CUP FROM 1971-72) : THE REAL CLUBS OF EACH YEAR, FIELD BY FIELD, WITH YOUR COUNTRY'S PLACES WON ON THE FIELD IN THIS GAME.</p>
+      <div id="europe-body"></div>
+    </div>
+
     <div class="view" id="v-honours">
       <h1>Honours</h1>
       <p class="sub">WHO WON WHAT, SEASON BY SEASON, FOR AS LONG AS THIS SAVE HAS BEEN PLAYED. A SEASON NOT YET COMPLETED, OR A COMPETITION NOT YET PLAYED THAT YEAR (THE EUROPEAN CUP DIDN'T EXIST FOR AN ENGLISH CLUB BEFORE 1956-57), SHOWS AS A BLANK RATHER THAN A GUESS.</p>
       <div class="box"><div class="box-title">SEASON-BY-SEASON HONOURS</div>
-        <div class="scroll-box" style="max-height:480px;"><table><thead><tr><th>Season</th><th>First Division</th><th>Second Division</th><th>Third Division (or S/N)</th><th>Fourth Division</th><th>FA Cup</th><th>European Cup</th><th>Cup Winners' Cup</th></tr></thead><tbody id="honours-body"></tbody></table></div>
+        <div class="scroll-box" style="max-height:480px;"><table><thead><tr><th>Season</th><th>First Division</th><th>Second Division</th><th>Third Division (or S/N)</th><th>Fourth Division</th><th>FA Cup</th><th>European Cup</th><th>Cup Winners' Cup</th><th>Fairs / UEFA Cup</th></tr></thead><tbody id="honours-body"></tbody></table></div>
       </div>
     </div>
 
@@ -2717,7 +2724,12 @@ function genOppSquad(clubStrength, seedBase, oppName){
   var target = oppName ? aiSquadTarget(oppName, clubStrength) : null;
   var centre = oppName ? aiRepCentre(oppName) : 2;
   var pools = null;
-  if (profile && profile.rawSquad && profile.rawSquad.length){
+  var euStar = (!profile && oppName && typeof euroStarProfile==='function') ? euroStarProfile(oppName) : null; /* v319 : a real foreign club's key players */
+  if (euStar){
+    pools = {GK:[], FB:[], HB:[], FWD:[]};
+    var posMap = {G:'GK', B:'FB', H:'HB', F:'FWD'};
+    euStar.p.slice().sort(function(a,b){ return b.rep-a.rep; }).forEach(function(p){ pools[posMap[p.pos]||'FWD'].push({n:p.n, pos:null, rep:p.rep}); });
+  } else if (profile && profile.rawSquad && profile.rawSquad.length){
     pools = {GK:[], FB:[], HB:[], FWD:[]};
     profile.rawSquad.forEach(function(p, idx){ pools[slotFor(p.pos)].push({p:p, idx:idx}); });
     /* v109: pick each line's best men by rating, not whoever happens to be listed first (Liverpool's first-listed keeper is a 1-star reserve) */
@@ -2728,10 +2740,10 @@ function genOppSquad(clubStrength, seedBase, oppName){
     for (var k=0;k<grp.n;k++){
       var seed = seedBase + counter*13.7;
       var real = (pools && pools[grp.slot].length > k) ? pools[grp.slot][k] : null;
-      var ca = real ? (target!==null ? aiScaledCA(real.rep, target, seed, centre) : clamp(repCA[real.rep] + (seededRand(seed)-0.5)*10, 15, 95))
+      var ca = (real && euStar) ? clamp(clubStrength - 9 + (real.rep-3)*5 + (seededRand(seed)-0.5)*8, 15, 95) : real ? (target!==null ? aiScaledCA(real.rep, target, seed, centre) : clamp(repCA[real.rep] + (seededRand(seed)-0.5)*10, 15, 95))
                     : (target!==null ? clamp(target + (seededRand(seed)-0.5)*14, 15, 95) : clamp(clubStrength - 10 + (seededRand(seed)-0.5)*24, 15, 95));
       var attrs = buildAttributes(ca, grp.slot, seed);
-      var name = real ? real.n : (pick(firstNamePool) + ' ' + pick(surnamePool));
+      var name = real ? real.n : ((!profile && oppName && typeof euFillerName==='function' && euFillerName(oppName)) || (pick(firstNamePool) + ' ' + pick(surnamePool))); /* v319 : a foreign club's unnamed men carry names of their own country */
       /* v218: carry the real researched position string through (e.g. "Outside-Right",
          "Centre-Half") so a shirt-number lineup built from this squad can match each man
          to his own real position via autoAssignSlotsForPlayers, same as our own squad --
@@ -8987,6 +8999,7 @@ function advanceCupField(){
         survivors.push(cupBracket.reservedOpponentEntry);
       }
     }
+    if (cupBracket.roundIdx === cupRoundNames.length-1 && survivors.length===1){ var _ru = (cupBracket.alive||[]).filter(function(x){ return x.n !== survivors[0].n; })[0]; cupBracket.runnerUpName = _ru ? _ru.n : null; } /* v319 : the beaten finalist takes the Cup Winners' Cup place if the winner is already in the European Cup */
     cupBracket.alive = survivors;
     if (!(cupBracket.reservedForRoundIdx > cupBracket.roundIdx)){ /* a reservation already made for a LATER round's draw (possible when a replay chain holds this round past that draw) must survive */
       cupBracket.reservedOpponent = null;
@@ -9906,6 +9919,7 @@ function recordDivisionChampions(){
   divisionChampions = fourthDivisionCreated
     ? {label:seasonLabel, D1:divisionChampionOf('D1'), D2:divisionChampionOf('D2'), D3:divisionChampionOf('D3'), D4:divisionChampionOf('D4'), D1RunnerUp:divisionRunnerUpOf('D1')}
     : {label:seasonLabel, D1:divisionChampionOf('D1'), D2:divisionChampionOf('D2'), '3S':divisionChampionOf('3S'), '3N':divisionChampionOf('3N'), D1RunnerUp:divisionRunnerUpOf('D1')};
+  divisionChampions.D1Top = divisionTopOf('D1', 10); /* v319 : European places go by League position */
   recordHonour(seasonLabel, {
     D1:divisionChampions.D1, D2:divisionChampions.D2, D3:divisionChampions.D3||null, D4:divisionChampions.D4||null,
     '3S':divisionChampions['3S']||null, '3N':divisionChampions['3N']||null,
@@ -10296,7 +10310,7 @@ function maybeAnnounceEuroCupDraw(){
 var cupWinnersCup = {active:false, label:null};
 var lastFaCupWinnerName = null; /* set by recordFaCupWinner() at processSeasonEnd, from cupBracket.championName for the season just finished, before cupBracket resets for the next one */
 function recordFaCupWinner(){
-  if (cupBracket && cupBracket.championName) lastFaCupWinnerName = cupBracket.championName;
+  if (cupBracket && cupBracket.championName){ lastFaCupWinnerName = cupBracket.championName; lastFaCupRunnerUpName = cupBracket.runnerUpName || null; }
 }
 var CWC_FINAL_VENUES = {
   1963: {ground:"De Kuip", city:"Rotterdam"},
@@ -10659,6 +10673,676 @@ function advanceFairsCupField(){
 function maybeAnnounceFairsCupDraw(){
   advanceFairsCupField();
 }
+/* ===== v319 DATA ===== */
+/* ===== v319 EUROPEAN DATA (generated from era_europe/euro_data.json; sources: Wikipedia season articles for every European Cup / Cup Winners' Cup / Fairs Cup / UEFA Cup edition 1955-56 to 1998-99, fields and entry rounds read from the real draws) ===== */
+var EURO_CLUBS=[["Sporting CP","POR"],["Partizan","YUG"],["MTK","HUN"],["Anderlecht","BEL"],["Servette","SUI"],["Real Madrid","ESP"],["Rot-Weiss Essen","FRG"],["Hibernian","SCO"],["Djurgården","SWE"],["Gwardia Warsaw","POL"],["AGF","DEN"],["Reims","FRA"],["Rapid Wien","AUT"],["PSV Eindhoven","NED"],["AC Milan","ITA"],["Saarbrücken",""],["Lausanne-Sport","SUI"],["London XI","ENG"],["Birmingham City","ENG"],["Barcelona","ESP"],["Borussia Dortmund","FRG"],["Spora Luxembourg","LUX"],["Dinamo București","ROU"],["Galatasaray","TUR"],["Slovan Bratislava","TCH"],["Legia Warsaw","POL"],["Manchester United","ENG"],["Nice","FRA"],["Porto","POR"],["Athletic Bilbao","ESP"],["CSKA Sofia","BUL"],["Rangers","SCO"],["Grasshopper","SUI"],["Roda JC","NED"],["Red Star Belgrade","YUG"],["Fiorentina","ITA"],["IFK Norrköping","SWE"],["Budapest Honvéd","HUN"],["Vasas","HUN"],["Saint-Étienne","FRA"],["Stade Dudelange","LUX"],["Glenavon","NIR"],["Sevilla","ESP"],["Benfica","POR"],["Shamrock Rovers","IRL"],["Royal Antwerp","BEL"],["Wismut Karl-Marx-Stadt","GDR"],["Ajax","NED"],["Young Boys","SUI"],["Dukla Prague","TCH"],["Steaua București","ROU"],["Standard Liège","BEL"],["Heart of Midlothian","SCO"],["Beşiktaş","TUR"],["Olympiacos","GRE"],["Dinamo Zagreb","YUG"],["Jeunesse Esch","LUX"],["IFK Göteborg","SWE"],["Ards","NIR"],["Petrolul Ploiești","ROU"],["Atlético Madrid","ESP"],["Drumcondra","IRL"],["Polonia Bytom","POL"],["KB","DEN"],["Schalke 04","FRG"],["Juventus","ITA"],["Wiener Sport-Club","AUT"],["VV DOS","NED"],["Wolverhampton Wanderers","ENG"],["Helsingin Palloseura","FIN"],["Union Saint-Gilloise","BEL"],["Leipzig XI","GDR"],["Hannover 96","FRG"],["Roma","ITA"],["Cologne XI","FRG"],["Zagreb XI","YUG"],["Újpesti Dózsa","HUN"],["Copenhagen XI","DEN"],["Chelsea","ENG"],["Belgrade XI","YUG"],["Basel","SUI"],["Inter Milan","ITA"],["Lyon","FRA"],["Eintracht Frankfurt","FRG"],["KuPS","FIN"],["Linfield","NIR"],["ŁKS Łódź","POL"],["Inter Bratislava","TCH"],["Fenerbahçe","TUR"],["Csepel","HUN"],["Vorwärts Berlin","GDR"],["Boldklubben 1909","DEN"],["Sparta Rotterdam","NED"],["ASK Vorwärts Berlin","GDR"],["Rudá Hvězda Brno","TCH"],["Ferencváros","HUN"],["Austria Wien","AUT"],["Borussia Mönchengladbach","FRG"],["Lucerne","SUI"],["Fredrikstad","NOR"],["IFK Helsingfors","FIN"],["IFK Malmö","SWE"],["Limerick","IRL"],["Spartak Hradec Králové","TCH"],["Lierse","BEL"],["Panathinaikos","GRE"],["Burnley","ENG"],["Hamburg","FRG"],["Swansea City","WAL"],["Carl Zeiss Jena","GDR"],["La Chaux-de-Fonds","SUI"],["Leixões","POR"],["Leicester City","ENG"],["Sedan","FRA"],["Spartak Varna","BUL"],["Floriana","MLT"],["Dunfermline Athletic","SCO"],["St Patrick's Athletic","IRL"],["Alliance Dudelange","LUX"],["Național București","ROU"],["Werder Bremen","FRG"],["Dynamo Žilina","TCH"],["Vardar","YUG"],["Nürnberg","FRG"],["Hibernians","MLT"],["Feyenoord","NED"],["Górnik Zabrze","POL"],["Tottenham Hotspur","ENG"],["Monaco","FRA"],["Boldklubben 1913","DEN"],["Haka","FIN"],["Valencia","ESP"],["Nottingham Forest","ENG"],["Köln","FRG"],["Iraklis","GRE"],["Vojvodina","YUG"],["Strasbourg","FRA"],["Spartak KPS Brno",""],["Espanyol","ESP"],["Belenenses","POR"],["Sheffield Wednesday","ENG"],["West Berlin XI","FRG"],["Novi Sad XI","YUG"],["OFK Beograd","YUG"],["Chemie Halle-Leuna","GDR"],["Bangor City","WAL"],["Napoli","ITA"],["Vitória de Setúbal","POR"],["F91 Dudelange","LUX"],["Botev Plovdiv","BUL"],["Zagłębie Sosnowiec","POL"],["Portadown","NIR"],["GAK","AUT"],["Union Luxembourg","LUX"],["Ipswich Town","ENG"],["Shelbourne","IRL"],["Dundee","SCO"],["Esbjerg","DEN"],["Partizani","ALB"],["Sampdoria","ITA"],["Aris Bonnevoie","LUX"],["Viktoria Köln","FRG"],["Zbrojovka Brno","TCH"],["Bayern Munich","FRG"],["Odense XI","DEN"],["Marseille","FRA"],["Celtic","SCO"],["Everton","ENG"],["Utrecht","NED"],["Tasmania Berlin","FRG"],["Glentoran","NIR"],["Zaragoza","ESP"],["Altay","TUR"],["Willem II","NED"],["Atalanta","ITA"],["APOEL","CYP"],["Gjøvik-Lyn","NOR"],["LASK","AUT"],["Sliema Wanderers","MLT"],["Borough United","WAL"],["Slavia Sofia","BUL"],["Sachsenring Zwickau","GDR"],["AEK Athens","GRE"],["Anorthosis Famagusta","CYP"],["Valletta","MLT"],["Distillery","NIR"],["Lyn","NOR"],["Dundalk","IRL"],["Zürich","SUI"],["Spartak Plovdiv","BUL"],["Arsenal","ENG"],["RFC Liège","BEL"],["Partick Thistle","SCO"],["Racing Paris","FRA"],["Lokomotive Leipzig","GDR"],["Steagul Roșu Brașov","ROU"],["Lokomotiv Plovdiv","BUL"],["Hertha BSC","FRG"],["Tresnjevka Zagreb",""],["Gent","BEL"],["DOS Utrecht","NED"],["Cork Celtic","IRL"],["West Ham United","ENG"],["Sparta Prague","TCH"],["Cardiff City","WAL"],["Skeid","NOR"],["Torino","ITA"],["Fortuna Sittard","NED"],["Derry City","IRL"],["Admira Wacker","AUT"],["Magdeburg","GDR"],["1860 Munich","FRG"],["Bologna","ITA"],["KR","ISL"],["Liverpool","ENG"],["BSG Chemie Leipzig","GDR"],["Győri ETO","HUN"],["Lokomotiv Sofia","BUL"],["Malmö FF","SWE"],["DWS","NED"],["Reipas Lahti","FIN"],["Real Betis","ESP"],["Stade Français","FRA"],["Göztepe","TUR"],["Bordeaux","FRA"],["Kilmarnock","SCO"],["Vålerenga","NOR"],["Aris","GRE"],["Örgryte","SWE"],["Stuttgart","FRG"],["Czarni Żagań","POL"],["Omonia","CYP"],["Sion","SUI"],["Wiener Neustadt","AUT"],["Știința Cluj","ROU"],["Go Ahead Eagles","NED"],["Rosenborg","NOR"],["Coleraine","NIR"],["Dynamo Kyiv","URS"],["Rennes","FRA"],["17 Nëntori","ALB"],["Keflavík","ISL"],["HJK","FIN"],["Levski Sofia","BUL"],["Nantes","FRA"],["Leeds United","ENG"],["Valur","ISL"],["Spartak Moscow","URS"],["Tatran Prešov","TCH"],["Braga","POR"],["Apollon Limassol","CYP"],["Åbo IFK","FIN"],["AaB","DEN"],["Waterford","IRL"],["Admira-NÖ Energie Wien","AUT"],["Torpedo Moscow","URS"],["Olimpija Ljubljana","YUG"],["Argeș Pitești","ROU"],["Frigg","NOR"],["Red Star",""],["US Luxembourg","LUX"],["Hvidovre","DEN"],["Lausanne Sports","SUI"],["Dundee United","SCO"],["Toulouse","FRA"],["West Bromwich Albion","ENG"],["RFC Liegeois","BEL"],["Aberdeen","SCO"],["Crusaders","NIR"],["Wisła Kraków","POL"],["Randers","DEN"],["Hajduk Split","YUG"],["NAC Breda","NED"],["Spartak Trnava","TCH"],["Olympiakos Nicosia","CYP"],["Sarajevo","YUG"],["Karl-Marx-Stadt","GDR"],["Eintracht Braunschweig","FRG"],["Dinamo Tirana","ALB"],["Rapid București","ROU"],["PAOK","GRE"],["Club Brugge","BEL"],["Dynamo Dresden","GDR"],["Slavia Prague","TCH"],["1860 München","FRG"],["BK Frem","DEN"],["GD CUF","POR"],["Bor","YUG"],["Den Haag","NED"],["Girondins Bordeaux","FRA"],["US Rumelange","LUX"],["Lugano","SUI"],["Ruch Chorzów","POL"],["AEL Limassol","CYP"],["Manchester City","ENG"],["AB","DEN"],["Morton","SCO"],["Beerschot","BEL"],["Daring Club Molenbeek","BEL"],["Wacker Innsbruck","AUT"],["Newcastle United","ENG"],["Feyenoord Rotterdam","NED"],["Académica","POR"],["Hansa Rostock","GDR"],["Metz","FRA"],["AIK","SWE"],["Waregem","BEL"],["Legia Warszawa","POL"],["Mjøndalen","NOR"],["ÍBV","ISL"],["St. Gallen","SUI"],["TPS","FIN"],["UTA Arad","ROU"],["Avenir Beggen","LUX"],["Öster","SWE"],["Gwardia Warszawa","POL"],["Baník Ostrava","TCH"],["Southampton","ENG"],["Charleroi","BEL"],["Rouen","FRA"],["Twente","NED"],["LASK Linz","AUT"],["Cagliari","ITA"],["Åtvidaberg","SWE"],["Bohemians","IRL"],["TJ Gottwaldov","TCH"],["Kickers Offenbach","FRG"],["ÍB Akureyri","ISL"],["Karpaty Lviv","URS"],["Pezoporikos Larnaca","CYP"],["Strømsgodset","NOR"],["KPV","FIN"],["EPA Larnaca","CYP"],["B 1903","DEN"],["Ilves-Kissat","FIN"],["Sturm Graz","AUT"],["Lazio","ITA"],["Cork Hibernians","IRL"],["Beveren","BEL"],["B1901","DEN"],["Universitatea Craiova","ROU"],["Pécsi Dózsa","HUN"],["GKS Katowice","POL"],["Barreirense","POR"],["Eskişehirspor","TUR"],["Angoulême","FRA"],["Coventry City","ENG"],["ÍA","ISL"],["Sarpsborg","NOR"],["Željezničar","YUG"],["Hajduk Split",""],["Fram","ISL"],["TJ Škoda Plzeň","TCH"],["Jeunesse Hautcharage","LUX"],["BFC Dynamo","GDR"],["Komlói Bányász","HUN"],["MP","FIN"],["Dynamo Moscow","URS"],["CSKA Moscow","URS"],["Vllaznia Shkodër","ALB"],["Nîmes","FRA"],["Austria Salzburg","AUT"],["Marsa","MLT"],["Zagłębie Wałbrzych","POL"],["Teplice","TCH"],["Košice","TCH"],["Botev Vratsa","BUL"],["St Johnstone","SCO"],["Elfsborg","SWE"],["Celta Vigo","ESP"],["Panionios","GRE"],["Akritas","CYP"],["Bastia","FRA"],["Víkingur","ISL"],["Red Boys Differdange","LUX"],["Ankaragücü","TUR"],["Landskrona BoIS","SWE"],["Fremad Amager","DEN"],["Besa Kavajë","ALB"],["Wrexham","WAL"],["Waterford United","IRL"],["Vejle","DEN"],["Derby County","ENG"],["Salgótarján","HUN"],["Beroe Stara Zagora","BUL"],["Dinamo Tbilisi","URS"],["VÖEST Linz","AUT"],["Viking","NOR"],["Sochaux","FRA"],["Angers","FRA"],["Stoke City","ENG"],["Kaiserslautern","FRG"],["Las Palmas","ESP"],["Ararat Yerevan","URS"],["Molenbeek","BEL"],["CUF Barreiro","POR"],["Sunderland","ENG"],["Fola Esch","LUX"],["Randers Freja","DEN"],["Gżira United","MLT"],["Brann","NOR"],["Chimia Râmnicu Vâlcea","ROU"],["Zaria Voroshilovgrad","URS"],["Stal Mielec","POL"],["Wuppertaler SV","FRG"],["Fortuna Düsseldorf","FRG"],["Næstved","DEN"],["Finn Harps","IRL"],["Velež Mostar","YUG"],["Panachaiki","GRE"],["Jiul Petroşani","ROU"],["Bursaspor","TUR"],["Vanløse","DEN"],["Enosis Neon Paralimni","CYP"],["Etar","BUL"],["Start","NOR"],["Boluspor","TUR"],["Real Sociedad","ESP"],["Videoton","HUN"],["Amsterdam","NED"],["Raba ETO Győr","HUN"],["Boavista","POR"],["Borac Banja Luka","YUG"],["Stal Rzeszów","POL"],["Haladás","HUN"],["Home Farm","IRL"],["Lens","FRA"],["Haladás VSE","HUN"],["MSV Duisburg","FRG"],["Aston Villa","ENG"],["Bohemians","TCH"],["GAIS","SWE"],["Śląsk Wrocław","POL"],["Holbæk B&I","DEN"],["Molde","NOR"],["ASA Târgu Mureș","ROU"],["Chornomorets Odesa","URS"],["Dunav Ruse","BUL"],["Athlone Town","IRL"],["CSU Galați","ROU"],["Bodø/Glimt","NOR"],["Carrick Rangers","NIR"],["MTK/VM Budapest","HUN"],["Trabzonspor","TUR"],["Køge","DEN"],["Adanaspor","TUR"],["Tychy","POL"],["Cesena","ITA"],["Queens Park Rangers","ENG"],["Lokeren","BEL"],["Akademik Sofia","BUL"],["Shakhtar Donetsk","URS"],["Sportul Studențesc","ROU"],["Târgu Mureș","ROU"],["Progrès Niedercorn","LUX"],["Lokomotíva Košice","TCH"],["Diósgyőri VTK","HUN"],["Sligo Rovers","IRL"],["Halmstad","SWE"],["Lillestrøm","NOR"],["AZ Alkmaar","NED"],["Sloboda Tuzla","YUG"],["Odra Opole","POL"],["Widzew Łódź","POL"],["Marek Dupnitsa","BUL"],["F.K. Bodø/Glimt","NOR"],["Rijeka","YUG"],["Ballymena United","NIR"],["Marek Stanke Dimitrov","BUL"],["AS Nancy","FRA"],["Kalmar FF","SWE"],["Odense","DEN"],["Vllaznia","ALB"],["Vicenza","ITA"],["Sporting Gijón","ESP"],["Lech Poznań","POL"],["Politehnica Timișoara","ROU"],["Cliftonville","NIR"],["Germinal Ekeren","BEL"],["Arka Gdynia","POL"],["Alki Larnaca","CYP"],["Progrès Niederkorn","LUX"],["KPT","FIN"],["Orduspor","TUR"],["Perugia","ITA"],["Castilla CF","ESP"],["Kastoria","GRE"],["Ilves","FIN"],["Haugar","NOR"],["Newport County","WAL"],["Waterschei Thor","BEL"],["OPS","FIN"],["Szombierki Bytom","POL"],["Moss","NOR"],["Napredak Kruševac","YUG"],["St Mirren","SCO"],["Radnički Niš","YUG"],["SKA Rostov","URS"],["KTP","FIN"],["AZ","NED"],["Bryne","NOR"],["Winterslag","BEL"],["Zenit Leningrad","URS"],["Neuchâtel Xamax","SUI"],["Tatabányai Bányász","HUN"],["Paris Saint-Germain","FRA"],["B.93","DEN"],["Kuusysi","FIN"],["Baia Mare","ROU"],["Corvinul Hunedoara","ROU"],["HFC Haarlem","NED"],["Lyngby","DEN"],["Brage","SWE"],["Żurrieq","MLT"],["NEC","NED"],["Mersin İ. Y.","TUR"],["Hammarby","SWE"],["Lechia Gdańsk","POL"],["B 1901 Nykøbing","DEN"],["Dinamo Minsk","URS"],["Ħamrun Spartans","MLT"],["Watford","ENG"],["AEL","GRE"],["Groningen","NED"],["Drogheda United","IRL"],["Laval","FRA"],["Hellas Verona","ITA"],["Rabat Ajax","MLT"],["UCD","IRL"],["Siófoki Bányász","HUN"],["Labinoti","ALB"],["Dnipro Dnipropetrovsk","URS"],["Pogoń Szczecin","POL"],["Sliven","BUL"],["Vorwärts Frankfurt","GDR"],["Dukla Banská Bystrica","TCH"],["Real Valladolid","ESP"],["Auxerre","FRA"],["Galway United","IRL"],["Aarau","SUI"],["Flamurtari","ALB"],["Cercle Brugge","BEL"],["Bayer Uerdingen","FRG"],["Pirin Blagoevgrad","BUL"],["Portimonense","POR"],["Osasuna","ESP"],["TJ Vítkovice","TCH"],["Brøndby","DEN"],["Stahl Brandenburg","GDR"],["Luzern","SUI"],["Swarovski Tirol","AUT"],["Bayer Leverkusen","FRG"],["OFI","GRE"],["Sigma Olomouc","TCH"],["Dunajská Streda","TCH"],["KV Mechelen","BEL"],["Tromsø","NOR"],["Gençlerbirliği","TUR"],["Merthyr Tydfil","WAL"],["RoPS","FIN"],["Español","ESP"],["Victoria București","ROU"],["Chaves","POR"],["Békéscsaba","HUN"],["Metalist Kharkiv","URS"],["Sakaryaspor","TUR"],["Kremser SC","AUT"],["Mechelen","BEL"],["Žalgiris Vilnius","URS"],["First Vienna","AUT"],["Ikast","DEN"],["Oţelul Galaţi","ROU"],["Montpellier","FRA"],["Chernomorets","BUL"],["Cork City","IRL"],["Apolonia","ALB"],["Flacăra Moreni","ROU"],["Plastika Nitra","TCH"],["Wettingen","SUI"],["Rad","YUG"],["Bray Wanderers",""],["Nea Salamis","CYP"],["Swift Hesperange","LUX"],["Estrela da Amadora","POR"],["PSV Schwerin","FRG"],["KA","ISL"],["&nbsp;",""],["Vitesse","NED"],["FH","ISL"],["Zagłębie Lubin","POL"],["Stockerau","AUT"],["Fyllingen","NOR"],["Athinaikos","GRE"],["Motherwell","SCO"],["Bacău","ROU"],["Stahl Eisenhüttenstadt","FRG"],["Örebro","SWE"],["Bangor","NIR"],["Rot-Weiß Erfurt","FRG"],["Parma","ITA"],["Oviedo","ESP"],["Genoa","ITA"],["Salgueiros","POR"],["Cannes","FRA"],["Vác","HUN"],["Maribor",""],["Hapoel Petah Tikva","ISR"],["Vaduz",""],["B36 Tórshavn",""],["Miedź Legnica","POL"],["Airdrieonians","SCO"],["Electroputere Craiova","ROU"],["Copenhagen","DEN"],["Belvedur Izola",""],["Caen","FRA"],["RAF Jelgava",""],["HB Tórshavn",""],["Degerfors","SWE"],["Maccabi Haifa","ISR"],["MyPa","FIN"],["Balzers",""],["Albpetrol Patos","ALB"],["Nikol Tallinn",""],["Neman Grodno",""],["Publikum Celje",""],["Tirol Innsbruck","AUT"],["Košice",""],["Deportivo La Coruña","ESP"],["Alania Vladikavkaz",""],["Tenerife","ESP"],["Gloria Bistrița","ROU"],["Lokomotiv Moscow",""],["Karlsruhe","FRG"],["Kocaelispor","TUR"],["Norwich City","ENG"],["Kongsvinger","NOR"],["Marítimo","POR"],["Barry Town","WAL"],["Olimpija Rīga",""],["Fandok Bobruisk",""],["Maccabi Tel Aviv","ISR"],["Norma Tallinn",""],["Schaan",""],["B71 Sandoy",""],["Tiligul Tiraspol",""],["Viktoria Žižkov","TCH"],["Shumen","BUL"],["Hapoel Be'er Sheva","ISR"],["Zimbru Chișinău",""],["Grevenmacher","LUX"],["Mura",""],["Jazz","FIN"],["Turan Tovuz",""],["GÍ",""],["Trelleborg","SWE"],["Teuta Durrës","ALB"],["Flora",""],["ROMAR Mažeikiai",""],["Skonto",""],["Inter Cardiff","WAL"],["Blackburn Rovers","ENG"],["Tekstilshchik Kamyshin",""],["Seraing","BEL"],["Rotor Volgograd",""],["Afan Lido","WAL"],["Apollon Smyrnis","GRE"],["Inkaras Kaunas",""],["Silkeborg","DEN"],["Samtredia",""],["Kapaz",""],["Raith Rovers","SCO"],["Osijek",""],["TPV","FIN"],["Shirak",""],["Hapoel Tel Aviv","ISR"],["Eendracht Aalst","BEL"],["Farense","POR"],["Freiburg","FRG"],["MPKC Mozyr",""],["TNS Llansantffraid","WAL"],["Sloga Jugomagnat",""],["Varteks",""],["Dinamo Batumi",""],["Tallinna Sadam",""],["Nyva Vinnytsia",""],["Chemlon Humenné",""],["Kareda Šiauliai",""],["Qarabağ",""],["Kotayk Abovyan",""],["AEK Larnaca","CYP"],["Constructorul Chișinău",""],["Hapoel Ironi Rishon LeZion","ISR"],["Dinamo-93 Minsk",""],["Margveti Zestaponi",""],["Gorica",""],["Pyunik",""],["Lantana Tallinn",""],["Beitar Jerusalem","ISR"],["Sileks",""],["Neftçi",""],["Newtown","WAL"],["Dinaburg",""],["Bečej",""],["Hutnik Kraków","POL"],["Khazri Buzovna",""],["Helsingborg","SWE"],["BVSC","HUN"],["Guingamp","FRA"],["Kolkheti Poti",""],["Yerevan",""],["Jablonec",""],["Birkirkara","MLT"],["Odra Wodzisław","POL"],["Pobeda",""],["Daugava Rīga",""],["Vorskla Poltava",""],["Neftochimic Burgas","BUL"],["Principat",""],["KÍ",""],["Mouscron","BEL"],["Udinese","ITA"],["Bochum","FRG"],["Dinamo Baku",""],["Belshina Bobruisk",""],["Polonia Warsaw","POL"],["VPS","FIN"],["FinnPa","FIN"],["İstanbulspor","TUR"],["Zalgiris Vilnius",""],["Litex Lovech","BUL"],["Obilić",""],["Vitesse Arnhem","NED"]];
+var EURO_YEARS={"1955-ec":{"n":4,"t":[8,4,2,1],"f":"0,0,70;1,0,62;2,0,62;3,0,62;4,0,61;5,0,85;6,0,63;7,0,62;8,0,61;9,0,61;10,0,61;11,0,76;12,0,61;13,0,62;14,0,76;15,0,61","h":[],"qe":[],"qs":[0]},"1955-fairs":{"n":2,"t":[2,1],"f":"16,0,61;17,0,64;18,0,64;19,0,76","h":[],"qe":[0,0],"qs":[]},"1956-ec":{"n":5,"t":[6,8,4,2,1],"f":"20,0,63;21,0,61;22,0,61;23,0,61;24,0,62;25,0,61;3,0,61;26,0,78;10,0,61;27,0,62;28,0,62;29,0,64;30,1,61;31,1,70;32,1,61;5,1,85;12,1,62;33,1,62;34,1,62;35,1,70;36,1,61;37,1,62","h":[],"qe":[0],"qs":[1]},"1957-ec":{"n":5,"t":[7,8,4,2,1],"f":"30,0,61;38,0,62;31,0,68;39,0,62;40,0,61;34,0,63;10,0,60;41,0,61;42,0,64;43,0,76;44,0,61;26,0,78;14,0,74;12,0,62;45,1,62;5,1,86;36,1,61;46,1,61;47,1,68;48,1,61;49,1,62;20,1,63;50,1,61","h":[],"qe":[0],"qs":[0]},"1958-ec":{"n":5,"t":[12,8,4,2,1],"f":"51,0,62;52,0,62;53,0,61;54,0,61;48,0,60;26,0,78;55,0,62;49,0,61;56,0,61;57,0,61;58,0,61;11,0,75;46,0,60;59,0,61;60,0,64;61,0,61;62,0,61;2,0,63;63,0,61;64,0,63;65,0,74;66,0,61;67,0,62;0,0,68;30,1,61;68,1,64;5,1,87;69,1,61","h":[],"qe":[0,1],"qs":[0]},"1958-fairs":{"n":4,"t":[8,4,2,1],"f":"70,0,62;71,0,61;72,0,63;73,0,64;74,0,63;18,0,64;75,0,62;76,0,62;77,0,61;78,0,64;79,0,62;16,0,61;80,0,61;19,0,74;81,0,76;82,0,62","h":[],"qe":[0,0],"qs":[]},"1959-ec":{"n":5,"t":[11,8,4,2,1],"f":"27,0,64;44,0,61;83,0,63;84,0,61;30,0,60;19,0,76;66,0,63;59,0,61;85,0,61;57,0,62;56,0,61;86,0,61;87,0,62;28,0,62;54,0,61;14,0,75;88,0,61;89,0,62;31,0,68;3,0,62;90,0,61;68,0,63;5,1,86;91,1,61;92,1,62;48,1,64;34,1,64","h":[],"qe":[0],"qs":[0]},"1960-cwc":{"n":5,"t":[4,3,1,1,1],"f":"93,0,61;94,0,62;31,0,69;95,0,62;55,1,61;96,0,61;68,0,65;97,1,63;98,0,61;35,0,70","h":[],"qe":[0],"qs":[0]},"1960-ec":{"n":5,"t":[12,8,4,2,1],"f":"52,0,62;43,0,72;34,0,64;76,0,61;99,0,61;47,0,67;10,0,62;25,0,62;65,0,71;30,0,60;100,0,61;101,0,61;12,0,62;53,0,63;102,0,61;48,0,63;50,0,62;103,0,62;41,0,61;46,0,62;11,0,74;56,0,62;19,0,76;104,0,62;5,1,86;105,1,61;106,1,64;107,1,63","h":[],"qe":[1],"qs":[0]},"1960-fairs":{"n":4,"t":[8,4,2,1],"f":"81,0,73;72,0,63;71,0,61;79,0,64;63,0,61;80,0,61;18,0,66;76,0,62;75,0,62;19,0,78;7,0,64;16,0,61;82,0,62;74,0,63;70,0,63;73,0,64","h":[],"qe":[0],"qs":[0]},"1961-cwc":{"n":5,"t":[9,7,3,2,1],"f":"108,0,61;109,0,61;110,0,61;111,0,62;41,0,61;112,0,64;113,0,62;60,0,66;12,0,65;114,0,61;115,0,61;76,0,61;116,0,62;117,0,61;118,1,61;119,1,61;120,0,63;10,0,63;54,0,61;121,0,62;35,1,72;47,1,65;122,1,62","h":[],"qe":[0],"qs":[0]},"1961-ec":{"n":5,"t":[13,8,4,2,1],"f":"50,0,61;96,0,61;123,0,63;61,0,62;4,0,63;124,0,61;30,0,62;49,0,63;57,0,63;125,0,62;126,0,61;127,0,72;51,0,64;99,0,62;90,0,62;85,0,61;128,0,62;31,0,69;0,0,66;1,0,64;105,0,61;65,0,68;21,0,62;129,0,61;38,0,65;5,0,81;88,1,62;43,1,74;130,1,61","h":[],"qe":[0],"qs":[0]},"1961-fairs":{"n":5,"t":[15,8,4,2,1],"f":"16,0,61;131,0,64;132,0,64;70,0,63;52,0,62;133,0,63;81,0,72;134,0,61;14,0,71;135,0,62;136,0,62;2,0,64;137,0,61;71,0,61;72,0,63;138,0,64;18,0,69;80,0,61;34,0,63;7,0,65;139,0,62;82,0,62;140,0,64;73,0,67;141,0,63;19,0,75;142,1,62;55,1,63","h":[],"qe":[0,0,0],"qs":[0,0]},"1962-cwc":{"n":5,"t":[9,8,4,2,1],"f":"143,0,62;144,0,61;145,0,61;146,0,64;16,0,62;92,0,63;31,0,69;42,0,65;39,0,63;147,0,62;148,0,61;91,0,62;50,0,61;149,0,61;76,0,64;150,0,61;124,0,61;54,0,61;151,1,61;24,1,63;127,1,72;123,1,64;152,1,61;44,1,62;60,1,70","h":[],"qe":[1],"qs":[0]},"1962-ec":{"n":5,"t":[14,8,4,2,1],"f":"14,0,69;153,0,61;115,0,61;154,0,64;22,0,63;23,0,63;62,0,63;105,0,61;30,0,61;1,0,64;5,0,80;3,0,63;155,0,61;0,0,65;156,0,62;133,0,63;4,0,63;125,0,63;99,0,62;38,0,64;96,0,62;100,0,62;90,0,62;49,0,64;85,0,61;157,0,61;36,0,63;158,0,61;11,1,71;43,1,75","h":[],"qe":[0],"qs":[0]},"1962-fairs":{"n":5,"t":[16,8,4,2,1],"f":"159,0,64;160,0,61;161,0,63;95,0,63;59,0,62;162,0,62;135,0,63;71,0,62;80,0,61;163,0,68;61,0,62;164,0,61;28,0,63;55,0,63;165,0,62;70,0,62;131,0,67;166,0,68;167,0,64;116,0,64;168,0,62;169,0,63;7,0,65;77,0,63;170,0,61;171,0,64;172,0,61;73,0,66;12,0,65;34,0,66;139,0,62;19,0,75","h":[],"qe":[0],"qs":[0,0,0]},"1963-cwc":{"n":5,"t":[13,8,4,2,1],"f":"155,0,61;19,0,74;107,0,65;153,0,61;82,0,62;129,0,63;54,0,61;150,0,61;173,0,62;26,0,70;174,0,64;0,0,65;175,0,61;176,0,61;80,0,61;166,0,67;177,0,61;55,0,67;178,0,61;179,0,61;69,0,63;24,0,64;2,0,65;180,0,61;88,0,62;59,0,63;127,1,74;181,1,61;85,1,61","h":[127],"qe":[0],"qs":[0]},"1963-ec":{"n":5,"t":[15,8,4,2,1],"f":"167,0,63;81,0,70;128,0,62;182,0,61;130,0,62;56,0,63;1,0,63;183,0,61;126,0,62;96,0,63;49,0,65;184,0,61;185,0,61;43,0,75;186,0,61;20,0,65;187,0,61;188,0,61;23,0,64;95,0,65;158,0,61;189,0,61;157,0,62;13,0,64;51,0,66;36,0,63;22,0,63;109,0,64;31,0,68;5,0,76;14,1,72","h":[],"qe":[0],"qs":[0]},"1963-fairs":{"n":5,"t":[16,8,4,2,1],"f":"77,0,62;190,0,64;160,0,61;191,0,62;170,0,61;192,0,62;162,0,61;4,0,63;16,0,63;52,0,63;134,0,62;171,0,64;65,0,68;143,0,64;60,0,70;28,0,62;12,0,64;193,0,62;44,0,62;131,0,70;194,0,61;76,0,64;195,0,61;196,0,61;197,0,63;73,0,67;198,0,61;139,0,62;133,0,62;199,0,62;200,0,62;140,0,65","h":[],"qe":[0,0],"qs":[0,0]},"1964-cwc":{"n":5,"t":[14,8,4,2,1],"f":"180,0,61;201,0,61;16,0,63;37,0,64;199,0,61;202,0,64;203,0,62;183,0,61;184,0,61;171,0,68;157,0,61;204,0,61;205,0,61;130,0,61;206,0,64;207,0,62;50,0,62;208,0,61;182,0,61;55,0,66;209,0,61;25,0,63;210,0,61;23,0,64;28,0,62;82,0,64;153,0,61;211,0,63;156,1,65;0,1,69","h":[],"qe":[0],"qs":[1]},"1964-ec":{"n":5,"t":[15,8,4,2,1],"f":"178,0,61;22,0,64;31,0,67;34,0,66;12,0,64;44,0,62;170,0,61;105,0,62;158,0,61;133,0,65;3,0,64;212,0,64;213,0,61;214,0,70;215,0,61;216,0,62;217,0,61;218,0,61;219,0,62;88,0,64;220,0,61;186,0,61;91,0,64;5,0,76;49,0,66;126,0,63;39,0,64;110,0,63;160,0,61;43,0,73;81,1,72","h":[],"qe":[0],"qs":[0]},"1964-fairs":{"n":5,"t":[24,12,2,2,1],"f":"63,0,64;168,0,63;131,0,72;191,0,64;139,0,63;155,0,62;4,0,62;60,0,69;221,0,64;222,0,62;70,0,63;65,0,68;223,0,61;59,0,63;135,0,63;196,0,62;80,0,61;21,0,63;136,0,63;14,0,70;19,0,71;35,0,69;111,0,64;166,0,68;20,0,67;224,0,62;8,0,64;26,0,69;83,0,66;225,0,62;226,0,61;167,0,63;75,0,64;152,0,62;227,0,61;73,0,68;66,0,65;194,0,61;95,0,64;162,0,63;29,0,65;143,0,64;197,0,63;45,0,64;116,0,64;228,0,61;129,0,63;229,0,63","h":[],"qe":[0,0],"qs":[0,0,0]},"1965-cwc":{"n":5,"t":[16,8,4,2,1],"f":"202,0,69;230,0,61;231,0,61;54,0,62;210,0,61;21,0,62;232,0,61;23,0,64;233,0,61;234,0,61;60,0,69;55,0,67;115,0,62;20,0,66;102,0,63;30,0,63;10,0,64;147,0,63;235,0,62;166,0,67;213,0,61;236,0,61;237,0,61;238,0,62;49,0,66;239,0,62;220,0,61;37,0,63;65,0,71;214,0,71;204,0,63;51,0,65","h":[202],"qe":[0],"qs":[0]},"1965-ec":{"n":5,"t":[15,8,4,2,1],"f":"125,0,65;5,0,74;240,0,61;225,0,63;88,0,63;3,0,65;186,0,62;208,0,61;105,0,62;178,0,61;241,0,61;95,0,68;22,0,64;91,0,63;242,0,61;26,0,70;61,0,63;90,0,63;40,0,64;43,0,74;8,0,63;243,0,61;16,0,64;203,0,62;177,0,62;126,0,62;175,0,63;120,0,64;1,0,65;244,0,62;81,1,73","h":[],"qe":[0],"qs":[0]},"1965-fairs":{"n":3,"t":[4,1,1],"f":"19,0,71;138,0,65;211,0,67;78,0,65;116,0,66;171,0,68;245,0,64;76,0,65","h":[],"qe":[0,0],"qs":[0]},"1966-cwc":{"n":6,"t":[1,15,8,4,2,1],"f":"246,0,61;51,0,65;143,1,63;247,1,62;12,1,64;23,1,64;44,1,62;21,1,62;248,1,62;163,1,67;35,1,68;216,1,64;182,1,62;249,1,62;215,1,61;25,1,64;250,1,61;4,1,62;251,1,61;115,1,62;92,1,64;136,1,65;50,1,63;108,1,63;180,1,62;170,1,61;31,1,67;205,1,62;171,1,68;252,1,61;167,1,65;20,2,71","h":[],"qe":[1],"qs":[1]},"1966-ec":{"n":6,"t":[2,15,8,4,2,1],"f":"178,0,61;30,0,64;253,0,61;90,0,64;218,1,62;60,1,69;254,1,61;135,1,63;213,1,61;244,1,62;166,1,68;188,1,64;47,1,65;53,1,64;214,1,72;59,1,64;157,1,62;49,1,66;130,1,63;3,1,66;81,1,72;255,1,62;38,1,65;0,1,67;211,1,65;231,1,61;226,1,61;240,1,61;160,1,62;85,1,62;54,1,63;126,1,63;5,2,76","h":[],"qe":[1],"qs":[1]},"1966-fairs":{"n":7,"t":[16,16,8,4,2,1,1],"f":"61,0,63;83,0,65;27,0,65;228,0,62;256,0,62;95,0,68;229,0,64;106,0,65;66,0,65;146,0,65;227,0,62;65,0,68;257,0,61;42,0,65;258,0,61;116,0,65;162,0,63;55,0,65;223,0,62;212,0,63;168,0,64;80,0,63;123,0,65;131,0,69;259,0,61;29,0,66;8,0,63;194,0,62;260,0,61;45,0,64;28,0,63;224,0,62;261,1,61;262,1,61;91,1,63;147,1,63;19,1,72;263,1,62;264,1,62;203,1,64;265,1,64;219,1,64;245,1,65;266,1,62;189,1,63;43,1,72;225,1,63;199,1,62","h":[],"qe":[0,1,1],"qs":[0,1,1]},"1967-cwc":{"n":5,"t":[16,8,4,2,1],"f":"172,0,63;51,0,67;267,0,62;213,0,61;216,0,65;250,0,61;14,0,67;243,0,63;131,0,69;268,0,61;96,0,64;50,0,62;163,0,71;105,0,63;99,0,63;147,0,62;242,0,62;269,0,61;107,0,65;270,0,61;160,0,61;82,0,64;271,0,62;127,0,68;115,0,62;272,0,62;44,0,63;204,0,63;255,0,62;181,0,63;262,0,60;273,0,62","h":[],"qe":[0],"qs":[0]},"1967-ec":{"n":5,"t":[16,8,4,2,1],"f":"274,0,61;275,0,62;26,0,69;124,0,64;166,0,72;238,0,64;126,0,63;8,0,62;80,0,62;261,0,61;47,0,66;5,0,74;205,0,62;203,0,63;276,0,61;3,0,65;187,0,63;38,0,65;246,0,61;56,0,64;170,0,61;43,0,70;39,0,64;84,0,64;53,0,63;12,0,65;277,0,63;278,0,61;54,0,63;65,0,69;149,0,64;279,0,61","h":[],"qe":[0],"qs":[0]},"1967-fairs":{"n":7,"t":[24,12,4,4,2,1,1],"f":"219,0,63;156,0,64;280,0,61;266,0,61;83,0,67;132,0,64;188,0,64;19,0,69;281,0,62;0,0,66;27,0,64;35,0,66;282,0,61;31,0,69;133,0,65;283,0,62;1,0,67;196,0,65;21,0,62;245,0,68;146,0,66;72,0,64;7,0,65;28,0,63;168,0,64;171,0,68;257,0,63;95,0,68;218,0,62;214,0,70;4,0,64;284,0,63;117,0,64;224,0,63;285,0,61;29,0,65;212,0,65;186,0,62;55,0,71;59,0,63;135,0,64;286,0,62;194,0,64;85,0,64;66,0,64;60,0,67;45,0,64;223,0,62","h":[],"qe":[0,0,0],"qs":[0,0,0]},"1968-cwc":{"n":5,"t":[14,6,4,2,1],"f":"116,0,65;175,0,63;54,0,62;213,0,61;22,0,65;216,0,65;281,0,61;265,0,64;158,0,63;206,0,65;204,0,65;28,0,62;24,0,65;287,0,62;288,0,62;152,0,63;289,0,62;133,0,65;270,0,61;44,0,62;290,0,61;178,0,62;291,0,61;19,0,68;172,0,63;186,0,62;268,0,61;36,0,64","h":[],"qe":[0],"qs":[0]},"1968-ec":{"n":5,"t":[16,8,4,2,1],"f":"218,0,62;14,0,71;238,0,64;292,0,61;39,0,64;166,0,69;34,0,65;109,0,64;253,0,62;26,0,73;3,0,65;170,0,61;236,0,63;12,0,65;5,0,73;293,0,61;123,0,64;47,0,65;294,0,64;88,0,64;246,0,62;43,0,72;243,0,62;95,0,71;115,0,62;220,0,62;50,0,63;273,0,62;182,0,62;56,0,63;188,0,66;295,0,61","h":[26],"qe":[0],"qs":[0]},"1968-fairs":{"n":7,"t":[32,16,8,4,2,1,1],"f":"78,0,65;296,0,62;297,0,62;219,0,63;31,0,69;135,0,66;168,0,63;187,0,63;298,0,62;105,0,63;29,0,65;214,0,69;16,0,64;65,0,69;299,0,61;83,0,66;180,0,65;267,0,63;149,0,63;171,0,67;0,0,66;131,0,68;300,0,64;301,0,62;147,0,63;85,0,63;82,0,65;302,0,62;303,0,61;27,0,63;55,0,69;35,0,66;279,0,62;143,0,63;212,0,67;80,0,62;223,0,63;165,0,64;111,0,64;257,0,63;304,0,62;107,0,68;66,0,63;283,0,61;256,0,62;7,0,66;194,0,64;63,0,64;51,0,67;245,0,72;146,0,65;32,0,65;205,0,62;305,0,61;72,0,63;91,0,63;60,0,67;306,0,62;307,0,61;284,0,64;227,0,62;124,0,63;76,0,65;260,0,62;25,1,64","h":[],"qe":[0,0,0,0],"qs":[0,0,0,0]},"1969-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"12,0,66;255,0,64;49,1,67;165,1,63;55,1,68;24,1,69;36,1,64;178,1,62;44,1,62;64,1,65;210,1,64;2,1,66;302,1,61;84,1,64;104,1,64;175,1,63;29,1,68;294,1,63;58,1,64;73,1,67;13,1,65;223,1,67;153,1,63;308,1,61;204,1,64;309,1,61;243,1,63;285,1,61;310,1,61;54,1,63;126,1,65;31,1,71;50,1,63","h":[],"qe":[1],"qs":[1]},"1969-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"311,0,61;63,0,63;124,1,63;273,1,65;23,1,64;253,1,62;312,1,61;25,1,64;163,1,69;39,1,64;90,1,64;105,1,63;34,1,65;85,1,63;14,1,74;313,1,61;213,1,61;125,1,65;51,1,66;240,1,62;274,1,62;5,1,71;245,1,72;186,1,64;30,1,66;95,1,70;80,1,62;166,1,69;43,1,71;96,1,63;238,1,64;35,1,66;314,1,61","h":[],"qe":[1],"qs":[1]},"1969-fairs":{"n":7,"t":[22,12,5,3,2,1,1],"f":"246,0,62;3,0,65;56,0,63;237,0,63;116,0,66;224,0,64;135,0,65;315,0,61;261,0,63;28,0,63;263,0,64;300,0,70;147,0,65;316,0,62;236,0,63;317,0,64;279,0,62;214,0,68;187,0,63;81,0,70;203,0,65;188,0,65;225,0,65;211,0,65;205,0,62;318,0,62;75,0,65;319,0,62;320,0,62;0,0,66;321,0,61;190,0,65;170,0,62;109,0,64;172,0,63;229,0,64;218,0,62;304,0,62;146,0,66;72,0,65;47,0,68;66,0,63;292,0,62;197,1,64;65,1,68;303,1,62;322,1,64","h":[],"qe":[0,0,0,0],"qs":[0,0,0]},"1970-cwc":{"n":6,"t":[2,16,8,4,2,1],"f":"323,0,61;158,0,63;324,0,61;325,0,62;326,1,63;281,1,62;188,1,64;327,1,61;30,1,65;130,1,64;227,1,63;78,1,65;267,1,64;37,1,65;294,1,68;85,1,62;223,1,67;153,1,63;252,1,63;126,1,68;13,1,65;328,1,62;50,1,62;256,1,62;43,1,70;90,1,65;212,1,66;204,1,64;329,1,61;330,1,61;244,1,64;124,1,62;5,1,70;299,1,61","h":[294],"qe":[1],"qs":[1]},"1970-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"243,0,64;96,0,63;322,1,63;39,1,64;60,1,65;236,1,62;51,1,67;57,1,64;25,1,66;240,1,62;47,1,70;247,1,64;80,1,62;170,1,61;253,1,62;166,1,72;331,1,61;88,1,64;109,1,65;0,1,66;115,1,62;76,1,68;34,1,65;125,1,69;312,1,61;332,1,61;97,1,65;167,1,65;241,1,63;56,1,62;105,1,63;24,1,67;333,1,61","h":[],"qe":[1],"qs":[1]},"1970-fairs":{"n":6,"t":[32,16,8,4,2,1],"f":"334,0,61;335,0,61;336,0,64;190,0,69;337,0,61;131,0,66;66,0,62;338,0,62;339,0,61;197,0,65;273,0,65;165,0,64;292,0,63;35,0,67;133,0,66;113,0,65;81,0,70;300,0,70;340,0,61;341,0,62;342,0,61;19,0,68;65,0,67;290,0,62;343,0,62;55,0,68;199,0,64;107,0,68;42,0,64;344,0,61;182,0,64;320,0,62;7,0,66;218,0,62;147,0,66;345,0,62;214,0,67;95,0,69;22,0,65;280,0,62;163,0,67;31,0,69;149,0,63;346,0,64;92,0,65;347,0,61;237,0,64;225,0,66;348,0,61;245,0,72;1,0,66;282,0,62;203,0,64;29,0,66;263,0,63;32,0,64;295,0,63;178,0,62;349,0,62;3,0,69;262,0,62;350,0,61;180,0,64","h":[],"qe":[0,0,0,0,0],"qs":[0,0,0,0]},"1971-cwc":{"n":6,"t":[2,16,8,4,2,1],"f":"91,0,63;96,0,63;124,0,62;351,0,61;185,1,64;19,1,68;50,1,63;4,1,64;214,1,70;352,1,62;163,1,69;102,1,64;206,1,65;278,1,63;239,1,64;31,1,68;0,1,65;186,1,63;150,1,64;323,1,61;353,1,61;78,1,70;297,1,62;183,1,64;354,1,61;204,1,65;243,1,63;92,1,66;355,1,62;34,1,67;356,1,61;344,1,61;54,1,63;357,1,62","h":[78],"qe":[1],"qs":[1]},"1971-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"131,0,66;153,0,63;165,1,63;126,1,68;47,1,73;282,1,63;220,1,64;32,1,63;330,1,61;190,1,70;22,1,65;273,1,66;125,1,67;274,1,62;299,1,62;43,1,68;30,1,65;158,1,63;271,1,63;76,1,66;218,1,61;333,1,61;166,1,71;347,1,61;178,1,62;81,1,69;182,1,63;337,1,61;97,1,65;23,1,65;358,1,62;51,1,66;85,1,62","h":[],"qe":[1],"qs":[1]},"1971-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"12,0,66;359,0,61;88,0,64;95,0,67;288,0,64;160,0,63;241,0,63;127,0,66;170,0,61;277,0,65;147,0,67;360,0,62;109,0,66;196,0,64;312,0,62;361,0,61;143,0,65;8,0,64;362,0,61;65,0,70;38,0,65;155,0,64;363,0,61;364,0,62;247,0,63;365,0,62;349,0,61;281,0,64;55,0,68;366,0,61;107,0,67;367,0,62;197,0,65;368,0,61;236,0,62;100,0,64;80,0,63;5,0,71;144,0,64;13,0,67;104,0,65;245,0,74;369,0,64;267,0,63;39,0,63;133,0,69;156,0,66;295,0,63;291,0,63;25,0,67;317,0,65;29,0,65;68,0,65;302,0,64;146,0,66;279,0,62;212,0,65;3,0,69;28,0,64;244,0,64;60,0,67;370,0,61;14,0,70;371,0,61","h":[],"qe":[0,0,0,0],"qs":[0,0,0]},"1972-cwc":{"n":5,"t":[16,8,4,2,1],"f":"372,0,62;60,0,66;247,0,63;288,0,64;373,0,61;307,0,64;374,0,61;14,0,72;329,0,62;337,0,60;64,0,66;180,0,64;115,0,62;95,0,69;51,0,67;203,0,65;109,0,67;356,0,61;375,0,61;245,0,72;12,0,67;280,0,62;279,0,64;376,0,61;0,0,65;7,0,67;377,0,61;378,0,61;188,0,64;379,0,61;271,0,63;99,0,64;25,1,66","h":[],"qe":[0],"qs":[0]},"1972-ec":{"n":5,"t":[16,8,4,2,1],"f":"30,0,65;105,0,67;47,0,75;23,0,64;163,0,69;380,0,61;231,0,64;299,0,62;238,0,65;178,0,63;126,0,67;160,0,63;257,0,64;5,0,70;241,0,62;165,0,64;65,0,71;210,0,64;311,0,62;166,0,71;236,0,63;76,0,67;80,0,62;273,0,65;3,0,67;381,0,61;382,0,64;349,0,64;218,0,61;43,0,69","h":[],"qe":[0],"qs":[0]},"1972-uefa":{"n":7,"t":[32,16,8,4,2,1,1],"f":"214,0,68;83,0,66;312,0,65;36,0,65;234,0,64;243,0,63;182,0,63;383,0,62;384,0,61;96,0,65;385,0,62;320,0,65;24,0,66;135,0,64;292,0,63;88,0,63;282,0,63;386,0,61;34,0,67;16,0,64;49,0,65;143,0,65;186,0,63;127,0,70;387,0,61;309,0,63;323,0,63;281,0,63;388,0,62;285,0,63;37,0,65;192,0,65;133,0,68;324,0,62;267,0,64;97,0,65;389,0,62;354,0,64;125,0,68;290,0,63;294,0,68;131,0,66;360,0,62;32,0,64;390,0,64;391,0,63;206,0,66;392,0,64;81,0,71;184,0,64;147,0,67;150,0,64;332,0,62;393,0,62;344,0,63;35,0,66;54,0,63;322,0,64;394,0,62;395,0,62;28,0,63;19,0,67;261,0,63;100,0,64","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1973-cwc":{"n":5,"t":[16,8,4,2,1],"f":"38,0,65;396,0,64;204,0,64;0,0,64;3,0,67;188,0,63;329,0,61;218,0,61;316,0,63;337,0,62;272,0,64;210,0,65;384,0,63;397,0,61;255,0,64;29,0,65;14,0,74;55,0,67;398,0,61;12,0,66;220,0,63;82,0,65;25,0,65;280,0,62;399,0,61;400,0,61;401,0,61;170,0,62;309,0,62;97,0,69;375,0,61;31,0,70","h":[],"qe":[0],"qs":[0]},"1973-ec":{"n":5,"t":[16,8,4,2,1],"f":"387,0,62;273,0,66;402,0,62;175,0,64;43,0,68;54,0,63;380,0,61;76,0,67;163,0,69;323,0,62;282,0,65;65,0,73;47,0,77;30,0,65;299,0,62;281,0,63;115,0,62;80,0,62;351,0,62;311,0,62;166,0,69;381,0,61;244,0,64;34,0,68;403,0,61;56,0,63;214,0,73;268,0,63;22,0,65;60,0,65;23,0,63","h":[],"qe":[0],"qs":[0]},"1973-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"99,0,64;238,0,66;292,0,63;404,0,63;333,0,62;305,0,64;109,0,66;356,0,62;330,0,62;245,0,72;314,0,63;125,0,67;7,0,67;241,0,62;27,0,64;19,0,65;405,0,63;406,0,61;32,0,64;127,0,71;267,0,63;407,0,61;156,0,66;320,0,67;138,0,65;394,0,61;139,0,65;68,0,69;153,0,63;165,0,63;147,0,69;297,0,63;154,0,65;5,0,70;336,0,64;232,0,64;178,0,62;196,0,64;35,0,66;340,0,62;95,0,68;9,0,65;229,0,64;274,0,63;248,0,64;408,0,62;385,0,62;180,0,63;105,0,65;143,0,67;209,0,64;81,0,70;88,0,63;257,0,64;365,0,62;37,0,65;206,0,65;194,0,65;344,0,62;133,0,68;409,0,61;152,0,64;58,0,64;51,0,66","h":[],"qe":[0,0,0,0],"qs":[0,0,0]},"1974-cwc":{"n":5,"t":[16,8,4,2,1],"f":"263,0,64;410,0,61;411,0,61;407,0,60;83,0,65;128,0,65;238,0,66;30,0,67;315,0,64;212,0,65;13,0,67;58,0,63;283,0,64;109,0,66;43,0,68;412,0,61;218,0,62;232,0,63;178,0,62;220,0,63;214,0,72;330,0,62;95,0,66;204,0,64;351,0,61;5,0,68;306,0,64;96,0,64;313,0,63;413,0,61;280,0,64;34,0,68","h":[],"qe":[0],"qs":[0]},"1974-ec":{"n":5,"t":[13,8,4,2,1],"f":"261,0,64;292,0,66;56,0,63;88,0,63;271,0,65;241,0,62;39,0,64;0,0,66;387,0,62;393,0,64;243,0,64;76,0,69;245,0,72;188,0,65;24,0,66;3,0,65;166,0,70;54,0,63;125,0,71;237,0,64;386,0,61;19,0,64;184,0,64;242,0,64;340,0,63;323,0,62;163,1,73;210,1,69;201,1,64","h":[],"qe":[0],"qs":[0]},"1974-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"82,0,65;374,0,62;246,0,64;151,0,65;382,0,66;4,0,64;154,0,67;320,0,67;390,0,64;47,0,73;394,0,62;156,0,65;236,0,63;7,0,66;28,0,65;68,0,68;414,0,61;81,0,68;126,0,66;1,0,65;415,0,61;8,0,64;416,0,61;22,0,65;247,0,65;408,0,61;53,0,64;195,0,65;299,0,62;97,0,69;335,0,63;45,0,65;398,0,62;282,0,65;107,0,66;324,0,63;12,0,66;227,0,64;417,0,64;316,0,64;196,0,64;216,0,65;314,0,63;357,0,66;244,0,64;25,0,64;146,0,65;418,0,62;90,0,66;65,0,70;32,0,63;105,0,64;206,0,64;405,0,64;133,0,69;331,0,63;419,0,62;124,0,64;63,0,64;60,0,69;147,0,69;171,0,66;49,0,64;329,0,62;420,1,62","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1975-cwc":{"n":5,"t":[16,8,4,2,1],"f":"273,0,66;421,0,62;246,0,63;166,0,68;53,0,63;35,0,65;105,0,63;181,0,64;279,0,65;3,0,66;422,0,62;290,0,63;379,0,63;8,0,64;205,0,64;423,0,61;335,0,63;180,0,63;424,0,62;184,0,63;80,0,64;60,0,68;83,0,65;237,0,64;381,0,62;288,0,64;425,0,61;426,0,62;393,0,65;183,0,64;220,0,63;202,0,66;427,1,62","h":[],"qe":[0],"qs":[0]},"1975-ec":{"n":5,"t":[16,8,4,2,1],"f":"97,0,73;299,0,62;30,0,65;65,0,72;24,0,65;382,0,67;5,0,68;22,0,65;43,0,68;88,0,63;76,0,68;188,0,64;218,0,64;210,0,67;56,0,62;163,0,74;54,0,63;238,0,70;231,0,64;347,0,63;63,0,64;39,0,66;31,0,68;324,0,62;115,0,63;271,0,65;394,0,63;387,0,61;292,0,66;84,0,64;85,0,63;13,0,68","h":[],"qe":[0],"qs":[0]},"1975-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"428,0,63;413,0,62;170,0,64;47,0,72;32,0,64;417,0,63;280,0,64;19,0,66;305,0,63;247,0,64;45,0,65;429,0,64;430,0,62;37,0,66;109,0,66;165,0,64;340,0,63;34,0,68;167,0,65;14,0,72;125,0,69;154,0,66;431,0,61;432,0,61;197,0,65;242,0,64;7,0,66;214,0,69;433,0,61;403,0,62;133,0,70;333,0,63;82,0,65;281,0,64;434,0,61;314,0,62;435,0,61;282,0,66;436,0,62;336,0,64;28,0,65;313,0,64;12,0,66;23,0,63;73,0,66;437,0,61;255,0,64;146,0,66;386,0,62;38,0,64;135,0,64;182,0,64;48,0,65;107,0,67;438,0,61;226,0,65;87,0,65;171,0,67;241,0,62;263,0,64;243,0,63;344,0,63;178,0,62;0,0,65","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1976-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"204,0,63;4,0,64;439,1,61;421,1,63;243,1,66;220,1,63;12,1,64;60,1,67;104,1,66;271,1,66;385,1,64;2,1,65;203,1,66;107,1,70;241,1,61;194,1,67;52,1,65;115,1,62;432,1,63;324,1,62;157,1,65;134,1,65;175,1,64;440,1,61;146,1,65;3,1,70;33,1,65;305,1,63;23,1,64;441,1,61;160,1,63;317,1,65;165,1,63;442,2,62","h":[],"qe":[1],"qs":[1]},"1976-ec":{"n":5,"t":[16,8,4,2,1],"f":"31,0,67;188,0,63;178,0,61;311,0,63;95,0,69;56,0,62;282,0,68;43,0,68;30,0,65;39,0,69;187,0,64;13,0,69;347,0,63;443,0,61;214,0,73;268,0,64;387,0,61;316,0,66;444,0,61;163,0,76;238,0,70;1,0,66;231,0,64;280,0,63;206,0,63;218,0,64;96,0,64;97,0,72;403,0,65;5,0,69;281,0,69;50,0,65","h":[],"qe":[0],"qs":[0]},"1976-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"28,0,66;64,0,66;351,0,62;24,0,64;170,0,63;80,0,64;413,0,61;391,0,65;182,0,64;357,0,65;47,0,71;26,0,66;361,0,63;445,0,61;139,0,64;19,0,69;166,0,67;269,0,65;382,0,66;407,0,62;22,0,64;14,0,72;277,0,65;433,0,61;138,0,64;27,0,65;125,0,67;8,0,63;88,0,63;418,0,62;32,0,63;124,0,63;7,0,65;388,0,63;81,0,67;37,0,65;133,0,69;446,0,61;84,0,64;314,0,63;210,0,66;447,0,64;294,0,66;65,0,70;406,0,62;394,0,63;448,0,64;400,0,63;374,0,63;449,0,62;283,0,64;450,0,61;451,0,62;354,0,65;452,0,61;54,0,63;299,0,62;415,0,62;453,0,61;55,0,65;76,0,67;29,0,65;196,0,64;34,0,68","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1977-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"31,0,66;48,0,64;454,1,61;381,1,63;280,1,63;150,1,64;320,1,70;400,1,62;347,1,63;133,1,69;28,1,65;39,1,70;26,1,67;107,1,73;220,1,62;217,1,65;3,1,72;237,1,63;71,1,65;221,1,65;14,1,72;184,1,63;357,1,64;274,1,63;340,1,63;204,1,64;96,1,64;455,1,62;314,1,64;53,1,63;456,1,62;187,1,64;271,1,66","h":[],"qe":[1],"qs":[0]},"1977-ec":{"n":5,"t":[15,8,4,2,1],"f":"166,0,66;56,0,62;80,0,64;299,0,62;34,0,68;457,0,61;38,0,65;97,0,73;43,0,67;255,0,65;443,0,62;333,0,63;282,0,68;458,0,61;243,0,66;432,0,64;459,0,61;47,0,69;246,0,63;170,0,63;231,0,63;65,0,73;84,0,63;281,0,69;115,0,62;105,0,63;49,0,65;244,0,64;22,0,64;60,0,68;214,1,75","h":[],"qe":[1],"qs":[0]},"1977-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"83,0,66;178,0,62;460,0,62;374,0,62;429,0,64;88,0,63;19,0,69;50,0,64;372,0,64;0,0,65;163,0,73;308,0,64;421,0,64;336,0,64;324,0,63;300,0,66;109,0,65;172,0,64;263,0,64;63,0,64;35,0,65;64,0,66;285,0,64;32,0,64;41,0,65;13,0,68;126,0,65;130,0,65;81,0,65;385,0,64;238,0,70;277,0,65;376,0,64;154,0,65;392,0,65;461,0,62;426,0,63;218,0,64;321,0,64;76,0,66;462,0,61;210,0,67;54,0,63;55,0,65;294,0,65;463,0,61;464,0,61;95,0,67;12,0,64;87,0,66;394,0,67;267,0,64;4,0,63;29,0,70;51,0,66;283,0,63;415,0,62;351,0,62;453,0,61;182,0,67;206,0,64;175,0,64;188,0,66;30,0,64","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1978-cwc":{"n":5,"t":[15,8,4,2,1],"f":"460,0,62;154,0,66;150,0,63;299,0,64;19,0,71;451,0,64;115,0,61;81,0,64;465,0,61;153,0,64;466,0,62;379,0,65;338,0,65;467,0,61;340,0,63;405,0,65;468,0,61;267,0,63;280,0,64;4,0,63;285,0,63;469,0,62;246,0,62;210,0,69;95,0,66;470,0,61;0,0,64;316,0,66;44,0,64;175,0,63;3,1,75","h":[],"qe":[0],"qs":[0]},"1978-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"128,0,64;50,0,63;182,1,67;28,1,66;132,1,65;214,1,76;5,1,68;454,1,61;32,1,67;184,1,63;471,1,61;217,1,64;133,1,67;347,1,62;65,1,73;31,1,66;88,1,62;13,1,72;472,1,61;96,1,67;85,1,64;459,1,61;231,1,63;324,1,62;1,1,65;282,1,67;162,1,65;76,1,66;281,1,72;269,1,65;130,1,64;238,1,68;218,1,63","h":[214],"qe":[1],"qs":[1]},"1978-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"49,0,64;473,0,64;14,0,69;455,0,63;30,0,63;131,0,65;97,0,72;335,0,64;257,0,64;105,0,64;29,0,69;47,0,69;407,0,62;167,0,65;56,0,62;16,0,65;244,0,65;43,0,67;474,0,64;206,0,65;249,0,65;124,0,63;23,0,64;265,0,65;354,0,64;34,0,67;84,0,63;333,0,64;80,0,63;229,0,66;255,0,64;434,0,62;368,0,64;136,0,65;428,0,64;475,0,61;51,0,66;263,0,64;415,0,62;157,0,64;190,0,66;194,0,65;109,0,67;104,0,65;309,0,64;170,0,63;320,0,69;294,0,64;7,0,65;36,0,65;476,0,61;2,0,66;329,0,63;432,0,64;54,0,62;243,0,66;385,0,65;146,0,66;271,0,66;12,0,63;197,0,65;149,0,65;37,0,65;445,0,62","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1979-cwc":{"n":6,"t":[2,16,8,4,2,1],"f":"31,0,67;459,0,62;333,0,63;175,0,63;357,1,66;359,1,64;178,1,62;421,1,63;477,1,61;244,1,64;48,1,64;50,1,63;220,1,63;160,1,64;347,1,62;19,1,74;131,1,66;405,1,68;190,1,67;88,1,62;379,1,64;210,1,69;370,1,64;320,1,68;57,1,65;253,1,65;299,1,64;455,1,62;478,1,62;466,1,62;479,1,61;384,1,65;65,1,71;216,1,65","h":[],"qe":[1],"qs":[0]},"1979-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"187,0,64;85,0,63;132,1,70;314,1,64;257,1,64;182,1,66;354,1,63;292,1,66;4,1,64;338,1,66;76,1,65;49,1,66;415,1,62;136,1,66;242,1,64;47,1,69;374,1,62;231,1,62;158,1,65;166,1,66;124,1,63;28,1,65;14,1,69;243,1,66;5,1,67;246,1,62;107,1,69;214,1,73;385,1,65;381,1,64;96,1,68;271,1,66;443,1,62","h":[132],"qe":[1],"qs":[1]},"1979-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"162,0,65;157,0,65;10,0,65;403,0,64;267,0,64;83,0,67;227,0,64;43,0,67;60,0,68;282,0,67;97,0,74;387,0,63;22,0,64;480,0,61;263,0,63;3,0,71;430,0,63;163,0,71;109,0,66;265,0,67;238,0,67;30,0,63;481,0,61;32,0,67;451,0,64;128,0,65;125,0,67;167,0,65;188,0,66;391,0,65;23,0,64;34,0,71;41,0,64;51,0,66;81,0,65;417,0,64;470,0,62;241,0,63;482,0,61;218,0,67;146,0,65;54,0,62;483,0,61;316,0,67;484,0,64;55,0,65;217,0,64;95,0,66;12,0,63;456,0,63;205,0,64;154,0,67;0,0,63;324,0,63;474,0,64;13,0,70;184,0,63;245,0,68;229,0,67;206,0,64;463,0,63;39,0,67;66,0,64;340,0,63","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1980-cwc":{"n":6,"t":[2,16,8,4,2,1],"f":"166,0,66;456,0,64;172,0,64;43,0,65;485,1,64;202,1,67;476,1,62;124,1,62;253,1,64;486,1,61;385,1,66;21,1,65;203,1,65;180,1,64;25,1,64;261,1,64;351,1,63;487,1,61;125,1,68;73,1,66;109,1,66;131,1,71;128,1,65;232,1,64;488,1,61;489,1,61;268,1,64;231,1,63;490,1,62;405,1,67;361,1,64;218,1,67;158,1,64;55,1,64","h":[],"qe":[1],"qs":[0]},"1980-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"37,0,67;184,0,62;267,1,63;96,1,67;491,1,61;214,1,70;30,1,62;132,1,73;443,1,62;492,1,61;54,1,62;163,1,72;278,1,65;47,1,70;309,1,64;316,1,67;354,1,65;175,1,62;56,1,62;247,1,65;458,1,62;157,1,64;102,1,65;5,1,68;0,1,64;85,1,62;244,1,66;81,1,65;340,1,65;281,1,68;80,1,63;387,1,62;34,1,71","h":[132],"qe":[1],"qs":[1]},"1980-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"162,0,67;386,0,64;391,0,67;3,0,69;210,0,67;493,0,61;460,0,63;374,0,62;467,0,62;90,0,65;282,0,67;494,0,62;257,0,65;168,0,65;430,0,63;474,0,63;238,0,67;243,0,65;451,0,63;83,0,71;388,0,64;4,0,64;320,0,66;57,0,66;88,0,62;384,0,65;28,0,65;187,0,65;32,0,67;63,0,64;107,0,71;275,0,65;368,0,64;495,0,62;154,0,66;227,0,65;347,0,62;133,0,67;65,0,70;105,0,64;449,0,64;357,0,66;84,0,64;39,0,68;321,0,64;496,0,62;26,0,66;463,0,62;13,0,69;68,0,65;394,0,66;206,0,64;432,0,65;263,0,64;178,0,62;19,0,72;51,0,67;50,0,63;76,0,64;417,0,64;38,0,65;421,0,64;229,0,69;329,0,63","h":[],"qe":[0,0,0],"qs":[0,0]},"1981-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"476,0,63;194,0,65;351,1,62;187,1,64;47,1,69;127,1,67;497,1,62;375,1,64;83,1,71;280,1,64;108,1,65;56,1,62;408,1,65;49,1,66;31,1,67;19,1,71;149,1,64;226,1,64;25,1,64;16,1,65;470,1,62;498,1,61;372,1,67;385,1,70;152,1,65;413,1,63;38,1,64;115,1,63;51,1,68;381,1,65;28,1,65;467,1,61;73,1,65","h":[],"qe":[1],"qs":[1]},"1981-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"39,0,70;354,0,65;96,1,65;158,1,63;238,1,66;443,1,62;188,1,65;429,1,66;246,1,63;463,1,64;3,1,67;166,1,66;65,1,69;95,1,65;316,1,67;124,1,62;34,1,70;415,1,62;499,1,62;491,1,61;214,1,73;30,1,64;417,1,65;454,1,63;170,1,64;63,1,64;438,1,64;340,1,64;54,1,62;43,1,68;231,1,63;314,1,64;163,1,72","h":[214],"qe":[1],"qs":[1]},"1981-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"391,0,67;450,0,64;210,0,67;97,0,74;445,0,63;81,0,67;175,0,62;257,0,64;227,0,64;178,0,62;128,0,64;263,0,64;421,0,64;60,0,66;500,0,61;501,0,62;22,0,64;243,0,65;430,0,63;131,0,69;130,0,64;57,0,65;244,0,65;449,0,66;247,0,66;281,0,67;502,0,62;282,0,67;125,0,68;492,0,62;32,0,68;265,0,65;271,0,66;229,0,69;107,0,71;168,0,65;154,0,70;267,0,64;338,0,65;85,0,62;373,0,64;224,0,65;278,0,64;109,0,69;102,0,64;317,0,65;218,0,66;269,0,65;146,0,65;496,0,63;503,0,61;203,0,65;105,0,63;190,0,69;13,0,68;406,0,64;12,0,63;418,0,64;335,0,64;358,0,65;0,0,63;374,0,62;504,0,62;5,0,71","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1982-cwc":{"n":6,"t":[2,16,8,4,2,1],"f":"267,0,65;232,0,64;108,0,64;249,0,65;237,1,64;127,1,69;255,1,65;163,1,74;278,1,63;309,1,64;475,1,63;178,1,61;217,1,66;505,1,62;282,1,67;506,1,61;490,1,63;374,1,61;23,1,64;507,1,61;96,1,65;105,1,62;459,1,63;34,1,70;19,1,74;250,1,65;102,1,63;499,1,63;81,1,67;24,1,65;508,1,61;5,1,72;57,1,70;76,1,63","h":[],"qe":[1],"qs":[0]},"1982-ec":{"n":6,"t":[1,16,8,4,2,1],"f":"22,0,65;226,0,64;128,1,63;30,1,66;55,1,64;0,1,64;373,1,64;417,1,64;166,1,65;47,1,67;32,1,68;238,1,67;240,1,65;85,1,62;354,1,66;107,1,74;54,1,61;314,1,63;49,1,66;429,1,70;53,1,64;51,1,71;216,1,65;261,1,65;65,1,68;313,1,64;12,1,64;124,1,62;463,1,63;231,1,62;242,1,64;187,1,64;214,1,72","h":[429],"qe":[1],"qs":[1]},"1982-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"391,0,69;443,0,62;73,0,65;154,0,68;182,0,65;133,0,69;39,0,67;504,0,62;20,0,65;31,0,65;263,0,66;13,0,67;168,0,64;28,0,66;430,0,63;209,0,65;109,0,68;224,0,65;385,0,70;146,0,64;481,0,62;4,0,64;247,0,66;190,0,68;340,0,65;35,0,65;90,0,65;120,0,65;95,0,64;29,0,66;170,0,64;316,0,67;152,0,64;509,0,61;510,0,62;199,0,65;351,0,62;44,0,65;511,0,61;512,0,61;26,0,65;131,0,69;280,0,64;388,0,67;329,0,63;188,0,64;180,0,65;275,0,64;3,0,68;482,0,62;42,0,65;243,0,64;43,0,67;221,0,65;432,0,64;357,0,65;317,0,65;36,0,65;403,0,64;449,0,66;387,0,63;194,0,66;513,0,61;271,0,67","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1983-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"108,0,65;210,0,66;514,1,62;400,1,64;19,1,72;515,1,61;114,1,65;26,1,64;49,1,65;516,1,61;240,1,65;457,1,64;130,1,63;170,1,63;505,1,64;65,1,71;517,1,61;184,1,63;31,1,66;55,1,63;28,1,66;518,1,61;451,1,63;4,1,65;313,1,64;182,1,64;76,1,64;299,1,64;133,1,69;413,1,63;338,1,65;347,1,63;267,1,71","h":[267],"qe":[1],"qs":[1]},"1983-ec":{"n":5,"t":[16,8,4,2,1],"f":"471,0,63;214,0,71;475,0,63;29,0,65;47,0,66;54,0,62;43,0,71;85,0,62;216,0,64;373,0,63;519,0,62;32,0,66;507,0,61;22,0,66;107,0,76;472,0,63;88,0,63;430,0,66;12,0,65;244,0,65;438,0,64;51,0,69;520,0,61;263,0,68;30,0,66;231,0,62;73,0,67;57,0,68;354,0,65;56,0,62;1,0,65;387,0,63","h":[],"qe":[0],"qs":[0]},"1983-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"391,0,69;521,0,64;203,0,64;5,0,72;522,0,61;37,0,66;183,0,65;163,0,72;60,0,65;523,0,62;500,0,62;3,0,72;166,0,65;10,0,65;524,0,61;127,0,68;160,0,65;96,0,67;316,0,66;333,0,64;238,0,67;525,0,62;224,0,66;194,0,65;247,0,67;242,0,64;340,0,68;271,0,66;188,0,65;45,0,65;526,0,64;34,0,68;309,0,63;109,0,67;199,0,64;426,0,65;132,0,68;90,0,64;196,0,65;280,0,64;13,0,66;95,0,64;527,0,61;87,0,65;496,0,66;310,0,65;42,0,66;0,0,65;92,0,65;237,0,64;452,0,64;335,0,65;495,0,64;125,0,68;443,0,62;81,0,67;229,0,67;243,0,63;147,0,65;429,0,69;120,0,66;218,0,66;463,0,66;368,0,64","h":[],"qe":[0,0,0,0],"qs":[0,0]},"1984-cwc":{"n":5,"t":[16,8,4,2,1],"f":"163,0,72;493,0,63;149,0,64;153,0,64;73,0,70;50,0,64;379,0,64;28,0,69;87,0,65;507,0,61;528,0,61;167,0,64;63,0,64;207,0,65;269,0,65;309,0,62;218,0,65;282,0,65;304,0,65;19,0,71;12,0,66;53,0,64;199,0,63;166,0,66;529,0,62;522,0,60;175,0,63;4,0,65;357,0,64;271,0,69;467,0,63;520,0,61","h":[],"qe":[0],"qs":[0]},"1984-ec":{"n":5,"t":[16,8,4,2,1],"f":"487,0,63;65,0,73;32,0,65;37,0,66;226,0,64;203,0,66;530,0,61;511,0,61;224,0,65;29,0,65;22,0,68;231,0,62;243,0,64;229,0,65;443,0,61;531,0,62;267,0,70;354,0,66;96,0,68;184,0,63;475,0,63;214,0,74;34,0,67;43,0,70;313,0,63;57,0,66;347,0,63;338,0,65;125,0,67;105,0,63;85,0,62;44,0,65","h":[],"qe":[0],"qs":[0]},"1984-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"133,0,68;532,0,61;305,0,64;263,0,68;128,0,63;30,0,66;324,0,64;31,0,65;519,0,64;242,0,64;374,0,62;47,0,65;430,0,66;250,0,64;232,0,64;60,0,64;533,0,61;349,0,65;534,0,61;13,0,66;88,0,63;35,0,64;535,0,62;97,0,69;170,0,63;51,0,68;213,0,65;448,0,65;194,0,66;459,0,63;26,0,66;216,0,64;132,0,70;281,0,65;471,0,63;247,0,68;54,0,63;503,0,64;314,0,63;177,0,65;505,0,64;52,0,65;3,0,74;120,0,66;527,0,61;1,0,65;221,0,65;340,0,66;5,0,70;299,0,64;536,0,64;466,0,65;249,0,64;127,0,71;317,0,64;107,0,72;0,0,65;537,0,62;452,0,63;81,0,67;418,0,64;49,0,64;463,0,66;10,0,64","h":[],"qe":[0,0,0,0,0],"qs":[0,0,0]},"1985-cwc":{"n":5,"t":[15,8,4,2,1],"f":"12,0,69;504,0,62;351,0,63;170,0,62;128,0,62;340,0,67;168,0,64;238,0,66;293,0,65;49,0,63;305,0,64;374,0,61;522,0,62;159,0,65;511,0,62;538,0,61;34,0,66;539,0,61;99,0,65;145,0,65;60,0,63;166,0,66;242,0,63;540,0,61;541,0,62;282,0,66;513,0,62;542,0,63;23,0,64;463,0,67;43,1,70","h":[],"qe":[],"qs":[0]},"1985-ec":{"n":5,"t":[15,8,4,2,1],"f":"126,0,65;163,0,71;354,0,66;96,0,69;527,0,61;231,0,62;37,0,65;44,0,64;381,0,64;50,0,63;502,0,63;226,0,63;507,0,61;275,0,65;85,0,62;4,0,65;347,0,62;267,0,68;57,0,67;149,0,64;224,0,67;88,0,62;203,0,67;19,0,69;28,0,67;47,0,65;526,0,64;280,0,64;56,0,63;65,0,75;3,1,73","h":[],"qe":[],"qs":[0]},"1985-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"133,0,69;474,0,64;182,0,64;5,0,73;537,0,62;14,0,66;175,0,63;217,0,65;29,0,64;53,0,63;421,0,65;281,0,65;324,0,63;263,0,68;97,0,68;475,0,63;237,0,63;194,0,66;22,0,67;122,0,65;313,0,63;13,0,65;436,0,65;120,0,65;46,0,65;531,0,64;247,0,68;311,0,65;216,0,64;430,0,67;271,0,67;304,0,65;81,0,69;310,0,64;306,0,65;10,0,63;278,0,64;520,0,62;177,0,65;316,0,66;25,0,65;387,0,63;503,0,64;452,0,63;543,0,61;516,0,63;544,0,62;1,0,66;191,0,65;299,0,63;31,0,65;545,0,64;283,0,64;495,0,63;92,0,66;107,0,71;0,0,65;125,0,66;206,0,65;105,0,65;246,0,64;244,0,64;418,0,69;218,0,64","h":[],"qe":[],"qs":[0,0,0]},"1986-cwc":{"n":5,"t":[16,8,4,2,1],"f":"73,0,69;171,0,65;513,0,62;379,0,65;333,0,64;243,0,64;38,0,65;408,0,65;240,0,64;22,0,66;218,0,63;250,0,64;411,0,65;47,0,64;54,0,64;153,0,64;43,0,69;459,0,63;380,0,65;224,0,66;130,0,65;255,0,65;229,0,64;273,0,65;12,0,69;281,0,66;170,0,62;194,0,66;351,0,63;342,0,65;267,0,68;232,0,64","h":[],"qe":[],"qs":[0]},"1986-ec":{"n":5,"t":[15,8,4,2,1],"f":"505,0,64;546,0,62;28,0,67;527,0,61;547,0,61;37,0,65;228,0,65;354,0,65;53,0,63;278,0,64;175,0,62;242,0,63;44,0,63;166,0,65;384,0,65;238,0,70;13,0,65;163,0,71;313,0,62;96,0,68;3,0,72;126,0,64;236,0,65;85,0,62;34,0,66;105,0,64;48,0,65;5,0,76;65,0,73;246,0,63;50,1,68","h":[],"qe":[],"qs":[0]},"1986-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"203,0,66;147,0,65;35,0,65;421,0,64;29,0,65;210,0,65;60,0,67;120,0,64;97,0,68;1,0,65;237,0,63;548,0,61;519,0,66;216,0,63;523,0,64;538,0,61;244,0,66;206,0,65;247,0,68;549,0,61;340,0,66;23,0,65;550,0,61;30,0,66;52,0,64;49,0,65;124,0,63;149,0,64;81,0,71;182,0,63;347,0,62;0,0,67;56,0,63;199,0,63;338,0,65;226,0,63;470,0,64;551,0,63;542,0,65;109,0,66;540,0,61;19,0,71;177,0,65;463,0,65;25,0,66;531,0,65;146,0,65;264,0,65;503,0,66;511,0,63;466,0,65;51,0,67;552,0,61;271,0,68;341,0,65;125,0,65;31,0,64;487,0,63;426,0,66;263,0,68;553,0,62;57,0,68;452,0,62;231,0,63","h":[],"qe":[],"qs":[0,0,0]},"1987-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"293,0,64;554,0,62;555,1,62;22,1,65;495,1,64;556,1,61;417,1,66;432,1,65;519,1,65;557,1,61;243,1,65;552,1,60;558,1,61;174,1,65;347,1,62;470,1,63;0,1,67;550,1,65;472,1,64;178,1,63;559,1,61;170,1,62;194,1,69;165,1,65;252,1,65;271,1,69;76,1,65;288,1,65;48,1,64;313,1,62;107,1,69;47,1,69;187,1,64","h":[],"qe":[],"qs":[1]},"1987-ec":{"n":5,"t":[16,8,4,2,1],"f":"503,0,66;507,0,63;163,0,73;30,0,64;5,0,75;146,0,64;28,0,71;122,0,65;459,0,63;85,0,62;224,0,67;354,0,65;12,0,68;520,0,62;13,0,64;23,0,64;50,0,67;2,0,65;44,0,63;231,0,62;238,0,70;31,0,65;54,0,64;126,0,64;10,0,63;56,0,62;43,0,67;158,0,64;351,0,63;203,0,65;218,0,64;3,0,71","h":[],"qe":[],"qs":[0]},"1987-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"53,0,64;81,0,71;324,0,63;267,0,67;97,0,70;560,0,64;547,0,63;57,0,71;37,0,64;449,0,65;166,0,65;20,0,65;237,0,62;263,0,72;332,0,65;561,0,61;19,0,71;139,0,65;46,0,64;246,0,63;247,0,68;282,0,66;340,0,66;562,0,62;546,0,63;305,0,64;502,0,64;281,0,65;125,0,65;21,0,65;96,0,67;551,0,63;32,0,65;357,0,66;338,0,66;430,0,66;540,0,62;1,0,64;321,0,65;168,0,64;308,0,65;120,0,63;105,0,64;537,0,62;217,0,65;385,0,66;532,0,62;526,0,65;34,0,67;149,0,64;474,0,64;14,0,66;452,0,63;342,0,65;504,0,63;147,0,67;264,0,65;370,0,65;311,0,64;209,0,65;184,0,63;65,0,71;408,0,65;232,0,65;138,1,65","h":[],"qe":[],"qs":[0,0,0]},"1988-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"563,0,62;500,0,63;208,1,65;204,1,65;41,1,65;10,1,64;351,1,62;19,1,72;540,1,63;475,1,63;87,1,65;30,1,64;231,1,63;105,1,66;33,1,65;147,1,67;422,1,65;564,1,62;32,1,64;83,1,66;565,1,61;555,1,67;313,1,62;304,1,64;3,1,71;115,1,64;263,1,71;22,1,64;507,1,63;109,1,65;566,1,61;36,1,65;159,1,65;567,2,62","h":[],"qe":[],"qs":[1]},"1988-ec":{"n":5,"t":[15,8,4,2,1],"f":"28,0,69;242,0,63;126,0,64;56,0,62;5,0,74;493,0,64;37,0,65;166,0,64;354,0,64;120,0,67;243,0,64;14,0,66;187,0,64;34,0,66;520,0,62;240,0,65;329,0,64;57,0,69;203,0,65;50,0,68;247,0,67;170,0,62;281,0,68;547,0,64;246,0,62;128,0,63;522,0,63;503,0,66;12,0,67;23,0,63;13,1,69","h":[],"qe":[],"qs":[0]},"1988-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"229,0,65;504,0,63;45,0,65;133,0,70;163,0,71;25,0,66;551,0,69;139,0,64;73,0,67;123,0,65;523,0,65;60,0,66;539,0,63;194,0,67;117,0,65;52,0,64;568,0,62;96,0,66;0,0,67;47,0,70;417,0,65;49,0,66;153,0,64;191,0,65;81,0,70;512,0,64;347,0,62;76,0,64;31,0,66;342,0,64;267,0,66;282,0,65;531,0,64;224,0,67;314,0,64;554,0,63;311,0,65;85,0,62;434,0,65;306,0,67;218,0,64;255,0,65;569,0,61;570,0,61;571,0,61;65,0,70;408,0,65;175,0,63;182,0,63;29,0,65;572,0,62;43,0,70;178,0,63;561,0,62;146,0,64;280,0,64;1,0,64;180,0,65;4,0,65;335,0,66;149,0,64;519,0,65;53,0,64;55,0,64","h":[],"qe":[],"qs":[0,0,0]},"1989-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"573,0,61;278,0,64;536,1,64;520,1,62;153,1,63;8,1,65;139,1,64;128,1,65;246,1,62;354,1,63;53,1,63;20,1,66;400,1,65;159,1,68;255,1,64;574,1,61;24,1,65;32,1,63;3,1,69;467,1,64;19,1,74;25,1,65;209,1,64;293,1,64;95,1,64;130,1,64;105,1,66;108,1,65;22,1,65;523,1,66;570,1,60;1,1,64;166,1,64","h":[],"qe":[],"qs":[1]},"1989-ec":{"n":5,"t":[16,8,4,2,1],"f":"218,0,64;81,0,70;236,0,65;567,0,64;14,0,70;242,0,63;21,0,64;5,0,73;31,0,66;163,0,73;178,0,62;240,0,65;50,0,71;351,0,62;13,0,69;549,0,62;203,0,64;88,0,64;292,0,65;30,0,66;165,0,66;547,0,63;282,0,68;182,0,63;37,0,64;135,0,65;208,0,64;43,0,69;85,0,61;531,0,64;550,0,64;231,0,62","h":[],"qe":[],"qs":[0]},"1989-uefa":{"n":7,"t":[1,32,16,8,4,2,1],"f":"537,0,63;55,0,64;96,1,65;47,1,68;243,1,64;45,1,64;250,1,64;171,1,66;267,1,65;12,1,66;7,1,65;418,1,66;60,1,65;35,1,64;131,1,66;561,1,65;507,1,63;505,1,64;559,1,64;342,1,63;575,1,61;388,1,65;56,1,62;134,1,65;232,1,64;170,1,62;263,1,69;347,1,62;191,1,66;174,1,66;247,1,67;184,1,63;569,1,62;459,1,64;120,1,67;320,1,65;281,1,67;126,1,64;65,1,70;0,1,67;146,1,69;28,1,68;576,1,61;133,1,69;577,1,62;229,1,69;125,1,66;228,1,64;107,1,67;578,1,61;187,1,63;23,1,65;34,1,66;238,1,67;2,1,64;502,1,64;406,1,65;568,1,62;57,1,69;579,1,62;54,1,64;276,1,65;421,1,64;303,1,65;316,1,65","h":[],"qe":[],"qs":[1,1,1]},"1990-cwc":{"n":6,"t":[1,16,8,4,2,1],"f":"580,0,61;443,0,64;581,1,61;267,1,64;25,1,64;582,1,61;54,1,65;540,1,63;391,1,66;159,1,72;26,1,66;341,1,64;379,1,65;511,1,64;572,1,62;13,1,69;170,1,61;50,1,70;84,1,65;238,1,68;178,1,62;49,1,65;351,1,62;8,1,65;19,1,72;387,1,64;191,1,68;583,1,62;503,1,65;584,1,63;96,1,66;533,1,63;65,1,74","h":[],"qe":[1],"qs":[1]},"1990-ec":{"n":5,"t":[16,8,4,2,1],"f":"175,0,63;163,0,72;585,0,61;30,0,67;22,0,67;117,0,64;28,0,68;151,0,65;34,0,67;32,0,65;184,0,63;31,0,65;153,0,63;282,0,66;218,0,65;53,0,63;146,0,69;76,0,65;203,0,64;247,0,67;471,0,64;5,0,71;550,0,64;507,0,62;14,0,74;586,0,61;459,0,63;281,0,66;475,0,64;105,0,66;165,0,68;278,0,64","h":[],"qe":[],"qs":[0]},"1990-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"210,0,65;559,0,64;73,0,67;43,0,71;429,0,66;316,0,65;174,0,65;55,0,64;551,0,66;320,0,64;20,0,65;276,0,66;547,0,63;83,0,66;208,0,64;587,0,62;313,0,63;87,0,64;436,0,65;236,0,64;531,0,65;52,0,66;255,0,64;431,0,65;476,0,65;60,0,64;88,0,63;147,0,66;588,0,61;263,0,68;342,0,63;311,0,65;41,0,64;224,0,67;124,0,64;1,0,65;36,0,64;133,0,71;134,0,64;131,0,66;158,0,64;340,0,65;16,0,65;417,0,67;2,0,64;549,0,62;180,0,64;231,0,62;45,0,66;95,0,65;3,0,71;59,0,65;33,0,66;128,0,66;42,0,65;280,0,64;12,0,66;81,0,68;0,0,65;567,0,65;381,0,64;209,0,65;589,0,61;212,0,65","h":[],"qe":[0],"qs":[0,0]},"1991-cwc":{"n":6,"t":[2,16,8,4,2,1],"f":"590,0,61;127,0,67;538,0,63;471,0,64;591,1,61;60,1,63;592,1,61;26,1,70;342,1,63;593,1,62;231,1,63;281,1,66;594,1,61;120,1,69;243,1,63;95,1,65;595,1,63;23,1,65;316,1,64;41,1,63;487,1,64;358,1,65;73,1,72;36,1,64;56,1,62;108,1,64;128,1,67;246,1,62;232,1,65;158,1,63;125,1,65;271,1,66;184,1,62;28,1,69","h":[26],"qe":[0],"qs":[1]},"1991-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"267,0,64;333,0,64;47,0,66;596,0,61;183,0,65;50,0,68;597,0,61;553,0,63;421,0,64;81,0,72;166,0,64;478,0,65;574,0,62;163,0,72;55,0,63;443,0,64;83,0,65;21,0,64;523,0,65;598,0,63;570,0,62;537,0,66;550,0,65;556,0,63;144,0,65;255,0,66;107,0,68;126,0,64;199,0,65;16,0,64;213,0,65;206,0,66;359,0,65;182,0,64;214,0,68;507,0,62;356,0,65;247,0,68;503,0,64;115,0,64;82,0,65;314,0,64;280,0,63;567,0,64;30,0,66;599,0,64;180,0,63;545,0,65;600,0,64;601,0,64;602,0,62;603,0,62;24,0,64;5,0,70;335,0,65;168,0,64;0,0,68;22,0,66;474,0,64;1,0,66;604,0,62;357,0,65;229,0,68;341,0,64","h":[],"qe":[0],"qs":[0,0]},"1992-cwc":{"n":6,"t":[4,16,8,4,2,1],"f":"605,0,61;520,0,63;330,0,65;606,0,61;607,0,61;436,0,65;313,0,62;608,0,61;609,1,61;128,1,70;54,1,65;443,1,65;311,1,64;60,1,65;120,1,73;72,1,65;610,1,62;203,1,64;599,1,63;76,1,64;246,1,62;421,1,64;243,1,62;549,1,63;125,1,67;247,1,68;214,1,69;250,1,64;204,1,65;209,1,66;41,1,63;45,1,65;305,1,64;10,1,65;324,1,64;50,1,69","h":[],"qe":[1],"qs":[1]},"1992-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"133,0,70;166,0,64;357,0,66;236,0,63;611,0,61;105,0,65;238,0,68;12,0,65;612,0,61;356,0,64;299,0,64;73,0,71;476,0,65;5,0,72;88,0,64;149,0,64;115,0,63;20,0,66;342,0,64;23,0,66;32,0,64;0,0,67;7,0,65;3,0,70;36,0,64;206,0,70;65,0,72;183,0,64;351,0,63;391,0,65;26,0,69;255,0,66;503,0,66;285,0,65;505,0,65;280,0,63;196,0,65;537,0,65;361,0,65;47,0,71;140,0,65;21,0,63;553,0,66;340,0,65;283,0,65;52,0,66;43,0,68;613,0,61;614,0,62;171,0,66;51,0,66;151,0,64;604,0,61;523,0,64;131,0,66;146,0,68;587,0,64;208,0,63;147,0,65;417,0,66;463,0,65;83,0,65;567,0,63;596,0,61","h":[],"qe":[0,0],"qs":[0,0,0]},"1993-cwc":{"n":6,"t":[11,16,8,4,2,1],"f":"328,0,65;155,0,65;615,0,61;616,0,61;178,0,63;617,0,61;597,0,61;175,0,63;148,0,65;618,0,61;246,0,61;619,0,61;620,0,61;621,0,61;622,0,61;459,0,63;365,0,65;568,0,63;291,0,65;623,0,61;624,0,61;471,0,64;625,1,61;95,1,65;5,1,73;505,1,68;340,1,64;206,1,70;267,1,63;190,1,65;51,1,66;204,1,64;43,1,70;342,1,63;30,1,66;105,1,65;551,1,67;162,1,65;271,1,65;47,1,72;626,1,61;53,1,63;255,1,66;599,1,68","h":[],"qe":[1],"qs":[1]},"1993-uefa":{"n":6,"t":[32,16,8,4,2,1],"f":"252,0,65;627,0,64;324,0,63;224,0,67;20,0,71;628,0,61;547,0,66;263,0,67;48,0,65;166,0,64;629,0,64;537,0,68;268,0,65;4,0,65;22,0,66;322,0,65;357,0,67;83,0,65;531,0,64;209,0,66;507,0,62;306,0,66;244,0,65;131,0,65;320,0,64;163,0,70;630,0,61;605,0,62;52,0,66;60,0,66;36,0,63;567,0,63;81,0,69;279,0,65;65,0,75;631,0,61;632,0,63;13,0,67;213,0,64;2,0,63;633,0,61;0,0,65;634,0,64;587,0,65;314,0,63;635,0,61;149,0,63;54,0,66;45,0,69;636,0,62;361,0,64;554,0,64;336,0,65;196,0,64;283,0,64;552,0,64;24,0,64;429,0,66;443,0,65;184,0,62;153,0,63;421,0,64;604,0,62;250,0,63","h":[],"qe":[0,0],"qs":[0,0,0]},"1994-cwc":{"n":6,"t":[12,16,8,4,2,1],"f":"597,0,61;248,0,65;637,0,61;568,0,63;440,0,65;638,0,61;639,0,61;240,0,65;95,0,64;148,0,64;115,0,63;457,0,65;241,0,65;640,0,61;641,0,61;605,0,62;543,0,64;642,0,61;643,0,61;242,0,64;644,0,61;231,0,63;645,0,62;36,0,62;125,1,67;120,1,70;263,1,65;630,1,60;171,1,66;281,1,67;105,1,65;78,1,65;96,1,65;547,1,67;190,1,70;53,1,63;55,1,63;537,1,67;159,1,69;32,1,65;436,1,65;28,1,67;86,1,65;358,1,64","h":[190],"qe":[1],"qs":[1]},"1994-uefa":{"n":7,"t":[27,32,16,8,4,2,1],"f":"183,0,64;646,0,61;227,0,65;647,0,61;145,0,65;347,0,63;37,0,65;648,0,61;649,0,61;236,0,63;539,0,64;650,0,61;519,0,65;124,0,64;385,0,66;340,0,64;612,0,62;651,0,61;88,0,64;652,0,61;588,0,62;85,0,63;87,0,65;619,0,61;122,0,65;563,0,64;653,0,61;654,0,61;126,0,64;44,0,64;655,0,61;250,0,64;459,0,64;451,0,65;593,0,63;616,0,62;471,0,64;656,0,61;256,0,65;243,0,63;30,0,66;393,0,65;151,0,64;24,0,63;657,0,61;305,0,64;283,0,63;574,0,63;658,0,61;267,0,64;659,0,61;342,0,62;184,0,62;279,0,64;29,1,65;232,1,65;603,1,63;551,1,67;13,1,65;660,1,64;421,1,66;20,1,71;636,1,62;336,1,65;625,1,62;224,1,67;661,1,61;320,1,63;391,1,66;81,1,73;429,1,65;146,1,67;83,1,67;54,1,66;165,1,69;65,1,74;45,1,68;300,1,65;662,1,62;357,1,66;318,1,65;5,1,71;0,1,66;627,1,65;663,1,61;244,1,64;443,1,65;22,1,65;209,1,65;587,1,64;599,1,71","h":[],"qe":[1,1,1],"qs":[0,0]},"1995-uefa":{"n":7,"t":[33,32,16,8,4,2,1],"f":"231,0,63;178,0,62;203,0,65;23,0,66;664,0,61;615,0,61;665,0,61;256,0,65;145,0,64;463,0,64;547,0,67;666,0,61;268,0,64;667,0,61;22,0,64;243,0,62;187,0,64;218,0,65;56,0,63;291,0,65;365,0,66;76,0,64;340,0,63;519,0,65;88,0,64;158,0,63;122,0,64;668,0,61;41,0,63;588,0,61;124,0,63;436,0,64;669,0,61;96,0,65;459,0,64;656,0,60;593,0,63;619,0,61;596,0,61;313,0,63;149,0,63;385,0,65;180,0,63;54,0,65;670,0,62;653,0,60;34,0,69;503,0,65;155,0,65;347,0,63;24,0,64;671,0,61;335,0,64;283,0,63;240,0,65;647,0,60;658,0,61;605,0,63;672,0,61;387,0,64;589,0,62;673,0,61;648,0,60;674,0,61;632,0,66;224,0,67;81,1,71;14,1,69;128,1,68;245,1,65;163,1,69;631,1,61;628,1,61;214,1,68;221,1,65;120,1,69;19,1,70;104,1,65;43,1,70;132,1,66;13,1,64;73,1,70;675,1,62;426,1,65;136,1,65;33,1,65;676,1,62;82,1,65;677,1,63;663,1,60;26,1,67;42,1,65;391,1,66;336,1,67;537,1,67;147,1,65;51,1,66","h":[],"qe":[1,1,1,1],"qs":[0,0]},"1996-cwc":{"n":6,"t":[17,16,8,4,2,1],"f":"678,0,61;213,0,63;155,0,64;400,0,65;679,0,61;292,0,65;37,0,66;680,0,61;681,0,61;153,0,63;615,0,61;607,0,62;170,0,63;203,0,67;682,0,61;616,0,61;683,0,61;684,0,61;685,0,61;540,0,64;232,0,66;686,0,61;256,0,65;243,0,62;34,0,67;52,0,65;687,0,61;619,0,62;688,0,61;689,0,61;690,0,61;691,0,61;184,0,61;630,0,60;360,1,65;335,1,63;19,1,72;23,1,65;391,1,66;214,1,67;10,1,65;541,1,64;305,1,65;43,1,70;182,1,65;35,1,67;13,1,67;505,1,69;631,1,61","h":[],"qe":[1],"qs":[0]},"1996-uefa":{"n":8,"t":[27,26,32,16,8,4,2,1],"f":"385,0,64;649,0,61;692,0,61;644,0,61;55,0,63;240,0,64;178,0,62;693,0,61;651,0,61;653,0,60;694,0,61;122,0,64;183,0,64;673,0,61;151,0,63;135,0,65;695,0,61;242,0,64;696,0,61;309,0,65;324,0,63;519,0,66;697,0,61;115,0,63;56,0,62;25,0,66;180,0,63;666,0,61;347,0,64;698,0,61;699,0,61;217,0,65;700,0,61;658,0,61;648,0,62;271,0,65;643,0,61;175,0,64;637,0,61;701,0,61;568,0,63;268,0,63;655,0,61;365,0,65;130,0,64;656,0,60;702,0,61;650,0,61;703,0,61;704,0,61;618,0,63;1,0,65;117,0,64;24,0,64;357,1,66;279,1,65;503,1,65;458,1,65;152,1,65;134,1,64;705,1,61;358,1,64;471,1,67;267,1,63;706,1,62;553,1,66;443,1,66;119,1,65;539,1,64;247,1,68;625,1,63;255,1,65;440,1,65;511,1,64;166,1,65;436,1,65;434,1,65;218,1,65;53,1,64;125,2,67;95,2,65;54,2,66;283,2,67;394,2,65;107,2,67;304,2,65;547,2,68;281,2,67;421,2,66;131,2,65;163,2,73;73,2,71;238,2,67;64,2,65;33,2,65;426,2,66;336,2,67;707,2,62;81,2,69;572,2,65;0,2,65;138,2,66;429,2,65;478,2,64;300,2,65;628,2,61;3,2,69;599,2,73;147,2,65;629,2,65;640,2,62;190,2,72;97,2,66;128,2,67;667,2,62;105,2,65;632,2,65","h":[],"qe":[2,2,2],"qs":[1,1]},"1997-uefa":{"n":8,"t":[20,18,32,16,8,4,2,1],"f":"519,0,66;708,0,61;606,0,63;656,0,60;531,0,65;709,0,61;666,0,60;162,0,64;619,0,62;250,0,64;659,0,61;166,0,65;503,0,66;644,0,60;649,0,60;271,0,65;32,0,65;237,0,64;135,0,65;387,0,64;213,0,64;22,0,63;324,0,62;95,0,65;710,0,61;687,0,61;711,0,61;273,0,65;712,0,61;713,0,61;714,0,61;715,0,61;400,0,66;716,0,61;717,0,61;263,0,65;694,0,60;571,0,64;76,0,64;718,0,61;218,1,65;3,1,70;663,1,62;443,1,67;12,1,65;625,1,63;705,1,64;381,1,64;281,1,68;280,1,63;552,1,65;596,1,61;719,1,62;459,1,64;10,1,64;628,1,60;627,2,66;537,2,67;361,2,68;190,2,70;463,2,64;720,2,64;605,2,63;47,2,69;82,2,66;547,2,70;678,2,61;385,2,66;536,2,65;658,2,61;147,2,65;336,2,66;136,2,65;31,2,65;2,2,64;64,2,70;372,2,65;43,2,70;232,2,66;247,2,68;159,2,69;29,2,66;224,2,71;429,2,64;50,2,67;88,2,64;651,2,61;211,2,65;721,2,63;55,2,63;587,2,64;249,2,65;81,2,74;214,2,69;304,2,66;320,2,63;697,2,61;60,2,66;112,2,65;244,2,66;632,2,66;183,2,64","h":[],"qe":[2,2,2,2],"qs":[0,0,2]},"1998-uefa":{"n":8,"t":[20,20,32,16,8,4,2,1],"f":"257,0,65;722,0,61;723,0,61;30,0,66;231,0,64;85,0,64;451,0,64;711,0,60;708,0,60;34,0,68;87,0,64;240,0,63;683,0,61;724,0,61;616,0,61;725,0,61;349,0,65;225,0,65;650,0,62;714,0,60;347,0,64;568,0,64;674,0,61;726,0,61;673,0,60;218,0,64;478,0,63;275,0,65;155,0,63;31,0,64;571,0,63;680,0,61;153,0,62;57,0,66;95,0,66;717,0,60;644,0,60;3,0,70;700,0,61;269,0,65;663,1,63;182,1,66;4,1,65;727,1,61;434,1,64;88,1,63;667,1,61;280,1,65;283,1,67;188,1,65;400,1,66;728,1,61;443,1,66;381,1,63;330,1,64;671,1,61;12,1,67;152,1,66;357,1,66;271,1,66;553,1,65;203,2,67;417,2,65;599,2,71;660,2,63;82,2,66;658,2,61;147,2,64;166,2,66;229,2,66;125,2,68;369,2,65;73,2,70;86,2,64;128,2,69;729,2,61;32,2,66;35,2,68;429,2,67;64,2,72;304,2,66;365,2,65;214,2,68;0,2,65;212,2,66;605,2,62;221,2,66;224,2,70;60,2,69;730,2,61;697,2,61;245,2,65;636,2,63;720,2,64;551,2,69;50,2,68;131,2,67;173,2,65;385,2,66;183,2,63;76,2,64;281,2,68;731,2,62;120,2,69;165,2,67","h":[],"qe":[2,2,2,2],"qs":[0,0,2]}};
+var EURO_FINAL_VENUES={ec:{"1956":["Parc des Princes","Paris"],"1957":["Santiago Bernabéu","Madrid"],"1958":["Heysel Stadium","Brussels"],"1959":["Neckarstadion","Stuttgart"],"1960":["Hampden Park","Glasgow"],"1961":["Wankdorf Stadium","Bern"],"1962":["Olympic Stadium","Amsterdam"],"1963":["Wembley Stadium","London"],"1964":["Prater Stadium","Vienna"],"1965":["San Siro","Milan"],"1966":["Heysel Stadium","Brussels"],"1967":["Estádio Nacional","Lisbon"],"1968":["Wembley Stadium","London"],"1969":["Santiago Bernabéu","Madrid"],"1970":["San Siro","Milan"],"1971":["Wembley Stadium","London"],"1972":["De Kuip","Rotterdam"],"1973":["Red Star Stadium","Belgrade"],"1974":["Heysel Stadium","Brussels"],"1975":["Parc des Princes","Paris"],"1976":["Hampden Park","Glasgow"],"1977":["Stadio Olimpico","Rome"],"1978":["Wembley Stadium","London"],"1979":["Olympiastadion","Munich"],"1980":["Santiago Bernabéu","Madrid"],"1981":["Parc des Princes","Paris"],"1982":["De Kuip","Rotterdam"],"1983":["Olympic Stadium","Athens"],"1984":["Stadio Olimpico","Rome"],"1985":["Heysel Stadium","Brussels"],"1986":["Ramón Sánchez Pizjuán","Seville"],"1987":["Prater Stadium","Vienna"],"1988":["Neckarstadion","Stuttgart"],"1989":["Camp Nou","Barcelona"],"1990":["Prater Stadium","Vienna"],"1991":["Stadio San Nicola","Bari"],"1992":["Wembley Stadium","London"],"1993":["Olympiastadion","Munich"],"1994":["Olympic Stadium","Athens"],"1995":["Ernst-Happel-Stadion","Vienna"],"1996":["Stadio Olimpico","Rome"],"1997":["Olympiastadion","Munich"],"1998":["Amsterdam Arena","Amsterdam"],"1999":["Camp Nou","Barcelona"]},cwc:{"1962":["Hampden Park","Glasgow"],"1963":["De Kuip","Rotterdam"],"1964":["Heysel Stadium","Brussels"],"1965":["Wembley Stadium","London"],"1966":["Hampden Park","Glasgow"],"1967":["Frankenstadion","Nuremberg"],"1968":["De Kuip","Rotterdam"],"1969":["St. Jakob Stadium","Basel"],"1970":["Prater Stadium","Vienna"],"1971":["Karaiskakis Stadium","Piraeus"],"1972":["Camp Nou","Barcelona"],"1973":["Kaftanzoglio Stadium","Thessaloniki"],"1974":["De Kuip","Rotterdam"],"1975":["St. Jakob Stadium","Basel"],"1976":["Heysel Stadium","Brussels"],"1977":["Olympic Stadium","Amsterdam"],"1978":["Parc des Princes","Paris"],"1979":["St. Jakob Stadium","Basel"],"1980":["Heysel Stadium","Brussels"],"1981":["Rheinstadion","Düsseldorf"],"1982":["Camp Nou","Barcelona"],"1983":["Ullevi","Gothenburg"],"1984":["St. Jakob Stadium","Basel"],"1985":["De Kuip","Rotterdam"],"1986":["Stade de Gerland","Lyon"],"1987":["Olympic Stadium","Athens"],"1988":["Stade de la Meinau","Strasbourg"],"1989":["Wankdorf Stadium","Bern"],"1990":["Ullevi","Gothenburg"],"1991":["De Kuip","Rotterdam"],"1992":["Estádio da Luz","Lisbon"],"1993":["Wembley Stadium","London"],"1994":["Parken Stadium","Copenhagen"],"1995":["Parc des Princes","Paris"],"1996":["King Baudouin Stadium","Brussels"],"1997":["De Kuip","Rotterdam"],"1998":["Råsunda Stadium","Stockholm"],"1999":["Villa Park","Birmingham"]}};
+/* key real players/managers for the best-known clubs, by era (season START year). pos: G goalkeeper, B full-back, H half-back/midfield, F forward. rep 3 = very good, 4 = star, 5 = all-time great. */
+var EURO_STARS = {};
+function _es(club, from, to, mgr, list){ (EURO_STARS[club] = EURO_STARS[club] || []).push({from:from, to:to, mgr:mgr, p:list.map(function(x){ return {n:x[0], pos:x[1], rep:x[2]}; })}); }
+_es('Real Madrid',1959,1964,'Miguel Muñoz',[['José Araquistáin','G',3],['Pachín','B',3],['José Santamaría','H',4],['Luis del Sol','H',3],['Alfredo Di Stéfano','F',5],['Ferenc Puskás','F',5],['Francisco Gento','F',4],['Amancio','F',4],['Héctor Rial','F',3]]);
+_es('Real Madrid',1965,1972,'Miguel Muñoz',[['Antonio Betancort','G',3],['Ignacio Zoco','H',3],['Pirri','H',4],['Manuel Sanchís','B',3],['Francisco Gento','F',4],['Amancio','F',4],['Manuel Velázquez','H',3],['Grosso','F',3]]);
+_es('Real Madrid',1973,1984,null,[['Miguel Ángel','G',3],['Camacho','B',3],['Vicente del Bosque','H',3],['Pirri','H',3],['Uli Stielike','H',4],['Günter Netzer','H',4],['Paul Breitner','H',4],['Juanito','F',4],['Santillana','F',4]]);
+_es('Real Madrid',1985,1989,null,[['Francisco Buyo','G',3],['Camacho','B',3],['Manolo Sanchís','H',3],['Míchel','H',4],['Martín Vázquez','H',3],['Gallego','H',3],['Emilio Butragueño','F',4],['Hugo Sánchez','F',4],['Jorge Valdano','F',3],['Santillana','F',3]]);
+_es('Benfica',1955,1958,null,[['José Águas','F',4],['Mário Coluna','H',4],['Costa Pereira','G',3],['José Augusto','F',3],['Domiciano Cavém','F',3]]);
+_es('Benfica',1959,1962,'Béla Guttmann',[['Costa Pereira','G',3],['Germano','H',4],['Ângelo Martins','B',3],['Mário Coluna','H',4],['José Águas','F',4],['José Augusto','F',3],['Eusébio','F',5],['António Simões','F',3],['Domiciano Cavém','F',3]]);
+_es('Benfica',1963,1970,null,[['Costa Pereira','G',3],['Germano','H',4],['Mário Coluna','H',4],['José Augusto','F',3],['Eusébio','F',5],['António Simões','F',3],['José Torres','F',4],['Humberto Coelho','H',3]]);
+_es('Inter Milan',1960,1967,'Helenio Herrera',[['Giuliano Sarti','G',3],['Tarcisio Burgnich','B',4],['Giacinto Facchetti','B',4],['Armando Picchi','H',4],['Aristide Guarneri','H',3],['Luis Suárez','H',5],['Jair','F',4],['Sandro Mazzola','F',4],['Joaquín Peiró','F',3],['Mario Corso','F',4]]);
+_es('Inter Milan',1968,1980,null,[['Giacinto Facchetti','B',4],['Sandro Mazzola','F',4],['Roberto Boninsegna','F',4],['Mario Corso','F',3],['Mauro Bellugi','H',3]]);
+_es('AC Milan',1955,1960,null,[['Gunnar Nordahl','F',4],['Nils Liedholm','H',4],['Juan Alberto Schiaffino','F',5],['Cesare Maldini','H',4],['Lorenzo Buffon','G',3]]);
+_es('AC Milan',1961,1966,'Nereo Rocco',[['Giorgio Ghezzi','G',3],['Cesare Maldini','H',4],['Giovanni Trapattoni','H',3],['Gianni Rivera','F',5],['José Altafini','F',4],['Dino Sani','H',3],['Bruno Mora','F',3]]);
+_es('AC Milan',1967,1972,'Nereo Rocco',[['Fabio Cudicini','G',4],['Karl-Heinz Schnellinger','B',4],['Gianni Rivera','F',5],['Pierino Prati','F',4],['Angelo Benedicto Sormani','F',3],['Kurt Hamrin','F',3]]);
+_es('Barcelona',1955,1961,null,[['Ladislao Kubala','F',5],['Sándor Kocsis','F',5],['Zoltán Czibor','F',4],['Luis Suárez','H',5],['Evaristo','F',3],['Antoni Ramallets','G',4]]);
+_es('Atlético Madrid',1972,1975,'Juan Carlos Lorenzo',[['Luis Aragonés','F',4],['Adelardo','H',3],['José Eulogio Gárate','F',4],['Rubén Ayala','F',3],['Miguel Reina','G',3]]);
+_es('Hamburg',1960,1968,null,[['Uwe Seeler','F',5],['Jürgen Kurbjuhn','B',3],['Gert Dörfel','F',3]]);
+_es('Reims',1955,1959,'Albert Batteux',[['Raymond Kopa','F',5],['Just Fontaine','F',5],['Roger Piantoni','F',4],['Robert Jonquet','H',4],['Armand Penverne','H',3]]);
+_es('Honvéd',1955,1956,null,[['Ferenc Puskás','F',5],['Sándor Kocsis','F',5],['Zoltán Czibor','F',4],['József Bozsik','H',5],['Gyula Grosics','G',4],['Lajos Budai','F',3]]);
+_es('Ferencváros',1963,1969,null,[['Flórián Albert','F',5],['Dezső Novák','H',3],['Máté Fenyvesi','F',4],['Gyula Rákosi','F',3],['Ferenc Bene','F',3]]);
+_es('Dukla Prague',1955,1965,null,[['Josef Masopust','H',5],['Svatopluk Pluskal','H',3],['Ladislav Novák','H',3]]);
+_es('Panathinaikos',1970,1971,'Ferenc Puskás',[['Antonis Antoniadis','F',3],['Takis Oikonomopoulos','G',2]]);
+_es('Celtic',1965,1970,'Jock Stein',[['Ronnie Simpson','G',3],['Jim Craig','B',3],['Tommy Gemmell','B',4],['Bobby Murdoch','H',4],['Billy McNeill','H',4],['John Clark','H',3],['Jimmy Johnstone','F',5],['Willie Wallace','F',3],['Stevie Chalmers','F',3],['Bertie Auld','F',3],['Bobby Lennox','F',3]]);
+_es('Celtic',1971,1977,'Jock Stein',[['Evan Williams','G',3],['Danny McGrain','B',4],['Billy McNeill','H',3],['Kenny Dalglish','F',4],['Lou Macari','F',3],['Dixie Deans','F',3],['Jimmy Johnstone','F',4],['George Connelly','H',4]]);
+_es('Rangers',1955,1966,'Scot Symon',[['George Young','B',3],['Eric Caldow','B',4],['Jim Baxter','H',5],['Ian McMillan','F',3],['Ralph Brand','F',4],['Jimmy Millar','F',3],['Willie Henderson','F',4],['Davie Wilson','F',3],['Harold Davis','H',3]]);
+_es('Rangers',1969,1972,'Willie Waddell',[['Peter McCloy','G',3],['Sandy Jardine','B',4],['John Greig','H',4],['Colin Stein','F',3],['Willie Johnston','F',3],['Derek Johnstone','F',3]]);
+_es('Hibernian',1955,1959,'Hugh Shaw',[['Gordon Smith','F',4],['Bobby Johnstone','F',4],['Lawrie Reilly','F',4],['Eddie Turnbull','F',4],['Willie Ormond','F',3]]);
+_es('Aberdeen',1980,1985,'Alex Ferguson',[['Jim Leighton','G',4],['Willie Miller','H',4],['Alex McLeish','H',4],['Gordon Strachan','F',4],['Peter Weir','F',3],['Mark McGhee','F',3],['Neale Cooper','H',3],['Eric Black','F',3]]);
+_es('Manchester United',1955,1957,'Matt Busby',[['Ray Wood','G',3],['Roger Byrne','B',4],['Duncan Edwards','H',5],['Mark Jones','H',3],['Eddie Colman','H',3],['Tommy Taylor','F',4],['Dennis Viollet','F',4],['Johnny Berry','F',3],['Liam Whelan','F',3],['Bobby Charlton','F',4]]);
+_es('Manchester United',1958,1971,'Matt Busby',[['Alex Stepney','G',3],['Shay Brennan','B',3],['Tony Dunne','B',4],['Pat Crerand','H',4],['Bill Foulkes','H',3],['Nobby Stiles','H',3],['David Sadler','H',3],['Bobby Charlton','F',5],['Denis Law','F',5],['George Best','F',5],['Brian Kidd','F',3],['John Aston','F',3]]);
+_es('Liverpool',1959,1973,'Bill Shankly',[['Tommy Lawrence','G',3],['Gerry Byrne','B',3],['Ron Yeats','H',4],['Tommy Smith','H',4],['Ian St John','F',4],['Roger Hunt','F',4],['Ian Callaghan','F',3],['Peter Thompson','F',3],['Emlyn Hughes','B',4],['Kevin Keegan','F',4]]);
+_es('Liverpool',1974,1983,'Bob Paisley',[['Ray Clemence','G',4],['Phil Neal','B',4],['Alan Hansen','H',4],['Phil Thompson','H',3],['Graeme Souness','H',5],['Terry McDermott','H',3],['Kenny Dalglish','F',5],['Ian Rush','F',4],['Ray Kennedy','F',3]]);
+_es('Leeds United',1961,1973,'Don Revie',[['Gary Sprake','G',3],['Paul Reaney','B',3],['Terry Cooper','B',3],['Jack Charlton','H',4],['Norman Hunter','H',4],['Billy Bremner','H',5],['Johnny Giles','H',4],['Eddie Gray','F',4],['Peter Lorimer','F',4],['Allan Clarke','F',4],['Mick Jones','F',3]]);
+_es('Tottenham Hotspur',1958,1973,'Bill Nicholson',[['Pat Jennings','G',4],['Peter Baker','B',3],['Ron Henry','B',3],['Danny Blanchflower','H',5],['Dave Mackay','H',5],['Maurice Norman','H',3],['John White','F',4],['Cliff Jones','F',4],['Jimmy Greaves','F',5],['Bobby Smith','F',4],['Alan Gilzean','F',4]]);
+_es('West Ham United',1961,1973,'Ron Greenwood',[['Bobby Moore','H',5],['Martin Peters','H',4],['Geoff Hurst','F',5],['Johnny Byrne','F',3],['Trevor Brooking','H',4],['Ken Brown','H',3],['Harry Redknapp','F',2]]);
+_es('Chelsea',1965,1971,null,[['Peter Bonetti','G',4],['Ron Harris','H',4],['John Hollins','H',3],['Charlie Cooke','F',4],['Peter Osgood','F',4],['Alan Hudson','H',3],['Tommy Baldwin','F',3]]);
+_es('Arsenal',1966,1975,'Bertie Mee',[['Bob Wilson','G',3],['Pat Rice','B',3],['Bob McNab','B',3],['Frank McLintock','H',4],['Peter Storey','H',3],['George Armstrong','F',3],['George Graham','F',3],['Ray Kennedy','F',3],['John Radford','F',3]]);
+_es('Manchester City',1966,1972,'Joe Mercer',[['Joe Corrigan','G',3],['Tony Book','B',3],['Mike Summerbee','F',4],['Colin Bell','H',5],['Francis Lee','F',4],['Neil Young','F',3],['Mike Doyle','H',3]]);
+_es('Everton',1961,1971,'Harry Catterick',[['Gordon West','G',3],['Brian Labone','H',4],['Howard Kendall','H',4],['Colin Harvey','H',4],['Alan Ball','H',5],['Joe Royle','F',3],['Alex Young','F',4]]);
+_es('Nottingham Forest',1977,1980,'Brian Clough',[['Peter Shilton','G',5],['Viv Anderson','B',3],['Larry Lloyd','H',3],['Kenny Burns','H',3],['John Robertson','F',4],['Trevor Francis','F',4],['Garry Birtles','F',3]]);
+_es('Wolverhampton Wanderers',1955,1962,'Stan Cullis',[['Billy Wright','H',5],['Peter Broadbent','F',4],['Bill Slater','H',3],['Ron Flowers','H',4],['Jimmy Murray','F',3],['Norman Deeley','F',3]]);
+_es('Burnley',1959,1964,'Harry Potts',[['Jimmy Adamson','H',4],['Jimmy McIlroy','F',5],['John Connelly','F',4],['Ray Pointer','F',4],['Brian Miller','H',3],['Jimmy Robson','F',3]]);
+_es('Ipswich Town',1961,1963,'Alf Ramsey',[['Roy Bailey','G',3],['Ray Crawford','F',4],['Ted Phillips','F',4],['Jimmy Leadbetter','F',3]]);
+
+_es('Real Madrid',1955,1955,'José Villalonga',[['Juan Alonso','G',3],['José María Atienza','B',3],['Lesmes II','B',3],['Marquitos','H',3],['José María Zárraga','H',3],['Héctor Rial','F',4],['Alfredo Di Stéfano','F',5],['Enrique Mateos','F',3],['Francisco Gento','F',4]]);
+_es('Real Madrid',1956,1957,null,[['Juan Alonso','G',3],['José María Atienza','B',3],['Lesmes II','B',3],['José Santamaría','H',4],['José María Zárraga','H',3],['Raymond Kopa','F',4],['Héctor Rial','F',4],['Alfredo Di Stéfano','F',5],['Francisco Gento','F',4]]);
+_es('Real Madrid',1958,1958,'Luis Carniglia',[['Juan Alonso','G',3],['José María Atienza','B',3],['José Santamaría','H',4],['José María Zárraga','H',3],['Raymond Kopa','F',4],['Héctor Rial','F',4],['Alfredo Di Stéfano','F',5],['Ferenc Puskás','F',5],['Francisco Gento','F',4]]);
+_es('AC Milan',1988,1990,'Arrigo Sacchi',[['Giovanni Galli','G',3],['Franco Baresi','H',5],['Paolo Maldini','B',5],['Mauro Tassotti','B',3],['Frank Rijkaard','H',4],['Carlo Ancelotti','H',4],['Ruud Gullit','F',5],['Marco van Basten','F',5]]);
+_es('Juventus',1957,1961,null,[['John Charles','F',5],['Omar Sívori','F',5],['Giampiero Boniperti','F',4]]);
+_es('Juventus',1964,1968,'Heriberto Herrera',[['Roberto Anzolin','G',3],['Sandro Salvadore','H',3],['Luis del Sol','H',3],['Omar Sívori','F',4]]);
+_es('Juventus',1976,1981,'Giovanni Trapattoni',[['Dino Zoff','G',5],['Claudio Gentile','B',4],['Antonio Cabrini','B',4],['Gaetano Scirea','H',5],['Marco Tardelli','H',4],['Franco Causio','F',4],['Roberto Bettega','F',4]]);
+_es('Juventus',1982,1985,'Giovanni Trapattoni',[['Dino Zoff','G',5],['Claudio Gentile','B',4],['Antonio Cabrini','B',4],['Gaetano Scirea','H',5],['Marco Tardelli','H',4],['Roberto Bettega','F',3],['Paolo Rossi','F',4],['Michel Platini','F',5],['Zbigniew Boniek','F',4]]);
+_es('Barcelona',1974,1975,'Rinus Michels',[['Johan Cruyff','F',5],['Johan Neeskens','H',4],['Carles Rexach','F',3],['Migueli','H',3],['Juan Manuel Asensi','H',3]]);
+_es('Barcelona',1982,1983,null,[['Diego Maradona','F',5],['Bernd Schuster','H',4]]);
+_es('Barcelona',1986,1988,null,[['Bernd Schuster','H',4],['Gary Lineker','F',4],['Andoni Zubizarreta','G',3]]);
+_es('Atlético Madrid',1961,1961,'Marcel Domingo',[['Enrique Collar','F',4],['Joaquín Peiró','F',4],['Adelardo','H',3]]);
+_es('Ajax',1965,1969,'Rinus Michels',[['Piet Keizer','F',4],['Sjaak Swart','F',3],['Johan Cruyff','F',5],['Velibor Vasović','H',3]]);
+_es('Ajax',1970,1970,'Rinus Michels',[['Heinz Stuy','G',3],['Wim Suurbier','B',3],['Barry Hulshoff','H',4],['Ruud Krol','B',4],['Arie Haan','H',3],['Johan Neeskens','H',4],['Piet Keizer','F',4],['Johan Cruyff','F',5],['Gerrie Mühren','H',3]]);
+_es('Ajax',1971,1973,'Ștefan Kovács',[['Heinz Stuy','G',3],['Wim Suurbier','B',3],['Barry Hulshoff','H',4],['Ruud Krol','B',4],['Arie Haan','H',3],['Johan Neeskens','H',4],['Piet Keizer','F',4],['Johan Cruyff','F',5],['Johnny Rep','F',4],['Gerrie Mühren','H',3]]);
+_es('Ajax',1992,1995,'Louis van Gaal',[['Edwin van der Sar','G',4],['Frank de Boer','H',4],['Ronald de Boer','H',4],['Danny Blind','H',3],['Frank Rijkaard','H',4],['Finidi George','F',3],['Marc Overmars','F',4],['Patrick Kluivert','F',4]]);
+_es('Feyenoord',1969,1971,'Ernst Happel',[['Eddy Treijtel','G',3],['Rinus Israël','H',4],['Wim van Hanegem','H',5],['Wim Jansen','H',4],['Coen Moulijn','F',3],['Ove Kindvall','F',4]]);
+_es('Bayern Munich',1963,1968,'Zlatko Čajkovski',[['Sepp Maier','G',4],['Franz Beckenbauer','H',5],['Gerd Müller','F',5],['Georg Schwarzenbeck','H',3]]);
+_es('Bayern Munich',1969,1978,null,[['Sepp Maier','G',5],['Franz Beckenbauer','H',5],['Georg Schwarzenbeck','H',4],['Paul Breitner','B',4],['Uli Hoeneß','F',4],['Gerd Müller','F',5],['Franz Roth','H',3],['Karl-Heinz Rummenigge','F',5]]);
+_es('Borussia Mönchengladbach',1969,1974,'Hennes Weisweiler',[['Wolfgang Kleff','G',3],['Berti Vogts','B',4],['Günter Netzer','H',5],['Herbert Wimmer','H',3],['Jupp Heynckes','F',4],['Rainer Bonhof','H',4]]);
+_es('Borussia Mönchengladbach',1975,1978,'Udo Lattek',[['Wolfgang Kleff','G',3],['Berti Vogts','B',4],['Rainer Bonhof','H',4],['Herbert Wimmer','H',3],['Uli Stielike','H',4],['Jupp Heynckes','F',4],['Allan Simonsen','F',5]]);
+_es('Hamburg',1981,1986,'Ernst Happel',[['Uli Stein','G',3],['Manfred Kaltz','B',4],['Ditmar Jakobs','H',3],['Felix Magath','H',4],['Horst Hrubesch','F',4],['Jimmy Hartwig','F',3]]);
+_es('Dynamo Kyiv',1973,1981,'Valeriy Lobanovskyi',[['Oleg Blokhin','F',5],['Volodymyr Onyshchenko','F',3],['Leonid Buryak','H',4],['Anatoliy Konkov','H',3],['Viktor Kolotov','B',3]]);
+_es('Dynamo Kyiv',1984,1989,'Valeriy Lobanovskyi',[['Igor Belanov','F',5],['Oleg Blokhin','F',4],['Alexei Mykhailychenko','F',3],['Vasyl Rats','H',3],['Oleksandr Zavarov','F',4]]);
+_es('Steaua București',1985,1985,'Emerich Jenei',[['Helmuth Duckadam','G',4],['Ștefan Iovan','B',3],['Miodrag Belodedici','H',4],['Gavril Balint','F',3],['Victor Pițurcă','F',3],['Marius Lăcătuș','F',4]]);
+_es('Steaua București',1986,1989,null,[['Miodrag Belodedici','H',4],['Gavril Balint','F',3],['Victor Pițurcă','F',3],['Marius Lăcătuș','F',4]]);
+_es('Anderlecht',1970,1980,null,[['Paul Van Himst','F',5],['Rob Rensenbrink','F',5],['Arie Haan','H',4],['François Van der Elst','F',3],['Ludo Coeck','H',3]]);
+_es('Dundee',1962,1964,'Bob Shankly',[['Alan Gilzean','F',4],['Ian Ure','H',3],['Alex Hamilton','B',3],['Andy Penman','F',3],['Gordon Smith','F',3]]);
+_es('Newcastle United',1968,1969,'Joe Harvey',[['Bobby Moncur','H',3],['Wyn Davies','F',4]]);
+_es('Aston Villa',1981,1981,'Tony Barton',[['Jimmy Rimmer','G',3],['Tony Morley','F',3],['Gary Shaw','F',3],['Allan Evans','H',3],['Dennis Mortimer','H',3],['Peter Withe','F',4]]);
+
+/* =====================================================================
+   v319 : EUROPEAN COMPETITIONS WITH REAL FOREIGN CLUBS (user request, "European competitions with real
+   foreign clubs as AI opponents").
+   One generic engine now runs the European Cup (from 1955-56), the Cup Winners' Cup (from 1960-61) and the
+   Inter-Cities Fairs Cup (1955-56 to 1970-71, then the UEFA Cup from 1971-72), replacing the old three
+   16-club, four-round copies above. It keeps their state names (europeanCup / cupWinnersCup / fairsCup),
+   fixture flags (isEuroCup / isCWC / isFairsCup), euroLeg numbering (1, 2, and 3 = a deciding match) and
+   news/line formats, so the finishMatch branch, the vidiprinter, save/load and the scripted-news resolvers
+   all keep working untouched.
+   DATA : EURO_YEARS (above) is the real field of every edition, 1955-56 to 1998-99, read off the Wikipedia
+   season articles : which clubs, from which round they came in, and an Elo-style strength figure worked out
+   from the real results of the previous seasons. The home-nation slots (England or Scotland, whichever
+   country you are playing in) are NOT taken from the real list : they are filled from THIS game's own
+   league tables and cups (champion / cup winner / league position / holder), under the rules of the day,
+   so Celtic can win the 1967 European Cup, or lose it, and the next year's field reflects it.
+   Abstractions, stated honestly : an edition the data lacks (a few Fairs Cup years, the 1991+ European
+   Cup, 1999+ UEFA Cup, three Cup Winners' Cup years) borrows the nearest real edition's shape; the Fairs
+   Cup's 1955-58 and 1958-60 editions (each ran across several seasons) are run season by season; the
+   League Cup route to the UEFA Cup is not modelled (there is no English League Cup simulation), so the
+   next club in the League table takes that place; the replayed 1962 Cup Winners' Cup Final is one match. */
+var EU_ALIAS = {'Morton':'Greenock Morton','Heart of Midlothian':'Heart of Midlothian','Hearts':'Heart of Midlothian','Dundee Utd':'Dundee United'};
+var EU_CITY = {'Arsenal':'London','Chelsea':'London','Tottenham Hotspur':'London','West Ham United':'London','Fulham':'London','Charlton Athletic':'London','Millwall':'London','Queens Park Rangers':'London','Crystal Palace':'London','Leyton Orient':'London','Brentford':'London','Wimbledon':'London',
+ 'Liverpool':'Liverpool','Everton':'Liverpool','Manchester City':'Manchester','Manchester United':'Manchester','Sheffield United':'Sheffield','Sheffield Wednesday':'Sheffield','Aston Villa':'Birmingham','Birmingham City':'Birmingham','Nottingham Forest':'Nottingham','Notts County':'Nottingham','Bristol City':'Bristol','Bristol Rovers':'Bristol',
+ 'Celtic':'Glasgow','Rangers':'Glasgow','Partick Thistle':'Glasgow',"Queen's Park":'Glasgow','Clyde':'Glasgow','Heart of Midlothian':'Edinburgh','Hibernian':'Edinburgh','Dundee':'Dundee','Dundee United':'Dundee'};
+var EU_COMPS = {
+  ec:   {key:'ec',   first:1955, label:'European Cup',        tag:'EUROPEAN CUP',        honour:'europeanCup', flag:'isEuroCup'},
+  cwc:  {key:'cwc',  first:1960, label:"Cup Winners' Cup",    tag:"CUP WINNERS' CUP",    honour:'cwc',         flag:'isCWC'},
+  fairs:{key:'fairs',first:1955, label:'Fairs Cup',           tag:'FAIRS CUP',           honour:'fairsCup',    flag:'isFairsCup'}
+};
+var EU_VENUE_CAP = {'Wembley Stadium':98000,'Hampden Park':110000,'Santiago Bernabéu':95000,'San Siro':85000,'Heysel Stadium':70000,'Camp Nou':95000,'Olympic Stadium':60000,'Prater Stadium':70000};
+var euQualCache = null, euByName = null, euParsed = {};
+function euYear(label){ return parseInt(String(label).split('-')[0], 10); }
+function euNat(){ return isSco() ? 'SCO' : 'ENG'; }
+function euNatLabel(){ return isSco() ? 'Scotland' : 'England'; }
+function euState(c){ return c==='ec' ? europeanCup : c==='cwc' ? cupWinnersCup : fairsCup; }
+function euSetState(c, o){ if (c==='ec') europeanCup = o; else if (c==='cwc') cupWinnersCup = o; else fairsCup = o; }
+function euCompName(c, y){ return c==='fairs' ? (y>=1971 ? 'UEFA Cup' : 'Fairs Cup') : EU_COMPS[c].label; }
+function euTag(c, y){ return euCompName(c, y).toUpperCase(); }
+function euHonourKey(c, y){ return (c==='fairs' && y>=1971) ? 'uefaCup' : EU_COMPS[c].honour; }
+function euIsNative(n){ return isSco() ? (typeof scoTierOf==='function' && !!scoTierOf(n)) : !!clubProfiles[n]; }
+/* the continental data's ratings onto the game's scale : a club with a rating of 60 plays like a mid-table side (an XI around 56), the very best of an era (74-86) like the top of our own First Division or above */
+function euStrength(sd){ return Math.max(40, Math.min(91, Math.round(64 + (sd-60)*1.85))); }
+function euIdxByName(){
+  if (euByName) return euByName;
+  euByName = {}; EURO_CLUBS.forEach(function(c, i){ euByName[c[0]] = i; });
+  return euByName;
+}
+function euClubName(i){ var n = EURO_CLUBS[i][0]; return EU_ALIAS[n] || n; }
+/* the real edition's data for a comp and season-start year; a missing edition borrows the nearest real one (synthetic:true) */
+function euData(c, y){
+  var kind = (c==='fairs' && y>=1971) ? 'uefa' : c;
+  var key = y+'-'+kind, synthetic = false, srcY = y;
+  if (!EURO_YEARS[key]){
+    var best = null, bd = 99;
+    Object.keys(EURO_YEARS).forEach(function(k){
+      if (k.slice(5) !== kind) return;
+      var ky = parseInt(k, 10);
+      if (kind==='ec' && y>=1991){ if (!EURO_YEARS[k].qe.length) return; } /* the 1985-90 ban is real history for those years; later years use a readmitted year's shape */
+      var d = Math.abs(ky-y);
+      if (d < bd || (d===bd && ky < best)){ bd = d; best = ky; }
+    });
+    if (best === null) return null;
+    srcY = best; key = best+'-'+kind; synthetic = true;
+  }
+  if (!euParsed[key]){
+    var raw = EURO_YEARS[key];
+    euParsed[key] = {n:raw.n, t:raw.t, h:raw.h, qe:raw.qe, qs:raw.qs, f:raw.f.split(';').map(function(r){ var p = r.split(','); return {id:+p[0], e:+p[1], s:+p[2]}; })};
+  }
+  var d0 = euParsed[key];
+  return {n:d0.n, t:d0.t, h:d0.h, qe:d0.qe, qs:d0.qs, f:d0.f, synthetic:synthetic, srcYear:srcY, kind:kind};
+}
+function euCityOf(n){ return EU_CITY[n] || n; }
+/* ---- qualification : who from THIS country goes into which competition, under the rules of the day ---- */
+function divisionTopOf(key, n){
+  var t = (ourDivisionKey() === key) ? table : (function(){ var d = aiBgDivFor(key); return d && d.table; })();
+  if (!t) return [];
+  var names = Object.keys(t).filter(function(k){ return t[k] && t[k].p>0; });
+  names.sort(function(a,b){ var x=t[a], y=t[b]; return y.pts-x.pts || (y.f-y.a)-(x.f-x.a) || y.f-x.f; });
+  return names.slice(0, n);
+}
+var lastFaCupRunnerUpName = null;
+function euSimRecord(label){
+  var dc = divisionChampions, prev = simPrevLabel(label);
+  return (dc && dc.D1 && dc.label === prev) ? dc : null;
+}
+function euQualifyAll(label){
+  var nat = euNat();
+  if (euQualCache && euQualCache.label===label && euQualCache.nat===nat && euQualCache.club===ourClubName) return euQualCache;
+  var y = euYear(label), prev = simPrevLabel(label), dc = euSimRecord(label);
+  var out = {label:label, nat:nat, club:ourClubName, simmed:!!dc, ec:[], cwc:[], fairs:[], chelseaOut:null};
+  var natRounds = function(dd){ return (nat==='SCO' ? dd.qs : dd.qe).slice().sort(function(a,b){ return a-b; }); };
+  if (!dc){
+    /* the first season of a game : there is no season of ours to read, so the real home-nation entrants of that edition go in */
+    ['ec','cwc','fairs'].forEach(function(c){
+      if (y < EU_COMPS[c].first) return;
+      var dd = euData(c, y); if (!dd) return;
+      dd.f.forEach(function(r){
+        var cl = EURO_CLUBS[r.id], n = EU_ALIAS[cl[0]] || cl[0];
+        if (cl[1] === nat && euIsNative(n)) out[c].push({n:n, e:r.e});
+      });
+    });
+    return (euQualCache = out);
+  }
+  var h = simHonour(prev) || {};
+  var top = (dc.D1Top && dc.D1Top.length ? dc.D1Top : [dc.D1, dc.D1RunnerUp]).filter(Boolean).filter(euIsNative);
+  var taken = {};
+  function holderRound(dd){ var hr = dd.f.filter(function(r){ return dd.h.indexOf(r.id) >= 0; })[0]; return hr ? hr.e : (dd.n === 6 ? 1 : 0); }
+  /* EUROPEAN CUP : the champions, plus the holders from the early years of the holders' rule */
+  if (y >= EU_COMPS.ec.first){
+    var dd = euData('ec', y);
+    if (dd){
+      var slots = natRounds(dd);
+      if (y === 1955 && nat === 'ENG'){ /* the real draw had no English club (Chelsea, the champions, were stopped); the game lets any other champions go, and a Chelsea we manage decides for himself */
+        slots = [0];
+        if (dc && dc.D1 === 'Chelsea' && ourClubName !== 'Chelsea'){ slots = []; out.chelseaOut = 'Chelsea'; }
+      }
+      var hold = h.europeanCup;
+      if (hold && euIsNative(hold) && y >= 1957){ out.ec.push({n:hold, e:holderRound(dd), holder:true}); taken[hold] = true; }
+      var i = 0;
+      slots.forEach(function(e){
+        while (i < top.length && taken[top[i]]) i++;
+        if (i < top.length){ out.ec.push({n:top[i], e:e}); taken[top[i]] = true; i++; }
+      });
+    }
+  }
+  /* CUP WINNERS' CUP : the domestic cup winners; if they are champions already (or holders), the beaten finalists */
+  if (y >= EU_COMPS.cwc.first){
+    var dd2 = euData('cwc', y);
+    if (dd2){
+      var slots2 = natRounds(dd2);
+      var cands = [lastFaCupWinnerName, lastFaCupRunnerUpName].filter(function(n){ return n && euIsNative(n); });
+      var hold2 = h.cwc;
+      if (hold2 && euIsNative(hold2) && !taken[hold2]){ out.cwc.push({n:hold2, e:holderRound(dd2), holder:true}); taken[hold2] = true; }
+      var cj = 0;
+      slots2.forEach(function(e){
+        while (cj < cands.length && taken[cands[cj]]) cj++;
+        if (cj < cands.length){ out.cwc.push({n:cands[cj], e:e}); taken[cands[cj]] = true; cj++; }
+      });
+    }
+  }
+  /* FAIRS / UEFA CUP : the next clubs in the League table, one club a city while that rule lasted (to 1966-67) */
+  var dd3 = euData('fairs', y);
+  if (dd3){
+    var slots3 = natRounds(dd3), cities = {}, ti = 0;
+    slots3.forEach(function(e){
+      while (ti < top.length){
+        var n = top[ti];
+        if (!taken[n] && !(y <= 1966 && cities[euCityOf(n)])) break;
+        ti++;
+      }
+      if (ti < top.length){ var nn = top[ti]; out.fairs.push({n:nn, e:e}); taken[nn] = true; cities[euCityOf(nn)] = true; ti++; }
+    });
+  }
+  return (euQualCache = out);
+}
+/* ---- field, rounds, dates ---- */
+function euStarNote(n, y){
+  var lst = EURO_STARS[n]; if (!lst) return '';
+  for (var i=0;i<lst.length;i++){
+    var e = lst[i];
+    if (y >= e.from && y <= e.to){
+      var best = e.p.slice().sort(function(a,b){ return b.rep-a.rep; }).slice(0,2).map(function(p){ return p.n; });
+      return ' ('+best.join(' and ')+(e.mgr?'; manager '+e.mgr:'')+')';
+    }
+  }
+  return '';
+}
+var EU_NAME_GROUPS = {
+  ib:{cc:'ESP POR', f:'José Manuel Antonio Francisco Luis Juan Carlos Pedro Joaquín Fernando Rafael Miguel Ángel Mário Jorge', s:'García Fernández López Martínez Sánchez Pérez Gómez Ruiz Díaz Torres Alves Silva Costa Santos Ferreira Pereira Rodrigues Oliveira'},
+  it:{cc:'ITA', f:'Giuseppe Mario Luigi Aldo Bruno Carlo Franco Giovanni Sergio Renato Alberto Enrico', s:'Rossi Bianchi Ferrari Romano Colombo Ricci Marino Greco Bruno Conti Gallo Fontana'},
+  de:{cc:'FRG GDR AUT SUI LUX', f:'Hans Karl Heinz Klaus Peter Werner Horst Günter Dieter Jürgen Franz Walter Rolf', s:'Müller Schmidt Schneider Fischer Weber Wagner Becker Hoffmann Koch Richter Bauer Keller'},
+  nl:{cc:'NED BEL', f:'Jan Piet Henk Willem Kees Johan Cor Wim Gerrit Hans Jacques Louis', s:'de Jong Jansen de Vries van Dijk Bakker Visser Smit Meijer Peeters Janssens Maes Claes'},
+  fr:{cc:'FRA', f:'Jean Pierre Michel André Robert Roger Marcel Jacques René Louis Raymond Gérard', s:'Martin Bernard Dubois Moreau Laurent Simon Lefebvre Roux Girard Fontaine Mercier Blanc'},
+  nd:{cc:'SWE NOR DEN FIN ISL', f:'Lars Bengt Sven Olle Erik Anders Knut Ole Henning Jens Kjell Per', s:'Andersson Johansson Nilsson Larsen Hansen Pedersen Berg Lindqvist Nielsen Olsen Karlsson Eriksen'},
+  ea:{cc:'HUN TCH POL YUG BUL ROU URS ALB', f:'Józef Milan Zoltán Ferenc Ivan Stefan Vladimir Jan Josef Tadeusz Dimitar Nicolae Gheorghe Boris Aleksandr László', s:'Kovács Nagy Horváth Novák Svoboda Kowalski Nowak Petrović Jovanović Ivanov Popescu Petrov Sidorov Marinescu Szabó Kozlov'},
+  me:{cc:'TUR GRE CYP ISR MLT', f:'Mehmet Ahmet Mustafa Yannis Nikos Giorgos Kostas Dimitris Mario Joseph Avi Yossi', s:'Yılmaz Kaya Demir Papadopoulos Georgiou Nikolaou Cohen Levi Borg Camilleri Vella Çelik'}
+};
+var EU_CC_OF = null;
+function euFillerName(oppName){
+  if (!EU_CC_OF){ EU_CC_OF = {}; EURO_CLUBS.forEach(function(cl){ EU_CC_OF[EU_ALIAS[cl[0]] || cl[0]] = cl[1]; }); }
+  var cc = EU_CC_OF[oppName]; if (!cc) return null;
+  for (var k in EU_NAME_GROUPS){
+    var g = EU_NAME_GROUPS[k]; if (g.cc.split(' ').indexOf(cc) < 0) continue;
+    var fs = g.f.split(' '), ss = g.s.split(/ (?=[A-ZÁÉÍÓÚÜÖÇ])/);
+    if (k==='nl') ss = ['de Jong','Jansen','de Vries','van Dijk','Bakker','Visser','Smit','Meijer','Peeters','Janssens','Maes','Claes'];
+    return pick(fs)+' '+pick(ss);
+  }
+  return null;
+}
+function euroStarProfile(name){
+  var lst = EURO_STARS[name]; if (!lst) return null;
+  var y = euYear(seasonLabel);
+  for (var i=0;i<lst.length;i++) if (y >= lst[i].from && y <= lst[i].to) return lst[i];
+  return null;
+}
+function euRoundNames(n, prelim){
+  var names = [], firstIsPrelim = (n >= 5 && prelim), num = 0, ord = ['First','Second','Third','Fourth','Fifth'];
+  for (var i=0;i<n;i++){
+    var fe = n-1-i;
+    if (fe===0) names.push('Final');
+    else if (fe===1) names.push('Semi-Final');
+    else if (fe===2) names.push('Quarter-Final');
+    else if (i===0 && firstIsPrelim) names.push('Preliminary Round');
+    else names.push((ord[num++] || ('Round '+num))+' Round');
+  }
+  return names;
+}
+/* how many rounds this particular field really needs to get down to one club (the data's own count can include a round the real draw folded away) */
+function euRoundsNeeded(ents){
+  var maxE = 0; ents.forEach(function(e){ if ((e.e||0) > maxE) maxE = e.e||0; });
+  var alive = ents.filter(function(e){ return !e.e; }).length, r = 0;
+  while (r < maxE || alive > 1){ r++; alive = Math.ceil(alive/2) + ents.filter(function(e){ return e.e === r; }).length; if (r > 12) break; }
+  return Math.max(r, 2);
+}
+function euRoundDates(c, label, n){
+  var y = euYear(label), off = {ec:0, cwc:2, fairs:4}[c] || 0, out = [], k = n - 3;
+  function d(yy, m, dd){ return isoOf(new Date(yy, m, dd + off)); }
+  var finalDate = (c==='ec') ? d(y+1,4,24) : (c==='cwc') ? d(y+1,4,10) : d(y+1,4,2);
+  var dates = [];
+  if (k > 0){
+    var spacing = k <= 4 ? 21 : 17, startDay = k <= 4 ? 14 : (k===5 ? 7 : 31 /* Aug 31 */);
+    var startMonth = k <= 5 ? 8 : 7;
+    for (var i=0;i<k;i++) dates.push(isoOf(new Date(y, startMonth, startDay + off + i*spacing)));
+  }
+  var tail = [d(y+1,2,8), d(y+1,3,5), finalDate];
+  if (c==='fairs'){ tail = [d(y+1,2,1), d(y+1,2,29), finalDate]; }
+  if (c==='cwc'){ tail = [d(y+1,2,15), d(y+1,3,12), finalDate]; }
+  tail = tail.slice(3-Math.min(3,n));
+  return dates.concat(tail).slice(-n);
+}
+function euFinalVenue(c, label){
+  var kind = (c==='fairs' && euYear(label)>=1971) ? 'uefa' : c;
+  var tbl = EURO_FINAL_VENUES[kind]; if (!tbl) return null;
+  var v = tbl[euYear(label)+1]; if (!v) return null;
+  return {ground:v[0], city:v[1], name:v[0], capacity:EU_VENUE_CAP[v[0]]||65000, isFinal:true};
+}
+function euFinalVenueLabel(c, label){ var v = euFinalVenue(c, label); return v ? (v.ground+', '+v.city) : 'a neutral venue'; }
+function euSingleFinal(c, y){
+  if (c==='ec') return true;
+  if (c==='cwc') return y !== 1960; /* the first Cup Winners' Cup Final was two legs */
+  return y >= 1997; /* the 1997-98 UEFA Cup Final was the first single match */
+}
+function euAwayGoalsEra(y){ return y >= 1965; }
+/* the field's size as the rounds will consume it : a final alive count above one means the field is oversized */
+function euFinalAlive(ents, n){
+  var alive = ents.filter(function(e){ return !e.e; }).length;
+  for (var r=1; r<n; r++){
+    alive = Math.ceil(alive/2);
+    alive += ents.filter(function(e){ return e.e === r; }).length;
+  }
+  return Math.ceil(alive/2);
+}
+function euBuildEntrants(c, label, dd){
+  var nat = euNat(), y = euYear(label), q = euQualifyAll(label)[c], ents = [], seen = {};
+  function add(n, e, s, cc, real){ if (seen[n]) return; seen[n] = true; ents.push({n:n, s:s, cc:cc, e:e, real:!!real}); }
+  q.forEach(function(x){ add(x.n, x.e, Math.round(aiXiStrength({n:x.n, s:cupEntrantStrength(x.n, 80)}) + 10), nat, false); });
+  dd.f.forEach(function(r){
+    var cl = EURO_CLUBS[r.id]; if (cl[1] === nat) return;
+    add(euClubName(r.id), r.e, euStrength(r.s), cl[1], true);
+  });
+  var exp = dd.f.length;
+  while ((ents.length > exp || false) && ents.length > 4){
+    var worst = null;
+    ents.forEach(function(e){ if (e.real && e.n !== ourClubName && (!worst || e.s < worst.s)) worst = e; });
+    if (!worst) break;
+    ents.splice(ents.indexOf(worst), 1);
+  }
+  return ents;
+}
+function euInit(c, lazy){
+  var label = seasonLabel, y = euYear(label), comp = EU_COMPS[c];
+  if (isNaN(y) || y < comp.first) return;
+  var cur = euState(c);
+  if (cur && cur.label === label) return;
+  var dd = euData(c, y); if (!dd) return;
+  var ents = euBuildEntrants(c, label, dd);
+  var q = euQualifyAll(label);
+  var rounds = euRoundsNeeded(ents), dates = euRoundDates(c, label, rounds);
+  if (lazy && isoOf(currentDate) > dates[Math.min(1, rounds-1)]){ euSetState(c, {active:false, label:label}); return; } /* a save from before this engine, mid-season : no edition this year */
+  var name = euCompName(c, y);
+  var st = {active:true, label:label, comp:c, compName:name, entrants:ents, alive:ents.filter(function(e){ return !e.e; }), roundIdx:0,
+    rounds:rounds, roundNames:euRoundNames(rounds, (function(){ var c0 = ents.filter(function(e){ return !e.e; }).length, c1 = ents.filter(function(e){ return e.e===1; }).length; return c0 <= 8 && c1 >= c0; })()), roundDates:dates, history:[], championName:null, runnerUpName:null,
+    drawnOurTie:false, ourOpp:null, ourAggA:0, ourAggB:0, ourAwayA:0, ourAwayB:0, ourLegsPlayed:0, ourResolved:false, ourWon:null, ourPendingDecider:false,
+    singleFinal:euSingleFinal(c, y), synthetic:dd.synthetic, srcYear:dd.srcYear, entered:{0:true}};
+  euSetState(c, st);
+  var natives = ents.filter(function(e){ return !e.real; }).map(function(e){ return e.n; });
+  var weAreIn = ents.some(function(e){ return e.n === ourClubName; });
+  if (c==='ec') recordHonour(label, {euroEntrant: natives.length ? natives[0] : null});
+  var tag = euTag(c, y);
+  if (c==='ec' && q.chelseaOut){
+    addNews('rivals', ''+String(q.chelseaOut).toUpperCase()+' STAY HOME: the champions '+q.chelseaOut+', invited into the brand-new European Cup, have withdrawn under pressure from the Football League Management Committee, who judged it not in the League\'s interests. The field of '+ents.length+' goes ahead without an English club.');
+  } else if (natives.length){
+    addNews('board', tag+': '+natives.join(', ')+' represent '+euNatLabel()+' in the '+name+', one of '+ents.length+' clubs in the '+label+' field.'+(weAreIn?' We are in it ourselves.':''));
+  } else if (!weAreIn){
+    addNews('board', tag+': the '+label+' '+name+' gets under way with '+ents.length+' clubs'+(isSco()||euNat()==='ENG' ? ', none from '+euNatLabel() : '')+'.');
+  }
+  if (c==='ec' && dd.synthetic === false && y===1955) { /* the first European Cup */ }
+}
+function euEnsure(c){
+  var st = euState(c), y = euYear(seasonLabel);
+  if (isNaN(y) || y < EU_COMPS[c].first) return;
+  if (st && st.label === seasonLabel) return;
+  euInit(c, true);
+}
+/* ---- ties ---- */
+function euNeutralScore(a, b){
+  if (Math.random() < 0.5) return simAiLeagueMatch(a, b);
+  var r = simAiLeagueMatch(b, a); return [r[1], r[0]];
+}
+var EU_NEUTRALS = [['Heysel Stadium','Brussels'],['Stade Olympique de la Pontaise','Lausanne'],['Parc des Princes','Paris'],['Olympic Stadium','Amsterdam'],['Hampden Park','Glasgow'],['Stadio Olimpico','Rome'],['Wankdorf Stadium','Bern'],['Prater Stadium','Vienna']];
+function euNeutralVenue(){ var v = pick(EU_NEUTRALS); return {ground:v[0], city:v[1], name:v[0], capacity:EU_VENUE_CAP[v[0]]||55000, isFinal:false}; }
+function euroDecisiveMatch(a, b){
+  var sc = simAiLeagueMatch(a, b), gA = sc[0], gB = sc[1];
+  if (gA === gB){
+    var aOdds = 1/(1+Math.pow(10, -(aiXiStrength(a)+aiFormCA(a.n)+BG_HOME_EDGE-aiXiStrength(b)-aiFormCA(b.n))/BG_ODDS_SCALE));
+    if (Math.random() < aOdds) gA++; else gB++;
+  }
+  return [gA, gB];
+}
+/* a tie between two clubs that are NOT ours : two legs (clubA at home first) or, for a single-match Final, one game at the Final's venue */
+function euResolveTie(st, a, b, roundIdx){
+  var y = euYear(st.label), isFinal = (roundIdx === st.roundNames.length-1), A = a.n.toUpperCase(), B = b.n.toUpperCase();
+  if (isFinal && st.singleFinal){
+    var sc = euNeutralScore(a, b), ven = euFinalVenueLabel(st.comp, st.label), winner, tail = '';
+    if (sc[0] === sc[1]){
+      var rep = euroDecisiveMatch(a, b); winner = rep[0] > rep[1] ? a : b;
+      tail = (y <= 1974) ? ' (after extra time; '+winner.n.toUpperCase()+' won the replay)' : ' (after extra time; '+winner.n.toUpperCase()+' won on penalties)';
+    } else winner = sc[0] > sc[1] ? a : b;
+    return {winner:winner, loser:winner===a?b:a, aggA:sc[0], aggB:sc[1], line:A+' '+sc[0]+'-'+sc[1]+' '+B+tail+', the Final at '+ven};
+  }
+  var leg1 = simAiLeagueMatch(a, b), leg2 = simAiLeagueMatch(b, a);
+  var aggA = leg1[0]+leg2[1], aggB = leg1[1]+leg2[0], how = '', win = null;
+  if (aggA !== aggB) win = aggA > aggB ? a : b;
+  else if (euAwayGoalsEra(y) && leg2[1] !== leg1[1]){ win = leg2[1] > leg1[1] ? a : b; how = ', '+win.n.toUpperCase()+' win on away goals'; }
+  else if (y >= 1970){ var pk = euroDecisiveMatch(a, b); win = pk[0] > pk[1] ? a : b; how = ', '+win.n.toUpperCase()+' won on penalties'; }
+  else {
+    var dec = euroDecisiveMatch(a, b); if (dec[0] > dec[1]) aggA++; else aggB++;
+    win = aggA > aggB ? a : b;
+    how = ', '+win.n.toUpperCase()+' won '+(isFinal ? 'the Final, settled at '+euFinalVenueLabel(st.comp, st.label) : 'a neutral-venue decider');
+  }
+  return {winner:win, loser:win===a?b:a, aggA:aggA, aggB:aggB,
+    line:A+' '+leg1[0]+'-'+leg1[1]+' '+B+', '+B+' '+leg2[0]+'-'+leg2[1]+' '+A+' ('+aggA+'-'+aggB+' agg.'+how+')'};
+}
+function resolveTwoLegTie(clubA, clubB, season, roundLabelOverride, finalVenueLabelFn){
+  /* kept for callers that pass two clubs directly (the older tests) : the European Cup's own rules for that season */
+  var st = (europeanCup && europeanCup.roundNames) ? Object.assign({}, europeanCup, {comp:europeanCup.comp||'ec', label:europeanCup.label||season||seasonLabel}) : {comp:'ec', label:season||seasonLabel, roundNames:['Round','Final'], singleFinal:false};
+  var idx = roundLabelOverride ? (roundLabelOverride==='Final' ? st.roundNames.length-1 : 0) : st.roundIdx;
+  return euResolveTie(st, clubA, clubB, idx || 0);
+}
+function euPair(pool, avoidSame){
+  var p = pool.slice(), pairs = [];
+  while (p.length >= 2){
+    var a = p.splice(Math.floor(Math.random()*p.length), 1)[0];
+    var idxs = []; p.forEach(function(x, i){ if (!avoidSame || !a.cc || x.cc !== a.cc) idxs.push(i); });
+    var bi = idxs.length ? idxs[Math.floor(Math.random()*idxs.length)] : Math.floor(Math.random()*p.length);
+    pairs.push([a, p.splice(bi, 1)[0]]);
+  }
+  return {pairs:pairs, bye:p[0] || null};
+}
+function euRoundLabel(c){ var st = euState(c); return (st && st.roundNames) ? st.roundNames[st.roundIdx] : undefined; }
+function euroRoundLabel(){ return euRoundLabel('ec'); }
+function cwcRoundLabel(){ return euRoundLabel('cwc'); }
+function fairsCupRoundLabel(){ return euRoundLabel('fairs'); }
+function euIsFinalRound(st){ return st.roundIdx === st.roundNames.length-1; }
+function euScheduleOurLeg(c){
+  var st = euState(c), y = euYear(st.label), comp = EU_COMPS[c], tag = euTag(c, y);
+  var pool = st.alive.filter(function(e){ return e.n !== ourClubName; });
+  if (!pool.length) return;
+  var diff = pool.filter(function(e){ var me = st.alive.filter(function(a){ return a.n===ourClubName; })[0]; return !(me && me.cc && e.cc === me.cc); });
+  if (!euIsFinalRound(st) && diff.length) pool = diff;
+  var chosen = pool[Math.floor(Math.random()*pool.length)];
+  st.ourOpp = chosen; st.drawnOurTie = true; st.ourLegsPlayed = 0;
+  st.ourAggA = 0; st.ourAggB = 0; st.ourAwayA = 0; st.ourAwayB = 0; st.ourResolved = false; st.ourWon = null; st.ourPendingDecider = false;
+  var rname = st.roundNames[st.roundIdx], roundLabel = st.compName+', '+rname;
+  var leg1Date = st.roundDates[st.roundIdx];
+  function insertLeg(home, dateIso, legNo, single, venue){
+    var idx = findFixtureIndexForDate(dateIso);
+    var tie = {opp:chosen.n, s:chosen.s, home:home, played:false, res:null, euroLeg:legNo, roundName: single ? roundLabel : roundLabel+' (Leg '+legNo+')'};
+    tie[comp.flag] = true;
+    if (venue) tie.neutralVenue = venue;
+    fixtures.splice(idx, 0, tie);
+    fixtureRealDates.splice(idx, 0, dateFromIso(dateIso));
+    normalizeFixtureDatesFrom(idx+1); enforceSeasonEndCutoff();
+  }
+  var note = euStarNote(chosen.n, y);
+  if (euIsFinalRound(st) && st.singleFinal){
+    insertLeg(true, leg1Date, 3, true, euFinalVenue(c, st.label) || euNeutralVenue());
+    st.singleTie = true;
+    addNews('board', tag+' DRAW: we are in the hat for real -- the Final, against '+chosen.n+note+', at '+euFinalVenueLabel(c, st.label)+'.');
+    return;
+  }
+  st.singleTie = false;
+  var homeFirst = Math.random() < 0.5;
+  var leg2Date = isoOf(new Date(dateFromIso(leg1Date).getTime() + 14*86400000));
+  insertLeg(homeFirst, leg1Date, 1, false, null);
+  insertLeg(!homeFirst, leg2Date, 2, false, null);
+  addNews('board', tag+' DRAW: we are in the hat for real -- drawn against '+chosen.n+note+' in the '+rname+', first leg '+(homeFirst?'at home':'away')+'.');
+}
+function euScheduleDecider(c){
+  var st = euState(c), oppObj = st.ourOpp, comp = EU_COMPS[c];
+  var isFinalRound = euIsFinalRound(st);
+  var venue = (isFinalRound ? euFinalVenue(c, st.label) : null) || euNeutralVenue();
+  var dIso = isoOf(new Date(currentDate.getTime() + 10*86400000));
+  var idx = findFixtureIndexForDate(dIso);
+  var tie = {opp:oppObj.n, s:oppObj.s, home:Math.random()<0.5, played:false, res:null, euroLeg:3, roundName:st.compName+', '+st.roundNames[st.roundIdx]+' (Deciding Match)'};
+  tie[comp.flag] = true;
+  tie.neutralVenue = venue;
+  fixtures.splice(idx, 0, tie);
+  fixtureRealDates.splice(idx, 0, dateFromIso(dIso));
+  normalizeFixtureDatesFrom(idx+1); enforceSeasonEndCutoff();
+  st.ourPendingDecider = true;
+}
+function euApplyOutcome(c, won, f, how){
+  var st = euState(c), y = euYear(st.label), tag = euTag(c, y);
+  st.ourResolved = true; st.ourWon = won; st.ourPendingDecider = false;
+  var wasFinal = euIsFinalRound(st), venueTxt = wasFinal ? euFinalVenueLabel(c, st.label) : '';
+  var score = st.ourAggA+'-'+st.ourAggB, agg = st.singleTie ? '' : ' on aggregate';
+  if (won){
+    adjustManagerRep(wasFinal ? 6 : 4);
+    addNews('board', tag+': '+(wasFinal ? 'WE HAVE WON THE '+tag+', ' : 'through to the next round, ')+(f.euroLeg===3 ? (wasFinal ? 'winning the Final against ' : 'winning the deciding match against ') : 'seeing off ')+f.opp+' '+score+agg+(how||'')+(wasFinal && f.euroLeg===3 ? ' at '+venueTxt : '')+'.');
+  } else {
+    adjustManagerRep(wasFinal ? -3 : -2);
+    addNews('board', tag+': out, beaten by '+f.opp+' '+st.ourAggB+'-'+st.ourAggA+agg+(how||'')+'.'+(f.euroLeg===3 && !st.singleTie ? ' Beaten in the deciding match after a level two legs.' : ''));
+  }
+}
+function euHandlePlayerLegResult(c, f, us, opp){
+  var st = euState(c), y = euYear(st.label), tag = euTag(c, y);
+  if (f.euroLeg === 3){
+    if (st.singleTie){ st.ourAggA = us; st.ourAggB = opp; }
+    var won = us > opp, how = '';
+    if (us === opp){
+      won = Math.random() < 0.5;
+      how = (y <= 1974) ? ', after a level game and a replay' : ', on penalties after extra time';
+    }
+    euApplyOutcome(c, won, f, how);
+    return;
+  }
+  st.ourAggA += us; st.ourAggB += opp; st.ourLegsPlayed++;
+  if (f.home) st.ourAwayB += opp; else st.ourAwayA += us;
+  if (f.euroLeg === 2){
+    if (st.ourAggA === st.ourAggB){
+      if (euAwayGoalsEra(y) && st.ourAwayA !== st.ourAwayB){
+        euApplyOutcome(c, st.ourAwayA > st.ourAwayB, f, ' (away goals)');
+      } else if (y >= 1970){
+        euApplyOutcome(c, Math.random() < 0.5, f, ' (penalties)');
+      } else {
+        var fin = euIsFinalRound(st);
+        euScheduleDecider(c);
+        addNews('board', tag+': level '+st.ourAggA+'-'+st.ourAggB+' on aggregate after both legs against '+f.opp+' -- '+(fin ? 'the Final will be settled at '+euFinalVenueLabel(c, st.label) : 'a deciding match at a neutral ground will settle it')+(euAwayGoalsEra(y)?' (the away goals are level too).':' (no away-goals rule in this era).'));
+      }
+    } else {
+      euApplyOutcome(c, st.ourAggA > st.ourAggB, f, '');
+    }
+  } else {
+    addNews('board', tag+', '+f.roundName+': '+us+'-'+opp+' against '+f.opp+' in the first leg. '+(f.home?'Away':'Home')+' to come.');
+  }
+}
+function euFinish(c, st, champ, runnerUp){
+  var y = euYear(st.label), tag = euTag(c, y);
+  st.championName = champ ? champ.n : null; st.runnerUpName = runnerUp ? runnerUp.n : null;
+  st.active = false;
+  if (!st.championName) return;
+  var final2 = !st.singleFinal;
+  addNews('board', tag+' FINAL: '+st.championName.toUpperCase()+' have won the '+st.compName+(final2 ? ' over two legs' : ', the Final played at '+euFinalVenueLabel(c, st.label))+'.'+(st.championName===ourClubName?' AND IT IS US.':'')+(st.championName!==ourClubName ? euStarNote(st.championName, y).replace(/^ \(/, ' (').replace(/\)$/, ')') : ''));
+  var patch = {}; patch[euHonourKey(c, y)] = st.championName; recordHonour(st.label, patch);
+}
+/* the league season can end before the last European rounds (the Final is late May): settle whatever is left among the AI clubs before the new season rebuilds the fields */
+function euFinishSeason(){
+  ['ec','cwc','fairs'].forEach(function(c){
+    var st = euState(c); if (!st || !st.active || !st.roundDates || !st.roundDates.length) return;
+    if (st.label !== seasonLabel) return;
+    var us = st.alive && st.alive.some(function(e){ return e.n === ourClubName; });
+    if (!us && st.entrants) st.entrants = st.entrants.filter(function(e){ return e.n !== ourClubName || (e.e||0) < st.roundIdx; }); /* a club of ours still waiting to come in can no longer play */
+    if (us && (!st.drawnOurTie || !st.ourResolved || !st.ourOpp)){
+      if (st.ourOpp && st.drawnOurTie){ st.ourResolved = true; st.ourWon = false; }
+      else st.alive = st.alive.filter(function(e){ return e.n !== ourClubName; });
+    }
+    var saved = currentDate, last = st.roundDates[st.roundDates.length-1];
+    currentDate = new Date(dateFromIso(last).getTime() + 86400000);
+    try { euAdvance(c); } catch(err){}
+    currentDate = saved;
+  });
+}
+
+function euAdvance(c){
+  var st = euState(c); if (!st || !st.active || !st.roundNames) return;
+  var y = euYear(st.label), tag = euTag(c, y), guard = 0;
+  if (!st.entered) st.entered = {};
+  while (st.active && st.roundIdx < st.roundNames.length && isoOf(currentDate) >= st.roundDates[st.roundIdx] && guard++ < 14){
+    if (!st.entered[st.roundIdx]){
+      st.entered[st.roundIdx] = true;
+      var late = (st.entrants||[]).filter(function(e){ return e.e === st.roundIdx && !st.alive.some(function(a){ return a.n === e.n; }); });
+      if (late.length){
+        st.alive = st.alive.concat(late);
+        if (late.some(function(e){ return e.n === ourClubName; })) addNews('board', tag+': we come into the '+st.compName+' at the '+st.roundNames[st.roundIdx]+'.');
+      }
+    }
+    if (st.alive.length < 2){ euFinish(c, st, st.alive[0] || null, null); break; }
+    var ourInField = st.alive.some(function(e){ return e.n === ourClubName; });
+    if (ourInField){
+      if (!st.drawnOurTie){ euScheduleOurLeg(c); return; }
+      if (!st.ourResolved) return;
+    }
+    var excl = ourInField ? [ourClubName, st.ourOpp.n] : [];
+    var pool = st.alive.filter(function(e){ return excl.indexOf(e.n) < 0; });
+    var rname = st.roundNames[st.roundIdx], lines = [], survivors = [], loser = null;
+    var me = st.alive.filter(function(e){ return e.n === ourClubName; })[0];
+    if (ourInField){
+      survivors.push(st.ourWon ? me : st.ourOpp); loser = st.ourWon ? st.ourOpp : me;
+      lines.push(tag+', '+rname+': '+ourClubName.toUpperCase()+' '+(st.ourWon?'beat':'lost to')+' '+st.ourOpp.n.toUpperCase()+' '+st.ourAggA+'-'+st.ourAggB+(st.singleTie?'':' on aggregate')+'.');
+    }
+    var pr = euPair(pool, st.roundIdx < st.roundNames.length-3);
+    pr.pairs.forEach(function(p){
+      var res = euResolveTie(st, p[0], p[1], st.roundIdx);
+      survivors.push(res.winner); lines.push(res.line); loser = res.loser;
+    });
+    if (pr.bye){ survivors.push(pr.bye); lines.push(pr.bye.n.toUpperCase()+' receive a bye into the next round.'); }
+    st.history.push({roundName:rname, lines:lines, remaining:survivors.length});
+    var isLast = euIsFinalRound(st);
+    st.alive = survivors; st.roundIdx++;
+    st.drawnOurTie = false; st.ourOpp = null; st.ourAggA = 0; st.ourAggB = 0; st.ourAwayA = 0; st.ourAwayB = 0; st.singleTie = false;
+    st.ourLegsPlayed = 0; st.ourResolved = false; st.ourWon = null; st.ourPendingDecider = false;
+    if (isLast){ euFinish(c, st, survivors[0], loser); break; }
+  }
+}
+/* ---- the legacy entry points, now thin ---- */
+function initEuropeanCupForSeason(){ euInit('ec'); }
+function initCupWinnersCupForSeason(){ euInit('cwc'); }
+function initFairsCupForSeason(){ euInit('fairs'); }
+function advanceEuropeanCupField(){ euEnsure('ec'); euAdvance('ec'); }
+function advanceCupWinnersCupField(){ euEnsure('cwc'); euAdvance('cwc'); }
+function advanceFairsCupField(){ euEnsure('fairs'); euAdvance('fairs'); }
+function maybeAnnounceEuroCupDraw(){ euEnsure('ec'); euAdvance('ec'); }
+function maybeAnnounceCwcDraw(){ euEnsure('cwc'); euAdvance('cwc'); }
+function maybeAnnounceFairsCupDraw(){ euEnsure('fairs'); euAdvance('fairs'); }
+function euroScheduleOurLeg(){ euScheduleOurLeg('ec'); }
+function cwcScheduleOurLeg(){ euScheduleOurLeg('cwc'); }
+function fairsCupScheduleOurLeg(){ euScheduleOurLeg('fairs'); }
+function euroScheduleDecider(){ euScheduleDecider('ec'); }
+function cwcScheduleDecider(){ euScheduleDecider('cwc'); }
+function fairsCupScheduleDecider(){ euScheduleDecider('fairs'); }
+function applyEuroCupOutcome(won, f){ euApplyOutcome('ec', won, f); }
+function applyCwcOutcome(won, f){ euApplyOutcome('cwc', won, f); }
+function applyFairsCupOutcome(won, f){ euApplyOutcome('fairs', won, f); }
+function euroHandlePlayerLegResult(f, u, o){ euHandlePlayerLegResult('ec', f, u, o); }
+function cwcHandlePlayerLegResult(f, u, o){ euHandlePlayerLegResult('cwc', f, u, o); }
+function fairsCupHandlePlayerLegResult(f, u, o){ euHandlePlayerLegResult('fairs', f, u, o); }
+function euroCupGateYearOk(label){ var y = euYear(label); return !isNaN(y) && y >= 1955; }
+function cwcGateYearOk(label){ var y = euYear(label); return !isNaN(y) && y >= 1960; }
+function fairsCupGateYearOk(label){ var y = euYear(label); return !isNaN(y) && y >= 1955; }
+function euroCupFinalVenueFor(l){ return euFinalVenue('ec', l); }
+function euroCupFinalVenueLabel(l){ return euFinalVenueLabel('ec', l); }
+function cwcFinalVenueFor(l){ return euFinalVenue('cwc', l); }
+function cwcFinalVenueLabel(l){ return euFinalVenueLabel('cwc', l); }
+function euroRoundDatesForSeason(l){ return euRoundDates('ec', l, euData('ec', euYear(l)).n); }
+function cwcRoundDatesForSeason(l){ return euRoundDates('cwc', l, euData('cwc', euYear(l)).n); }
+function fairsCupRoundDatesForSeason(l){ return euRoundDates('fairs', l, euData('fairs', euYear(l)).n); }
+/* v319 : EUROPE view */
+function renderEurope(){
+  var body = document.getElementById('europe-body'); if (!body) return;
+  var html = '';
+  [['ec', europeanCup], ['cwc', cupWinnersCup], ['fairs', fairsCup]].forEach(function(pair){
+    var c = pair[0], st = pair[1], y = euYear(seasonLabel);
+    if (isNaN(y) || y < EU_COMPS[c].first) return;
+    var name = euCompName(c, y);
+    html += '<div class="box"><div class="box-title">'+name.toUpperCase()+' '+seasonLabel+'</div>';
+    if (!st || st.label !== seasonLabel || !st.roundNames){
+      html += '<p class="sub">NOT YET UNDER WAY THIS SEASON.</p></div>'; return;
+    }
+    var inIt = (st.entrants||[]).some(function(e){ return e.n === ourClubName; });
+    var aliveUs = (st.alive||[]).some(function(e){ return e.n === ourClubName; });
+    var status = st.championName ? ('WON BY '+st.championName.toUpperCase()+(st.runnerUpName?' (BEAT '+st.runnerUpName.toUpperCase()+')':'')) :
+      (st.active ? ('NEXT: '+(st.roundNames[st.roundIdx]||'').toUpperCase()+' ('+st.roundDates[st.roundIdx]+'), '+(st.alive||[]).length+' CLUBS LEFT') : 'NO EDITION THIS SEASON');
+    html += '<p class="sub">'+status+'. '+(inIt ? (aliveUs ? 'WE ARE STILL IN IT.' : 'WE ARE OUT.') : 'WE ARE NOT IN IT.')+(st.synthetic?' (FIELD SHAPE BORROWED FROM THE '+st.srcYear+' EDITION.)':'')+'</p>';
+    html += '<p class="sub">FINAL: '+(euFinalVenueLabel(c, seasonLabel)).toUpperCase()+(st.singleFinal?' (ONE MATCH)':' (TWO LEGS)')+'</p>';
+    var ents = (st.entrants||[]).slice().sort(function(a,b){ return (a.e||0)-(b.e||0) || b.s-a.s; });
+    html += '<div class="scroll-box" style="max-height:220px;"><table><thead><tr><th>Club</th><th>From</th><th>Enters</th><th>Status</th></tr></thead><tbody>'+ents.map(function(e){
+      var alive = (st.alive||[]).some(function(a){ return a.n===e.n; });
+      var out = !alive && ((st.roundIdx>(e.e||0)) || !st.active);
+      return '<tr'+(e.n===ourClubName?' class="us"':'')+'><td>'+e.n.toUpperCase()+'</td><td>'+(e.cc||'')+'</td><td>'+(st.roundNames[e.e||0]||'').toUpperCase()+'</td><td>'+(st.championName===e.n?'CHAMPIONS':alive?(e.e>st.roundIdx?'TO ENTER':'ALIVE'):out?'OUT':'--')+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+    (st.history||[]).slice(-3).forEach(function(h){
+      html += '<p class="sub">'+h.roundName.toUpperCase()+'</p><p class="header">'+h.lines.slice(0,12).join('<br>')+'</p>';
+    });
+    html += '</div>';
+  });
+  body.innerHTML = html || '<div class="box"><p class="sub">THERE IS NO EUROPEAN FOOTBALL YET : THE EUROPEAN CUP AND THE FAIRS CUP BEGIN IN 1955-56.</p></div>';
+}
+
 function renderReigningChampions(){
   var box = document.getElementById('reigning-champions-box'); if (!box) return;
   backfillDivisionChampions();
@@ -10686,8 +11370,8 @@ function renderHonours(){
     var thirdCell = (h.D3 || h.D4) ? cell(h.D3) : cell(h['3S'] || h['3N']); /* post-1958 national Third shown here; pre-1958 falls back to whichever region actually had a recorded champion */
     var fourthCell = h.D4 !== undefined && h.D4 !== null ? cell(h.D4) : (h['3N'] && h.D3 ? cell(h['3N']) : '<td>--</td>');
     if (isSco()){ thirdCell = cell(h.leagueCup); fourthCell = '<td>--</td>'; }
-    return '<tr><td>'+h.label+'</td>'+cell(h.D1)+cell(h.D2)+thirdCell+fourthCell+cell(h.faCup)+cell(h.europeanCup)+cell(h.cwc)+'</tr>';
-  }).join('') : '<tr><td colspan="8">NO SEASON COMPLETED YET IN THIS SAVE.</td></tr>';
+    return '<tr><td>'+h.label+'</td>'+cell(h.D1)+cell(h.D2)+thirdCell+fourthCell+cell(h.faCup)+cell(h.europeanCup)+cell(h.cwc)+cell(h.fairsCup||h.uefaCup)+'</tr>';
+  }).join('') : '<tr><td colspan="9">NO SEASON COMPLETED YET IN THIS SAVE.</td></tr>';
 }
 function renderAllBackgroundDivisions(){
   renderReigningChampions();
@@ -13620,7 +14304,7 @@ function eraCaseText(t, atStart){
     var prev = toks[i-1], next = toks[i+1];
     var adjPrev = prev && t.substring(prev.e, k.s) === ' ', adjNext = next && t.substring(k.e, next.s) === ' ';
     function bare(x){ return x.w.replace(/['\u2019]s?$/i,'').toLowerCase(); }
-    var dotted = k.w.length === 1 && t.charAt(k.e) === '.' && /[A-Za-z]/.test(t.charAt(k.e+1));
+    var dotted = k.w.length === 1 && t.charAt(k.e) === '.' && (/[A-Za-z]/.test(t.charAt(k.e+1)) || (t.charAt(k.s-1) === '.' && /[A-Za-z]/.test(t.charAt(k.s-2)))); /* v319 : the C of F.C. */
     if (dotted) res = k.w.toUpperCase();
     else if (lw === 'i') res = 'I';
     else if (M.abbr[lw]) res = M.abbr[lw];
@@ -15266,7 +15950,7 @@ function simContinentalWinner(kind, label){ /* 'europeanCup' or 'cwc' : the winn
 function simEnglishTrophyBefore(label){
   return (honoursHistory||[]).some(function(h){
     if (h.label >= label) return false;
-    return [h.europeanCup, h.cwc, h.fairsCup].some(function(n){ return n && clubProfiles[n]; });
+    return [h.europeanCup, h.cwc, h.fairsCup, h.uefaCup].some(function(n){ return n && clubProfiles[n]; });
   });
 }
 SIM_NEWS_RESOLVERS.spurs_cwc = function(){
@@ -18763,6 +19447,7 @@ function gotoView(name){
   if (name==='worldcup') renderWorldCup();
   if (name==='reserves'){ renderReserveLeagueTable(); renderReserveXIBox(); renderReserveFormBox(); renderReserveAppearancesBox(); }
   if (name==='honours') renderHonours();
+  if (name==='europe') renderEurope();
   if (typeof refreshMenuGroupActiveState === 'function') refreshMenuGroupActiveState();
 }
 document.querySelectorAll('.navlink').forEach(function(a){ a.addEventListener('click', function(){ gotoView(a.dataset.view); }); });
@@ -18845,7 +19530,7 @@ function buildSaveState(){
     trainerName:trainerName, clubSecretaryName:clubSecretaryName, /* v206 : without these, reloading a save would show the generic default "Bert Symons"/"W. H. Cobbett" names even though a different trainer/secretary were generated and shown for the rest of that save */
     reserveLeagueRegion:reserveLeagueRegion, reserveLeagueTable:reserveLeagueTable, reserveLeagueLastLines:reserveLeagueLastLines, reserveFixtureQueue:reserveFixtureQueue, reserveXISelection:reserveXISelection, reservesRecord:reservesRecord, reserveRecentForm:reserveRecentForm,
     southernLastLines:southernLastLines, ourDivisionLastLines:ourDivisionLastLines, firstDivision:firstDivision, secondDivision:secondDivision, thirdDivisionSouthBg:thirdDivisionSouthBg, thirdDivisionNorth:thirdDivisionNorth, midlandLeague:midlandLeague, northEasternLeague:northEasternLeague,
-    manager:manager, lineupSlots:lineupSlots, substituteId:substituteId, seasonNumber:seasonNumber, seasonLabel:seasonLabel, seasonHistory:seasonHistory, divisionChampions:divisionChampions, honoursHistory:honoursHistory, europeanCup:europeanCup, cupWinnersCup:cupWinnersCup, fairsCup:fairsCup, lastFaCupWinnerName:lastFaCupWinnerName, reservesRecord:reservesRecord,
+    manager:manager, lineupSlots:lineupSlots, substituteId:substituteId, seasonNumber:seasonNumber, seasonLabel:seasonLabel, seasonHistory:seasonHistory, divisionChampions:divisionChampions, honoursHistory:honoursHistory, europeanCup:europeanCup, cupWinnersCup:cupWinnersCup, fairsCup:fairsCup, lastFaCupWinnerName:lastFaCupWinnerName, lastFaCupRunnerUpName:lastFaCupRunnerUpName, reservesRecord:reservesRecord,
     currentDivisionLabel:currentDivisionLabel, currentDivisionShort:currentDivisionShort, seasonEndPending:seasonEndPending, divisionTier:divisionTier, divisionRegion:divisionRegion, fourthDivisionCreated:fourthDivisionCreated,
     thirdDivisionExpanded1950:thirdDivisionExpanded1950,
     tacticalWrinkle:tacticalWrinkle, wrinkleFamiliarity:wrinkleFamiliarity, wrinkleCottonedOn:wrinkleCottonedOn, fixtureRealDates:fixtureRealDates.map(isoOf), cupRoundDates:cupRoundDates,
@@ -19273,6 +19958,7 @@ function applyLoadedState(s, silent){
     if (s.europeanCup) europeanCup = s.europeanCup; /* v237 BUG FIX : europeanCup was never saved at all before this pass -- a reload mid-competition silently lost the whole bracket and any in-progress tie. An older save with no europeanCup field keeps the fresh {active:false,label:null} default, which is exactly what a save made before the European Cup existed should show. */
     if (s.cupWinnersCup) cupWinnersCup = s.cupWinnersCup; /* v238 BUG FIX : cupWinnersCup had exactly the same gap europeanCup did before v237 -- never saved, so a reload mid-competition silently lost the bracket and any in-progress tie. An older save with no cupWinnersCup field keeps the fresh {active:false,label:null} default. */
     if (s.fairsCup) fairsCup = s.fairsCup; /* v258 : same save/load gap already fixed for the other two competitions at v237/v238 -- fixed from the start here rather than needing a later bug-fix pass. An older save with no fairsCup field keeps the fresh {active:false,label:null} default. */
+    lastFaCupRunnerUpName = s.lastFaCupRunnerUpName || null; euQualCache = null; /* v319 */
     if (s.lastFaCupWinnerName) lastFaCupWinnerName = s.lastFaCupWinnerName; /* v238 BUG FIX : without this, a reload straight after an FA Cup Final (before the Cup Winners' Cup for the following season has been built) forgot who just won it, so initCupWinnersCupForSeason would find nobody to enter. */
     reservesRecord = s.reservesRecord || {p:0,w:0,d:0,l:0};
     currentDivisionLabel = s.currentDivisionLabel || currentDivisionLabel; currentDivisionShort = s.currentDivisionShort || currentDivisionShort;
@@ -32355,6 +33041,7 @@ function checkMathematicalCertainties(){
 }
 function processSeasonEnd(){
   recordDivisionChampions(); /* v127 : before any table is reset or clubs move */
+  try { euFinishSeason(); } catch(err){} /* v319 : the Finals can fall after the last league match : settle them before the fields are rebuilt */
   recordFaCupWinner(); /* v236 : before cupBracket resets for the next season -- see lastFaCupWinnerName */
   try { simPostSeasonTitleNews(); } catch(err){} /* v309 : the sim's own champions get a headline; the real scripted one only if it agrees */
   var position = ourPosition();
@@ -33777,7 +34464,7 @@ function finishMatch(){
       : '<p class="header">... THE REST OF THIS ROUND IS STILL TO BE SETTLED ...</p>';
   } else if (f.isFairsCup){
     advanceFairsCupField();
-    document.getElementById('vidi-title').textContent = 'VIDIPRINTER : FAIRS CUP';
+    document.getElementById('vidi-title').textContent = 'VIDIPRINTER : '+(fairsCup && fairsCup.compName ? fairsCup.compName.toUpperCase() : 'FAIRS CUP');
     var fairsCupHist = fairsCup.history && fairsCup.history.length ? fairsCup.history[fairsCup.history.length-1] : null;
     document.getElementById('vidi-box').innerHTML = (fairsCupHist && fairsCupHist.lines && fairsCupHist.lines.length)
       ? '<p class="header">'+fairsCupHist.lines.slice(0,10).join('<br>')+'</p>'
@@ -33841,7 +34528,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v318'; /* v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v319'; /* v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
