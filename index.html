@@ -377,6 +377,7 @@ body.theme-pink #theme-pitch .pl .dot{position:absolute; left:-15px; top:-15px; 
 body.theme-pink #theme-pitch .pl.gk .dot{background:var(--pink3,#f7d3cd); color:var(--ink); border:2px solid var(--ink);}
 body.theme-pink #theme-pitch .pl .nm{position:absolute; left:0; top:17px; transform:translateX(-50%); font-family:var(--t-cond); font-size:11px; letter-spacing:.04em; text-transform:uppercase; background:var(--pink); color:var(--ink); padding:0 3px; white-space:nowrap; border:1px solid var(--ink);}
 #theme-pitch{display:none;}
+#theme-pitch .pl{transition:left .5s ease, top .5s ease;}
 body.theme-pink tbody tr.next-fix td{background:var(--ink)!important; color:var(--pink)!important;}
 
 </style>
@@ -579,6 +580,7 @@ body.theme-turnstile #theme-pitch .pl .dot{position:absolute; left:-15px; top:-1
 body.theme-turnstile #theme-pitch .pl.gk .dot{background:var(--pink3,#f7d3cd); color:var(--ink); border:2px solid var(--ink);}
 body.theme-turnstile #theme-pitch .pl .nm{position:absolute; left:0; top:17px; transform:translateX(-50%); font-family:var(--t-cond); font-size:11px; letter-spacing:.04em; text-transform:uppercase; background:var(--pink); color:var(--ink); padding:0 3px; white-space:nowrap; border:1px solid var(--ink);}
 #theme-pitch{display:none;}
+#theme-pitch .pl{transition:left .5s ease, top .5s ease;}
 
 /* =================== TURNSTILE : the magazine look (overrides the shared structure above) =================== */
 /* masthead : a decorative strip, then the big red title with its gold-and-ink drop shadow */
@@ -902,6 +904,7 @@ body.theme-programme #theme-pitch .pl .dot{position:absolute; left:-15px; top:-1
 body.theme-programme #theme-pitch .pl.gk .dot{background:var(--pink3,#f7d3cd); color:var(--ink); border:2px solid var(--ink);}
 body.theme-programme #theme-pitch .pl .nm{position:absolute; left:0; top:17px; transform:translateX(-50%); font-family:var(--t-cond); font-size:11px; letter-spacing:.04em; text-transform:uppercase; background:var(--pink); color:var(--ink); padding:0 3px; white-space:nowrap; border:1px solid var(--ink);}
 #theme-pitch{display:none;}
+#theme-pitch .pl{transition:left .5s ease, top .5s ease;}
 
 
 /* =================== PROGRAMME : the 1966 matchday-programme look (overrides the shared structure above) =================== */
@@ -10736,9 +10739,11 @@ function styleTacticsNote(){
     "Switching to the WM system : more solid at the back, but it asks more of players used to the old game." :
     tactics.formation==='235' ?
     "Sticking with the Pyramid : familiar to the players, but old-fashioned against sides who've moved on." :
-    "A foreign system, learned on the study trip. In the late 1940s these were older ideas than the WM, not newer ones : it costs the side while they learn it, and it only really pays with technical players.";
+    (typeof formationIsTimeline==='function' && formationIsTimeline(tactics.formation) ? formationNoveltyNote(tactics.formation) :
+    "A foreign system, learned on the study trip. In the late 1940s these were older ideas than the WM, not newer ones : it costs the side while they learn it, and it only really pays with technical players.");
   var sysLine = (typeof systemStatusLine==='function') ? systemStatusLine() : '';
-  document.getElementById('tactics-note').innerHTML = '<p class="sub">'+formDesc+(styleDesc?' '+styleDesc:'')+'</p>'+(sysLine ? '<p class="sub">'+sysLine+'</p>' : '');
+  var divLine = (typeof divisionShapesLine==='function') ? divisionShapesLine() : '';
+  document.getElementById('tactics-note').innerHTML = '<p class="sub">'+formDesc+(styleDesc?' '+styleDesc:'')+'</p>'+(sysLine ? '<p class="sub">'+sysLine+'</p>' : '')+(divLine ? '<p class="sub">'+divLine+'</p>' : '');
 }
 function renderStyleOptions(){
   var box = document.getElementById('style-options'); if (!box) return;
@@ -10763,6 +10768,7 @@ document.querySelectorAll('input[name="formation"]').forEach(function(r){ r.addE
   styleTacticsNote();
   if (typeof renderMethodOptions==='function') renderMethodOptions();
   if (typeof refreshTrainingSynergyNote==='function') refreshTrainingSynergyNote();
+  try{ eraPitchRender(); }catch(e){} /* v316 */
 });});
 document.querySelectorAll('input[name="approach"]').forEach(function(r){ r.addEventListener('change', function(){ tactics.approach = this.value; });});
 
@@ -10884,9 +10890,19 @@ var studyDestinations = [
      (Wikipedia, V1). Gated from the 1965-66 season, after both those European Cup wins, the same "only once
      it's actually won something" logic already used above -- not from Herrera's 1960 arrival, before any of
      it had been proven on the pitch. */
-  {key:'catenaccio', kind:'formation', traveler:'manager', label:"CATENACCIO : INTER MILAN'S EUROPEAN CUP", cost:200, weeks:4, availableFromYear:1965,
+  {key:'catenaccio', kind:'formation', traveler:'manager', label:"CATENACCIO : INTER MILAN'S EUROPEAN CUP", cost:200, weeks:4, availableFromYear:1962, /* v316 : early 60s (Herrera's Inter, Helenio, from 1960-61; sweeper ideas reach English shores by 1962-63) */
    desc:"Herrera's Inter have won the European Cup twice running playing a system built round a deep sweeper behind the back line, built to concede almost nothing and strike on the break. Not a system for a side short on defenders who can read the game.",
    unlockFormation:'catenaccio', formationLabel:"CATENACCIO : a deep sweeper, a packed defence, and precious little conceded"},
+  /* v316 : TWO LATER SYSTEMS, in the data now so the later eras need no new plumbing. 4-3-3 : Ramsey's own
+     post-1966 evolution and Brazil's 1970 side; Total Football : Michels' Ajax (1971 European Cup) and the
+     1974 Dutch side. Both are date-gated and, like every timeline system, arrive on the team sheet by themselves
+     once enough clubs play them. */
+  {key:'433', kind:'formation', traveler:'manager', label:"4-3-3 : THE NEW ORTHODOXY", cost:120, weeks:3, availableFromYear:1968,
+   desc:"Three in midfield, three up front and a flat back four: the shape the best sides of the late sixties are drifting to. It wants players who can pass and run for ninety minutes.",
+   unlockFormation:'433', formationLabel:"4-3-3 : a back four, three in midfield, three up front"},
+  {key:'totalfootball', kind:'formation', traveler:'manager', label:"TOTAL FOOTBALL : AJAX", cost:260, weeks:5, availableFromYear:1972,
+   desc:"Michels' Ajax have won the European Cup playing a system where every outfield player can play every role, and the whole side presses and swaps positions. It asks a great deal of a squad's skill and fitness.",
+   unlockFormation:'totalfootball', formationLabel:"TOTAL FOOTBALL : positions swapped, the whole side pressing"},
   /* v115 : THE FA COACHING BADGES (research file Part G2). SOURCED : Walter
      Winterbottom became the FA's first Director of Coaching in 1946 (V1); a
      two-tier scheme, the "preliminary" and the "full" badge, sat as exams at
@@ -10932,6 +10948,8 @@ function renderTripOptions(){
   var box = document.getElementById('trip-options'); box.innerHTML='';
   studyDestinations.forEach(function(d){
     if (d.kind==='formation' && unlockedFormations.indexOf(d.key)>=0) return;
+    if (d.kind==='formation' && formationIsMainstream(d.key)) return; /* v316 : already on the sheet because most clubs play it */
+    if (d.kind==='formation' && FORMATION_TIMELINE_READY() && FORMATION_TIMELINE[d.key] && fmTime() < FORMATION_TIMELINE[d.key].intro - 0.4) return; /* v316 : nobody has seen it yet */
     if (d.kind==='formation' && d.availableFromYear && seasonStartYear() < d.availableFromYear) return; /* v192 : hungary1953/winglesswonders only, the original three formation trips have no such gate and are unaffected */
     if (d.kind==='training' && unlockedTrainingMethods.indexOf(d.key)>=0) return;
     if (d.kind==='method' && (unlockedMethods.indexOf(d.key)>=0 || !pushRunAvailable() || ourClubName==='Tottenham Hotspur')) return;
@@ -11053,16 +11071,16 @@ function renderUnlockedFormations(){
      formation the manager had actually chosen could visually appear to
      un-select itself the next time this list got rebuilt. */
   var box = document.getElementById('unlocked-formations'); box.innerHTML='';
-  unlockedFormations.forEach(function(destKey){
-    var d = studyDestinations.find(function(x){return x.key===destKey;});
+  sheetFormationKeys().forEach(function(destKey){
+    var d = studyDestinations.find(function(x){return x.key===destKey;}); if (!d) return;
     /* v108 WIRING FIX (same bug as the training one above): the radio used the DESTINATION key, so picking
        La Maquina set tactics.formation='riverplate', which no part of the match engine recognises (it keys
        on 'lamaquina') : the formation silently played as a plain 2-3-5 with none of its effects. The
        formation id is the destination's own unlockFormation. */
     var key = d.unlockFormation || destKey;
     var p = document.createElement('p');
-    p.innerHTML = '<label><input type="radio" name="formation" value="'+key+'"'+(tactics.formation===key?' checked':'')+'> '+d.formationLabel.toUpperCase()+'</label>';
-    p.querySelector('input').addEventListener('change', function(){ tactics.formation = key; tactics.style = null; renderStyleOptions(); styleTacticsNote(); renderMethodOptions(); if (typeof refreshTrainingSynergyNote==='function') refreshTrainingSynergyNote(); });
+    p.innerHTML = '<label><input type="radio" name="formation" value="'+key+'"'+(tactics.formation===key?' checked':'')+'> '+d.formationLabel.toUpperCase()+'</label>'+formationAdoptionTag(key);
+    p.querySelector('input').addEventListener('change', function(){ tactics.formation = key; tactics.style = null; renderStyleOptions(); styleTacticsNote(); renderMethodOptions(); if (typeof refreshTrainingSynergyNote==='function') refreshTrainingSynergyNote(); try{ eraPitchRender(); }catch(e){} });
     box.appendChild(p);
   });
   renderMethodOptions();
@@ -13511,9 +13529,27 @@ function eraCaseEnable(on){
    at the end of renderLineupSlots(). Only shown by themes that style it (CSS hides it otherwise). */
 var ERA_PITCH = {
   pyr:[[50,91],[70,77],[30,77],[82,60],[50,62],[18,60],[91,27],[71,22],[50,19],[29,22],[9,27]],
-  wm: [[50,91],[80,77],[20,77],[68,62],[50,79],[32,62],[88,24],[66,45],[50,21],[34,45],[12,24]]
+  wm: [[50,91],[80,77],[20,77],[68,62],[50,79],[32,62],[88,24],[66,45],[50,21],[34,45],[12,24]],
+  /* v316 : the true shapes. Slot order is always [GK,RB,LB,RH,CH,LH,OR,IR,CF,IL,OL] : the slots keep their roles, the diagram
+     moves them to where a 4-4-2 / 4-2-4 / 4-3-3 / sweeper side really stands (and relabels them). */
+  '442':    [[50,91],[84,74],[16,74],[62,52],[62,78],[38,78],[88,48],[38,52],[58,22],[42,22],[12,48]],
+  '424':    [[50,91],[84,74],[16,74],[60,54],[62,78],[38,78],[88,24],[40,54],[58,20],[42,20],[12,24]],
+  '433':    [[50,91],[84,74],[16,74],[70,56],[62,78],[38,78],[86,24],[30,56],[50,20],[50,46],[14,24]],
+  sweeper:  [[50,91],[80,66],[20,66],[50,64],[50,81],[72,46],[84,24],[50,48],[50,18],[28,46],[16,24]]
 };
 var ERA_PITCH_LBL = ['GK','RB','LB','RH','CH','LH','OR','IR','CF','IL','OL'];
+var ERA_PITCH_LBLS = {
+  '442':['GK','RB','LB','CM','CB','CB','RM','CM','ST','ST','LM'],
+  '424':['GK','RB','LB','CM','CB','CB','RW','CM','ST','ST','LW'],
+  '433':['GK','RB','LB','CM','CB','CB','RW','CM','ST','CM','LW'],
+  sweeper:['GK','RB','LB','CB','SW','CM','RW','CM','ST','CM','LW']
+};
+var ERA_SHAPE_NAME = {pyr:'2-3-5', wm:'W-M', '442':'4-4-2', '424':'4-2-4', '433':'4-3-3', sweeper:'SWEEPER'};
+function eraPitchShapeKey(){
+  var f = (typeof tactics !== 'undefined' && tactics) ? tactics.formation : '235';
+  if (typeof FORMATION_TIMELINE !== 'undefined' && FORMATION_TIMELINE && FORMATION_TIMELINE[f]) return FORMATION_TIMELINE[f].shape;
+  return f === 'wm' ? 'wm' : 'pyr';
+}
 function eraPitchRender(){
   var anchor = document.getElementById('lineup-slots-box'); if (!anchor || !anchor.parentNode) return;
   var el = document.getElementById('theme-pitch');
@@ -13521,17 +13557,34 @@ function eraPitchRender(){
     el = document.createElement('div'); el.id = 'theme-pitch'; el.className = 'pitch'; el.setAttribute('data-nocase','1'); el.setAttribute('aria-hidden','true');
     anchor.parentNode.insertBefore(el, anchor);
   }
-  var shape = (typeof tactics !== 'undefined' && tactics && tactics.formation === 'wm') ? 'wm' : 'pyr';
-  var h = '<div class="ln half"></div><div class="ln circ"></div><div class="ln penT"></div><div class="ln penB"></div><div class="ln sixT"></div><div class="ln sixB"></div><div class="dir">&#9650; ATTACK</div>';
+  var shape = eraPitchShapeKey();
+  el.setAttribute('data-shape', shape);
+  var lbls = ERA_PITCH_LBLS[shape] || ERA_PITCH_LBL;
   var slots = (typeof lineupSlots !== 'undefined' && lineupSlots) ? lineupSlots : [];
   var full = typeof lineup !== 'undefined' && lineup.length === 11 && slots.length === 11;
-  ERA_PITCH[shape].forEach(function(xy, i){
+  var names = ERA_PITCH[shape].map(function(xy, i){
     var nm = '';
     if (full && slots[i] && slots[i].playerId !== null && slots[i].playerId !== undefined){
       var pl = squad.find(function(x){ return x.id === slots[i].playerId; });
       if (pl) nm = String(pl.n).split(' ').slice(-1)[0].replace(/[<>&]/g,'');
     }
-    h += '<div class="pl'+(i===0?' gk':'')+'" style="left:'+xy[0]+'%;top:'+xy[1]+'%"><div class="dot">'+ERA_PITCH_LBL[i]+'</div>'+(nm?'<div class="nm">'+nm+'</div>':'')+'</div>';
+    return nm;
+  });
+  var dots = el.querySelectorAll('.pl');
+  if (dots.length === 11){ /* same eleven dots : just move them, so the shape visibly slides between formations */
+    ERA_PITCH[shape].forEach(function(xy, i){
+      var d = dots[i]; d.style.left = xy[0]+'%'; d.style.top = xy[1]+'%';
+      d.querySelector('.dot').textContent = lbls[i];
+      var nmEl = d.querySelector('.nm');
+      if (names[i]){ if (!nmEl){ nmEl = document.createElement('div'); nmEl.className = 'nm'; d.appendChild(nmEl); } nmEl.textContent = names[i]; }
+      else if (nmEl) nmEl.parentNode.removeChild(nmEl);
+    });
+    var sn = el.querySelector('.shp'); if (sn) sn.textContent = ERA_SHAPE_NAME[shape] || '';
+    return;
+  }
+  var h = '<div class="ln half"></div><div class="ln circ"></div><div class="ln penT"></div><div class="ln penB"></div><div class="ln sixT"></div><div class="ln sixB"></div><div class="dir">&#9650; ATTACK</div><div class="dir shp" style="top:auto;bottom:4px;right:auto;left:6px">'+(ERA_SHAPE_NAME[shape]||'')+'</div>';
+  ERA_PITCH[shape].forEach(function(xy, i){
+    h += '<div class="pl'+(i===0?' gk':'')+'" style="left:'+xy[0]+'%;top:'+xy[1]+'%"><div class="dot">'+lbls[i]+'</div>'+(names[i]?'<div class="nm">'+names[i]+'</div>':'')+'</div>';
   });
   el.innerHTML = h;
 }
@@ -18389,6 +18442,7 @@ function generateWeeklyNews(){
   checkHistoricalOneOffsPost1949();
   checkManagerTimeline1950(); /* v309 */
   checkManagerTimeline1966(); /* v315 */
+  refreshFormationSheet(); /* v316 */
   checkRealRetirements(); /* v249 */
   if (typeof announceCupWinnerIfDue==='function') announceCupWinnerIfDue(); /* v127 */
   checkRealSchoolboyLegends();
@@ -19549,7 +19603,7 @@ function initGameStateFresh(){
   midlandLeague = makeDivision("Midland League", gameEra==="1950" ? midlandLeagueClubs1950 : midlandLeagueClubs, 44); /* v309 */
   northEasternLeague = makeDivision("North Eastern League", gameEra==="1950" ? northEasternLeagueClubs1950 : northEasternLeagueClubs, 55);
   tactics = {formation:'235', approach:'balanced', style:'direct'};
-  unlockedFormations = (gameEra==='1966') ? ['winglesswonders','brazil424'] : []; /* v315 : 4-4-2 and 4-2-4 are on the 1966-67 team sheet from day one (no study trip); the club still has to learn them, see FOREIGN_SYSTEMS familiarity */
+  unlockedFormations = []; /* v316 : no formation is on the sheet by default beyond the Pyramid and the WM. 4-4-2 / 4-2-4 / sweeper / 4-3-3 arrive by DATE (FORMATION_TIMELINE) or earlier by study trip */
   activeTrip = null;
   unlockedTrainingMethods = [];
   activeTrainerTrip = null;
@@ -30178,12 +30232,133 @@ var FOREIGN_SYSTEMS = {
   hungary1953:     {learn:12, unfam:0.09}, /* v192 : see studyDestinations for sourcing */
   winglesswonders: {learn:14, unfam:0.08},
   brazil424:  {learn:16, unfam:0.10}, /* v193 : see studyDestinations for sourcing */
-  catenaccio: {learn:14, unfam:0.07}
+  catenaccio: {learn:14, unfam:0.07},
+  '433':      {learn:12, unfam:0.07}, /* v316 */
+  totalfootball: {learn:20, unfam:0.12} /* v316 */
 };
 var formationFamiliarity = {}; /* system key -> matches played in it */
+/* ============================================================================================
+   v316 : FORMATION TIMELINE. When was each shape actually around, and how many clubs played it?
+   Every system has an intro date (a decimal year : the moment the first clubs try it), a spread (years for the idea to
+   go from first adopters to its peak share) and a peak share of the League. Share = peak x smoothstep((t-intro)/spread).
+   The Pyramid (2-3-5) and the WM are the legacy pair : the Pyramid fades from 1946 (about 14% of clubs then, mostly the
+   smaller grounds) and the WM takes whatever the newer shapes have not. A shape is "mainstream" at MAINSTREAM (30% of
+   clubs) : from then on it is simply on the team sheet and costs the side no novelty. Before that the manager can still
+   go on the study trip and adopt it early, but the idea is novel, so the side is slower to learn it
+   (learn x (1 + 0.8 x novelty)) and shakier while they do (unfam x (1 + 0.4 x novelty)). The effect of the
+   shape itself (FOREIGN_SYSTEMS / formationEffects) does not change : only how soon you can have it and what it costs.
+   AI clubs do not play a different match engine for a formation (their strength is ability based), so a club's shape is
+   information : it is a deterministic function of the club, so it never changes between a save and a reload,
+   and about 18% of clubs are "progressive" and take each new shape first. It cannot move a result, which keeps balance.
+   Sources : 4-2-4 after Brazil's 1958 World Cup (Feola); Herrera's Inter, European Cup 1964-65 (sweeper ideas from
+   the early 60s); Ramsey's 1966 side; 4-3-3 spreading from 1968-70; Michels' Ajax 1971-73. All timings are mine
+   (balance, not data).
+   ============================================================================================ */
+var FORMATION_TIMELINE = {
+  brazil424:       {name:'4-2-4', shape:'424', intro:1958.6, spread:8,   peak:0.12, fadeFrom:1968, fadeYears:6, fadeTo:0.15},
+  catenaccio:      {name:'Sweeper / catenaccio', shape:'sweeper', intro:1961.6, spread:6, peak:0.08},
+  winglesswonders: {name:'4-4-2', shape:'442', intro:1966.6, spread:2.5, peak:0.85},
+  '433':           {name:'4-3-3', shape:'433', intro:1968.6, spread:4,   peak:0.50},
+  totalfootball:   {name:'Total Football', shape:'433', intro:1972.0, spread:3, peak:0.20}
+};
+var FORMATION_LEGACY = {'235':{name:'the Pyramid (2-3-5)', shape:'pyr'}, wm:{name:'the WM', shape:'wm'}};
+var FORMATION_MAINSTREAM = 0.30;
+var FORMATION_PROGRESSIVE = 0.18;
+function FORMATION_TIMELINE_READY(){ return typeof FORMATION_TIMELINE !== 'undefined' && !!FORMATION_TIMELINE && typeof currentDate !== 'undefined' && currentDate; }
+function fmTime(){ var d = currentDate; return d.getFullYear() + (d.getMonth() + (d.getDate()-1)/31)/12; }
+function fmSmooth(x){ x = x<0 ? 0 : x>1 ? 1 : x; return x*x*(3-2*x); }
+function formationRawShare(key, t){
+  var F = FORMATION_TIMELINE[key]; if (!F || t < F.intro) return 0;
+  var sh = F.peak * fmSmooth((t - F.intro) / F.spread);
+  if (F.fadeFrom && t > F.fadeFrom) sh *= 1 - (1 - (F.fadeTo||0.15)) * clamp((t - F.fadeFrom)/F.fadeYears, 0, 1);
+  return sh;
+}
+function formationShares(t){
+  if (t === undefined) t = fmTime();
+  var out = {}, sum = 0, keys = Object.keys(FORMATION_TIMELINE);
+  keys.forEach(function(k){ out[k] = formationRawShare(k, t); sum += out[k]; });
+  if (sum > 0.97){ keys.forEach(function(k){ out[k] *= 0.97/sum; }); sum = 0.97; }
+  var rem = 1 - sum;
+  var p = Math.min(rem, 0.14 * Math.exp(-(Math.max(t,1946) - 1946)/2));
+  out['235'] = p; out.wm = rem - p;
+  return out;
+}
+function formationShare(key, t){ var o = formationShares(t); return o[key] || 0; }
+function formationIsTimeline(key){ return !!(typeof FORMATION_TIMELINE !== 'undefined' && FORMATION_TIMELINE && FORMATION_TIMELINE[key]); }
+function formationIsMainstream(key){
+  if (!FORMATION_TIMELINE_READY() || !FORMATION_TIMELINE[key]) return false;
+  return formationShare(key) >= FORMATION_MAINSTREAM;
+}
+/* 0 = everyone plays it, 1 = nobody has tried it yet */
+function formationNovelty(key){
+  if (!FORMATION_TIMELINE_READY() || !FORMATION_TIMELINE[key]) return 0;
+  return clamp(1 - formationShare(key)/FORMATION_MAINSTREAM, 0, 1);
+}
+function systemLearn(key){ var F = FOREIGN_SYSTEMS[key]; return F ? F.learn * (1 + 0.8*formationNovelty(key)) : 1; }
+function systemUnfam(key){ var F = FOREIGN_SYSTEMS[key]; return F ? F.unfam * (1 + 0.4*formationNovelty(key)) : 0; }
+/* the keys on the team sheet beyond the two always-there radios : trip unlocks plus whatever is mainstream by date, oldest first */
+function sheetFormationKeys(){
+  var out = unlockedFormations.slice();
+  if (FORMATION_TIMELINE_READY()){
+    Object.keys(FORMATION_TIMELINE).sort(function(a,b){ return FORMATION_TIMELINE[a].intro - FORMATION_TIMELINE[b].intro; }).forEach(function(k){
+      if (out.indexOf(k) < 0 && formationIsMainstream(k) && studyDestinations.some(function(d){ return d.key===k; })) out.push(k);
+    });
+  }
+  return out;
+}
+var lastSheetSig = '';
+function refreshFormationSheet(){
+  if (!FORMATION_TIMELINE_READY()) return;
+  var sig = sheetFormationKeys().join(',') + '|' + seasonStartYear();
+  if (sig === lastSheetSig) return;
+  lastSheetSig = sig;
+  try{ renderUnlockedFormations(); renderTripOptions(); styleTacticsNote(); }catch(e){}
+}
+function fmHash(str){ /* FNV-1a -> [0,1) */
+  var h = 2166136261; str = String(str);
+  for (var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return (h >>> 0) / 4294967296;
+}
+function clubIsProgressive(club){ return fmHash('prog|'+club) < FORMATION_PROGRESSIVE; }
+/* the shape an AI club plays at time t (decimal year) : progressive clubs come first in the queue, newest shape first */
+function clubFormation(club, t){
+  if (t === undefined) t = fmTime();
+  var sh = formationShares(t);
+  var u = fmHash('rank|'+club);
+  u = clubIsProgressive(club) ? u * FORMATION_PROGRESSIVE : FORMATION_PROGRESSIVE + u * (1 - FORMATION_PROGRESSIVE);
+  var order = Object.keys(FORMATION_TIMELINE).sort(function(a,b){ return FORMATION_TIMELINE[b].intro - FORMATION_TIMELINE[a].intro; }).concat(['wm','235']);
+  var acc = 0;
+  for (var i = 0; i < order.length; i++){ acc += sh[order[i]] || 0; if (u < acc) return order[i]; }
+  return 'wm';
+}
+function formationName(key){
+  return FORMATION_TIMELINE[key] ? FORMATION_TIMELINE[key].name : FORMATION_LEGACY[key] ? FORMATION_LEGACY[key].name : key;
+}
+function divisionShapeCounts(){
+  var names = (typeof table !== 'undefined' && table) ? Object.keys(table) : [], c = {}, n = 0;
+  names.forEach(function(nm){ if (nm === ourClubName) return; var k = clubFormation(nm); c[k] = (c[k]||0) + 1; n++; });
+  return {counts:c, total:n};
+}
+function divisionShapesLine(){
+  if (!FORMATION_TIMELINE_READY() || typeof table === 'undefined') return '';
+  var r = divisionShapeCounts(); if (!r.total) return '';
+  var keys = Object.keys(r.counts).sort(function(a,b){ return r.counts[b]-r.counts[a]; });
+  var bits = keys.map(function(k){ return r.counts[k]+' '+(k==='wm'?'the WM':k==='235'?'the Pyramid':formationName(k)); });
+  return 'Around the division, as best you can tell: '+bits.join(', ')+' ('+r.total+' other clubs). That is what your scouts expect to see, it does not change a result.';
+}
+function formationAdoptionTag(key){
+  if (!FORMATION_TIMELINE_READY() || !FORMATION_TIMELINE[key]) return '';
+  var pct = Math.round(formationShare(key)*100), nov = formationNovelty(key);
+  return ' <span class="sub">('+(nov<0.02 ? 'now the usual way : about '+pct+'% of clubs' : nov>0.7 ? 'brand new : hardly any clubs play it' : 'still novel : about '+pct+'% of clubs play it')+')</span>';
+}
+function formationNoveltyNote(key){
+  var nm = formationName(key), nov = formationNovelty(key), F = FOREIGN_SYSTEMS[key];
+  if (nov < 0.02) return 'The '+nm+' is the usual way to play now : the lads will get used to it in a normal spell ('+F.learn+' matches).';
+  return 'The '+nm+' is still a novel idea (about '+Math.round(formationShare(key)*100)+'% of clubs play it). You are early : the side will take about '+Math.round(systemLearn(key))+' matches to learn it rather than '+F.learn+', and be shakier while they do.';
+}
 function seasonStartYear(){ var y = parseInt(seasonLabel, 10); return isNaN(y) ? 1946 : y; }
 function continentalEraFactor(){ var y = seasonStartYear(); return y >= 1953 ? 1 : y >= 1949 ? 0.75 : 0.5; }
-function systemAdapt(key){ var F = FOREIGN_SYSTEMS[key]; return F ? clamp((formationFamiliarity[key]||0)/F.learn, 0, 1) : 1; }
+function systemAdapt(key){ var F = FOREIGN_SYSTEMS[key]; return F ? clamp((formationFamiliarity[key]||0)/systemLearn(key), 0, 1) : 1; } /* v316 : learn time follows novelty */
 function pushRunAvailable(){ return seasonStartYear() >= 1949; }
 function xiTechIndex(xi){
   var out = (xi||[]).filter(function(p){ return p && p.slot && p.slot!=='GK' && roleWeights[p.slot]; });
@@ -30214,7 +30389,7 @@ function formationEffects(xi){
   var e = {key:key, str:1, gf:1, ga:1, trailGf:1, adapt:1, skill:0, u:0};
   if (!key) return e;
   var F = FOREIGN_SYSTEMS[key], a = systemAdapt(key);
-  e.adapt = a; e.str = 1 - F.unfam*(1-a);
+  e.adapt = a; e.str = 1 - systemUnfam(key)*(1-a);
   var tech = xiTechIndex(xi);
   if (key==='danubian'){
     e.skill = clamp((tech-70)/15, 0, 1); e.u = e.skill*a*continentalEraFactor();
@@ -30252,6 +30427,16 @@ function formationEffects(xi){
        the same way metodo's own, smaller version of this already is) drops hard once in front. */
     e.skill = clamp((xiTacklingIndex(xi)-72)/14, 0, 1); e.u = e.skill*a*continentalEraFactor();
     e.gf = 0.84 + 0.06*e.u; e.ga = 0.96 - 0.22*e.u; e.trailGf = 0.74;
+  } else if (key==='433'){
+    /* v316 : a balanced modern shape : passing and legs both matter, so it is based on the average of the two. A modest edge
+       at best, as it needs three real midfielders. */
+    e.skill = clamp(((tech + xiStaminaIndex(xi))/2 - 66)/16, 0, 1); e.u = e.skill*a;
+    e.gf = 1 + 0.10*e.u; e.ga = 1 - 0.08*e.u;
+  } else if (key==='totalfootball'){
+    /* v316 : the highest ceiling in the game, and a very high floor to reach it : positions swapped, a high press. Only a
+       side with real technique and real fitness gets anything from it. */
+    e.skill = clamp(((tech + xiStaminaIndex(xi))/2 - 74)/12, 0, 1); e.u = e.skill*a;
+    e.gf = 1 + 0.22*e.u; e.ga = 1.04 - 0.12*e.u;
   }
   return e;
 }
@@ -30259,7 +30444,7 @@ function formationEffects(xi){
 function recordSystemFamiliarity(){
   var key = activeSystemKey();
   Object.keys(FOREIGN_SYSTEMS).forEach(function(k){
-    if (k===key) formationFamiliarity[k] = Math.min((formationFamiliarity[k]||0) + 1, FOREIGN_SYSTEMS[k].learn*2);
+    if (k===key) formationFamiliarity[k] = Math.min((formationFamiliarity[k]||0) + 1, systemLearn(k)*2);
     else if (formationFamiliarity[k]) formationFamiliarity[k] = Math.max(0, formationFamiliarity[k] - 0.5);
   });
 }
@@ -30268,10 +30453,11 @@ function systemStatusLine(){
   var key = activeSystemKey(); if (!key || typeof squad==='undefined' || !squad) return '';
   var xi = (typeof lineup!=='undefined' && lineup && lineup.length===11) ? lineup.map(function(id){ return squad.find(function(p){ return p.id===id; }); }).filter(Boolean) : squad.slice(0, 11);
   var e = formationEffects(xi), F = FOREIGN_SYSTEMS[key];
-  var learned = Math.min(formationFamiliarity[key]||0, F.learn);
-  var name = key==='pushrun' ? 'Push-and-run' : key==='danubian' ? 'The Danubian game' : key==='metodo' ? 'The Metodo' : key==='hungary1953' ? 'The deep-lying centre-forward' : key==='winglesswonders' ? 'The Wingless Wonders' : key==='brazil424' ? '4-2-4' : key==='catenaccio' ? 'Catenaccio' : 'La Maquina';
-  var bits = [name+': '+Math.round(learned)+' of '+F.learn+' matches to learn it'+(e.adapt<1 ? ' : costing about '+Math.round((1-e.str)*100)+'% of the side\'s ability until then.' : ' : the side knows it now.')];
+  var learned = Math.min(formationFamiliarity[key]||0, systemLearn(key)); var learnN = Math.round(systemLearn(key));
+  var name = key==='pushrun' ? 'Push-and-run' : key==='danubian' ? 'The Danubian game' : key==='metodo' ? 'The Metodo' : key==='hungary1953' ? 'The deep-lying centre-forward' : key==='winglesswonders' ? '4-4-2 (the Wingless Wonders)' : key==='brazil424' ? '4-2-4' : key==='catenaccio' ? 'Catenaccio' : key==='433' ? '4-3-3' : key==='totalfootball' ? 'Total Football' : 'La Maquina';
+  var bits = [name+': '+Math.round(learned)+' of '+learnN+' matches to learn it'+(e.adapt<1 ? ' : costing about '+Math.round((1-e.str)*100)+'% of the side\'s ability until then.' : ' : the side knows it now.')];
   if (key==='lamaquina') bits.push(eliteForwardCount(xi)+' forward'+(eliteForwardCount(xi)===1?'':'s')+' of the class it needs (it wants four).');
+  else if (key==='433' || key==='totalfootball') bits.push('Passing and stamina of this XI, averaged: '+Math.round((xiTechIndex(xi)+xiStaminaIndex(xi))/2)+(key==='433' ? ' (it starts paying off above 66, fully at 82).' : ' (it starts paying off above 74, fully at 86).'));
   else if (key==='winglesswonders') bits.push('Stamina of this XI: '+Math.round(xiStaminaIndex(xi))+' (it starts paying off above 65, fully at 83).');
   else if (key==='catenaccio') bits.push('Tackling of this XI: '+Math.round(xiTacklingIndex(xi))+' (it starts paying off above 72, fully at 86).');
   else bits.push('Passing ability of this XI: '+Math.round(xiTechIndex(xi))+(key==='pushrun' ? ' (it starts paying off above 60, fully at 78).' : key==='brazil424' ? ' (it starts paying off above 72, fully at 86).' : ' (it starts paying off above 70, fully at 85).'));
@@ -32762,7 +32948,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v315'; /* v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v316'; /* v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
