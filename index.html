@@ -10865,7 +10865,7 @@ var studyDestinations = [
      campaign. */
   {key:'winglesswonders', kind:'formation', traveler:'manager', label:"THE WINGLESS WONDERS : ENGLAND, WORLD CUP 1966", cost:70, weeks:2, availableFromYear:1966,
    desc:"England have just won the World Cup without a recognised winger in the side : Ramsey's men work the width between them rather than hugging the touchline, built on graft and shape over individual flair. A fortnight studying what just won the country's first World Cup.",
-   unlockFormation:'winglesswonders', formationLabel:"THE WINGLESS WONDERS : narrow, work-rate football, no orthodox wingers"},
+   unlockFormation:'winglesswonders', formationLabel:"4-4-2 : THE WINGLESS WONDERS : two banks of four, narrow, work-rate football, no orthodox wingers"},
   /* v193 : TWO MORE, PER DIRECT FOLLOW-UP ("what about how Brazil started to play in the 50s? / I don't buy
      there was nothing else until 1966") -- a fair challenge, and the honest answer is these two were already
      known gaps, not a considered judgement that nothing else happened. Both added the same way as the pair
@@ -14792,6 +14792,12 @@ var historicalOneOffsPost1949 = [
   {date:'1966-07-23', fired:false, id:'wc1966_rattin', tag:'rivals', text:"UGLY SCENES AT WEMBLEY: England have beaten Argentina 1-0 in the World Cup quarter-final, but the story is Argentina captain Antonio Rattin, sent off for dissent and refusing to leave the pitch for several minutes before a police escort saw him off. Geoff Hurst, on for the injured Jimmy Greaves, scored the only goal."},
   {date:'1966-07-26', fired:false, id:'wc1966_semi', tag:'rivals', text:"ENGLAND INTO THE FINAL: a 2-1 win over Portugal at Wembley, both goals from Bobby Charlton, sends England into the World Cup Final. Eusebio's late penalty was Portugal's reply. Widely being called the match of the tournament."},
   {date:'1966-07-30', fired:false, id:'wc1966_final', tag:'rivals', text:"WORLD CHAMPIONS: England have beaten West Germany 4-2 after extra time at Wembley to win the World Cup, Geoff Hurst scoring a hat-trick, the only man ever to do so in a World Cup Final. Martin Peters put England ahead late on before Wolfgang Weber levelled with the last kick of normal time; Hurst's second, in extra time, is already the most argued-about goal in the game's history, given on the linesman's word that it crossed the line. Bobby Moore lifted the Jules Rimet Trophy from the Queen. A commentator's line is already being repeated in every pub in the country: \"Some people are on the pitch. They think it's all over... it is now.\""},
+  /* ---- v315 : 1966-67 events. None fires before 13 Aug (the game opens on 6 Aug, so there is no day-one backlog), and every one that touches something the sim plays has a resolver in SIM_NEWS_RESOLVERS : history follows the simulation. The Celtic European Cup win (25 May 1967) is deliberately NOT scripted : Celtic are not in this game's European field, so it could only contradict whatever the sim's final produced. ---- */
+  {date:'1966-08-13', fired:false, id:'charity_shield_1966', tag:'rivals', text:"CHARITY SHIELD: Liverpool, the League champions, have beaten FA Cup holders Everton 1-0 at Goodison Park, Roger Hunt scoring after nine minutes, to open the new season."},
+  {date:'1966-12-27', fired:false, id:'ballon_dor_1966', tag:'rivals', text:"EUROPEAN FOOTBALLER OF THE YEAR: Bobby Charlton has been named the 1966 France Football Ballon d'Or winner, a point ahead of Benfica's Eusebio, in the wake of England's World Cup win."},
+  {date:'1967-03-04', fired:false, id:'league_cup_1967', tag:'rivals', text:"THE LEAGUE CUP: Queens Park Rangers, of the Third Division, have beaten First Division West Bromwich Albion 3-2 at Wembley in the first League Cup final played as a single match."},
+  {date:'1967-05-06', fired:false, id:'man_utd_title_1967', tag:'rivals', text:"UNITED ARE CHAMPIONS (scripted fallback, replaced by the resolver)."},
+  {date:'1967-05-20', fired:false, id:'facup_1967', tag:'rivals', text:"SPURS WIN THE CUP: Tottenham Hotspur have beaten Chelsea 2-1 at Wembley in the first FA Cup final between two London clubs."},
   /* ---- v267 : FIRST BATCH OF 1966-1976 NEWS, PER DIRECT REQUEST TO START SCOPING THE DECADE. All five
      dates below were individually researched this session (see the two scoping conversations and the
      web-search-verified research pass behind the realSchoolboyLegends batch just above) rather than
@@ -14881,9 +14887,11 @@ function silenceHistoryBeforeStart(){
   });
   realSchoolboyLegends.forEach(function(e){
     var past = y > e.triggerYear || (y === e.triggerYear && e.triggerMonth!==undefined && m >= e.triggerMonth);
+    if (past && e.triggerDay!==undefined && y === e.triggerYear && m === e.triggerMonth && currentDate.getDate() < e.triggerDay) past = false; /* v315 : a dated entry later in the START month (Ball 15 Aug, 1966) is still ahead of a game that opens on the 6th */
     if (past && !e.fired){ e.fired = true; n++; }
   });
   historicalOneOffsPost1949.forEach(function(e){ if (e.date <= today && !e.fired){ e.fired = true; n++; } });
+  MANAGER_TIMELINE_1966.forEach(function(st){ st.said = false; }); /* v315 : a second 1966 game in the same page session replays its manager changes */
   historicalOneOffs.forEach(function(e){ if (!e.fired){ e.fired = true; n++; } }); /* 1946-49 kit/rationing notes : all before either start */
   return n;
 }
@@ -15055,6 +15063,21 @@ SIM_NEWS_RESOLVERS.manutd_eurocup_1968 = function(){
   var first = !simEnglishTrophyBefore('1967-68') && !(honoursHistory||[]).some(function(h){ return h.label < '1967-68' && h.europeanCup && clubProfiles[h.europeanCup]; });
   return 'UNITED WIN EUROPE: Manchester United have won the European Cup'+(first?', the first English club to do so':'')+', a decade on from Munich.'+(simMgrOk('Manchester United','Matt Busby') ? " Matt Busby's long pursuit of the trophy that cost him so much is finally won." : '');
 };
+/* v315 : the 1966-67 resolvers (see the event block in historicalOneOffsPost1949). */
+function simPlayerExists(name){
+  if ((squad||[]).some(function(p){ return p.n === name; })) return true;
+  return Object.keys(clubSquads||{}).some(function(c){ return (clubSquads[c]||[]).some(function(p){ return p.n === name; }); });
+}
+function sim1966Season(){ return gameEra === '1966' && seasonLabel === '1966-67'; } /* the scripted 1966-67 items below describe THAT season of a game that started in the 1966-67 era; a 1946/50/59 game that wandered here has its own world */
+SIM_NEWS_RESOLVERS.charity_shield_1966 = function(e){ return (!sim1966Season() || ourClubName === 'Liverpool' || ourClubName === 'Everton') ? null : e.text; }; /* a manager of either side would have a Shield to play that this game does not */
+SIM_NEWS_RESOLVERS.ballon_dor_1966 = function(e){ return (sim1966Season() && simPlayerExists('Bobby Charlton')) ? e.text : null; };
+SIM_NEWS_RESOLVERS.league_cup_1967 = function(e){ return (!sim1966Season() || ourClubName === 'Queens Park Rangers' || ourClubName === 'West Bromwich Albion') ? null : e.text; }; /* the League Cup is not simulated; the item stays out of a game where either finalist is the user's */
+SIM_NEWS_RESOLVERS.facup_1967 = function(e){ return simCupResolve('1966-67','Tottenham Hotspur','Chelsea',2,1,e.text); };
+SIM_NEWS_RESOLVERS.man_utd_title_1967 = function(){
+  return simTitleResolve('1966-67', 'Manchester United', function(rows){
+    return 'UNITED ARE CHAMPIONS: '+simTitleBase(rows,'Manchester United')+(simMgrOk('Manchester United','Matt Busby') ? " Matt Busby's side take the title." : '')+simD2Clause();
+  });
+};
 SIM_NEWS_RESOLVERS.accrington_resign = function(){ return null; }; /* v309 : the sim does not play Accrington's real 1962 collapse; dropped rather than contradict it */
 SIM_NEWS_RESOLVERS.workington_elected = function(){ return null; }; /* v309 : the re-election vote is now played in the sim (runReElection, REAL_REELECTIONS) and reports itself */
 SIM_NEWS_RESOLVERS.franklin_hull = function(){ return null; }; /* v309 : the move is now a real signing (realSchoolboyLegends, id franklin_hull_1951), with consent where the user's club is involved */
@@ -15108,6 +15131,28 @@ function checkManagerTimeline1950(){
   if (gameEra !== '1950') return;
   var today = isoOf(currentDate);
   MANAGER_TIMELINE_1950.forEach(function(st){
+    if (st.date > today) return;
+    var r = (rivals||[]).find(function(x){ return x.n === st.club; });
+    if (!r || r.mgr !== st.from) return;
+    r.mgr = st.to;
+    if (!st.said){ st.said = true; addNews('rivals', st.text); }
+  });
+}
+/* v315 : 1966-67 managerial changes, dated (the month's 1st where the sources give only a month), each applied only if the club still has the manager the real change replaced (the sim's own sackings win). Sources: the clubs' "List of X managers" Wikipedia pages. Notts County is the least certain: the list has Burkitt -> Beattie in Feb 1967 while another page has Beattie as general manager from March. */
+var MANAGER_TIMELINE_1966 = [
+  {date:'1966-12-01', club:'Doncaster Rovers', from:'Jackie Bestall', to:'Keith Kettleborough (player-manager)', text:'MANAGER: Keith Kettleborough has taken over from Jackie Bestall as manager of Doncaster Rovers.'},
+  {date:'1967-02-01', club:'Blackpool', from:'Ron Suart', to:'Stan Mortensen', text:'MANAGER: Stan Mortensen has succeeded Ron Suart as manager of Blackpool.'},
+  {date:'1967-02-01', club:'Notts County', from:'Jack Burkitt', to:'Andy Beattie', text:'MANAGER: Andy Beattie has taken over from Jack Burkitt at Notts County.'},
+  {date:'1967-02-01', club:'Swansea Town', from:'Glyn Davies', to:'Billy Lucas', text:'MANAGER: Billy Lucas has succeeded Glyn Davies as manager of Swansea Town.'},
+  {date:'1967-03-01', club:'Brentford', from:'Billy Gray', to:'Jimmy Sirrel', text:'MANAGER: Jimmy Sirrel has been appointed manager of Brentford, succeeding Billy Gray.'},
+  {date:'1967-05-01', club:'Exeter City', from:'Jack Basford', to:'Frank Broome', text:'MANAGER: Frank Broome has been appointed manager of Exeter City, succeeding Jack Basford.'},
+  {date:'1967-06-01', club:'Derby County', from:'Tim Ward', to:'Brian Clough', text:'MANAGER: Derby County have appointed Brian Clough, the young manager of Hartlepools United, to succeed Tim Ward.'},
+  {date:'1967-06-01', club:'Hartlepools United', from:'Brian Clough', to:'Angus McLean', text:'MANAGER: Angus McLean has been appointed manager of Hartlepools United after Brian Clough\'s departure for Derby.'}
+];
+function checkManagerTimeline1966(){
+  if (gameEra !== '1966') return;
+  var today = isoOf(currentDate);
+  MANAGER_TIMELINE_1966.forEach(function(st){
     if (st.date > today) return;
     var r = (rivals||[]).find(function(x){ return x.n === st.club; });
     if (!r || r.mgr !== st.from) return;
@@ -15525,8 +15570,21 @@ var realSchoolboyLegends = [
     note:"Manchester United have paid West Bromwich Albion £1,500,000, a British record fee, for midfielder Bryan Robson, on 3 October 1981."},
   {name:"Eric Cantona", pos:"Centre-Forward", club:"Manchester United", fromClub:"Leeds United", fee:1200000, triggerYear:1992, triggerMonth:10, kind:'signing', age:26, rep:5, nation:"France", spikeAttrs:['shooting','passing'], fired:false,
     note:"Manchester United have paid Leeds United £1,200,000 for forward Eric Cantona on 27 November 1992 -- a deal struck, famously, over a phone call between the two clubs' managers."},
-  {name:"Alex Stepney", pos:"Goalkeeper", club:"Manchester United", fromClub:"Chelsea", fee:55000, triggerYear:1966, triggerMonth:7, kind:'signing', age:24, rep:4, spikeAttrs:['handling'], fired:false,
-    note:"Manchester United have paid Chelsea £55,000 for goalkeeper Alex Stepney in August 1966 -- the exact day is not firmly established, only the month."},
+  /* ---- v315 : the 1966-67 real signings the 1966 start squads were built around (era1966/build_data.py puts Ball at Blackpool, England at Blackburn, Eastham at Arsenal, McNab at Huddersfield and Wyn Davies at Bolton on 6 Aug, so each of these actually MOVES a man who is there). All go through realSigningFire, so a user managing either club is offered the real bid or told it is theirs to make. ---- */
+  {name:"Mike England", pos:"Centre-Half", club:"Tottenham Hotspur", fromClub:"Blackburn Rovers", fee:95000, triggerYear:1966, triggerMonth:7, triggerDay:19, kind:'signing', age:24, rep:4, nation:"Wales", spikeAttrs:['heading','tackling'], fired:false,
+    note:"Tottenham Hotspur have paid Blackburn Rovers £95,000 for Welsh international centre-half Mike England, a commanding man in the air who'll anchor the back line for the next seven years. (v315 : 19 August 1966, per the club's own history; Wikipedia says only July.)"},
+  {name:"George Eastham", pos:"Inside-Forward", club:"Stoke City", fromClub:"Arsenal", fee:35000, triggerYear:1966, triggerMonth:7, triggerDay:18, kind:'signing', age:29, rep:4, spikeAttrs:['passing','stamina'], fired:false,
+    note:"Stoke City have signed George Eastham from Arsenal for a reported £35,000, the man whose court case ended the retain-and-transfer system now a Potteries player. (v315 : sources give £30,000 or £35,000, and 18 or 19 August.)"},
+  {name:"Tony Hateley", id:"hateley_chelsea_1966", pos:"Centre-Forward", club:"Chelsea", fromClub:"Aston Villa", fee:100000, triggerYear:1966, triggerMonth:9, triggerDay:25, kind:'signing', age:25, rep:3, spikeAttrs:['heading','shooting'], fired:false,
+    note:"Chelsea have paid Aston Villa a club-record £100,000 for centre-forward Tony Hateley, a big, old-fashioned header of the ball signed with Peter Osgood's broken leg in mind. (v315 : October 1966; the exact day was not pinned down.)"},
+  {name:"Wyn Davies", pos:"Centre-Forward", club:"Newcastle United", fromClub:"Bolton Wanderers", fee:80000, triggerYear:1966, triggerMonth:9, triggerDay:25, kind:'signing', age:24, rep:3, nation:"Wales", spikeAttrs:['heading','stamina'], fired:false,
+    note:"Newcastle United have paid Bolton Wanderers a club-record £80,000 for Welsh centre-forward Wyn Davies, 'Wyn the Leap', as the club reacts to a 6-0 defeat at Blackpool. (v315 : late October 1966; the exact day was not pinned down.)"},
+  {name:"Derek Dougan", pos:"Centre-Forward", club:"Wolverhampton Wanderers", fromClub:"Leicester City", fee:50000, triggerYear:1967, triggerMonth:2, kind:'signing', age:28, rep:4, nation:"Northern Ireland", spikeAttrs:['heading','shooting'], fired:false,
+    note:"Wolverhampton Wanderers have paid Leicester City £50,000 for Northern Ireland forward Derek Dougan. (v315 : March 1967.)"},
+  {name:"Gordon Banks", pos:"Goalkeeper", club:"Stoke City", fromClub:"Leicester City", fee:50000, triggerYear:1967, triggerMonth:3, kind:'signing', age:29, rep:4, spikeAttrs:['handling'], fired:false,
+    note:"Stoke City have paid Leicester City a reported £50,000 for goalkeeper Gordon Banks, the World Cup winner, dropped at Filbert Street for the teenager Peter Shilton. (v315 : April 1967; one source gives £52,500.)"},
+  {name:"Alex Stepney", pos:"Goalkeeper", club:"Manchester United", fromClub:"Chelsea", fee:55000, triggerYear:1966, triggerMonth:8, triggerDay:8, kind:'signing', age:24, rep:4, spikeAttrs:['handling'], fired:false,
+    note:"Manchester United have paid Chelsea £55,000 for goalkeeper Alex Stepney, a British-record fee for a goalkeeper at the time and the man who'll keep goal for the club for over a decade. (v315 : the date is the soft one here -- sources differ between late August and 'a few days before his 17 September debut', so it fires on 8 September; the fee is as reported.)"},
   {name:"Lou Macari", pos:"Inside-Forward", club:"Manchester United", fromClub:"Celtic", fee:200000, triggerYear:1973, triggerMonth:0, kind:'signing', age:23, rep:4, nation:"Scotland", spikeAttrs:['passing','stamina'], fired:false,
     note:"Manchester United have paid Celtic £200,000 for forward Lou Macari in January 1973 -- the exact day is not firmly established, only the month."},
   {name:"Steve Coppell", pos:"Outside-Right", club:"Manchester United", fromClub:"Tranmere Rovers", fee:60000, triggerYear:1975, triggerMonth:1, kind:'signing', age:19, rep:4, spikeAttrs:['pace','stamina'], fired:false,
@@ -15916,8 +15974,8 @@ var realSchoolboyLegends = [
     note:"Arsenal have given a first-team debut, against Aston Villa on 10 September 1962 (lost 2-1), to home-grown utility player David Court, a schoolboy signing from 1959 who turned professional in January 1962. He'll later become Arsenal's Assistant Head of Youth Development."},
   {name:"Jim Furnell", pos:"Goalkeeper", club:"Arsenal", fromClub:"Liverpool", fee:15000, triggerYear:1963, triggerMonth:10, kind:'signing', age:25, rep:3, spikeAttrs:['passing','tackling'], fired:false,
     note:"Arsenal have paid Liverpool £15,000 for goalkeeper Jim Furnell, debut against Blackpool on 23 November 1963, won 5-3 -- Furnell had been at Burnley before a brief Liverpool spell preceded this move."},
-  {name:"George Graham", pos:"Inside-Forward", club:"Arsenal", fromClub:"Chelsea", fee:50000, triggerYear:1966, triggerMonth:9, kind:'signing', age:21, rep:3, nation:"Scotland", spikeAttrs:['passing','tackling'], fired:false,
-    note:"Arsenal have paid Chelsea £50,000 plus Tommy Baldwin in part-exchange for Scottish forward George Graham, debut against Leicester City on 1 October 1966 (lost 4-2 at home). He'll go on to become one of Arsenal's most successful managers."},
+  {name:"George Graham", pos:"Inside-Forward", club:"Arsenal", fromClub:"Chelsea", fee:50000, triggerYear:1966, triggerMonth:8, kind:'signing', age:21, rep:3, nation:"Scotland", spikeAttrs:['passing','tackling'], fired:false,
+    note:"Arsenal have paid Chelsea £50,000 plus Tommy Baldwin in part-exchange for Scottish forward George Graham (v315 : the swap fires in early September, a month before his 1 October debut). He'll go on to become one of Arsenal's most successful managers."},
   {name:"David Price", pos:"Wing-Half", club:"Arsenal", triggerYear:1973, triggerMonth:4, kind:'debut', age:17, rep:3, spikeAttrs:['passing','tackling'], fired:false,
     note:"Arsenal have given a first-team debut, against Leeds United on 9 May 1973, to home-grown midfielder David Price, aged 17."},
   {name:"Jimmy Rimmer", pos:"Goalkeeper", club:"Arsenal", fromClub:"Manchester United", triggerYear:1974, triggerMonth:1, kind:'signing', age:26, rep:3, spikeAttrs:['passing','tackling'], fired:false,
@@ -16416,8 +16474,8 @@ var realSchoolboyLegends = [
     note:"Everton have given a first-team debut to apprentice full-back Tommy Wright. (EXACT DAY UNCONFIRMED.)"},
   {name:"John Hurst", pos:"Centre-Half", club:"Everton", triggerYear:1965, triggerMonth:7, kind:'debut', age:18, rep:3, spikeAttrs:['passing','tackling'], fired:false,
     note:"Everton have given a first-team debut, away at Stoke City, to young centre-half John Hurst, a genuine home-grown product."},
-  {name:"Alan Ball", pos:"Wing-Half", club:"Everton", fromClub:"Blackpool", fee:112000, triggerYear:1966, triggerMonth:7, kind:'signing', age:21, rep:3, spikeAttrs:['passing','tackling'], fired:false,
-    note:"Everton have paid Blackpool a then-British record £112,000 for 1966 World Cup winner Alan Ball -- the middle move of a career that will later take him to Arsenal too. (EXACT DAY UNCONFIRMED, FEE DISPUTED : one source gives £110,000.)"},
+  {name:"Alan Ball", pos:"Wing-Half", club:"Everton", fromClub:"Blackpool", fee:112000, triggerYear:1966, triggerMonth:7, triggerDay:15, kind:'signing', age:21, rep:3, spikeAttrs:['passing','tackling'], fired:false,
+    note:"Everton have paid Blackpool a then-British record £112,000 for 1966 World Cup winner Alan Ball -- the middle move of a career that will later take him to Arsenal too. (v315 : 15 August 1966, the plan's sourced date; FEE DISPUTED : one source gives £110,000.)"},
   {name:"Joe Royle", pos:"Centre-Forward", club:"Everton", triggerYear:1966, triggerMonth:0, kind:'debut', age:16, rep:3, spikeAttrs:['passing','tackling'], fired:false,
     note:"Everton have given a first-team debut, away at Blackpool, to young centre-forward Joe Royle -- a genuine home-grown product. (EXACT DAY UNCONFIRMED.)"},
   {name:"Howard Kendall", pos:"Wing-Half", club:"Everton", fromClub:"Preston North End", fee:85000, triggerYear:1967, triggerMonth:2, kind:'signing', age:20, rep:3, spikeAttrs:['passing','tackling'], fired:false,
@@ -17604,6 +17662,7 @@ function checkRealSchoolboyLegends(){
     if (e.fired) return;
     if (y < e.triggerYear) return;
     if (e.triggerMonth!==undefined && y===e.triggerYear && m < e.triggerMonth) return; /* v115 : optional month, 0-indexed */
+    if (e.triggerDay!==undefined && e.triggerMonth!==undefined && y===e.triggerYear && m===e.triggerMonth && currentDate.getDate() < e.triggerDay) return; /* v315 : optional day-of-month, so a real signing lands on (or just after) its real date; entries without it fire at the month's first weekly tick, as before */
     e.fired = true;
     var isSigning = e.kind==='signing'; /* v212 : signing now routes to its own function, realSigningFire -- see its comment for why it can no longer share 'debut''s mechanic */
     var isDebut = e.kind==='debut' || isSigning;
@@ -18329,6 +18388,7 @@ function generateWeeklyNews(){
   checkHistoricalOneOffs();
   checkHistoricalOneOffsPost1949();
   checkManagerTimeline1950(); /* v309 */
+  checkManagerTimeline1966(); /* v315 */
   checkRealRetirements(); /* v249 */
   if (typeof announceCupWinnerIfDue==='function') announceCupWinnerIfDue(); /* v127 */
   checkRealSchoolboyLegends();
@@ -19489,7 +19549,7 @@ function initGameStateFresh(){
   midlandLeague = makeDivision("Midland League", gameEra==="1950" ? midlandLeagueClubs1950 : midlandLeagueClubs, 44); /* v309 */
   northEasternLeague = makeDivision("North Eastern League", gameEra==="1950" ? northEasternLeagueClubs1950 : northEasternLeagueClubs, 55);
   tactics = {formation:'235', approach:'balanced', style:'direct'};
-  unlockedFormations = [];
+  unlockedFormations = (gameEra==='1966') ? ['winglesswonders','brazil424'] : []; /* v315 : 4-4-2 and 4-2-4 are on the 1966-67 team sheet from day one (no study trip); the club still has to learn them, see FOREIGN_SYSTEMS familiarity */
   activeTrip = null;
   unlockedTrainingMethods = [];
   activeTrainerTrip = null;
@@ -26307,7 +26367,8 @@ SQUADS_1966_SECOND["Blackburn Rovers"] = [
   {n:"Allan Gilliver", pos:"Forward", rep:2},
   {n:"Dave Helliwell", pos:"Forward", rep:1},
   {n:"Frank Lord", pos:"Forward", rep:1},
-  {n:"Martin Britt", pos:"Forward", rep:1}
+  {n:"Martin Britt", pos:"Forward", rep:1},
+  {n:"Mike England", pos:"Half-Back", rep:4}
 ];
 SQUADS_1966_SECOND["Coventry City"] = [
   {n:"Bill Glazier", pos:"Goalkeeper", rep:3},
@@ -26353,7 +26414,8 @@ SQUADS_1966_SECOND["Huddersfield Town"] = [
   {n:"David Shaw", pos:"Forward", rep:2},
   {n:"Ray Veall", pos:"Forward", rep:1},
   {n:"Billy Lynn", pos:"Forward", rep:1},
-  {n:"Maurice Mason", pos:"Forward", rep:1}
+  {n:"Maurice Mason", pos:"Forward", rep:1},
+  {n:"Bob McNab", pos:"Full-Back", rep:3}
 ];
 SQUADS_1966_SECOND["Bristol City"] = [
   {n:"Mike Gibson", pos:"Goalkeeper", rep:3},
@@ -26457,7 +26519,8 @@ SQUADS_1966_SECOND["Bolton Wanderers"] = [
   {n:"John Byrom", pos:"Forward", rep:3},
   {n:"Gordon Taylor", pos:"Forward", rep:3},
   {n:"Francis Lee", pos:"Forward", rep:3},
-  {n:"Dennis Butler", pos:"Forward", rep:2}
+  {n:"Dennis Butler", pos:"Forward", rep:2},
+  {n:"Wyn Davies", pos:"Forward", rep:3}
 ];
 SQUADS_1966_SECOND["Birmingham City"] = [
   {n:"Dave Latchford", pos:"Goalkeeper", rep:3},
@@ -27874,7 +27937,6 @@ SQUADS_1966_FIRST["Chelsea"] = [
   {n:"Tommy Robson", pos:"Forward", rep:2},
   {n:"Peter Houseman", pos:"Forward", rep:1},
   {n:"Peter Osgood", pos:"Forward", rep:1},
-  {n:"Tony Currie", pos:"Forward", rep:1},
   {n:"Roger Wosahlo", pos:"Forward", rep:1},
   {n:"Pat McMahon", pos:"Forward", rep:1},
   {n:"Joe Fascione", pos:"Forward", rep:3},
@@ -27936,7 +27998,8 @@ SQUADS_1966_FIRST["Leicester City"] = [
   {n:"Mike Stringfellow", pos:"Forward", rep:3},
   {n:"Derek Dougan", pos:"Forward", rep:4},
   {n:"Jimmy Goodfellow", pos:"Forward", rep:3},
-  {n:"Tom Sweenie", pos:"Forward", rep:3}
+  {n:"Tom Sweenie", pos:"Forward", rep:3},
+  {n:"Peter Shilton", pos:"Goalkeeper", rep:3}
 ];
 SQUADS_1966_FIRST["Tottenham Hotspur"] = [
   {n:"Pat Jennings", pos:"Goalkeeper", rep:3},
@@ -27949,7 +28012,6 @@ SQUADS_1966_FIRST["Tottenham Hotspur"] = [
   {n:"Tony Want", pos:"Full-Back", rep:1},
   {n:"John Collins", pos:"Full-Back", rep:1},
   {n:"Alan Mullery", pos:"Half-Back", rep:3},
-  {n:"Mike England", pos:"Half-Back", rep:4},
   {n:"Laurie Brown", pos:"Half-Back", rep:2},
   {n:"Dave Mackay", pos:"Half-Back", rep:4},
   {n:"Edward Clayton", pos:"Half-Back", rep:3},
@@ -28015,7 +28077,6 @@ SQUADS_1966_FIRST["Stoke City"] = [
   {n:"Harold Burrows", pos:"Forward", rep:2},
   {n:"John Ritchie", pos:"Forward", rep:3},
   {n:"Peter Dobing", pos:"Forward", rep:3},
-  {n:"George Eastham", pos:"Forward", rep:4},
   {n:"Tony Lacey", pos:"Forward", rep:2},
   {n:"Roy Vernon", pos:"Forward", rep:4},
   {n:"Dennis Viollet", pos:"Forward", rep:3},
@@ -28045,7 +28106,6 @@ SQUADS_1966_FIRST["Everton"] = [
   {n:"Gerry Glover", pos:"Half-Back", rep:1},
   {n:"Fred Pickering", pos:"Forward", rep:3},
   {n:"Alan Whittle", pos:"Forward", rep:1},
-  {n:"Alan Ball Jr.", pos:"Forward", rep:3},
   {n:"Derek Temple", pos:"Forward", rep:3},
   {n:"Joe Royle", pos:"Forward", rep:1},
   {n:"Jimmy Husband", pos:"Forward", rep:1},
@@ -28124,7 +28184,8 @@ SQUADS_1966_FIRST["Blackpool"] = [
   {n:"Ray Charnley", pos:"Forward", rep:3},
   {n:"Kenneth Morton", pos:"Forward", rep:1},
   {n:"Tony Marsden", pos:"Forward", rep:1},
-  {n:"David Parry", pos:"Forward", rep:1}
+  {n:"David Parry", pos:"Forward", rep:1},
+  {n:"Alan Ball", pos:"Forward", rep:3}
 ];
 SQUADS_1966_FIRST["Arsenal"] = [
   {n:"Bob Wilson", pos:"Goalkeeper", rep:3},
@@ -28161,7 +28222,8 @@ SQUADS_1966_FIRST["Arsenal"] = [
   {n:"David Jenkins", pos:"Forward", rep:3},
   {n:"John Corr", pos:"Forward", rep:2},
   {n:"Dave Simmons", pos:"Forward", rep:1},
-  {n:"Jimmy McGill", pos:"Forward", rep:2}
+  {n:"Jimmy McGill", pos:"Forward", rep:2},
+  {n:"George Eastham", pos:"Forward", rep:4}
 ];
 SQUADS_1966_FIRST["Newcastle United"] = [
   {n:"David Lawson", pos:"Goalkeeper", rep:1},
@@ -32700,7 +32762,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v314'; /* v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v315'; /* v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
