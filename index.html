@@ -96,6 +96,11 @@ tbody tr.zone-warn td:first-child{border-left:4px solid var(--dos-yellow);}
 .bar{font-family:var(--font-dos); color:var(--dos-green); letter-spacing:0px;}
 .scoreboard{display:flex; align-items:center; justify-content:center; gap:20px; padding:16px 10px; border:2px double var(--ink); margin-bottom:16px; flex-wrap:wrap;}
 .side{text-align:center; flex:1; font-size:20px; min-width:140px;}
+/* v321b : scorers sit under the club name with real line spacing (the themes' .side line-height:1 had stacked them solid), both sides start level */
+body .scoreboard{align-items:flex-start;}
+body .scoreboard .side .name{margin-bottom:8px;}
+body .scoreboard .side .scorers{line-height:1.5; margin-top:6px; min-height:1.5em;}
+body .scoreboard .side .scorers .sc-line{margin:3px 0; line-height:1.5;}
 .side .name.us{color:var(--dos-yellow);}
 .score{font-size:36px; color:var(--ink); letter-spacing:4px;}
 .clock{color:var(--dos-cyan); font-size:16px;}
@@ -14353,9 +14358,22 @@ function eraCaseAtStart(n){
     while (ps && !(ps.textContent||'').trim()) ps = ps.previousSibling;
     if (ps) { prevTxt = ps.textContent || ''; break; }
     cur = cur.parentNode;
-    if (!cur || cur.nodeType !== 1 || !inl[cur.tagName]) return true;
+    if (!cur || cur.nodeType !== 1 || !inl[cur.tagName] || (cur.classList && (cur.classList.contains('navlink') || cur.classList.contains('navgrouplabel')))) return true; /* v321b : every menu label opens its own sentence */
   }
-  return /[.!?]["'\u201d)]*\s*$/.test(prevTxt) || !prevTxt.trim();
+  return /[.!?]["'\u201d)]*\s*$/.test(prevTxt) || !prevTxt.trim() || /^\d{1,3}(\+\d{1,2})?['\u2019]$/.test(prevTxt.trim()); /* v321b : a commentary line led by its minute (51') opens a sentence */
+}
+/* v321b : a word split across inline tags (the menu's <span class="hot">N</span> hot letters : TRAI<span>N</span>ING) was cased one text node
+   at a time, giving 'traiNing' / 'tacTICS' / 'transFers'. The run of adjoining pieces is now cased as ONE string (case changes never change the
+   length, so the result is handed back piece by piece). */
+function eraCaseRunOf(n){
+  var INL = {SPAN:1,B:1,I:1,EM:1,STRONG:1,U:1,SMALL:1};
+  function tn(s){ if (!s) return null; if (s.nodeType === 3) return s; if (s.nodeType === 1 && INL[s.tagName] && s.childNodes.length === 1 && s.firstChild.nodeType === 3) return s.firstChild; return null; }
+  function sib(x, dir){ var el = (x.parentNode && x.parentNode !== x.parentNode.ownerDocument && x.parentNode.nodeType === 1 && INL[x.parentNode.tagName] && x.parentNode.childNodes.length === 1) ? x.parentNode : x; return tn(dir < 0 ? el.previousSibling : el.nextSibling); }
+  var run = [n], cur = n, o;
+  while ((o = sib(cur, -1)) && /[A-Za-z]$/.test(o.nodeValue) && /^[A-Za-z]/.test(cur.nodeValue)) { run.unshift(o); cur = o; }
+  cur = n;
+  while ((o = sib(cur, 1)) && /[A-Za-z]$/.test(cur.nodeValue) && /^[A-Za-z]/.test(o.nodeValue)) { run.push(o); cur = o; }
+  return run.length > 1 ? run : null;
 }
 function eraCaseProcess(root){
   if (!eraCase.on || !root) return;
@@ -14363,8 +14381,20 @@ function eraCaseProcess(root){
   var list = [];
   if (root.nodeType === 3) list.push(root);
   else if (root.nodeType === 1){ var w = document.createTreeWalker(root, 4, null, false), x; while ((x = w.nextNode())) list.push(x); }
+  var doneRun = [];
   list.forEach(function(n){
     var p = n.parentNode; if (!p || SKIP[p.tagName] || (p.closest && p.closest('#theme-masthead,[data-nocase]'))) return;
+    if (doneRun.indexOf(n) >= 0) return;
+    var run = eraCaseRunOf(n);
+    if (run){
+      var full = run.map(function(x){ return x.nodeValue; }).join(''), rr = eraCaseText(full, eraCaseAtStart(run[0]));
+      run.forEach(function(x){ doneRun.push(x); });
+      if (rr.length === full.length){
+        var at = 0;
+        run.forEach(function(x){ var t0 = x.nodeValue, t1 = rr.substr(at, t0.length); at += t0.length; if (t1 !== t0){ eraCase.nodes.set(x, t0); eraCase.list.push(x); x.nodeValue = t1; } });
+        return;
+      }
+    }
     var t = n.nodeValue; if (!t || !/[A-Za-z]{2}/.test(t)) return;
     var r = eraCaseText(t, eraCaseAtStart(n));
     if (r !== t){ eraCase.nodes.set(n, t); eraCase.list.push(n); n.nodeValue = r; }
@@ -21238,7 +21268,7 @@ var bank = {
   dominantHalfBack:["{P} is running the midfield this afternoon, popping up everywhere.","Every good move for {A} seems to start with {P} today.","{P} is bossing that middle third, quietly dictating the whole game."],
   noOnePast:["Nobody is getting past {P} this afternoon : a colossus at the back.","{P} has shut up shop entirely down that side, nothing getting through.","Another attack snuffed out by {P}, imperious in the tackle today."]
 };
-function fill(str, A, P, P2, K){ var s = str.replace(/\{A\}/g, A.toUpperCase()).replace(/\{P\}/g, P.toUpperCase()); if (P2) s = s.replace(/\{P2\}/g, P2.toUpperCase()); if (K) s = s.replace(/\{K\}/g, K.toUpperCase()); return s; }
+function fill(str, A, P, P2, K){ /* v321b : the club (A) keeps the shouty DOS form, but player names (P, P2, K) stay in normal case everywhere : the display layer left 'Lionel FIRTH's pass' half shouting */ var s = str.replace(/\{A\}/g, A.toUpperCase()).replace(/\{P\}/g, function(){ return P; }); if (P2) s = s.replace(/\{P2\}/g, function(){ return P2; }); if (K) s = s.replace(/\{K\}/g, function(){ return K; }); return s; }
 function tacticalBuildupPool(team){
   /* v186 : cup-day flavour (bank.buildupCup) is folded in for BOTH sides whenever the live match is a cup tie --
      the atmosphere isn't a function of our own tactics, it's a function of the occasion, so it's added before the
@@ -30614,7 +30644,7 @@ function goalPoolFor(p){
   if (p.rep === 2 && Math.random() < 0.25) return bank.goalWorkmanlike;
   return bank.goal;
 }
-function fillMilestone(str, name, n){ return str.replace(/\{P\}/g, name.toUpperCase()).replace(/\{N\}/g, n); }
+function fillMilestone(str, name, n){ return str.replace(/\{P\}/g, function(){ return name; }).replace(/\{N\}/g, n); } /* v321b : player name in normal case */
 /* ---------- v171 GOAL MILESTONES, PER DIRECT REQUEST ("his 20th of the season"). scorerObj (and every other
    goalscorer reference in simulateMinuteBlock) IS the real squad object for one of our own players -- the same
    object squad.find(id) would return -- so p.goalsSeason already holds his real total from every match played
@@ -31586,10 +31616,16 @@ function concedeModifier(){
   return m;
 }
 
+function scoreboardScorerLines(goals){
+  /* v321b : one line per scorer, repeat scorers combined onto it in scoring order : TOMMY SINCLAIR 25', 42' */
+  var order = [], by = {};
+  goals.forEach(function(g){ if (!by[g.n]){ by[g.n] = []; order.push(g.n); } by[g.n].push(g.min+"'"+(g.pen?' (PEN)':'')); });
+  return order.map(function(n){ return '<div class="sc-line">'+n.toUpperCase()+' '+by[n].join(', ')+'</div>'; }).join('');
+}
 function renderScoreboardScorers(){
   if (!live) return;
-  var usHtml = live.usGoals.map(function(g){ return g.n.toUpperCase()+' '+g.min+"'"+(g.pen?' (PEN)':''); }).join('<br>');
-  var oppHtml = live.oppGoals.map(function(g){ return g.n.toUpperCase()+' '+g.min+"'"+(g.pen?' (PEN)':''); }).join('<br>');
+  var usHtml = scoreboardScorerLines(live.usGoals);
+  var oppHtml = scoreboardScorerLines(live.oppGoals);
   document.getElementById(live.f.home ? 'side-left-scorers' : 'side-right-scorers').innerHTML = usHtml;
   document.getElementById(live.f.home ? 'side-right-scorers' : 'side-left-scorers').innerHTML = oppHtml;
 }
@@ -34752,7 +34788,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v321a'; /* v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v321b'; /* v321b : sentence-case layer cases a word split by hot-letter spans as one word (Training, Tactics, Transfers) ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
