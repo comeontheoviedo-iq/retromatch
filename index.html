@@ -1047,6 +1047,185 @@ body.theme-programme #theme-pitch .pl .nm{top:19px; font-family:var(--t-cond); f
 }
 
 </style>
+<style id="pcard-css">
+/*PCARD-CSS-START*/
+/* v323 : era player cards (everything is pc- prefixed and scoped to .pc-stage so no game or theme rule can reach it) */
+.pc-stage{--f-abril:'Abril Fatface','Didot',Georgia,serif;--f-std:'Old Standard TT','Century Schoolbook',Georgia,serif;--f-osw:'Oswald','Arial Narrow',Arial,sans-serif;--f-black:'UnifrakturMaguntia','Old English Text MT',Georgia,serif;--f-alfa:'Alfa Slab One','Rockwell','Roboto Slab',Georgia,serif;--f-kau:'Kaushan Script','Brush Script MT',cursive;--f-bask:'Libre Baskerville','Baskerville',Georgia,serif;--f-barlow:'Barlow Condensed','Arial Narrow',Impact,sans-serif;--f-zilla:'Zilla Slab','Rockwell',Georgia,serif;
+  display:flex;flex-direction:column;align-items:center;margin:6px 0 4px;text-transform:none;letter-spacing:normal;text-shadow:none;white-space:normal}
+.pc-stage *,.pc-stage *::before,.pc-stage *::after{box-sizing:border-box}
+.pc-stage .pc-card{width:min(280px,100%);outline-offset:3px}
+.pc-stage .pc-card:focus-visible{outline:2px solid #f2b632}
+.pc-stage .pc-hint{margin-top:5px;font:400 11px/1 var(--f-std);font-style:italic;opacity:.75;text-align:center}
+.pc-stage h3,.pc-stage p,.pc-stage dl,.pc-stage dt,.pc-stage dd,.pc-stage em,.pc-stage b,.pc-stage span,.pc-stage small,.pc-stage div{text-transform:none}
+.pc-stage .pc-series,.pc-stage .pc-pos,.pc-stage .pc-foot,.pc-stage .pc-ribbon,.pc-stage .pc-badge span,.pc-stage .pc-tiles span,.pc-stage .pc-rec span,.pc-stage .pc-stats dt,.pc-stage .pc-sumrow,.pc-stage .pc-bfoot,.pc-stage .pc-bhead small,.pc-stage .pc-bhead h3,.pc-stage .pc-nameplate h3{text-transform:uppercase}
+.pc-stage.pc-e46 .pc-nameplate h3,.pc-stage.pc-e46 .pc-bhead h3,.pc-stage.pc-e46 .pc-series b,.pc-stage.pc-e46 .pc-bhead small,.pc-stage .pc-sumrow b{text-transform:none}
+.pc-stage .pc-pos{max-width:92%;text-align:center;white-space:normal}
+.pc-stage .pc-nameplate h3,.pc-stage .pc-bhead h3{white-space:nowrap}
+.pc-stage .pc-bhead p{text-transform:none}
+.pc-notes{text-align:center}
+
+.pc-card{width:min(300px,86vw);aspect-ratio:2/3;container-type:inline-size;perspective:1400px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;display:block}
+.pc-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.3,.7,.2,1)}
+.pc-card.pc-flipped .pc-inner{transform:rotateY(180deg)}
+.pc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column;font-size:4cqw}
+.pc-face.pc-back{transform:rotateY(180deg)}
+@media (prefers-reduced-motion:reduce){.pc-inner{transition:none}}
+.pc-portrait svg{display:block;width:100%;height:100%}
+.pc-stars{display:inline-flex;gap:.5cqw;vertical-align:middle}
+.pc-stars i{width:3.4cqw;height:3.4cqw;background:currentColor;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.pc-stars i.pc-off{opacity:.22}
+.pc-pips{display:inline-flex;gap:.6cqw;vertical-align:middle}
+.pc-pips i{display:block}
+
+/* ============ 1946-50  CIGARETTE CARD ============ */
+.pc-e46 .pc-face{background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .24  0 0 0 0 .12  0 0 0 .5 0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='.38'/></svg>"),
+  radial-gradient(120% 90% at 30% 20%,#f8edcf 0%,#f0e0b8 60%,#e3cf9f 100%);
+  color:#2a1a12;border-radius:5.2cqw;box-shadow:0 1px 0 #fff6 inset,0 10px 26px #0009,0 2px 4px #0006;--ink:#5c1b12;padding:7cqw 7.5cqw 6cqw;align-items:stretch}
+.pc-e46 .pc-face::before{content:"";position:absolute;inset:2.7cqw;border:1.1cqw double var(--ink);border-radius:3.4cqw;pointer-events:none}
+.pc-e46 .pc-face::after{content:"";position:absolute;inset:4.9cqw;border:.25cqw solid #5c1b1255;border-radius:1.6cqw;pointer-events:none}
+.pc-e46 .pc-corner{position:absolute;width:8cqw;height:8cqw;color:var(--ink);z-index:2}
+.pc-e46 .pc-corner.pc-tl{left:3.6cqw;top:3.6cqw}.pc-e46 .pc-corner.pc-tr{right:3.6cqw;top:3.6cqw;transform:scaleX(-1)}
+.pc-e46 .pc-corner.pc-bl{left:3.6cqw;bottom:3.6cqw;transform:scaleY(-1)}.pc-e46 .pc-corner.pc-br{right:3.6cqw;bottom:3.6cqw;transform:scale(-1)}
+.pc-e46 .pc-series{text-align:center;font:500 3.2cqw/1.1 var(--f-osw);letter-spacing:.24em;text-transform:uppercase;color:var(--ink);margin:0 4cqw 2.4cqw}
+.pc-e46 .pc-series b{display:block;font:400 6.6cqw/1.05 var(--f-abril);letter-spacing:.02em;text-transform:none;margin-top:.8cqw}
+.pc-e46 .pc-portrait{flex:1;min-height:0;position:relative;border-radius:34cqw 34cqw 2.4cqw 2.4cqw;overflow:hidden;border:.9cqw solid var(--ink);outline:.35cqw solid var(--ink);outline-offset:.8cqw;
+  background:repeating-conic-gradient(from 0deg at 50% 78%,#f3e4bd 0 5deg,#e9d3a0 5deg 10deg);margin:0 3cqw}
+.pc-e46 .pc-portrait svg{filter:sepia(.5) saturate(1.25) contrast(.97)}
+.pc-e46 .pc-portrait::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 8cqw #5c1b1255;pointer-events:none}
+.pc-e46 .pc-nameplate{text-align:center;margin:3.4cqw 0 0}
+.pc-e46 .pc-nameplate h3{margin:0;font:400 8.4cqw/1 var(--f-abril);color:#1d120d;letter-spacing:.01em}
+.pc-e46 .pc-meta{display:flex;flex-direction:column;align-items:center;gap:.9cqw;margin-top:1.8cqw}
+.pc-e46 .pc-club{font:italic 400 4.6cqw/1.1 var(--f-std);color:#3b2a20;display:flex;align-items:center;gap:1.6cqw}
+.pc-e46 .pc-sw{display:inline-flex;border:.3cqw solid var(--ink);border-radius:.4cqw;overflow:hidden}
+.pc-e46 .pc-sw i{display:block;width:3cqw;height:3cqw}
+.pc-e46 .pc-pos{font:500 3.2cqw/1 var(--f-osw);letter-spacing:.22em;text-transform:uppercase;color:#f3e6c8;background:var(--ink);padding:1.2cqw 3.2cqw 1.1cqw;border-radius:.6cqw}
+.pc-e46 .pc-foot{margin-top:2.6cqw;text-align:center;font:500 3.3cqw/1 var(--f-osw);letter-spacing:.2em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:2cqw}
+.pc-e46 .pc-foot::before,.pc-e46 .pc-foot::after{content:"";flex:1;border-top:.3cqw solid var(--ink);border-bottom:.3cqw solid var(--ink);height:.9cqw}
+/* 46 back */
+.pc-e46 .pc-back .pc-bhead{text-align:center;margin-top:1.4cqw}
+.pc-e46 .pc-back .pc-bhead small{display:block;font:400 4.8cqw/1 var(--f-black);color:var(--ink)}
+.pc-e46 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:400 6.8cqw/1.05 var(--f-abril);color:#1d120d}
+.pc-e46 .pc-back .pc-bhead p{margin:1cqw 0 0;font:italic 400 3.8cqw/1.1 var(--f-std);color:#3b2a20}
+.pc-e46 .pc-rule{height:1.2cqw;border-top:.3cqw solid var(--ink);border-bottom:.3cqw solid var(--ink);margin:2.4cqw 0}
+.pc-e46 .pc-bio{margin:0;font:400 3.75cqw/1.38 var(--f-std);text-align:justify;hyphens:auto;color:#2a1a12}
+.pc-e46 .pc-bio::first-letter{font:400 8.4cqw/.8 var(--f-abril);float:left;margin:.7cqw 1cqw 0 0;color:var(--ink)}
+.pc-e46 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);margin:2.6cqw 0 1.2cqw;border:.3cqw solid var(--ink);border-radius:.8cqw}
+.pc-e46 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;border-left:.3cqw solid var(--ink)}
+.pc-e46 .pc-rec div:first-child{border-left:0}
+.pc-e46 .pc-rec b{display:block;font:400 4.7cqw/1 var(--f-abril);color:#1d120d}
+.pc-e46 .pc-rec span{font:500 2.6cqw/1 var(--f-osw);letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.pc-e46 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.4cqw;row-gap:.95cqw;align-items:center;margin-top:1.2cqw}
+.pc-e46 .pc-stats dt{font:500 3cqw/1 var(--f-osw);letter-spacing:.16em;text-transform:uppercase;color:#3b2a20}
+.pc-e46 .pc-stats dd{margin:0;display:contents}
+.pc-e46 .pc-stats em{font:italic 400 3.2cqw/1 var(--f-std);color:#3b2a20;min-width:3.6cqw;text-align:right}
+.pc-e46 .pc-pips{gap:.8cqw}
+.pc-e46 .pc-pips i{width:2.8cqw;height:2.8cqw;border-radius:50%;border:.35cqw solid var(--ink);background:transparent}
+.pc-e46 .pc-pips i.pc-on{background:var(--ink)}
+.pc-e46 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.pc-e46 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2.2cqw;padding-top:1.6cqw;border-top:.3cqw dotted var(--ink);font:500 3cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#3b2a20;gap:1cqw}
+.pc-e46 .pc-sumrow b{font:400 3.7cqw var(--f-std);letter-spacing:0;text-transform:none;color:#1d120d;font-weight:700}
+.pc-e46 .pc-sumrow .pc-stars{color:var(--ink)}
+.pc-e46 .pc-bfoot{margin-top:auto;text-align:center;font:italic 400 2.9cqw/1.1 var(--f-std);color:#5c3b30;padding-top:1.4cqw}
+
+/* ============ 1959  TRADE / GUM CARD ============ */
+.pc-e59 .pc-face{background:#fbf6e6;border-radius:2.4cqw;box-shadow:0 10px 24px #0008,0 2px 3px #0006;padding:0;border:3.6cqw solid var(--c1b);--red:#b32323;--navy:#1f3550}
+.pc-e59 .pc-face::after{content:"";position:absolute;inset:0;border:.9cqw solid #fbf6e6;pointer-events:none;border-radius:0}
+.pc-e59 .pc-ribbon{background:var(--red);color:#ffd45e;display:flex;justify-content:space-between;align-items:center;padding:2.4cqw 3.4cqw 2cqw;font:400 5.6cqw/1 var(--f-alfa);letter-spacing:.02em;text-transform:uppercase;text-shadow:.35cqw .35cqw 0 #00000055}
+.pc-e59 .pc-ribbon small{font:500 3.4cqw var(--f-osw);letter-spacing:.14em;color:#fbf6e6;text-shadow:none}
+.pc-e59 .pc-portrait{flex:1;min-height:0;position:relative;margin:3cqw 3.6cqw 0;background:
+  radial-gradient(circle at 50% 38%,#ffffff55 0 20%,transparent 21%),
+  radial-gradient(#00000026 22%,transparent 24%) 0 0/2.6cqw 2.6cqw,
+  linear-gradient(180deg,var(--tint) 0%,var(--tint2) 100%);border:1cqw solid #fff;box-shadow:1.4cqw 1.4cqw 0 var(--navy);overflow:hidden}
+.pc-e59 .pc-portrait::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(112deg,transparent 0 5cqw,#ffffff22 5cqw 8cqw);pointer-events:none}
+.pc-e59 .pc-badge{position:absolute;right:2.2cqw;top:2.2cqw;z-index:3;width:14cqw;height:14cqw;background:#ffd45e;color:var(--red);display:grid;place-items:center;text-align:center;clip-path:polygon(50% 0,60% 14%,77% 7%,80% 25%,98% 28%,89% 44%,100% 58%,84% 66%,86% 84%,68% 82%,59% 98%,50% 85%,41% 98%,32% 82%,14% 84%,16% 66%,0 58%,11% 44%,2% 28%,20% 25%,23% 7%,40% 14%);font:400 3.4cqw/1 var(--f-alfa)}
+.pc-e59 .pc-badge span{display:block;font-size:6cqw;line-height:.95}
+.pc-e59 .pc-flash{position:absolute;left:1.6cqw;bottom:2.4cqw;z-index:3;font:400 6.4cqw/1 var(--f-kau);color:#fff;text-shadow:.45cqw .45cqw 0 var(--red),-.1cqw -.1cqw 0 var(--red);transform:rotate(-5deg)}
+.pc-e59 .pc-nameplate{margin:3.4cqw 3cqw 0;background:var(--navy);color:#fff;text-align:center;padding:1.8cqw 1cqw 1.5cqw;transform:skewX(-4deg);border-bottom:1cqw solid var(--red)}
+.pc-e59 .pc-nameplate h3{margin:0;font:400 7.4cqw/1 var(--f-alfa);transform:skewX(4deg);text-transform:uppercase;letter-spacing:.01em}
+.pc-e59 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin:2.2cqw 4cqw 0;gap:2cqw}
+.pc-e59 .pc-club{font:italic 400 3.9cqw/1.1 var(--f-bask);color:#1a1714;display:flex;align-items:center;gap:1.4cqw}
+.pc-e59 .pc-sw{display:inline-flex;border:.4cqw solid #1a1714}.pc-e59 .pc-sw i{display:block;width:3cqw;height:3cqw}
+.pc-e59 .pc-pos{font:500 3.3cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--red);padding:1.3cqw 2.4cqw}
+.pc-e59 .pc-foot{margin:2.2cqw 3.6cqw 2.6cqw;text-align:center;font:500 3cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#4c453b;border-top:.4cqw solid #1a1714;padding-top:1.6cqw}
+.pc-e59 .pc-corner{display:none}
+/* 59 back */
+.pc-e59 .pc-back{background:#f1e9d0;padding:0}
+.pc-e59 .pc-back .pc-bhead{background:var(--navy);color:#fff;padding:2.4cqw 3.4cqw 2cqw;border-bottom:1cqw solid var(--red)}
+.pc-e59 .pc-back .pc-bhead small{display:block;font:500 3cqw/1 var(--f-osw);letter-spacing:.16em;text-transform:uppercase;color:#ffd45e}
+.pc-e59 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:400 6.6cqw/1.05 var(--f-alfa);text-transform:uppercase}
+.pc-e59 .pc-back .pc-bhead p{margin:.4cqw 0 0;font:italic 400 3.5cqw/1.1 var(--f-bask);color:#d6e3ee}
+.pc-e59 .pc-bodyb{padding:2.6cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
+.pc-e59 .pc-bio{margin:0;font:italic 400 3.45cqw/1.42 var(--f-bask);color:#1a1714;position:relative;padding:2.4cqw 2.4cqw 2.2cqw 2.4cqw;min-height:34cqw;background:#fff9e0;border-left:1.1cqw solid var(--red)}
+.pc-e59 .pc-bio::before{content:"DID YOU KNOW?";display:block;font:400 3.4cqw/1 var(--f-alfa);font-style:normal;color:var(--red);margin-bottom:1.2cqw;letter-spacing:.04em}
+.pc-e59 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2cqw;margin:2.4cqw 0 1.4cqw}
+.pc-e59 .pc-rec div{background:var(--navy);color:#fff;text-align:center;padding:1.4cqw 0 1.1cqw}
+.pc-e59 .pc-rec b{display:block;font:400 4.8cqw/1 var(--f-alfa);color:#ffd45e}
+.pc-e59 .pc-rec span{font:500 2.6cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase}
+.pc-e59 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.2cqw;row-gap:1.9cqw;align-items:center;margin-top:2cqw}
+.pc-e59 .pc-stats dt{font:500 3.1cqw/1 var(--f-osw);letter-spacing:.12em;text-transform:uppercase;color:#1a1714}
+.pc-e59 .pc-stats dd{margin:0;display:contents}
+.pc-e59 .pc-stats em{font:400 3.4cqw/1 var(--f-alfa);color:var(--red);min-width:4cqw;text-align:right}
+.pc-e59 .pc-pips{gap:.5cqw}
+.pc-e59 .pc-pips i{width:3.1cqw;height:3.4cqw;background:#d9ceae;transform:skewX(-14deg)}
+.pc-e59 .pc-pips i.pc-on{background:var(--red)}
+.pc-e59 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--red) 50%,#d9ceae 50%)}
+.pc-e59 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:500 3cqw/1 var(--f-osw);letter-spacing:.12em;text-transform:uppercase;color:#1a1714;gap:1cqw}
+.pc-e59 .pc-sumrow b{font:400 3.6cqw var(--f-alfa);color:var(--navy);letter-spacing:0}
+.pc-e59 .pc-sumrow .pc-stars{color:var(--red)}
+.pc-e59 .pc-bfoot{margin:auto 0 2.4cqw;text-align:center;font:500 2.7cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#4c453b;border-top:.4cqw solid #1a1714;padding-top:1.4cqw}
+
+/* ============ 1966-67  STICKER-ALBUM / PROGRAMME ============ */
+.pc-e66 .pc-face{background:#fff;border-radius:4.4cqw;box-shadow:0 0 0 .8cqw #fff,0 0 0 1cqw #0002,0 10px 22px #0008;padding:3.4cqw;--navy:#1b2236;--red:#a82414;--cream:#efe5c9}
+.pc-e66 .pc-face::after{display:none}
+.pc-e66 .pc-corner{display:none}
+.pc-e66 .pc-ribbon{background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:2.4cqw 3cqw 2.1cqw;font:800 4.8cqw/1 var(--f-barlow);letter-spacing:.1em;text-transform:uppercase;border-radius:2.2cqw 2.2cqw 0 0}
+.pc-e66 .pc-ribbon small{font:700 3.6cqw var(--f-barlow);letter-spacing:.14em;color:#efe5c9}
+.pc-e66 .pc-portrait{flex:1;min-height:0;position:relative;background:var(--tint66);overflow:hidden}
+.pc-e66 .pc-portrait::before{content:"";position:absolute;width:86%;aspect-ratio:1;left:7%;top:6%;border-radius:50%;background:var(--tint66b)}
+.pc-e66 .pc-portrait svg{position:relative}
+.pc-e66 .pc-badge{position:absolute;left:0;top:0;z-index:3;background:var(--red);color:#fff;font:800 9cqw/1 var(--f-barlow);padding:1.6cqw 3.2cqw 1.4cqw;border-radius:0 0 3cqw 0;letter-spacing:.02em}
+.pc-e66 .pc-badge span{font-size:3cqw;font-weight:700;letter-spacing:.14em;display:block;color:#efe5c9;text-transform:uppercase;line-height:1;margin-bottom:.4cqw}
+.pc-e66 .pc-flash{display:none}
+.pc-e66 .pc-nameplate{margin:2.4cqw 0 0}
+.pc-e66 .pc-nameplate h3{margin:0;font:800 10cqw/.95 var(--f-barlow);color:var(--navy);text-transform:uppercase;letter-spacing:.01em}
+.pc-e66 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin-top:1.4cqw;gap:2cqw}
+.pc-e66 .pc-club{font:400 4.2cqw/1.1 var(--f-zilla);color:#3b4157;display:flex;align-items:center;gap:1.4cqw}
+.pc-e66 .pc-sw{display:inline-flex;border-radius:50%;overflow:hidden;width:4cqw;height:4cqw;box-shadow:0 0 0 .35cqw var(--navy)}.pc-e66 .pc-sw i{display:block;flex:1}
+.pc-e66 .pc-pos{font:700 3.6cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--red);padding:1.3cqw 3cqw;border-radius:5cqw}
+.pc-e66 .pc-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4cqw;margin-top:2.2cqw}
+.pc-e66 .pc-tiles div{background:var(--cream);text-align:center;padding:1.3cqw 0 1cqw;border-radius:1.4cqw}
+.pc-e66 .pc-tiles b{display:block;font:800 5.4cqw/1 var(--f-barlow);color:var(--navy)}
+.pc-e66 .pc-tiles span{font:700 2.8cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.pc-e66 .pc-foot{margin-top:2cqw;text-align:center;font:700 2.9cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:#7b7f90;padding-bottom:.6cqw}
+/* 66 back */
+.pc-e66 .pc-back{background:var(--cream);padding:3.4cqw}
+.pc-e66 .pc-back .pc-bhead{background:var(--navy);color:#fff;padding:2.6cqw 3.2cqw 2.4cqw;border-radius:2.2cqw 2.2cqw 0 0}
+.pc-e66 .pc-back .pc-bhead small{display:block;font:700 3.2cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:#ffb3a3}
+.pc-e66 .pc-back .pc-bhead h3{margin:.8cqw 0 0;font:800 8.4cqw/.95 var(--f-barlow);text-transform:uppercase}
+.pc-e66 .pc-back .pc-bhead p{margin:.8cqw 0 0;font:italic 400 3.6cqw/1.1 var(--f-zilla);color:#d9d4c2}
+.pc-e66 .pc-bodyb{background:#f6efd9;padding:2.6cqw 3.2cqw 0;flex:1;min-height:0;display:flex;flex-direction:column;border-radius:0 0 2.2cqw 2.2cqw}
+.pc-e66 .pc-bio{margin:0;min-height:26cqw;font:400 3.6cqw/1.4 var(--f-zilla);color:#1b2236}
+.pc-e66 .pc-bio::before{content:"Pen portrait";display:block;font:800 3.4cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:1cqw}
+.pc-e66 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);margin:2.4cqw 0 1.6cqw;border-top:.5cqw solid var(--navy);border-bottom:.5cqw solid var(--navy)}
+.pc-e66 .pc-rec div{text-align:center;padding:1.4cqw 0 1.1cqw}
+.pc-e66 .pc-rec b{display:block;font:800 5.2cqw/1 var(--f-barlow);color:var(--navy)}
+.pc-e66 .pc-rec span{font:700 2.7cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:var(--red)}
+.pc-e66 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.4cqw;row-gap:2cqw;align-items:center;margin-top:2cqw}
+.pc-e66 .pc-stats dt{font:700 3.3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--navy)}
+.pc-e66 .pc-stats dd{margin:0;display:contents}
+.pc-e66 .pc-stats em{font:800 3.8cqw/1 var(--f-barlow);color:var(--red);font-style:normal;min-width:4cqw;text-align:right}
+.pc-e66 .pc-pips{gap:.7cqw}
+.pc-e66 .pc-pips i{width:3cqw;height:3cqw;border-radius:50%;background:#d8cfb0}
+.pc-e66 .pc-pips i.pc-on{background:var(--navy)}
+.pc-e66 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--navy) 50%,#d8cfb0 50%)}
+.pc-e66 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:700 3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--navy);gap:1cqw}
+.pc-e66 .pc-sumrow b{font:800 3.8cqw var(--f-barlow);color:var(--red);letter-spacing:.04em}
+.pc-e66 .pc-sumrow .pc-stars{color:var(--red)}
+.pc-e66 .pc-bfoot{margin:auto 0 2.4cqw;text-align:center;font:700 2.7cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:#7b7f90}
+
+/*PCARD-CSS-END*/
+</style>
 <!--THEME-CSS-END-->
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
@@ -13611,28 +13790,205 @@ function renderSquad(){
   });
 }
 function bar(val){ var v=Math.round(val); var filled=Math.round(v/20*16); return '['+'#'.repeat(filled)+'.'.repeat(16-filled)+'] '+v+'/20'; }
+/*PCARD-JS-START*/
+/* ---------- v323 ERA PLAYER CARDS. The Player File shows the man as a collectable card of the era : a 1946-50 cigarette card,
+   a 1959 gum / trade card, a 1966 sticker. Everything printed on it is read from the save (name, age, position, club, this
+   season's apps and goals, wage, ability, reputation, form, the seven attributes, caps, man-of-the-match, career with the club) ;
+   nothing is invented but the lettering, the portrait (a stand-in silhouette in the club's own shirt) and the card number
+   (his place in the squad list). Click / Enter / Space turns the card over. */
+var PCARD_SERIES = {
+  '46': {eng:'Association Footballers', sco:'Scottish Footballers'},
+  '59': {eng:'Soccer Stars', sco:'Scottish Soccer Stars'},
+  '66': {eng:'Football Stars', sco:'Scottish Football Stars'}
+};
+var PCARD_COLOURS = [ /* longest names first */
+  ['GARIBALDI RED','#c1272d'],['ROYAL BLUE','#2457a6'],['SKY BLUE','#7fb7e0'],['LIGHT BLUE','#7fb7e0'],['DARK BLUE','#1b2f5a'],['DARK GREEN','#1f4d2b'],
+  ['OLD GOLD','#c9a227'],['NAVY BLUE','#1b2a4a'],['NAVY','#1b2a4a'],['CLARET','#7e1f3a'],['MAROON','#6d1a2c'],['AMBER','#f0a81c'],['GOLD','#d9b02c'],
+  ['YELLOW','#f2d21b'],['TANGERINE','#f28a1a'],['ORANGE','#f28a1a'],['PURPLE','#5b2a7a'],['GREEN','#2f6b3a'],['BLUE','#1f527f'],['RED','#b32323'],
+  ['WHITE','#f4f0e6'],['BLACK','#1c1c1c'],['GREY','#8a8f96'],['GRAY','#8a8f96'],['PINK','#e58aa8'],['CREAM','#efe5c9'],['BROWN','#6b4a2b'],['SCARLET','#c1272d']
+];
+function pcardHex(txt){
+  var u = ' ' + String(txt||'').toUpperCase() + ' ';
+  for (var i=0; i<PCARD_COLOURS.length; i++){ if (u.indexOf(' '+PCARD_COLOURS[i][0]+' ') >= 0 || u.indexOf(' '+PCARD_COLOURS[i][0]+',') >= 0) return PCARD_COLOURS[i][1]; }
+  for (var j=0; j<PCARD_COLOURS.length; j++){ if (u.indexOf(PCARD_COLOURS[j][0]) >= 0) return PCARD_COLOURS[j][1]; }
+  return null;
+}
+/* the kit label ("BLUE & WHITE HOOPS, WHITE SHORTS", "GREEN, WHITE SLEEVES", "CLARET & BLUE") -> {type, c1, c2, sleeves, collar} ; type is plain|stripes|hoops|halves|quarters */
+function pcardKit(label){
+  var up = String(label||'').toUpperCase(), parts = up.split(/\s*,\s*/), main = parts[0] || '', type = 'plain', sleeves = null, trim = null;
+  if (/HOOP/.test(main)) type = 'hoops'; else if (/HALVES|HALF/.test(main)) type = 'halves'; else if (/QUARTER/.test(main)) type = 'quarters'; else if (/STRIPE/.test(main)) type = 'stripes';
+  var cleaned = main.replace(/\b(PLAIN|STRIPES?|HOOPS?|HALVES|HALF|QUARTERS?|SHIRTS?|JERSEYS?)\b/g,' ');
+  var bits = cleaned.split(/\s*(?:&|\bAND\b|\/|\bWITH\b)\s*/).filter(function(x){ return x.trim(); });
+  var cols = bits.map(pcardHex).filter(function(x){ return x; });
+  parts.slice(1).forEach(function(pt){
+    if (/SLEEVE/.test(pt)) sleeves = pcardHex(pt.replace(/SLEEVES?/,'')) || sleeves;
+    else if (/COLLAR|TRIM|CUFF/.test(pt)) trim = pcardHex(pt) || trim;
+  });
+  var known = cols.length > 0, c1 = cols[0] || '#8a8f96', c2 = cols[1] || null;
+  if (!c2){ if (type !== 'plain') type = 'plain'; c2 = (c1 === '#f4f0e6') ? '#1b2a4a' : '#f4f0e6'; }
+  return {type:type, c1:c1, c2:c2, sleeves:sleeves, collar:trim || c2, known:known, two:cols.length > 1};
+}
+function pcardHash(str){ var h = 7; for (var i=0; i<str.length; i++) h = (h*31 + str.charCodeAt(i)) >>> 0; return h; }
+var pcardUid = 0;
+function pcardSil(p, kit, goalie, hairHex, style){
+  var id = 'pcs' + (++pcardUid), skin = '#dfae88', shirt = kit.c1, def = '', c1 = kit.c1, c2 = kit.c2, body = 'M-4 240C-4 198 32 178 76 166L124 166C168 178 204 198 204 240Z';
+  if (!goalie){
+    if (kit.type === 'stripes'){ def += '<pattern id="'+id+'" width="26" height="10" patternUnits="userSpaceOnUse"><rect width="26" height="10" fill="'+c1+'"/><rect x="13" width="13" height="10" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+    else if (kit.type === 'hoops'){ def += '<pattern id="'+id+'" width="10" height="28" patternUnits="userSpaceOnUse"><rect width="10" height="28" fill="'+c1+'"/><rect y="14" width="10" height="14" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+    else if (kit.type === 'halves'){ def += '<linearGradient id="'+id+'" x1="0" x2="1" y1="0" y2="0"><stop offset=".5" stop-color="'+c1+'"/><stop offset=".5" stop-color="'+c2+'"/></linearGradient>'; shirt = 'url(#'+id+')'; }
+    else if (kit.type === 'quarters'){ def += '<pattern id="'+id+'" width="200" height="240" patternUnits="userSpaceOnUse"><rect width="200" height="240" fill="'+c1+'"/><rect x="100" width="100" height="195" fill="'+c2+'"/><rect y="195" width="100" height="45" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+  }
+  var hair = {slick:'M67 98C62 62 82 50 102 50C126 50 140 68 133 100C130 80 120 70 102 70C86 70 74 78 67 98Z',
+              side:'M66 100C60 60 84 48 104 49C128 50 142 70 134 102C131 82 116 66 98 70C84 73 72 82 66 100Z',
+              wave:'M64 102C56 62 80 44 104 46C130 48 146 70 136 104C133 84 126 66 104 64C84 64 70 76 64 102Z'}[style] || '';
+  var collar = goalie
+    ? '<path d="M78 166C84 190 116 190 122 166L118 150C108 160 92 160 82 150Z" fill="'+kit.collar+'"/><path d="M80 154C90 166 110 166 120 154" fill="none" stroke="#0003" stroke-width="3"/>'
+    : '<path d="M84 160L100 190L116 160L108 156L100 172L92 156Z" fill="'+kit.collar+'"/><path d="M84 160L100 190L116 160" fill="none" stroke="#0003" stroke-width="2"/>';
+  var sleeveBit = '';
+  if (!goalie && kit.sleeves){
+    sleeveBit = '<path d="M-4 240C-4 214 6 198 24 188L40 222Z" fill="'+kit.sleeves+'"/><path d="M204 240C204 214 194 198 176 188L160 222Z" fill="'+kit.sleeves+'"/>';
+  }
+  return '<svg viewBox="0 0 200 240" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Silhouette of a footballer in the club shirt"><defs>'+def+'<linearGradient id="'+id+'g" x1="0" x2="1"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>'
+    + '<path d="'+body+'" fill="'+shirt+'"/>' + sleeveBit + '<path d="'+body+'" fill="url(#'+id+'g)"/>'
+    + '<path d="M86 128L86 160C92 172 108 172 114 160L114 128Z" fill="'+skin+'"/><path d="M86 140C96 152 106 152 114 140L114 128L86 128Z" fill="#00000026"/>'
+    + '<ellipse cx="68" cy="106" rx="5.5" ry="9" fill="'+skin+'"/><ellipse cx="132" cy="106" rx="5.5" ry="9" fill="'+skin+'"/><ellipse cx="100" cy="102" rx="33" ry="40" fill="'+skin+'"/>'
+    + '<path d="'+hair+'" fill="'+hairHex+'"/>' + collar + '</svg>';
+}
+function pcardEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function pcardPips(v){ var h = '', f = Math.floor(v/2), hf = v % 2; for (var i=0; i<10; i++) h += '<i class="'+(i<f ? 'pc-on' : (i===f && hf ? 'pc-half' : ''))+'"></i>'; return '<span class="pc-pips" aria-hidden="true">'+h+'</span>'; }
+function pcardStars(n){ var h = ''; for (var i=0; i<5; i++) h += '<i class="'+(i<n ? '' : 'pc-off')+'"></i>'; return '<span class="pc-stars" role="img" aria-label="Reputation '+n+' of 5">'+h+'</span>'; }
+var PCARD_CORNER = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 22V6C2 3.8 3.8 2 6 2H22"/><path d="M6 18V9C6 7.3 7.3 6 9 6H18"/><circle cx="11.5" cy="11.5" r="2" fill="currentColor"/><path d="M14 11.5H19M11.5 14V19"/></svg>';
+function pcardEra(){
+  var e = (typeof isSco === 'function' && isSco() && typeof scoEra !== 'undefined') ? scoEra : gameEra;
+  return e === '1959' ? '59' : (e === '1966' ? '66' : '46');
+}
+function pcardFormWord(f){ return f >= 4 ? 'Excellent' : f > 1 ? 'Good' : f >= -1 ? 'Fair' : f > -4 ? 'Poor' : 'Awful'; }
+var PCARD_NUM = ['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+function pcardCareer(p){
+  var apps = p.apps || 0, goals = p.goalsSeason || 0, seasons = 0, me = String(ourClubName||'').toLowerCase();
+  (p.seasonHistory || []).forEach(function(h){ if (String(h.club||'').toLowerCase() === me){ apps += h.apps||0; goals += h.goals||0; seasons++; } });
+  return {apps:apps, goals:goals, seasons:seasons};
+}
+/* the pen portrait : plain sentences built only from this player's own record */
+function pcardBio(p, era, best, attrsAll){
+  var pos = String(p.pos || 'player').toLowerCase(), club = ourClubName, car = pcardCareer(p), apps = p.apps || 0, g = p.goalsSeason || 0;
+  var num = function(n){ return (era === '46' && n <= 20) ? PCARD_NUM[n] : String(n); };
+  var s = [];
+  var youth = p.age <= 19, vet = p.age >= 33;
+  s.push(p.n + ' is a ' + (youth ? 'young ' : vet ? 'veteran ' : '') + pos + ', ' + p.age + ' years old, ' + (p.isManagerPlayer ? 'and the club\u2019s player-manager at ' : 'on the books at ') + club + '.');
+  if (car.seasons > 0) s.push('He has played ' + num(car.apps) + ' time' + (car.apps === 1 ? '' : 's') + ' for the club' + (car.goals ? ' and scored ' + num(car.goals) : '') + ', over ' + num(car.seasons + 1) + ' seasons.');
+  else if (apps) s.push('This season he has played ' + num(apps) + ' time' + (apps === 1 ? '' : 's') + (g ? ' and scored ' + num(g) : '') + '.');
+  else s.push('He has yet to play for the first team this season.');
+  if (car.seasons > 0 && apps) s.push('This season: ' + num(apps) + ' appearance' + (apps === 1 ? '' : 's') + (g ? ', ' + num(g) + ' goal' + (g === 1 ? '' : 's') : '') + '.');
+  if (best) s.push('His best point is his ' + best[0].toLowerCase() + ', rated ' + best[1] + ' out of 20.');
+  if (attrsAll){ var sorted = attrsAll.slice().sort(function(x,y){ return y[1]-x[1]; }), sec = sorted[1], low = sorted[sorted.length-1];
+    if (sec && sec[1] >= 14 && sec[0] !== best[0]) s.push('He is also strong in ' + sec[0].toLowerCase() + ' (' + sec[1] + ').');
+    if (low && low[1] <= 6 && low[0] !== best[0]) s.push('His weakest point is his ' + low[0].toLowerCase() + ' (' + low[1] + ').'); }
+  var extra = [];
+  if (p.caps) extra.push('capped ' + num(p.caps) + ' time' + (p.caps === 1 ? '' : 's') + ' by his country');
+  if (p.motmCount) extra.push('named man of the match ' + num(p.motmCount) + ' time' + (p.motmCount === 1 ? '' : 's'));
+  if (extra.length) s.push('He has been ' + extra.join(' and ') + '.');
+  if (p.injuredWeeks > 0) s.push('He is out injured for ' + p.injuredWeeks + ' more week' + (p.injuredWeeks === 1 ? '' : 's') + '.');
+  else if (p.suspendedMatches > 0) s.push('He is suspended for ' + p.suspendedMatches + ' more match' + (p.suspendedMatches === 1 ? '' : 'es') + '.');
+  else if (p.awayOnDuty) s.push('He is away on international duty.');
+  return s.join(' ');
+}
+function pcardFlash(p, top){
+  if (p.injuredWeeks > 0) return 'On the injured list';
+  if (top && top.id === p.id && (p.goalsSeason || 0) > 0) return 'Top scorer!';
+  if (p.rep >= 4) return 'Star man!';
+  if (p.age <= 19) return 'Rising star!';
+  if (p.form >= 4) return 'In form!';
+  return '';
+}
+function pcardHtml(p){
+  var era = pcardEra(), sco = (typeof isSco === 'function' && isSco()), series = (PCARD_SERIES[era] || PCARD_SERIES['46'])[sco ? 'sco' : 'eng'];
+  var order = squad.slice().sort(function(a,b){ return a.id - b.id; });
+  var idx = Math.max(0, order.findIndex(function(x){ return x.id === p.id; })) + 1, total = squad.length;
+  var cp = (typeof clubProfiles !== 'undefined' && clubProfiles[ourClubName]) || null;
+  var label = (cp && cp.colours) || (sco && typeof clubColoursSCO !== 'undefined' && clubColoursSCO[ourClubName]) || '';
+  var club = pcardKit(label), goalie = /goalkeeper/i.test(p.pos);
+  var kit = club;
+  if (goalie){ var gc = club.c1 === '#2f6b3a' ? '#f0a81c' : '#2f6b3a'; kit = {type:'plain', c1:gc, c2:gc, sleeves:null, collar:gc}; }
+  var h = pcardHash(p.n + '|' + p.id);
+  var hairs = ['#2a1b14','#4a3220','#6b4a2b','#8a6a3a','#c79a52','#1c1612'], hairHex = p.age >= 36 && (h % 3 === 0) ? '#a8a8a8' : hairs[h % hairs.length];
+  var style = ['slick','side','wave'][(h >>> 3) % 3];
+  var t59 = [['#f2b632','#e08a1e'],['#ff8a3d','#e2552b'],['#8fc7e6','#4f93bd'],['#9ad08a','#4f9a5a'],['#e8a0b4','#c4607f']][(h >>> 5) % 5];
+  var t66 = [['#d9a441','#efc76d'],['#e4b7a3','#f1d1c2'],['#9fc3d6','#c3dbe7'],['#b7d3a0','#d6e8c6'],['#cdb3d6','#e3d2ea']][(h >>> 7) % 5];
+  var attrs = []; if (p.handling) attrs.push(['Handling', p.handling]);
+  attrs.push(['Shooting', p.shooting],['Passing', p.passing],['Tackling', p.tackling],['Heading', p.heading],['Pace', p.pace],['Stamina', p.stamina]);
+  var best = attrs.slice().sort(function(a,b){ return b[1] - a[1]; })[0];
+  var top = squad.slice().sort(function(a,b){ return (b.goalsSeason||0) - (a.goalsSeason||0); })[0];
+  var flash = pcardFlash(p, top);
+  var wage = p.isManagerPlayer ? '\u2014' : '\u00a3' + p.wage, goalsTxt = p.goalsSeason ? p.goalsSeason : '\u2014';
+  var fit = function(base, maxch){ var n = p.n.length; return +(base * Math.min(1, maxch / n)).toFixed(2); };
+  var seasonTxt = seasonLabel, posTxt = pcardEsc(p.pos), clubTxt = pcardEsc(ourClubName);
+  var sw = '<span class="pc-sw" aria-hidden="true"><i style="background:'+club.c1+'"></i><i style="background:'+club.c2+'"></i></span>';
+  var corners = '';
+  if (era === '46') ['tl','tr','bl','br'].forEach(function(k){ corners += '<i class="pc-corner pc-'+k+'" aria-hidden="true">'+PCARD_CORNER+'</i>'; });
+  var sil = pcardSil(p, kit, goalie, hairHex, style);
+  var front, headBack, bfootTxt = series + ' ' + seasonTxt + ' &middot; No. ' + idx + ' of ' + total;
+  var nameBig = pcardEsc(p.n);
+  if (era === '46'){
+    front = corners + '<div class="pc-series">' + series + '<b>' + seasonTxt + '</b></div><div class="pc-portrait">' + sil + '</div>'
+      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(8.4,15)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + clubTxt + sw + '</div><div class="pc-pos">' + posTxt + '</div></div>'
+      + '<div class="pc-foot">No. ' + idx + ' of ' + total + '</div>';
+  } else if (era === '59'){
+    front = '<div class="pc-ribbon"><span>' + series + '</span><small>' + seasonTxt + '</small></div><div class="pc-portrait"><div class="pc-badge"><div>No.<span>' + idx + '</span></div></div>' + sil + (flash ? '<div class="pc-flash">' + pcardEsc(flash) + '</div>' : '') + '</div>'
+      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(7.4,17)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + clubTxt + sw + '</div><div class="pc-pos">' + posTxt + '</div></div>'
+      + '<div class="pc-foot">Card ' + idx + ' of ' + total + ' &middot; Collect the set</div>';
+  } else {
+    front = '<div class="pc-ribbon"><span>' + series + '</span><small>' + seasonTxt + '</small></div><div class="pc-portrait"><div class="pc-badge"><span>No.</span>' + idx + '</div>' + sil + '</div>'
+      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(10,15)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + sw + clubTxt + '</div><div class="pc-pos">' + posTxt + '</div></div>'
+      + '<div class="pc-tiles"><div><b>' + p.age + '</b><span>Age</span></div><div><b>' + (p.apps || 0) + '</b><span>Apps</span></div><div><b>' + goalsTxt + '</b><span>Goals</span></div></div>'
+      + '<div class="pc-foot">Sticker ' + idx + ' of ' + total + '</div>';
+  }
+  var kick = era === '46' ? 'The Player\u2019s Record' : era === '59' ? 'Player File' : 'Player Profile';
+  var bhead = '<div class="pc-bhead"><small>' + kick + '</small><h3 style="font-size:'+fit(era==='46'?6.8:era==='59'?6.6:8.4, 17)+'cqw">' + nameBig + '</h3><p>' + clubTxt + ', ' + posTxt.toLowerCase() + (p.isManagerPlayer ? ' (player-manager)' : '') + '</p></div>';
+  var rec = '<div class="pc-rec"><div><b>' + p.age + '</b><span>Age</span></div><div><b>' + (p.apps || 0) + '</b><span>Apps</span></div><div><b>' + goalsTxt + '</b><span>Goals</span></div><div><b>' + wage + '</b><span>A week</span></div></div>';
+  var stats = '<dl class="pc-stats">' + attrs.map(function(a){ return '<dt>' + a[0] + '</dt><dd>' + pcardPips(a[1]) + '<em>' + a[1] + '</em></dd>'; }).join('') + '</dl>';
+  var sum = '<div class="pc-sumrow"><span>Ability <b>' + p.ca + '/100</b></span><span>Rep ' + pcardStars(p.rep) + '</span><span>Form <b>' + pcardFormWord(p.form) + '</b></span></div>';
+  var bio = '<p class="pc-bio">' + pcardEsc(pcardBio(p, era, best, attrs)) + '</p>';
+  var back = (era === '46')
+    ? corners + bhead + '<div class="pc-rule"></div>' + bio + rec + stats + sum + '<div class="pc-bfoot">' + bfootTxt + '</div>'
+    : bhead + '<div class="pc-bodyb">' + bio + rec + stats + sum + '<div class="pc-bfoot">' + bfootTxt + '</div></div>';
+  var style_ = '--c1:'+kit.c1+';--c1b:'+club.c1+';--tint:'+t59[0]+';--tint2:'+t59[1]+';--tint66:'+t66[0]+';--tint66b:'+t66[1];
+  return '<div class="pc-stage pc-e' + era + '" data-nocase="1" data-era="' + era + '"><div class="pc-card" role="button" tabindex="0" aria-pressed="false" aria-label="' + pcardEsc(p.n + ', ' + p.pos + ', ' + ourClubName + '. Card ' + idx + ' of ' + total + '. Press to turn over.') + '" style="' + style_ + '">'
+    + '<div class="pc-inner"><div class="pc-face pc-front">' + front + '</div><div class="pc-face pc-back">' + back + '</div></div></div>'
+    + '<div class="pc-hint">Click the card to turn it over</div></div>';
+}
+function pcardWire(root){
+  Array.prototype.forEach.call(root.querySelectorAll('.pc-card'), function(c){
+    function flip(){ var on = c.classList.toggle('pc-flipped'); c.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    c.addEventListener('click', flip);
+    c.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } });
+  });
+}
 function showProfile(id, targetId){
   var p = squad.find(function(x){return x.id===id;});
-  var html = '<p class="val" style="font-size:20px;color:var(--dos-yellow);">'+p.n.toUpperCase()+(p.isManagerPlayer?' <span class="sub" style="display:inline;font-size:14px;">(PLAYER-MANAGER)</span>':'')+'</p>';
-  html += '<p class="sub" style="margin:0 0 6px;">'+p.pos.toUpperCase()+' : AGE '+p.age+' : CA '+p.ca+'/100 : REP '+stars(p.rep)+'</p>';
-  var wageText = p.isManagerPlayer ? 'MANAGER\'S SALARY ONLY, NO SEPARATE PLAYING WAGE' : ('&pound;'+p.wage+'/WK');
-  html += '<p class="sub" style="margin:0 0 10px;">FORM: '+formTag(p.form)+' &nbsp; WAGE: '+wageText+' &nbsp; APPEARANCES THIS SEASON: '+(p.apps||0)+' &nbsp; GOALS THIS SEASON: '+p.goalsSeason+(p.caps?(' &nbsp; HOME CHAMPIONSHIP CAPS: '+p.caps):'')+(p.intlCallUps?(' &nbsp; TRIAL/SQUAD CALL-UPS: '+p.intlCallUps):'')+(p.motmCount?(' &nbsp; MAN OF THE MATCH: '+p.motmCount):'')+(p.bookingsSeason?(' &nbsp; CAUTIONS THIS SEASON: '+p.bookingsSeason):'')+(p.awayOnDuty?' <span class="val warn">(AWAY ON INTERNATIONAL DUTY)</span>':'')+'</p>';
-  function line(lbl,val){ return '<div class="statline"><span class="lbl">'+lbl+'</span><span class="bar">'+bar(val)+'</span></div>'; }
-  if (p.handling) html += line('HANDLING', p.handling);
-  html += line('SHOOTING', p.shooting)+line('PASSING', p.passing)+line('TACKLING', p.tackling)+line('HEADING', p.heading)+line('PACE', p.pace)+line('STAMINA', p.stamina);
-  /* v237 : SEASON-BY-SEASON CAREER RECORD, per direct request -- p.seasonHistory is archived once per close
-     season (see startNewSeason's squad.forEach), each entry the real apps/goals/rep for one completed season,
-     never overwritten. Shown oldest-first, same reading order as seasonHistory's own SEASON HISTORY box. */
+  var el = document.getElementById(targetId); if (!p || !el) return;
+  var html = pcardHtml(p);
+  /* the facts the card has no room for, kept as one compact line */
+  var notes = [];
+  if (p.intlCallUps) notes.push('Trial / squad call-ups: ' + p.intlCallUps);
+  if (p.bookingsSeason) notes.push('Cautions this season: ' + p.bookingsSeason);
+  if (p.awayOnDuty) notes.push('Away on international duty');
+  if (p.caps) notes.push('Home championship caps: ' + p.caps);
+  if (p.motmCount) notes.push('Man of the match: ' + p.motmCount);
+  if (notes.length) html += '<p class="sub pc-notes" style="margin:6px 0 0;font-size:11px;">' + notes.join(' &nbsp; &middot; &nbsp; ').toUpperCase() + '</p>';
+  /* v237 : SEASON-BY-SEASON CAREER RECORD (p.seasonHistory is archived once per closed season, never overwritten) */
   if (p.seasonHistory && p.seasonHistory.length){
-    html += '<div class="box" style="margin-top:14px;"><div class="box-title">SEASON-BY-SEASON RECORD</div>'
-      + '<div class="scroll-box" style="max-height:200px;"><table><thead><tr><th>Season</th><th>Club</th><th class="num">Apps</th><th class="num">Goals</th><th class="num">Rep</th></tr></thead><tbody>'
+    html += '<div class="box pc-seasons" style="margin-top:8px;"><div class="box-title">SEASON-BY-SEASON RECORD</div>'
+      + '<div class="scroll-box" style="max-height:140px;"><table><thead><tr><th>Season</th><th>Club</th><th class="num">Apps</th><th class="num">Goals</th><th class="num">Rep</th></tr></thead><tbody>'
       + p.seasonHistory.map(function(h){
           return '<tr><td>'+h.label+'</td><td>'+(h.club||'').toUpperCase()+'</td><td class="num">'+h.apps+'</td><td class="num">'+h.goals+'</td><td class="num">'+h.rep+'</td></tr>';
         }).join('')
       + '</tbody></table></div></div>';
   }
-  document.getElementById(targetId).innerHTML = html;
+  el.innerHTML = html;
+  pcardWire(el);
 }
+/*PCARD-JS-END*/
 renderSquad();
 
 /* ---------- LINEUP VIEW ---------- */
@@ -14518,6 +14874,7 @@ function renderStatus(){
   var next = fixtures[fixtureIdx];
   var nextLabel = next ? ((next.isCup?'FA CUP V ':next.isLCup?'LEAGUE CUP V ':next.isFriendly?(next.isTrial?'TRIAL V ':'FRIENDLY V '):(next.home?'V ':'AT '))+next.opp.toUpperCase()) : 'SEASON COMPLETE';
   var posLabel = ourPosition() ? ordinal(ourPosition()) : '--';
+  if (isSco() && (divisionTier===3 || divisionTier===2)) currentDivisionShort = scoDivShortFor(divisionTier===3 ? 1 : 2); /* v323 : a Scottish club never shows the English 'DIV 1' in a Division A/B season */
   document.getElementById('statusbar').innerHTML = '<span>'+fmtDate(currentDate)+'</span><span>'+currentDivisionShort+' POS: <b>'+posLabel+'</b></span><span>NEXT: <b>'+nextLabel+'</b></span><span>LEAGUE PLAYED: <b>'+table[ourClubName].p+' / '+(isSco() ? rivals.length*2 : 42)+'</b></span><span>BANK: <b>£'+finances.bank.toLocaleString()+'</b></span>';
   /* REAL BUG FIX, PER DIRECT REPORT (screenshot of a new 1949-50-era game still showing "SEASON 1946-47" in
      the titlebar): this badge was pure static HTML, never once touched by any script in the whole file --
@@ -20265,8 +20622,8 @@ function realStartingDivisionFor(clubName){
      ERA_1966_PLAYABLE_TIERS (data block): Division One first (v313), v314: all four tiers playable now their squads have landed. CREATE A CLUB is not offered for
      this era, so there is no created-club branch here. */
   if (gameEra === '1966' && isSco()){ /* v317 */
-    if (has(firstDivisionMasterClubs1966_FIRST)) return {tier:3, label:scoDivWordFor(scoEraStartYear(),1,true), short:'DIV 1', name:scoDivWordFor(scoEraStartYear(),1,false), master:firstDivisionMasterClubs1966_FIRST, playable:true};
-    return {tier:2, label:scoDivWordFor(scoEraStartYear(),2,true), short:'DIV 2', name:scoDivWordFor(scoEraStartYear(),2,false), master:secondDivisionMasterClubs1966_SECOND, playable:true};
+    if (has(firstDivisionMasterClubs1966_FIRST)) return {tier:3, label:scoDivWordFor(scoEraStartYear(),1,true), short:scoDivShortFor(1,scoEraStartYear()), name:scoDivWordFor(scoEraStartYear(),1,false), master:firstDivisionMasterClubs1966_FIRST, playable:true};
+    return {tier:2, label:scoDivWordFor(scoEraStartYear(),2,true), short:scoDivShortFor(2,scoEraStartYear()), name:scoDivWordFor(scoEraStartYear(),2,false), master:secondDivisionMasterClubs1966_SECOND, playable:true};
   }
   if (gameEra === '1966'){
     if (has(firstDivisionMasterClubs1966_FIRST)) return {tier:3, label:'FIRST DIVISION', short:'DIV 1', name:'First Division', master:firstDivisionMasterClubs1966_FIRST, playable:!!ERA_1966_PLAYABLE_TIERS[3]};
@@ -29626,6 +29983,11 @@ function scoDivWordFor(startYear, which, upper){
   var w = (y < 1955) ? (which === 1 ? 'Division A' : 'Division B') : (which === 1 ? 'Division One' : 'Division Two');
   return upper ? w.toUpperCase() : w;
 }
+/* v323 : the status-bar short name (DIV A / DIV B until 1954-55, DIV 1 / DIV 2 from 1955-56, matching scoDivWordFor) */
+function scoDivShortFor(which, startYear){
+  var y = startYear || parseInt(seasonLabel, 10) || 1966;
+  return (y < 1955) ? (which === 1 ? 'DIV A' : 'DIV B') : (which === 1 ? 'DIV 1' : 'DIV 2');
+}
 function scoPickerNames(){ return CLUB_SCO_D1_NAMES.concat(CLUB_SCO_D2_NAMES); }
 
 /* v322 : structural Scottish League news, fired from startNewSeason only when the sim has actually put the club there -- so the history never contradicts the tables and nothing is dumped on day one */
@@ -34220,7 +34582,7 @@ function startNewSeason(outcome){
   var oldStartYear = parseInt(seasonLabel.split('-')[0], 10);
   var finishedSeasonLabel = seasonLabel; /* v237 : seasonLabel is about to be overwritten below -- captured here so the squad.forEach archive pass further down records apps/goals against the season that just ended, not the one about to start */
   seasonLabel = nextSeasonLabel();
-  if (isSco() && scoEraDef() && (divisionTier===3 || divisionTier===2) && /^DIVISION (A|B|ONE|TWO)$/.test(currentDivisionLabel)){ currentDivisionLabel = scoDivWordFor(null, divisionTier===3 ? 1 : 2, true); } /* v322 : the Scottish League renamed A/B as One/Two in 1955-56 */
+  if (isSco() && scoEraDef() && (divisionTier===3 || divisionTier===2) && /^DIVISION (A|B|ONE|TWO)$/.test(currentDivisionLabel)){ currentDivisionLabel = scoDivWordFor(null, divisionTier===3 ? 1 : 2, true); currentDivisionShort = scoDivShortFor(divisionTier===3 ? 1 : 2); } /* v322 : the Scottish League renamed A/B as One/Two in 1955-56 */
   initEuropeanCupForSeason(); /* v233 : reads divisionChampions.D1 as just recorded by processSeasonEnd's recordDivisionChampions() for the season just finished; gated to never fire before the real 1955-56 European Cup -- see euroCupGateYearOk */
   initCupWinnersCupForSeason(); /* v236 : reads lastFaCupWinnerName as just recorded by processSeasonEnd's recordFaCupWinner() for the season just finished; gated to never fire before the real 1960-61 Cup Winners' Cup -- see cwcGateYearOk */
   initFairsCupForSeason(); /* v258 : reads divisionChampions.D1RunnerUp as just recorded by processSeasonEnd's recordDivisionChampions() for the season just finished; gated to never fire before the real single-season 1960-61 Fairs Cup -- see fairsCupGateYearOk */
@@ -35030,7 +35392,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v322'; /* v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v323'; /* v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
