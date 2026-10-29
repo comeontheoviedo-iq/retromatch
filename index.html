@@ -32515,7 +32515,7 @@ function lcSetup(startYear, label){
     supp:LCUP_OFFSETS.supp.map(function(o){ return lcIso(anchor,o); }), qf:LCUP_OFFSETS.qf.map(function(o){ return lcIso(anchor,o); }),
     sf:LCUP_OFFSETS.sf.map(function(o){ return lcIso(anchor,o); }), fin:LCUP_OFFSETS.fin.map(function(o){ return lcIso(anchor,o); })};
   leagueCup = {active:true, label:label, dates:dates, groups:lcDrawGroups(), stage:'group', ties:[], history:[], champion:null,
-    runnerUp:null, ourStatus:'in', ourOut:null, lastLines:[], lastTitle:'', groupWinners:[], survivors:[]};
+    runnerUp:null, ourStatus:'in', ourOut:null, lastLines:[], lastTitle:'', groupWinners:[], survivors:[], year:startYear};
   /* the second pre-season game gives way to the first group match : drop spare friendlies ahead of the league programme */
   var firstReal = fixtures.findIndex(function(f){ return !f.isFriendly; });
   for (var i = (firstReal<0?fixtures.length:firstReal)-1; i>=1; i--){ if (fixtures[i].isFriendly && !fixtures[i].played){ fixtures.splice(i,1); fixtureRealDates.splice(i,1); } }
@@ -32590,7 +32590,7 @@ function lcNewTie(stage, roundName, a, b, kind, dateList){
 }
 function lcVenueFor(t, leg){
   if (leagueCup.fmt==='eng') return elcMatchVenue(t, leg);
-  if (t.stage==='sf' || t.stage==='fin' || leg.kind==='decider' || leg.kind==='replay'){
+  if (t.stage==='sf' || t.stage==='fin' || leg.kind==='decider' || leg.kind==='replay' || leg.kind==='replay2'){
     var opp = t.a.n===ourClubName ? t.b.n : t.a.n;
     if (t.stage==='fin') return lcVenueFinal();
     var v = scoNeutralVenueFor('Semi-Final', opp, leg.avoidGround); if (v){ v.isFinal = false; } return v;
@@ -32600,42 +32600,112 @@ function lcVenueFor(t, leg){
 function lcScheduleOurLeg(t, li){
   var leg = t.legs[li];
   var oppName = t.a.n===ourClubName ? t.b.n : t.a.n, opp = lcClubObj(oppName);
-  var neutral = leagueCup.fmt==='eng' ? elcIsNeutral(t, leg) : (t.stage==='sf' || t.stage==='fin' || leg.kind==='decider' || leg.kind==='replay');
-  var label = LCUP_NAME+', '+t.roundName+(t.kind==='two' && leg.kind==='leg1' ? ' (Leg 1)' : leg.kind==='leg2' ? ' (Leg 2)' : leg.kind==='decider' ? ' (Deciding Match)' : leg.kind==='replay' ? ' (Replay)' : '');
+  var neutral = leagueCup.fmt==='eng' ? elcIsNeutral(t, leg) : (t.stage==='sf' || t.stage==='fin' || leg.kind==='decider' || leg.kind==='replay' || leg.kind==='replay2');
+  var label = LCUP_NAME+', '+t.roundName+(t.kind==='two' && leg.kind==='leg1' ? ' (Leg 1)' : leg.kind==='leg2' ? ' (Leg 2)' : leg.kind==='decider' ? ' (Deciding Match)' : lcLegLabelOrdinal(t, leg));
   var f = {opp:oppName, s:opp.s, home:leg.h===ourClubName, played:false, res:null, isLCup:true, lcStage:t.stage, lcTie:t.id, lcLeg:li, roundName:label};
   if (neutral){ f.neutralVenue = lcVenueFor(t, leg); if (f.neutralVenue){ f.home = true; } }
   leg.fixtureRef = true;
   lcInsertFixture(f, leg.iso);
 }
+/* v321 : HOW A DRAWN LEAGUE CUP TIE IS SETTLED, by the rules of the day (the old code ended a twice-drawn tie on the toss of a coin).
+   England (Football League Cup) : single ties are replayed at the other club's ground (no extra time in the first match) ; a drawn replay goes to
+   30 minutes' extra time ; if still level it is a SECOND replay at a neutral ground (and so on) until 1993-94, when penalties settled a drawn replay ;
+   two-legged semi-finals level on aggregate were settled by a neutral play-off (extra time, replayed again if need be) until 1986-87, then by extra time in
+   the second leg, the away-goals rule and penalties ; the Final (one match at Wembley) goes to extra time and, if still level, a replay at a neutral ground
+   until 1996-97 (the 1977 Final took two), penalties from 1997-98. Scotland : the same, with penalties replacing replays from 1980-81 (every Final from
+   1981 was settled on the day ; the last replayed Final was 1979-80). Used by our own ties and by the background ones alike. */
+function lcYear(){ return (leagueCup && leagueCup.year) || seasonStartYear(); }
+function lcRules(){
+  var y = lcYear();
+  if (leagueCup && leagueCup.fmt==='eng') return {pensReplay: y>=1993, sfPlayoff: y<=1986, finalPens: y>=1997};
+  return {pensReplay: y>=1980, sfPlayoff: true, finalPens: y>=1980};
+}
+function lcPoisson(l){ var L = Math.exp(-l), k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k-1; }
+function lcStrength(o){ var v = NaN; try { v = aiXiStrength(o) + aiFormCA(o.n) + (o.adj||0); } catch(e){} return isFinite(v) ? v : (o.s||60); }
+function lcOdds(aObj, bObj){ return 1/(1+Math.pow(10, -(lcStrength(aObj)-lcStrength(bObj))/BG_ODDS_SCALE)); }
+function lcObjOf(t, name){ return t.a.n===name ? t.a : t.b; }
+/* thirty minutes of extra time added to a leg : goals go to the home / away side in proportion to the odds (about half a goal an extra time) */
+function lcPlayET(t, leg){
+  var o = lcOdds(lcObjOf(t, leg.h), lcObjOf(t, leg.a));
+  var gh = lcPoisson(0.55*(0.35+0.30*o)), ga = lcPoisson(0.55*(0.35+0.30*(1-o)));
+  leg.hg += gh; leg.ag += ga; leg.aet = true;
+}
+/* a penalty shoot-out : five kicks each then sudden death, the side with the better odds a hair more likely to score */
+function lcPlayPens(t, leg){
+  var o = lcOdds(lcObjOf(t, leg.h), lcObjOf(t, leg.a)), ph = 0, pa = 0, i;
+  var pH = 0.75 + 0.04*(o-0.5), pA = 0.75 - 0.04*(o-0.5);
+  for (i=0;i<5;i++){ if (Math.random()<pH) ph++; if (Math.random()<pA) pa++; }
+  var guard = 0;
+  while (ph===pa && guard++ < 40){ var sh = Math.random()<pH, sa = Math.random()<pA; if (sh) ph++; if (sa) pa++; if (sh===sa){ ph = pa; } }
+  if (ph===pa){ if (Math.random()<0.5) ph++; else pa++; }
+  leg.pens = [ph, pa];
+}
+function lcLegWinner(t, leg){
+  var nameW = leg.hg>leg.ag ? leg.h : leg.hg<leg.ag ? leg.a : (leg.pens && leg.pens[0]>leg.pens[1] ? leg.h : leg.a);
+  return lcObjOf(t, nameW);
+}
+function lcPlayedCount(t, kinds){ return t.legs.filter(function(l){ return kinds.indexOf(l.kind)>=0; }).length; }
+/* a leg (a replay, a play-off or the Final) that is still level after 90 minutes : extra time, then what the rules of the day say */
+function lcAfterDraw(t, leg){
+  var R = lcRules(), isFinal = (t.stage==='fin'), isDecider = (leg.kind==='decider');
+  if (leg.kind==='match' && !isFinal) return {type:'replay', kind:'replay'};
+  lcPlayET(t, leg);
+  if (leg.hg!==leg.ag) return {type:'win', winner:lcLegWinner(t, leg), how:'after extra time'};
+  var pens = isFinal ? R.finalPens : isDecider ? R.pensReplay : R.pensReplay;
+  if (!pens && t.legs.length >= 6) pens = true; /* no tie runs on for ever */
+  if (pens){ lcPlayPens(t, leg); return {type:'win', winner:lcLegWinner(t, leg), how:'on penalties after extra time'}; }
+  return {type:'replay', kind: isDecider ? 'decider' : (leg.kind==='match' ? 'replay' : 'replay2')};
+}
+/* the result of the leg just played, as an action : wait (first leg), win (with how) or replay (kind) */
+function lcAfterLeg(t, leg){
+  var R = lcRules();
+  if (t.kind==='two' && leg.kind==='leg1') return {type:'wait'};
+  if (t.kind==='two' && leg.kind==='leg2'){
+    var agg = lcTieAgg(t);
+    if (agg[0]!==agg[1]) return {type:'win', winner: agg[0]>agg[1] ? t.a : t.b, how: agg[0]+'-'+agg[1]+' on aggregate'};
+    if (R.sfPlayoff) return {type:'replay', kind:'decider', how:'level on aggregate'};
+    lcPlayET(t, leg); agg = lcTieAgg(t);
+    if (agg[0]!==agg[1]) return {type:'win', winner: agg[0]>agg[1] ? t.a : t.b, how: agg[0]+'-'+agg[1]+' on aggregate after extra time'};
+    var l1 = t.legs[0], l2 = t.legs[1];
+    var awayA = l2.ag, awayB = l1.ag; /* a plays away in the second leg, b away in the first */
+    if (awayA!==awayB) return {type:'win', winner: awayA>awayB ? t.a : t.b, how:'level on aggregate after extra time, on away goals'};
+    lcPlayPens(t, l2);
+    return {type:'win', winner: l2.pens[0]>l2.pens[1] ? l2.h===t.a.n ? t.a : t.b : l2.a===t.a.n ? t.a : t.b, how:'level on aggregate, on penalties'};
+  }
+  if (leg.hg!==leg.ag) return {type:'win', winner:lcLegWinner(t, leg), how: leg.kind==='match' ? '' : leg.kind==='decider' ? 'after a deciding match' : (leg.kind==='replay' ? 'after a replay' : 'after a second replay')};
+  return lcAfterDraw(t, leg);
+}
+function lcLegLabelOrdinal(t, leg){
+  if (leg.kind==='replay') return ' (Replay)';
+  if (leg.kind==='replay2'){ var n = lcPlayedCount(t, ['replay','replay2']); var k = t.legs.indexOf(leg); var idx = 0; t.legs.forEach(function(l,i){ if ((l.kind==='replay2') && i<=k) idx++; }); return idx<=1 ? ' (Second Replay)' : idx===2 ? ' (Third Replay)' : ' (Fourth Replay)'; }
+  return '';
+}
 function lcTieAgg(t){
   var aA = 0, aB = 0;
-  t.legs.forEach(function(l){ if (!l.played || l.kind==='decider' || l.kind==='replay') return; if (l.h===t.a.n){ aA += l.hg; aB += l.ag; } else { aB += l.hg; aA += l.ag; } });
+  t.legs.forEach(function(l){ if (!l.played || (l.kind!=='leg1' && l.kind!=='leg2')) return; if (l.h===t.a.n){ aA += l.hg; aB += l.ag; } else { aB += l.hg; aA += l.ag; } });
   return [aA, aB];
 }
+function lcLegText(l){ return l.h.toUpperCase()+' '+l.hg+'-'+l.ag+' '+l.a.toUpperCase()+(l.aet?' (aet)':'')+(l.pens?' ('+l.pens[0]+'-'+l.pens[1]+' on pens)':''); }
 function lcTieSettle(t, winnerObj, how){
   t.winner = winnerObj.n;
   var loser = winnerObj.n===t.a.n ? t.b : t.a;
-  var parts = t.legs.filter(function(l){ return l.played; }).map(function(l){ return l.h.toUpperCase()+' '+l.hg+'-'+l.ag+' '+l.a.toUpperCase(); });
+  var parts = t.legs.filter(function(l){ return l.played; }).map(lcLegText);
   t.line = t.roundName.toUpperCase()+': '+parts.join(', ')+(how ? ' ('+how+')' : '')+' : '+winnerObj.n.toUpperCase()+' through';
   t.loser = loser.n;
 }
 function lcSimTie(t){
   t.legs.forEach(function(l){ if (!l.played && !l.fixtureRef){ var sc = lcSimMatch(l.h, l.a); l.hg = sc[0]; l.ag = sc[1]; l.played = true; } });
-  var how = '';
-  if (t.kind==='two'){
-    var agg = lcTieAgg(t);
-    if (agg[0]===agg[1]){
-      var d = euroDecisiveMatch(t.a, t.b); t.legs.push({h:t.a.n, a:t.b.n, hg:d[0], ag:d[1], played:true, kind:'decider', iso:t.legs[1].iso});
-      if (d[0]>d[1]) agg[0]++; else agg[1]++; how = 'level on aggregate, decided in a play-off at a neutral ground';
-    }
-    lcTieSettle(t, agg[0]>agg[1] ? t.a : t.b, how || (agg[0]+'-'+agg[1]+' on aggregate'));
-  } else {
-    var l0 = t.legs[0];
-    if (l0.hg===l0.ag){
-      var d2 = euroDecisiveMatch(t.a, t.b); t.legs.push({h:t.b.n, a:t.a.n, hg:d2[1], ag:d2[0], played:true, kind:'replay', iso:l0.iso});
-      var wl = t.legs[1]; lcTieSettle(t, (wl.hg>wl.ag) ? (wl.h===t.a.n?t.a:t.b) : (wl.a===t.a.n?t.a:t.b), 'after a replay');
-    } else lcTieSettle(t, l0.hg>l0.ag ? (l0.h===t.a.n?t.a:t.b) : (l0.a===t.a.n?t.a:t.b), '');
+  var last = t.legs[t.legs.length-1], r = lcAfterLeg(t, last), guard = 0;
+  while (r.type==='replay' && guard++ < 8){
+    var prev = t.legs[t.legs.length-1], h, a;
+    if (r.kind==='replay'){ h = prev.a; a = prev.h; } else { h = (Math.random()<0.5) ? t.a.n : t.b.n; a = (h===t.a.n) ? t.b.n : t.a.n; }
+    var sc2 = lcSimMatch(h, a);
+    var nl = {h:h, a:a, hg:sc2[0], ag:sc2[1], played:true, kind:r.kind, iso:prev.iso};
+    t.legs.push(nl);
+    r = lcAfterLeg(t, nl);
   }
+  if (r.type!=='win'){ var lastL = t.legs[t.legs.length-1]; lcPlayPens(t, lastL); r = {type:'win', winner:lcLegWinner(t, lastL), how:'on penalties'}; }
+  lcTieSettle(t, r.winner, r.how);
 }
 function lcStageTies(stage){ return leagueCup.ties.filter(function(t){ return t.stage===stage; }); }
 function lcStartSupp(){
@@ -32726,32 +32796,29 @@ function lcHandleOurResult(f, us, them){
   var ourObj = t.a.n===ourClubName ? t.a : t.b, oppObj = ourObj===t.a ? t.b : t.a;
   function weWin(how){ lcTieSettle(t, ourObj, how); adjustManagerRep(t.stage==='fin'?5:2); lcAnnounceOurTie(t, true, f); }
   function weLose(how){ lcTieSettle(t, oppObj, how); leagueCup.ourStatus='out'; leagueCup.ourOut=t.roundName; adjustManagerRep(t.stage==='fin'?-1:-1.2); lcAnnounceOurTie(t, false, f); }
-  function toss(how){ var w = Math.random()<0.5; if (w) weWin(how+', settled on the toss of a coin'); else weLose(how+', settled on the toss of a coin'); }
-  if (t.kind==='two'){
-    if (f.lcLeg===0){
-      addNews('board', 'LEAGUE CUP, '+t.roundName+': '+us+'-'+them+' against '+f.opp+' in the first leg. '+(f.home?'Away':'Home')+' to come.');
-    } else if (leg.kind==='leg2'){
-      var agg = lcTieAgg(t); var ourAgg = (t.a===ourObj)?agg[0]:agg[1], oppAgg = (t.a===ourObj)?agg[1]:agg[0];
-      if (ourAgg===oppAgg){
-        var dl = {h:Math.random()<0.5?ourClubName:oppObj.n, a:null, hg:null, ag:null, played:false, kind:'decider', iso:isoOf(nextMidweekReplayDate(currentDate))};
-        dl.a = dl.h===ourClubName ? oppObj.n : ourClubName;
-        t.legs.push(dl); lcScheduleOurLeg(t, t.legs.length-1);
-        addNews('board', 'LEAGUE CUP, '+t.roundName+': level '+ourAgg+'-'+oppAgg+' on aggregate against '+f.opp+'. A deciding match at a neutral ground is arranged for midweek.');
-      } else if (ourAgg>oppAgg) weWin(ourAgg+'-'+oppAgg+' on aggregate'); else weLose(ourAgg+'-'+oppAgg+' on aggregate');
-    } else if (leg.kind==='decider'){
-      if (us>them) weWin('after a deciding match'); else if (us<them) weLose('after a deciding match'); else toss('level again after a deciding match');
-    }
-  } else {
-    if (leg.kind==='replay'){
-      if (us>them) weWin('after a replay'); else if (us<them) weLose('after a replay'); else toss('level again after a replay');
-    } else if (us>them) weWin(''); else if (us<them) weLose('');
-    else {
-      var rp = {h:oppObj.n, a:ourClubName, hg:null, ag:null, played:false, kind:'replay', iso:isoOf(nextMidweekReplayDate(currentDate))};
-      if (leagueCup.fmt==='eng' && leg.h===oppObj.n){ rp.h = ourClubName; rp.a = oppObj.n; } /* v320 : a replay goes to the other club's ground */
-      if (t.stage==='fin') rp.iso = isoOf(nextMidweekReplayDate(new Date(currentDate.getTime()+3*86400000)));
-      if (t.stage==='sf') rp.avoidGround = f.neutralVenue ? f.neutralVenue.ground : null;
-      t.legs.push(rp); lcScheduleOurLeg(t, t.legs.length-1);
+  /* v321 : what happens next comes from the rules of the day (lcAfterLeg), never the toss of a coin */
+  var r = lcAfterLeg(t, leg);
+  if (leg.aet){ var ourG = leg.h===ourClubName ? leg.hg : leg.ag, oppG = leg.h===ourClubName ? leg.ag : leg.hg; f.etNote = 'AET '+ourG+'-'+oppG; if (leg.pens){ f.etNote += ', '+(leg.h===ourClubName?leg.pens[0]:leg.pens[1])+'-'+(leg.h===ourClubName?leg.pens[1]:leg.pens[0])+' ON PENS'; } }
+  if (r.type==='wait'){
+    addNews('board', 'LEAGUE CUP, '+t.roundName+': '+us+'-'+them+' against '+f.opp+' in the first leg. '+(f.home?'Away':'Home')+' to come.');
+  } else if (r.type==='win'){
+    var ourWin = (r.winner.n===ourClubName);
+    if (leg.aet && !leg.pens && t.kind!=='two') addNews('board', 'LEAGUE CUP, '+t.roundName+': level at '+us+'-'+them+' after 90 minutes against '+f.opp+'; extra time settles it.');
+    if (leg.pens) addNews('board', 'LEAGUE CUP, '+t.roundName+': still level after extra time against '+f.opp+' ; a penalty shoot-out follows.');
+    if (ourWin) weWin(r.how); else weLose(r.how);
+  } else if (r.type==='replay'){
+    var rp = {h:oppObj.n, a:ourClubName, hg:null, ag:null, played:false, kind:r.kind, iso:isoOf(nextMidweekReplayDate(currentDate))};
+    if (r.kind==='replay'){ if (leagueCup.fmt==='eng' && leg.h===oppObj.n){ rp.h = ourClubName; rp.a = oppObj.n; } }
+    else { rp.h = Math.random()<0.5 ? ourClubName : oppObj.n; rp.a = (rp.h===ourClubName) ? oppObj.n : ourClubName; }
+    if (t.stage==='fin') rp.iso = isoOf(nextMidweekReplayDate(new Date(currentDate.getTime()+3*86400000)));
+    if (t.stage==='sf' || r.kind!=='replay' || t.stage==='fin') rp.avoidGround = f.neutralVenue ? f.neutralVenue.ground : null;
+    t.legs.push(rp); lcScheduleOurLeg(t, t.legs.length-1);
+    if (t.kind==='two'){
+      addNews('board', 'LEAGUE CUP, '+t.roundName+': level '+ (t.a===ourObj?lcTieAgg(t)[0]:lcTieAgg(t)[1])+'-'+(t.a===ourObj?lcTieAgg(t)[1]:lcTieAgg(t)[0])+' on aggregate against '+f.opp+(leg.kind==='decider'?' after extra time in the play-off':'')+'. A deciding match at a neutral ground is arranged for midweek.');
+    } else if (leg.kind==='match' && t.stage!=='fin'){
       addNews('board', 'LEAGUE CUP, '+t.roundName+': level at '+us+'-'+them+' with '+f.opp+'. A replay is arranged for midweek.');
+    } else {
+      addNews('board', 'LEAGUE CUP, '+t.roundName+': '+(leg.aet?'still level after extra time':'level after 90 minutes')+' ('+leg.hg+'-'+leg.ag+' in all). '+(t.stage==='fin'?'The Final is replayed':'A '+(r.kind==='replay2'?'second ':'')+'replay is arranged')+' at a neutral ground in midweek.');
     }
   }
   lcAdvance();
@@ -32789,7 +32856,7 @@ function renderLeagueCupBox(){
   if (ours.length){
     h += '<div style="padding:8px 8px 0;"><b>OUR LEAGUE CUP MATCHES</b></div><div class="scroll-box" style="max-height:200px;"><table><thead><tr><th>Round</th><th>Opponent</th><th class="num">H/A</th><th>Result</th></tr></thead><tbody>'+ours.map(function(f){
       var res = f.played ? (f.home?ourClubName:f.opp).toUpperCase()+' '+f.res.split(' ')[0]+' '+(f.home?f.opp:ourClubName).toUpperCase() : 'NOT YET PLAYED';
-      return '<tr><td>'+f.roundName.toUpperCase()+'</td><td>'+f.opp.toUpperCase()+'</td><td class="num">'+(f.neutralVenue?'N':f.home?'H':'A')+'</td><td>'+res+'</td></tr>';
+      return '<tr><td>'+f.roundName.toUpperCase()+'</td><td>'+f.opp.toUpperCase()+'</td><td class="num">'+(f.neutralVenue?'N':f.home?'H':'A')+'</td><td>'+res+(f.etNote?' ('+f.etNote+')':'')+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   }
   var ko = leagueCup.ties.filter(function(t){ return t.winner; });
@@ -32847,7 +32914,7 @@ function elcSetup(startYear, label){
   mid.slice(0, need).forEach(function(k){ stages.push(k); });
   stages.push('sf'); stages.push('fin');
   leagueCup = {active:true, fmt:'eng', label:label, dates:d, stage:null, stages:stages, ties:[], history:[], champion:null, runnerUp:null,
-    ourStatus:'in', ourOut:null, lastLines:[], lastTitle:'', survivors:[], championD1:false, entered:N, groups:null};
+    ourStatus:'in', ourOut:null, lastLines:[], lastTitle:'', survivors:[], championD1:false, entered:N, groups:null, year:startYear};
   var ourIn = pool.some(function(c){ return c.n===ourClubName; });
   if (!ourIn){ leagueCup.ourStatus = 'out'; leagueCup.ourOut = 'did not enter'; }
   var first = stages[0];
@@ -32900,14 +32967,14 @@ function elcFinishStage(stage){
 function elcMatchVenue(t, leg){
   var opp = t.a.n===ourClubName ? t.b.n : t.a.n;
   if (t.stage==='fin' && leg.kind==='match'){ return {ground:'Wembley Stadium', city:'London', capacity:100000, isFinal:true}; }
-  if (t.stage==='fin' || leg.kind==='decider' || (leg.kind==='replay' && t.stage==='sf')){
+  if (t.stage==='fin' || leg.kind==='decider' || leg.kind==='replay2' || (leg.kind==='replay' && t.stage==='sf')){
     var v = cupNeutralVenueFor('Semi-Final', opp, leg.avoidGround); if (v) v.isFinal = false; return v;
   }
   return null; /* an ordinary replay goes to the other club's ground */
 }
 function elcIsNeutral(t, leg){
   if (t.stage==='fin') return true;
-  return leg.kind==='decider' || (leg.kind==='replay' && t.stage==='sf');
+  return leg.kind==='decider' || leg.kind==='replay2' || (leg.kind==='replay' && t.stage==='sf');
 }
 function elcRenderBox(box){
   var h = '<div class="box-title">LEAGUE CUP : '+(leagueCup.label||'')+'</div>';
@@ -32920,7 +32987,7 @@ function elcRenderBox(box){
   if (ours.length){
     h += '<div style="padding:8px 8px 0;"><b>OUR LEAGUE CUP MATCHES</b></div><div class="scroll-box" style="max-height:200px;"><table><thead><tr><th>Round</th><th>Opponent</th><th class="num">H/A</th><th>Result</th></tr></thead><tbody>'+ours.map(function(f){
       var res = f.played ? (f.home?ourClubName:f.opp).toUpperCase()+' '+f.res.split(' ')[0]+' '+(f.home?f.opp:ourClubName).toUpperCase() : 'NOT YET PLAYED';
-      return '<tr><td>'+f.roundName.toUpperCase()+'</td><td>'+f.opp.toUpperCase()+'</td><td class="num">'+(f.neutralVenue?'N':f.home?'H':'A')+'</td><td>'+res+'</td></tr>';
+      return '<tr><td>'+f.roundName.toUpperCase()+'</td><td>'+f.opp.toUpperCase()+'</td><td class="num">'+(f.neutralVenue?'N':f.home?'H':'A')+'</td><td>'+res+(f.etNote?' ('+f.etNote+')':'')+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   }
   var rounds = leagueCup.history.slice().reverse();
@@ -34685,7 +34752,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v320'; /* v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v321'; /* v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
