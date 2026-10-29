@@ -13855,8 +13855,9 @@ function pcardSil(p, kit, goalie, hairHex, style){
     + '<path d="'+hair+'" fill="'+hairHex+'"/>' + collar + '</svg>';
 }
 function pcardEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function pcardPips(v){ var h = '', f = Math.floor(v/2), hf = v % 2; for (var i=0; i<10; i++) h += '<i class="'+(i<f ? 'pc-on' : (i===f && hf ? 'pc-half' : ''))+'"></i>'; return '<span class="pc-pips" aria-hidden="true">'+h+'</span>'; }
-function pcardStars(n){ var h = ''; for (var i=0; i<5; i++) h += '<i class="'+(i<n ? '' : 'pc-off')+'"></i>'; return '<span class="pc-stars" role="img" aria-label="Reputation '+n+' of 5">'+h+'</span>'; }
+function pcardInt(v){ var n = Math.round(Number(v)); return isFinite(n) ? n : 0; }
+function pcardPips(v){ v = pcardInt(v); var h = '', f = Math.floor(v/2), hf = v % 2; for (var i=0; i<10; i++) h += '<i class="'+(i<f ? 'pc-on' : (i===f && hf ? 'pc-half' : ''))+'"></i>'; return '<span class="pc-pips" aria-hidden="true">'+h+'</span>'; }
+function pcardStars(n){ n = pcardInt(n); var h = ''; for (var i=0; i<5; i++) h += '<i class="'+(i<n ? '' : 'pc-off')+'"></i>'; return '<span class="pc-stars" role="img" aria-label="Reputation '+n+' of 5">'+h+'</span>'; }
 var PCARD_CORNER = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 22V6C2 3.8 3.8 2 6 2H22"/><path d="M6 18V9C6 7.3 7.3 6 9 6H18"/><circle cx="11.5" cy="11.5" r="2" fill="currentColor"/><path d="M14 11.5H19M11.5 14V19"/></svg>';
 function pcardEra(){
   var e = (typeof isSco === 'function' && isSco() && typeof scoEra !== 'undefined') ? scoEra : gameEra;
@@ -13915,12 +13916,12 @@ function pcardHtml(p){
   var style = ['slick','side','wave'][(h >>> 3) % 3];
   var t59 = [['#f2b632','#e08a1e'],['#ff8a3d','#e2552b'],['#8fc7e6','#4f93bd'],['#9ad08a','#4f9a5a'],['#e8a0b4','#c4607f']][(h >>> 5) % 5];
   var t66 = [['#d9a441','#efc76d'],['#e4b7a3','#f1d1c2'],['#9fc3d6','#c3dbe7'],['#b7d3a0','#d6e8c6'],['#cdb3d6','#e3d2ea']][(h >>> 7) % 5];
-  var attrs = []; if (p.handling) attrs.push(['Handling', p.handling]);
-  attrs.push(['Shooting', p.shooting],['Passing', p.passing],['Tackling', p.tackling],['Heading', p.heading],['Pace', p.pace],['Stamina', p.stamina]);
+  var attrs = []; if (p.handling) attrs.push(['Handling', pcardInt(p.handling)]);
+  attrs.push(['Shooting', pcardInt(p.shooting)],['Passing', pcardInt(p.passing)],['Tackling', pcardInt(p.tackling)],['Heading', pcardInt(p.heading)],['Pace', pcardInt(p.pace)],['Stamina', pcardInt(p.stamina)]);
   var best = attrs.slice().sort(function(a,b){ return b[1] - a[1]; })[0];
   var top = squad.slice().sort(function(a,b){ return (b.goalsSeason||0) - (a.goalsSeason||0); })[0];
   var flash = pcardFlash(p, top);
-  var wage = p.isManagerPlayer ? '\u2014' : '\u00a3' + p.wage, goalsTxt = p.goalsSeason ? p.goalsSeason : '\u2014';
+  var wage = p.isManagerPlayer ? '\u2014' : '\u00a3' + pcardInt(p.wage), goalsTxt = p.goalsSeason ? p.goalsSeason : '\u2014';
   var fit = function(base, maxch){ var n = p.n.length; return +(base * Math.min(1, maxch / n)).toFixed(2); };
   var seasonTxt = seasonLabel, posTxt = pcardEsc(p.pos), clubTxt = pcardEsc(ourClubName);
   var sw = '<span class="pc-sw" aria-hidden="true"><i style="background:'+club.c1+'"></i><i style="background:'+club.c2+'"></i></span>';
@@ -13947,7 +13948,7 @@ function pcardHtml(p){
   var bhead = '<div class="pc-bhead"><small>' + kick + '</small><h3 style="font-size:'+fit(era==='46'?6.8:era==='59'?6.6:8.4, 17)+'cqw">' + nameBig + '</h3><p>' + clubTxt + ', ' + posTxt.toLowerCase() + (p.isManagerPlayer ? ' (player-manager)' : '') + '</p></div>';
   var rec = '<div class="pc-rec"><div><b>' + p.age + '</b><span>Age</span></div><div><b>' + (p.apps || 0) + '</b><span>Apps</span></div><div><b>' + goalsTxt + '</b><span>Goals</span></div><div><b>' + wage + '</b><span>A week</span></div></div>';
   var stats = '<dl class="pc-stats">' + attrs.map(function(a){ return '<dt>' + a[0] + '</dt><dd>' + pcardPips(a[1]) + '<em>' + a[1] + '</em></dd>'; }).join('') + '</dl>';
-  var sum = '<div class="pc-sumrow"><span>Ability <b>' + p.ca + '/100</b></span><span>Rep ' + pcardStars(p.rep) + '</span><span>Form <b>' + pcardFormWord(p.form) + '</b></span></div>';
+  var sum = '<div class="pc-sumrow"><span>Ability <b>' + pcardInt(p.ca) + '/100</b></span><span>Rep ' + pcardStars(p.rep) + '</span><span>Form <b>' + pcardFormWord(p.form) + '</b></span></div>';
   var bio = '<p class="pc-bio">' + pcardEsc(pcardBio(p, era, best, attrs)) + '</p>';
   var back = (era === '46')
     ? corners + bhead + '<div class="pc-rule"></div>' + bio + rec + stats + sum + '<div class="pc-bfoot">' + bfootTxt + '</div>'
@@ -35392,7 +35393,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v323'; /* v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v323a'; /* v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
