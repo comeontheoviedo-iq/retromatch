@@ -231,6 +231,52 @@
 #programme-body .p66 .ad.a4 .big{color:var(--yl)}
 #programme-body .p66 .ad.a5{background:#fff;border:5px solid var(--or);color:var(--ink);grid-column:span 3}
 #programme-body .p66 .ad.a5 .big{color:var(--or)}
+/* v331 : plan of the field and local adverts */
+#programme-body .plan{container-type:inline-size;position:relative}
+#programme-body .plan .pt{text-align:center;line-height:1.1;margin:2px 0 4px}
+#programme-body .plan .pt b{display:block;text-transform:uppercase}
+#programme-body .plan .pt i{font-style:normal;display:block}
+#programme-body .plan .prow{position:relative;height:3.9em;margin:0}
+#programme-body .plan .pl1{position:absolute;transform:translateX(-50%);text-align:center;line-height:1.08;white-space:nowrap}
+#programme-body .plan .pl1 .n{display:block}
+#programme-body .plan .pl1 .s{display:block;text-transform:uppercase}
+#programme-body .plan .pl1 .p{display:block}
+#programme-body .plan .mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:2px 0;padding:6px 0}
+#programme-body .plan .mid .ref{text-align:right}
+#programme-body .plan .mid .ln{text-align:left}
+#programme-body .plan .mid h5{margin:0 0 2px;font-weight:400}
+#programme-body .plan .mid .ball{width:46px;height:46px;display:block}
+#programme-body .teams.plansec{display:block;width:100%}
+#programme-body .planwrap>.plan{min-width:0}
+#programme-body .planwrap{display:grid;grid-template-columns:88px minmax(0,1fr) 88px;gap:8px;align-items:stretch}
+#programme-body .planwrap .fl{box-sizing:border-box;min-width:0;border:2px solid var(--ink);padding:8px 4px;text-align:center;align-self:center;font:600 11px/1.25 'Oswald',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+#programme-body .planwrap .fl .bg{overflow-wrap:anywhere;font:700 13px/1.1 'Oswald',sans-serif;display:block;margin:3px 0}
+#programme-body .planwrap .fl u{text-decoration:underline;text-decoration-thickness:2px}
+#programme-body .planwrap .fl small{font:italic 400 9.5px 'Old Standard TT';text-transform:none;letter-spacing:0;display:block;margin-top:3px}
+@media (max-width:700px){#programme-body .planwrap{grid-template-columns:1fr}#programme-body .planwrap .fl{display:none}}
+#programme-body .p46 .plan{font-size:clamp(7.5px,2.15cqw,12.5px)}
+#programme-body .p46 .plan .pt b{font:600 1.55em 'Oswald',sans-serif;letter-spacing:.14em}
+#programme-body .p46 .plan .pt i{font:italic 400 1em 'Old Standard TT'}
+#programme-body .p46 .plan .pl1 .n{font:700 .95em 'Old Standard TT'}
+#programme-body .p46 .plan .pl1 .s{font:600 1.1em 'Oswald',sans-serif;letter-spacing:.06em}
+#programme-body .p46 .plan .pl1 .p{font:italic .88em 'Old Standard TT'}
+#programme-body .p46 .plan .mid h5{font:italic 1.2em 'Old Standard TT'}
+#programme-body .p46 .plan .mid .nm{font:600 .95em 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+#programme-body .p46 .plan .mid .nm span{display:block}
+#programme-body .p59 .plan{font-size:clamp(7.5px,2.1cqw,12px)}
+#programme-body .p59 .plan .pt b{font:400 1.5em 'Alfa Slab One';color:var(--spot);letter-spacing:.04em}
+#programme-body .p59 .plan .pt i{font:italic 400 1em 'Libre Baskerville'}
+#programme-body .p59 .plan .pl1 .n{font:400 1em 'Alfa Slab One';color:var(--spot)}
+#programme-body .p59 .plan .pl1 .s{font:500 1.1em 'Oswald',sans-serif;letter-spacing:.06em}
+#programme-body .p59 .plan .pl1 .p{font:italic .86em 'Libre Baskerville'}
+#programme-body .p59 .plan .mid h5{font:500 1em 'Oswald';letter-spacing:.2em;text-transform:uppercase;color:var(--spot)}
+#programme-body .p59 .plan .mid .nm{font:italic .95em 'Libre Baskerville'}
+#programme-body .p59 .plan .mid .nm span{display:block}
+#programme-body .p66 .ad.a6{background:var(--or);color:#fff}
+#programme-body .p66 .ad.a7{background:#fff;border:5px solid var(--aq);color:var(--ink)}
+#programme-body .p66 .ad.a7 .big{color:var(--aq)}
+#programme-body .p66 .ad.a8{background:#e9e4d2;color:var(--ink)}
+#programme-body .p46 .adhead{margin-top:2px}
 #programme-body .p66 .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:6px solid var(--ink);padding-top:12px}
 #programme-body .p66 .foot .n{font:800 20px 'Barlow Condensed';text-transform:uppercase}
 #programme-body .p66 .foot button{font:800 18px 'Barlow Condensed';letter-spacing:.2em;text-transform:uppercase;background:var(--or);color:#fff;border:0;padding:9px 26px 6px;cursor:pointer;box-shadow:4px 4px 0 var(--ink)}
@@ -32163,8 +32209,11 @@ function progOurXI(){
   } else return null;
   return ps.length===11 ? ps : null;
 }
+var PROG_OPP_CACHE = {};
 function progOppXI(f){
-  try { var a = buildOpponentPreviewLineup(f.opp, f.s); if (a && a.length===11) return a; } catch(e){}
+  var key = seasonLabel+'|'+fixtureIdx+'|'+f.opp;
+  if (PROG_OPP_CACHE[key]) return PROG_OPP_CACHE[key].slice();
+  try { var a = buildOpponentPreviewLineup(f.opp, f.s); if (a && a.length===11){ PROG_OPP_CACHE[key] = a.slice(); return a; } } catch(e){}
   return null;
 }
 
@@ -32512,6 +32561,182 @@ var PROG_PRICE = {'46':['2d.','3d.'], '59':['3d.','4d.'], '66':['6d.','9d.']};
 function progPrice(c){ return PROG_PRICE[c.era][(c.kind==='cup'||c.kind==='lcup'||c.kind==='euro')?1:0]; }
 function progCloseHTML(){ return '<a href="#" class="pclose" data-prog-close="1">close ✕</a>'; }
 
+/* ================= v331 : PLAN OF THE FIELD (1946, 1959) AND LOCAL ADVERTS (1946, 1959, 1966) =================
+   The plan sets both sides out in the real formations (ERA_PITCH shapes), with the real XI from the save,
+   the match's own referee, and linesmen as flag colours only. The adverts are fictional businesses named
+   after the home club's town. The game holds no town for a club, so PROG_TOWN supplies it. */
+var PROG_TOWN = {
+  'Aston Villa':'Birmingham','Birmingham City':'Birmingham','Arsenal':'Highbury','Chelsea':'Chelsea','Charlton Athletic':'Charlton',
+  'Crystal Palace':'Selhurst','Millwall':'New Cross','Fulham':'Fulham','Queens Park Rangers':'Shepherd\u2019s Bush','Tottenham Hotspur':'Tottenham',
+  'West Ham United':'West Ham','Leyton Orient':'Leyton','Orient':'Leyton','Brentford':'Brentford','Everton':'Liverpool','Liverpool':'Liverpool',
+  'Manchester City':'Manchester','Manchester United':'Manchester','Notts County':'Nottingham','Nottingham Forest':'Nottingham',
+  'Port Vale':'Stoke-on-Trent','Stoke City':'Stoke-on-Trent','Tranmere Rovers':'Birkenhead','Hartlepools United':'Hartlepool',
+  'Brighton & Hove Albion':'Brighton','Bournemouth & Boscombe Athletic':'Bournemouth','Barrow':'Barrow-in-Furness','Bradford Park Avenue':'Bradford',
+  'Scunthorpe & Lindsey United':'Scunthorpe','Newport County':'Newport','Swansea Town':'Swansea','West Bromwich Albion':'West Bromwich',
+  'Wolverhampton Wanderers':'Wolverhampton','Sheffield United':'Sheffield','Sheffield Wednesday':'Sheffield','Bristol City':'Bristol','Bristol Rovers':'Bristol',
+  'Preston North End':'Preston','Newcastle United':'Newcastle','Dundee United':'Dundee','Airdrieonians':'Airdrie','Albion Rovers':'Coatbridge',
+  'Berwick Rangers':'Berwick-upon-Tweed','Celtic':'Glasgow','Rangers':'Glasgow','Partick Thistle':'Glasgow','Queen\'s Park':'Glasgow','Third Lanark':'Glasgow',
+  'Clyde':'Rutherglen','Clydebank':'Clydebank','Greenock Morton':'Greenock','Heart of Midlothian':'Edinburgh','Hibernian':'Edinburgh','East Fife':'Methil',
+  'East Stirlingshire':'Falkirk','Raith Rovers':'Kirkcaldy','Queen of the South':'Dumfries','St Johnstone':'Perth','St Mirren':'Paisley',
+  'Hamilton Academical':'Hamilton','Stirling Albion':'Stirling','Ayr United':'Ayr','Alloa Athletic':'Alloa','Forfar Athletic':'Forfar','Dunfermline Athletic':'Dunfermline',
+  'AC Milan':'Milano','Inter Milan':'Milano','Juventus':'Torino','Torino':'Torino','Roma':'Roma','Lazio':'Roma','Napoli':'Napoli','Fiorentina':'Firenze',
+  'Genoa':'Genova','Sampdoria':'Genova','Hellas Verona':'Verona','Triestina':'Trieste','Udinese':'Udine','Atalanta':'Bergamo','Reggiana':'Reggio Emilia',
+  'Reggina':'Reggio Calabria','SPAL':'Ferrara','Salernitana':'Salerno','Sambenedettese':'San Benedetto del Tronto','Marzotto Valdagno':'Valdagno'
+};
+var PROG_TOWN_SFX = /\s+(Town|City|United|Rovers|Albion|Athletic|Wanderers|County|Alexandra|Argyle|Stanley|Academical|Thistle|Forest|Wednesday|Hotspur|Rangers)$/;
+function progTown(club){
+  club = String(club || '');
+  if (PROG_TOWN[club]) return PROG_TOWN[club];
+  return club.replace(PROG_TOWN_SFX, '') || club;
+}
+function progFormRows(shape){
+  var P = ERA_PITCH[shape].map(function(p,i){ return {n:i+1, lat:p[0], d:p[1]}; }).sort(function(a,b){ return (b.d-a.d) || (a.n-b.n); });
+  var rows = [];
+  P.forEach(function(p){ var r = rows[rows.length-1]; if (r && r[r.length-1].d - p.d <= 10) r.push(p); else rows.push([p]); });
+  return rows.map(function(r){ return r.sort(function(a,b){ return (b.lat-a.lat) || (a.n-b.n); }).map(function(p){ return p.n; }); });
+}
+function progRowX(shape, row, home){
+  var xs = row.map(function(n){ var lat = ERA_PITCH[shape][n-1][0]; return 50 + (home ? (50-lat) : (lat-50)) * 0.95; });
+  var order = row.map(function(n,i){ return i; }).sort(function(a,b){ return xs[a]-xs[b]; });
+  var gap = row.length >= 5 ? 19 : row.length === 4 ? 21 : 24;
+  for (var it=0; it<6; it++) for (var k=1; k<order.length; k++){
+    var a = order[k-1], b = order[k];
+    if (xs[b]-xs[a] < gap){ var m = (xs[a]+xs[b])/2; xs[a] = m-gap/2; xs[b] = m+gap/2; }
+  }
+  return xs;
+}
+var PROG_POS = {GK:'Goal',RB:'Right Back',LB:'Left Back',RH:'Right Half',CH:'Centre Half',LH:'Left Half',OR:'Outside Right',IR:'Inside Right',CF:'Centre Forward',
+  IL:'Inside Left',OL:'Outside Left',CM:'Half Back',CB:'Centre Half',SW:'Sweeper',RW:'Outside Right',LW:'Outside Left',ST:'Centre Forward',RM:'Right Wing',LM:'Left Wing'};
+var PROG_FLAGS = [['Red &amp; White','Blue &amp; White'],['Red','Yellow'],['Blue','Red &amp; White'],['Yellow','Black &amp; White'],['Green','Red']];
+var PROG_PLAN_BALL = '<svg class="ball" viewBox="0 0 60 60" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="30" cy="30" r="27"/><path d="M30 17l10 7-4 12H24l-4-12z" fill="currentColor"/><path d="M30 17V4M40 24l13-5M36 36l8 11M24 36l-8 11M20 24L7 19"/><path d="M44 47c4-3 7-7 9-12M16 47c-4-3-7-7-9-12"/></g></svg>';
+function progPlanRows(shape, names, home, capN, dup){
+  var lbls = ERA_PITCH_LBLS[shape] || ERA_PITCH_LBL;
+  var rows = progFormRows(shape); if (!home) rows = rows.slice().reverse();
+  return rows.map(function(r){
+    var xs = progRowX(shape, r, home);
+    var cells = r.map(function(n,i){
+      var nm = names && names[n-1], label = '\u2014';
+      if (nm){
+        var sp = String(nm).lastIndexOf(' '), first = sp > 0 ? nm.slice(0, sp) : '', sur = nm.slice(sp+1);
+        label = sur.toUpperCase() + (dup[sur] && first ? ', ' + first.charAt(0) + '.' : '') + (n === capN ? ' (Capt.)' : '');
+      }
+      return '<div class="pl1" data-shirt="'+n+'" style="left:'+xs[i].toFixed(1)+'%"><span class="n">'+n+'</span><span class="s">'+progEsc(label)+'</span><span class="p">'+progEsc(PROG_POS[lbls[n-1]] || '')+'</span></div>';
+    }).join('');
+    return '<div class="prow" data-shirts="'+r.join(',')+'">'+cells+'</div>';
+  }).join('');
+}
+function progRefName(){
+  try { var n = refereeFor(fixtureIdx*13.7 + week*2.1); return n ? String(n) : null; } catch(e){ return null; }
+}
+function progCaptainShirt(c){
+  if (!c.xi || typeof captainId === 'undefined' || captainId == null) return 0;
+  for (var i=0;i<c.xi.length;i++) if (c.xi[i] && c.xi[i].id === captainId) return i+1;
+  return 0;
+}
+function progPlanHTML(c, f, home, away, hs, as2, hN, aN, hc, ac, flank, mode){
+  var rng = progRng(progHash('plan|'+home+'|'+away+'|'+seasonLabel+'|'+fixtureIdx));
+  var fl = progPickOne(rng, PROG_FLAGS), ref = progRefName();
+  var cap = progCaptainShirt(c), capH = f.home ? cap : 0, capA = f.home ? 0 : cap;
+  var cnt = {}, dup = {};
+  (hN||[]).concat(aN||[]).forEach(function(n){ if (n){ var s = String(n).slice(String(n).lastIndexOf(' ')+1); cnt[s] = (cnt[s]||0)+1; } });
+  Object.keys(cnt).forEach(function(k){ if (cnt[k] > 1) dup[k] = 1; });
+  var hShape = ERA_PITCH[hs] ? hs : 'wm', aShape = ERA_PITCH[as2] ? as2 : 'wm';
+  var sub = function(col, sh){ var t = (col ? '('+progEsc(col)+')' : ''); if (mode === '59') t += (t?' \u00b7 ':'') + progEsc(progShapeName(sh)); return t; };
+  var plan = '<div class="plan"><div class="pt"><b>'+progEsc(home)+'</b><i>'+sub(hc, hShape)+'</i></div>'
+    + progPlanRows(hShape, hN, true, capH, dup)
+    + '<div class="mid"><div class="ref"><h5>Referee</h5><div class="nm"><span>'+(ref ? progEsc(ref) : 'to be appointed')+'</span></div></div>'+PROG_PLAN_BALL
+    + '<div class="ln"><h5>Linesmen</h5><div class="nm"><span>'+fl[0]+' Flag</span><span>'+fl[1]+' Flag</span></div></div></div>'
+    + progPlanRows(aShape, aN, false, capA, dup)
+    + '<div class="pt"><b>'+progEsc(away)+'</b><i>'+sub(ac, aShape)+'</i></div></div>';
+  if (!flank) return plan;
+  var T = progEsc(progTown(home)), a = progPickOne(rng, PROG_SURN_AD);
+  return '<div class="planwrap"><div class="fl">Think of<br>a number<span class="bg">'+T+'<br>'+(2000+Math.floor(rng()*7000))+'</span><small>Cars for hire day &amp; night</small></div>'
+    + plan + '<div class="fl"><u>Warm</u> homes,<br><u>warm</u> hearts<span class="bg">'+progEsc(progPoss(a))+'<br>Coal</span><small>Coal &amp; coke merchants, '+T+'</small></div></div>';
+}
+/* ---------- adverts : fictional businesses, named after the home club's town ---------- */
+var PROG_SURN_AD = ['Pickering','Voss','Hallam','Garbutt','Crowther','Wetherill','Dunnock','Teale','Hargrove','Mossop','Quill','Ravenhill','Sowerby','Brindley','Aldous','Peverell','Cardew','Lambourne','Orrell','Fenner','Tolliver','Kitchen','Redfearn','Cartledge','Nuttall','Haddow','Yeomans','Sillitoe','Marsden','Gledhill'];
+var PROG_PUBS = ['The Plough','The Wheatsheaf','The Railway Tavern','The Black Swan','The Crown &amp; Anchor','The Miners&rsquo; Arms','The Ironmasters&rsquo; Arms','The Woolpack','The Fleece','The Navigation','The Cricketers','The Lamb &amp; Flag'];
+var PROG_TEAS = ['The Copper Kettle','The Willow Pattern','The Cosy Corner','The Blue Bird','The Primrose','The Crumpet','The Silver Teapot','The Mulberry'];
+var PROG_CINES = ['Palace','Regal','Majestic','Rialto','Plaza','Empire','Electric','Picture House','Pavilion'];
+var PROG_COACH = ['Blue','Green','Red','Primrose','Silver','Crimson','Cream','Maroon'];
+var PROG_STREETS = ['High Street','Market Place','Station Road','Bridge Street','Church Street','Corn Exchange','The Parade','King Street','Wellgate'];
+function progPoss(n){ return /s$/.test(n) ? n+'\u2019' : n+'\u2019s'; }
+function progAdTwo(R){ var a = PROG_SURN_AD.slice(), x = a.splice(Math.floor(R()*a.length),1)[0], y = a.splice(Math.floor(R()*a.length),1)[0]; return [x,y]; }
+function progAds46(T, R){
+  var ab = progAdTwo(R), a = ab[0], b = ab[1], cd = progAdTwo(R), c = cd[0], d = cd[1], e = progPickOne(R, PROG_SURN_AD), col = progPickOne(R, PROG_COACH), P = progPoss;
+  var st = function(){ return progPickOne(R, PROG_STREETS); }, yr = 1840 + Math.floor(R()*50);
+  return [
+    ['dbl','<div class="lab">Gentlemen\'s outfitters</div><div class="big">'+a+' &amp; '+b+'</div><hr><div class="sm">'+progPickOne(R,['Suits, overcoats, flannels &amp; shirts','Demob suits made to measure','Raincoats, caps &amp; best Sunday suits'])+'<br>Clothing coupons accepted</div><div class="lab" style="margin-top:3px">'+st()+', '+T+'</div>'],
+    ['','<div class="blk">'+P(c)+'</div><div class="lab">Tobacconist &amp; Newsagent</div><hr><div class="sm">Pipes, pouches &amp; smokers\' requisites<br>'+progPickOne(R,['Football Edition every Saturday at six','The Saturday football paper, hot from the press'])+'</div>'],
+    ['rev','<div class="lab">Rest awhile at</div><div class="big" style="font-size:21px">'+progPickOne(R,PROG_TEAS)+'</div><div class="lab" style="letter-spacing:.4em">Tea Rooms</div><hr><div class="sm">'+progPickOne(R,['Pots of tea &amp; toasted teacakes','Hot pies &amp; a pot of tea for the football crowd'])+'<br>'+st()+', '+T+' \u00b7 Open till six</div>'],
+    ['dbl','<div class="lab">Take your pleasure at</div><div class="big" style="font-size:21px">'+progPickOne(R,PROG_PUBS)+'</div><hr><div class="sm">'+d+' &amp; Sons\' ales on draught &middot; brewed in '+T+' since '+yr+'<br>Pies &amp; pickles at the bar</div>'],
+    ['','<div class="lab">Football special</div><div class="big" style="font-size:20px">'+P(e)+' '+col+' Buses</div><hr><div class="sm">'+T+' Market Place to the ground<br>'+progPickOne(R,['every ten minutes from one o\'clock','leaving 1.45, return fares 6d'])+'</div>'],
+    ['rev','<div class="lab">Pictures twice nightly</div><div class="big" style="font-size:21px">The '+progPickOne(R,PROG_CINES)+'</div><div class="lab" style="letter-spacing:.4em">'+T+'</div><hr><div class="sm">Continuous from 2 \u00b7 Change of programme<br>Monday &amp; Thursday \u00b7 Warmed throughout</div>']
+  ];
+}
+function progAds59(T, R){
+  var ab = progAdTwo(R), a = ab[0], b = ab[1], cd = progAdTwo(R), c = cd[0], d = cd[1], e = progPickOne(R, PROG_SURN_AD), col = progPickOne(R, PROG_COACH), P = progPoss;
+  var st = function(){ return progPickOne(R, PROG_STREETS); };
+  return [
+    ['wide red','<div class="lab">For the man about town</div><div class="big">'+a+' &amp; '+b+'</div><div class="scr" style="color:#fff">outfitters</div><div class="sm">'+progPickOne(R,['Italian-style suits \u00b7 Slim ties','Drape jackets \u00b7 Drainpipes \u00b7 Crepe soles','Continental suits \u00b7 Drip-dry nylon shirts'])+' \u00b7 '+st()+', '+T+'</div>'],
+    R() < .5 ? ['','<div class="big">'+P(c)+'</div><div class="lab">Tobacconist</div><div class="sm">Your Saturday paper<br>and a pipe to read it by</div>'] : ['blk','<div class="lab">Hot at half-time</div><div class="big">Brodex</div><div class="scr" style="color:#f0c2ba">beef tea</div>'],
+    ['','<div class="lab">Showing now</div><div class="big" style="font-size:20px">The '+progPickOne(R,PROG_CINES)+'</div><div class="scr" style="font-size:19px">'+T+'</div><div class="sm">In CinemaScope &amp; colour<br>Saturday matinee 1s 6d</div>'],
+    ['wide','<div class="lab">Television &amp; radio</div><div class="big" style="color:var(--spot)">'+P(d)+' Radio</div><div class="sm">'+T+' \u00b7 Sets on easy terms \u00b7 Watch the Cup Final in comfort</div>'],
+    ['','<div class="lab">Coffee &amp; tea</div><div class="big" style="font-size:19px">'+progPickOne(R,PROG_TEAS)+'</div><div class="scr" style="font-size:18px">tea rooms</div><div class="sm">'+st()+', '+T+'<br>Open till six</div>'],
+    ['blk','<div class="lab">Football coaches</div><div class="big" style="font-size:19px">'+P(e)+' '+col+' Line</div><div class="sm" style="color:#f0c2ba">'+T+' to the ground<br>Parties catered for</div>'],
+    ['','<div class="lab">Light up the evening</div><div class="big" style="font-size:19px">'+progPickOne(R,PROG_PUBS)+'</div><div class="sm">'+T+' &middot; '+c+' &amp; Co. ales &middot;<br>Pies, a darts team &amp; a warm welcome</div>']
+  ];
+}
+function progAds66(T, R){
+  var ab = progAdTwo(R), a = ab[0], b = ab[1], cd = progAdTwo(R), c = cd[0], d = cd[1], e = progPickOne(R, PROG_SURN_AD), col = progPickOne(R, PROG_COACH), P = progPoss;
+  var st = function(){ return progPickOne(R, PROG_STREETS); };
+  return [
+    ['a1','<div class="lab">Mod gear for the modern man</div><div class="big">'+a+'<br>&amp; '+b+'</div><div class="sm">'+progPickOne(R,['Polo necks \u00b7 Hipsters \u00b7 Two-button suits','Roll-necks \u00b7 Cuban heels \u00b7 Mohair suits'])+'<br>'+st()+', '+T+'</div>'],
+    ['a2','<div class="lab">Spins for a bob or two</div><div class="alfa">'+progPickOne(R,['Lyric','Disc-O','Platter','Groove','Spin'])+'</div><div class="big">Records</div><div class="sm">45s &amp; LPs \u00b7 Listen before you buy \u00b7 '+T+'</div>'],
+    ['a3','<div class="lab">It\'s all on the telly!</div><div class="big">'+P(d)+'<br>TV Rentals</div><div class="sm">'+T+' \u00b7 Rent now, from 12s 6d a week</div>'],
+    ['a4','<div class="lab">Open till eleven</div><div class="alfa" style="color:#fff">'+progPickOne(R,['Bonanza','Capri','Pied Piper','Mocha'])+'</div><div class="big">Coffee Bar &amp; Tea Rooms</div><div class="sm">Frothy coffee \u00b7 A proper cuppa \u00b7 Juke box \u00b7 '+T+'</div>'],
+    ['a5','<div class="lab">Hot at half-time</div><div class="big">Brodex<br>Beef Tea</div><div class="sm">Now in the new tin</div>'],
+    ['a6','<div class="lab">Now on keg</div><div class="big" style="font-size:25px">'+progPickOne(R,PROG_PUBS)+'</div><div class="sm">'+c+' &amp; Sons\' ales \u00b7 '+T+'<br>Lounge bar \u00b7 Pies \u00b7 Darts</div>'],
+    ['a7','<div class="lab">Match-day special</div><div class="big" style="font-size:27px">'+P(e)+' '+col+' Buses</div><div class="sm">'+T+' to the ground \u00b7 every 10 mins from 1.30</div>'],
+    ['a8','<div class="lab">Saturday matinee</div><div class="big" style="font-size:27px">The '+progPickOne(R,PROG_CINES)+'</div><div class="alfa" style="font-size:20px">'+T+'</div><div class="sm">Cartoons &amp; a western \u00b7 1s 6d</div>']
+  ];
+}
+/* Italian clubs : the same businesses, in Italian, named after the Italian town */
+var PROG_ITA_SURN = ['Bianchi','Ferrari','Rinaldi','Colombo','Galli','Moretti','Fontana','Barbieri','Conti','Bellini','Serra','Marchetti','Rossetti','Pellegrini','Gatti','Valli','Costa','Ferri','Basile','Orlandi'];
+var PROG_ITA_BAR = ['Bar Centrale','Bar Sport','Bar Roma','Bar Italia','Bar dei Mille','Caff\u00e8 della Piazza','Bar Stazione','Bar Savoia'];
+var PROG_ITA_OST = ['Osteria del Ponte','Trattoria La Fontana','Osteria dei Cacciatori','Trattoria Da Peppino','Osteria del Gallo','Trattoria Le Tre Rose','Osteria della Stazione'];
+var PROG_ITA_CINE = ['Cinema Excelsior','Cinema Impero','Cinema Odeon','Cinema Splendor','Cinema Roma','Cinema Moderno','Cinema Savoia','Cinema Italia'];
+var PROG_ITA_VIE = ['Via Roma','Corso Italia','Piazza del Mercato','Via Garibaldi','Corso Vittorio Emanuele','Via Mazzini','Piazza del Duomo','Via della Stazione'];
+function progAdsIta(T, R, era){
+  var pool = PROG_ITA_SURN.slice(), tk = function(){ return pool.splice(Math.floor(R()*pool.length),1)[0]; };
+  var a = tk(), b = tk(), c = tk(), d = tk(), e = tk(), via = function(){ return progPickOne(R, PROG_ITA_VIE); };
+  var pul = progPickOne(R, ['Pullman azzurri','Autolinee verdi','Corriere rosso','Autobus gialli']);
+  if (era === '59') return [
+    ['wide red','<div class="lab">Per l\'uomo elegante</div><div class="big">'+a+' &amp; '+b+'</div><div class="scr" style="color:#fff">sartoria</div><div class="sm">'+progPickOne(R,['Abiti su misura \u00b7 Cravatte sottili','Giacche all\'ultima moda \u00b7 Camicie bianche','Completi continentali \u00b7 Impermeabili'])+' \u00b7 '+via()+', '+T+'</div>'],
+    R() < .5 ? ['','<div class="big">Tabacchi '+c+'</div><div class="lab">Tabacchi &amp; giornali</div><div class="sm">Il giornale sportivo<br>ogni luned\u00ec mattina</div>'] : ['blk','<div class="lab">Caldo all\'intervallo</div><div class="big">Brodex</div><div class="scr" style="color:#f0c2ba">brodo</div>'],
+    ['','<div class="lab">Da oggi</div><div class="big" style="font-size:20px">'+progPickOne(R,PROG_ITA_CINE)+'</div><div class="scr" style="font-size:19px">'+T+'</div><div class="sm">In CinemaScope e a colori<br>Spettacolo continuato la domenica</div>'],
+    ['wide','<div class="lab">Radio &amp; televisione</div><div class="big" style="color:var(--spot)">Radio '+d+'</div><div class="sm">'+T+' \u00b7 Apparecchi a rate \u00b7 Segui la partita in poltrona</div>'],
+    ['','<div class="lab">Caff\u00e8 &amp; gelati</div><div class="big" style="font-size:19px">'+progPickOne(R,PROG_ITA_BAR)+'</div><div class="sm">'+via()+', '+T+'<br>Aperto fino a mezzanotte</div>'],
+    ['blk','<div class="lab">Autolinee per lo stadio</div><div class="big" style="font-size:19px">'+pul+' '+e+'</div><div class="sm" style="color:#f0c2ba">'+T+' \u00b7 partenze ogni quarto d\'ora<br>Comitive e gite</div>'],
+    ['','<div class="lab">Dopo la partita</div><div class="big" style="font-size:19px">'+progPickOne(R,PROG_ITA_OST)+'</div><div class="sm">'+T+' &middot; vino della casa &middot;<br>piatti caldi e buona compagnia</div>']
+  ];
+  return [
+    ['a1','<div class="lab">Moda per l\'uomo moderno</div><div class="big">'+a+'<br>&amp; '+b+'</div><div class="sm">'+progPickOne(R,['Maglioni a collo alto \u00b7 Giacche slim','Completi a due bottoni \u00b7 Impermeabili'])+'<br>'+via()+', '+T+'</div>'],
+    ['a2','<div class="lab">Dischi per tutti i gusti</div><div class="alfa">'+progPickOne(R,['Ritmo','Disco','Melodia','Twist','Juke'])+'</div><div class="big">Dischi</div><div class="sm">45 giri e 33 giri \u00b7 Ascolta prima di comprare \u00b7 '+T+'</div>'],
+    ['a3','<div class="lab">Tutto in televisione!</div><div class="big">Televisori<br>'+c+'</div><div class="sm">'+T+' \u00b7 Noleggio e rate comode</div>'],
+    ['a4','<div class="lab">Aperto fino a mezzanotte</div><div class="alfa" style="color:#fff">'+progPickOne(R,['Capri','Moka','Espresso','Riviera'])+'</div><div class="big">Bar &amp; Gelateria</div><div class="sm">Caff\u00e8 espresso \u00b7 Gelati \u00b7 Juke-box \u00b7 '+T+'</div>'],
+    ['a5','<div class="lab">Caldo all\'intervallo</div><div class="big">Brodex<br>Brodo</div><div class="sm">Ora nella nuova scatola</div>'],
+    ['a6','<div class="lab">Dopo la partita</div><div class="big" style="font-size:25px">'+progPickOne(R,PROG_ITA_OST)+'</div><div class="sm">'+T+' \u00b7 vino della casa<br>piatti caldi \u00b7 bocce</div>'],
+    ['a7','<div class="lab">Servizio per lo stadio</div><div class="big" style="font-size:27px">'+pul+' '+e+'</div><div class="sm">'+T+' \u00b7 partenze ogni quarto d\'ora</div>'],
+    ['a8','<div class="lab">Domenica pomeriggio</div><div class="big" style="font-size:27px">'+progPickOne(R,PROG_ITA_CINE)+'</div><div class="alfa" style="font-size:20px">'+T+'</div><div class="sm">Cartoni animati e un western</div>']
+  ];
+}
+function progAdsHTML(era, club){
+  var T = progEsc(progTown(club)), R = progRng(progHash('ads'+era+'|'+club));
+  var list = (era !== '46' && isIta()) ? progAdsIta(T, R, era) : era === '46' ? progAds46(T, R) : era === '59' ? progAds59(T, R) : progAds66(T, R);
+  return '<div class="ads" data-town="'+progEsc(progTown(club))+'">'+list.map(function(x){ return '<div class="ad '+x[0]+'">'+x[1]+'</div>'; }).join('')+'</div>';
+}
+
 function progBuild46(c, rng, F){
   var f=c.f, d=c.date, ko=progKO(d), season = seasonLabel.replace('-','–');
   var ground = cupVenueText(f).split(',')[0];
@@ -32528,8 +32753,8 @@ function progBuild46(c, rng, F){
     + '<div class="sketch">'+PROG_SKETCH+'<div class="cap">The '+progEsc(home)+' ground'+(ground?', '+progEsc(ground):'')+'</div></div>'
     + '<div class="fix"><div class="date">'+progDateLong(d)+'</div><div class="vs">'+progEsc(home)+' <em>v.</em> '+progEsc(away)+'</div><div class="lab">'+progEsc(progCompLabel(f))+' · Kick-off '+progEsc(ko)+'</div></div>'
     + '<div class="pageno">— 1 —</div></section><div class="fold"><span>fold</span></div>';
-  o += '<section class="pg"><h3>The teams</h3><div class="field"><div class="ttl">'+progEsc(home)+(hc?' ('+progEsc(hc)+')':'')+' &nbsp;—&nbsp; '+progEsc(away)+(ac?' ('+progEsc(ac)+')':'')+'</div>'
-    + progListsHTML(c, hN, aN, home, hc?'('+hc+')':'', away, ac?'('+ac+')':'') + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div>'
+  o += '<section class="pg"><h3>The teams</h3><div class="plansec">'+progPlanHTML(c, f, home, away, f.home?c.ourShape:c.oppShape, f.home?c.oppShape:c.ourShape, hN, aN, hc, ac, true, '46')
+    + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div>'
     + '<div class="twocol"><div class="notes" style="padding-right:12px"><h2>Notes from the Club</h2>'
     + notes.map(function(n){ return '<p data-k="'+n.k+'">'+progEsc(n.t)+'</p>'; }).join('')
     + (inj ? '<h5>Trainer\'s report</h5><p data-k="inj">'+progEsc(inj.t)+'</p>' : '') + '</div>'
@@ -32542,7 +32767,8 @@ function progBuild46(c, rng, F){
     o += '<h3>Fixtures to come</h3>'+progFixturesHTML(c);
   }
   var nh = progNextHome();
-  o += (nh ? '<div class="next">Next home match: v. '+progEsc(nh.opp)+' &nbsp;·&nbsp; '+progEsc(progDateLong(nh.d))+'</div>' : '')+'<div class="closer">'+progCloseHTML()+'</div><div class="pageno">— 4 —</div></section></article>';
+  o += '<div class="pageno">— 4 —</div></section><div class="fold"><span>fold</span></div><section class="pg"><div class="adhead">Support our advertisers — they support the Club</div>'+progAdsHTML('46', home)
+    + (nh ? '<div class="next">Next home match: v. '+progEsc(nh.opp)+' &nbsp;·&nbsp; '+progEsc(progDateLong(nh.d))+'</div>' : '')+'<div class="closer">'+progCloseHTML()+'</div><div class="pageno">— 5 —</div></section></article>';
   return o;
 }
 function progBuild59(c, rng, F){
@@ -32563,13 +32789,14 @@ function progBuild59(c, rng, F){
    + '<div class="cv-mid"><div class="ball">'+PROG_BALL+'</div><div class="cv-fix"><div class="d">'+progDateLong(d)+'</div><div class="v">'+progEsc(home)+' <em>v.</em> '+progEsc(away)+'</div><div class="k">'+progEsc(progCompLabel(f))+' · Kick-off '+progEsc(ko)+'</div></div></div>'
    + '<div class="cv-foot"><span>'+progEsc(ground||'')+'</span><span class="pr">'+progPrice(c)+'</span></div></div></header><div class="body">'
    + (intro ? '<div class="sec"><div class="intro" data-k="'+intro.k+'">'+progEsc(intro.t)+'</div></div>' : '')
-   + '<div class="sec"><h2>Teams</h2><div class="field"><div class="ttl"><span>'+progEsc(home)+' · '+progEsc(progShapeName(f.home?c.ourShape:c.oppShape))+(hc?' ('+progEsc(hc)+')':'')+'</span><span>'+progEsc(away)+' · '+progEsc(progShapeName(f.home?c.oppShape:c.ourShape))+(ac?' ('+progEsc(ac)+')':'')+'</span></div>'
-   + progListsHTML(c, hN, aN, home, '', away, '') + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div></div>'
+   + '<div class="sec"><h2>Teams</h2><div class="plansec">'+progPlanHTML(c, f, home, away, f.home?c.ourShape:c.oppShape, f.home?c.oppShape:c.ourShape, hN, aN, hc, ac, false, '59')
+   + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div></div>'
    + '<div class="cols2"><div class="sec"><h2>Pen portraits</h2><div class="pen">'
    + pen.map(function(p){ return '<article><div class="no">'+p.no+'</div><div><h4>'+progEsc(p.name)+'</h4><div class="st">'+progEsc(p.st)+'</div><p>'+progEsc(p.text)+'</p></div></article>'; }).join('')
    + (pen.length ? '' : '<p>Our side has not yet been selected.</p>') + '</div></div><div>'
    + (progTableHTML(c,5,false) ? '<div class="sec"><h3>'+progEsc(progTitle(currentDivisionLabel))+' — nearby</h3>'+progTableHTML(c,5,false)+'</div>' : '')
    + '<div class="sec"><h3>'+(groups?'Half-time scores':'Fixtures to come')+'</h3>'+(groups ? progKeyHTML(c, groups, '59') : progFixturesHTML(c))+'</div></div></div>'
+   + '<div class="sec adsec"><h2>Our friends</h2>'+progAdsHTML('59', home)+'</div>'
    + '<div class="foot"><span class="n">'+(nh?'Next home match: v. '+progEsc(nh.opp)+' · '+progEsc(progDateLong(nh.d)):'')+'</span>'+progCloseHTML()+'</div></div></article>';
   return o;
 }
@@ -32598,6 +32825,7 @@ function progBuild66(c, rng, F){
    + '<div>'+(progTableHTML(c,5,true) ? '<h2>League table <i>'+progEsc(progTitle(currentDivisionShort||''))+'</i></h2>'+progTableHTML(c,5,true) : '<h2>Fixtures to come</h2>'+progFixturesHTML(c))+'</div></div>'
    + (wc ? '<div class="sec"><div class="wc"><div class="big">'+wc.big+'<small>'+wc.small+'</small></div><p><b>'+wc.head+'</b>'+wc.text+'</p></div></div>' : '')
    + (groups ? '<div class="sec"><h2>Half-time scores <i>letters A–z</i></h2>'+progKeyHTML(c, groups, '66')+'</div>' : '')
+   + '<div class="sec adsec"><h2>Around the town</h2>'+progAdsHTML('66', home)+'</div>'
    + '<div class="foot"><span class="n">'+(nh?'Next home match: v. '+progEsc(nh.opp)+' · '+progEsc(progDateShort(nh.d)):'')+'</span>'+progCloseHTML()+'</div></div></article>';
   return o;
 }
@@ -32983,7 +33211,11 @@ function runReElection(members, table, feederPools, divLabel){
      be elected to the League itself, so reserve sides are not candidates. Before v116 "Darlington Reserves" could be
      voted into the Third Division (North) alongside Darlington. If no senior club is left in the feeders, the bottom
      club keeps its place. */
-  var pool = allFeederEntries.filter(function(c){ return !/ Reserves$/.test(c.n); }).sort(function(a,b){ return b.s-a.s; });
+  /* v331 : never elect a club that is already in the League. Gillingham sits in the old Southern League feeder list, so in 1966 a vote could 'elect' a club already in the Fourth Division and housekeeping then dropped the duplicate, leaving the League a club short (about 1 season in 20). */
+  var inLeagueNow = {}; inLeagueNow[ourClubName] = 1;
+  [firstDivision, secondDivision, thirdDivisionSouthBg, thirdDivisionNorth].forEach(function(dv){ if (dv && dv.clubs) dv.clubs.forEach(function(c){ inLeagueNow[c.n] = 1; }); });
+  (rivals || []).forEach(function(c){ inLeagueNow[c.n] = 1; }); (members || []).forEach(function(c){ inLeagueNow[c.n] = 1; });
+  var pool = allFeederEntries.filter(function(c){ return !/ Reserves$/.test(c.n) && !inLeagueNow[c.n]; }).sort(function(a,b){ return b.s-a.s; });
   if (!pool.length && !forced){
     addNews('board', 'RE-ELECTION AT THE AGM: '+bottom.ref.n+' finished bottom of '+divLabel+' and had to seek re-election -- with no senior non-league club to put up against them, they were re-elected.');
     return;
@@ -38404,7 +38636,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v330'; /* v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v331'; /* v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
