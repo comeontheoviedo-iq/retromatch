@@ -784,7 +784,7 @@ function renderPlan(id,era,club,hS,hNames,aS,aNames,flank){
  const dup={},cnt={};hNames.concat(aNames).forEach(n=>{const s=n.slice(n.lastIndexOf(' ')+1);cnt[s]=(cnt[s]||0)+1});Object.keys(cnt).forEach(k=>{if(cnt[k]>1)dup[k]=1});
  const plan=`<div class="plan"><div class="pt"><b>${esc(club.name)}</b><i>(Red &amp; white)</i></div>`
   +planRows(hS,hNames,true,capH,dup)
-  +`<div class="mid"><div class="ref"><h5>Referee</h5><div class="nm"><span>${esc(ref)}</span></div></div>${BALL}<div class="ln"><h5>Linesmen</h5><div class="nm"><span>${f[0]} Flag&mdash;Mr. ${esc(ini()+L1)}</span><span>${f[1]} Flag&mdash;Mr. ${esc(ini()+L2)}</span></div></div></div>`
+  +`<div class="mid"><div class="ref"><h5>Referee</h5><div class="nm"><span>${esc(ref)}</span></div></div>${BALL}<div class="ln"><h5>Linesmen</h5><div class="nm"><span>${f[0]} Flag</span><span>${f[1]} Flag</span></div></div></div>`
   +planRows(aS,aNames,false,capA,dup)
   +`<div class="pt"><b>${esc(AWAY.name)}</b><i>(Blue)</i></div></div>`;
  let h=plan;
