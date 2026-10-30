@@ -1549,6 +1549,7 @@ body.theme-programme #theme-pitch .pl .nm{top:19px; font-family:var(--t-cond); f
         <a class="navlink" data-view="cup">FA C<span class="hot">U</span>P</a>
         <a class="navlink" data-view="europe">E<span class="hot">U</span>ROPE</a>
         <a class="navlink" data-view="honours">H<span class="hot">O</span>NOURS</a>
+        <a class="navlink" data-view="abroad">OTHER LEAGUES</a>
       </div>
     </div>
     <div class="menu-group" data-group="othergroup">
@@ -1882,6 +1883,18 @@ body.theme-programme #theme-pitch .pl .nm{top:19px; font-family:var(--t-cond); f
       <div class="box"><div class="box-title">SEASON-BY-SEASON HONOURS</div>
         <div class="scroll-box" style="max-height:480px;"><table><thead><tr><th>Season</th><th>First Division</th><th>Second Division</th><th>Third Division (or S/N)</th><th>Fourth Division</th><th>FA Cup</th><th id="honours-lc-th">League Cup</th><th>European Cup</th><th>Cup Winners' Cup</th><th>Fairs / UEFA Cup</th></tr></thead><tbody id="honours-body"></tbody></table></div>
       </div>
+    </div>
+
+    <div class="view" id="v-abroad">
+      <h1>Other Leagues</h1>
+      <p class="sub" id="abroad-sub"></p>
+      <div class="box"><div class="box-title">LEAGUE TABLE <select id="abroad-country" style="font:inherit;background:var(--ink,#000);color:inherit;border:1px solid currentColor;margin-left:8px;"></select> <select id="abroad-tier" style="font:inherit;background:var(--ink,#000);color:inherit;border:1px solid currentColor;"></select></div>
+        <div class="scroll-box" style="max-height:440px;"><table><thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>Pts</th></tr></thead><tbody id="abroad-body"></tbody></table></div>
+      </div>
+      <div class="box"><div class="box-title">CHAMPIONS, THIS COUNTRY</div>
+        <div class="scroll-box" style="max-height:220px;"><table><thead><tr><th>Season</th><th>Top division</th><th>Second division</th><th id="abroad-hist-th">Cup</th></tr></thead><tbody id="abroad-hist"></tbody></table></div>
+      </div>
+      <div class="box"><div class="box-title">NEWS FROM ABROAD</div><div id="abroad-news"></div></div>
     </div>
 
     <div class="view" id="v-match">
@@ -4982,6 +4995,10 @@ function scoClubMove(move){
 }
 /* the other country's league world, rebuilt from its 1966-67 baseline membership around the club we are taking over */
 function scoCrossBorderMove(move){
+  if (worldEnsure() && WORLD.countries[move.country]){ worldCrossBorderMove(move); return; } /* v330 : destination built from the shared world */
+  scoCrossBorderMoveBaseline(move);
+}
+function scoCrossBorderMoveBaseline(move){
   var oldClub = ourClubName, newClub = move.club, target = move.country;
   scoSaveOldSquad(oldClub);
   gameCountry = target; setCupConfigForCountry();
@@ -5038,6 +5055,8 @@ var DIVISION_TIER_LABELS = ['Fourth Division','Third Division','Second Division'
    approached by sideways. See the root-cause note inside maybeGenerateJobOffer for why this exists. */
 var ELITE_FIRST_DIVISION_CLUBS = ["Liverpool","Manchester United","Wolverhampton Wanderers","Stoke City","Blackpool","Sheffield United"];
 function maybeGenerateJobOffer(){
+  try { maybeGenerateAbroadOffer(); } catch (e) { if (typeof console !== 'undefined') console.error('abroad offer', e); } /* v330 : approaches from any country in the shared world */
+  if (pendingJobOffer || pendingClubMove || pendingMidSeasonMove) return;
   if (isSco()){ maybeGenerateScoJobOffer(); return; } /* v318 */
   maybeGenerateEngToScoOffer(); /* v318 : rare approach from a Scottish club, all gated before any random draw */
   if (pendingJobOffer || pendingClubMove || pendingMidSeasonMove) return;
@@ -16166,7 +16185,7 @@ function renderClub(){
     if (pendingJobOffer){
       jobBox.style.display = 'block';
       if (jobBtns) jobBtns.style.display = '';
-      document.getElementById('job-offer-text').textContent = pendingJobOffer.club.toUpperCase()+' of '+pendingJobOffer.divisionLabel+' have asked the board\'s permission to speak to you about their vacancy. It goes no further than that without your say-so.';
+      document.getElementById('job-offer-text').textContent = pendingJobOffer.club.toUpperCase()+' of '+pendingJobOffer.divisionLabel+' have asked the board\'s permission to speak to you about their vacancy. It goes no further than that without your say-so.' + ((pendingJobOffer.country && typeof WORLD_REG !== 'undefined' && WORLD_REG[pendingJobOffer.country] && pendingJobOffer.country !== gameCountry) ? ' It would mean going abroad, to ' + WORLD_REG[pendingJobOffer.country].name + ', with a new squad at the end of the season.' : '');
     } else if (pendingClubMove){
       jobBox.style.display = 'block';
       if (jobBtns) jobBtns.style.display = 'none';
@@ -16608,7 +16627,8 @@ function applyEraTheme(){
 }
 /*THEME-JS-END*/
 function renderStatus(){
-  try{ applyEraTheme(); }catch(e){} /* v311 : era theme class follows gameEra on every status refresh, so a new game, a loaded save and a restored session all pick it up */
+  try{ applyEraTheme(); }catch(e){}
+  try{ worldNavRefresh(); }catch(e){} /* v330 */ /* v311 : era theme class follows gameEra on every status refresh, so a new game, a loaded save and a restored session all pick it up */
   var next = fixtures[fixtureIdx];
   var nextLabel = next ? ((next.isCup?'FA CUP V ':next.isLCup?'LEAGUE CUP V ':next.isFriendly?(next.isTrial?'TRIAL V ':'FRIENDLY V '):(next.home?'V ':'AT '))+next.opp.toUpperCase()) : 'SEASON COMPLETE';
   var posLabel = ourPosition() ? ordinal(ourPosition()) : '--';
@@ -21596,6 +21616,7 @@ function gotoView(name){
   if (name==='worldcup') renderWorldCup();
   if (name==='reserves'){ renderReserveLeagueTable(); renderReserveXIBox(); renderReserveFormBox(); renderReserveAppearancesBox(); }
   if (name==='honours') renderHonours();
+  if (name==='abroad') renderAbroad(); /* v330 */
   if (name==='europe') renderEurope();
   if (typeof refreshMenuGroupActiveState === 'function') refreshMenuGroupActiveState();
 }
@@ -21685,6 +21706,7 @@ function buildSaveState(){
     tacticalWrinkle:tacticalWrinkle, wrinkleFamiliarity:wrinkleFamiliarity, wrinkleCottonedOn:wrinkleCottonedOn, fixtureRealDates:fixtureRealDates.map(isoOf), cupRoundDates:cupRoundDates,
     blackBook:blackBook, scoutBrief:scoutBrief, signingHypeWeeksLeft:signingHypeWeeksLeft, signingHypeName:signingHypeName, pendingJobOffer:pendingJobOffer, pendingClubMove:pendingClubMove, pendingMidSeasonMove:pendingMidSeasonMove,
     openVacancies:openVacancies, /* v238 */
+    world:WORLD, /* v330 */
     englandJobOfferFired:englandJobOfferFired, pendingEnglandJobOffer:pendingEnglandJobOffer, isEnglandManager:isEnglandManager, englandXI:englandXI,
     playerManagerId:playerManagerId, ourClubName:ourClubName, captainId:captainId, penaltyTakerId:penaltyTakerId, pendingUnhappyPlayerId:pendingUnhappyPlayerId, boardTarget:boardTarget, boardGuidance:boardGuidance, seasonStartSnap:seasonStartSnap, seasonSummaryOpen:seasonSummaryOpen, nextTargetId:nextTargetId, nextOfferId:nextOfferId,
     scoutedPlayers:scoutedPlayers, pendingClubScoutTrips:pendingClubScoutTrips, clubSquads:clubSquads, aiClubForm:aiClubForm, aiClubInjuryCA:aiClubInjuryCA, aiClubBank:aiClubBank, aiClubLastGate:aiClubLastGate,
@@ -22192,6 +22214,7 @@ function applyLoadedState(s, silent){
     blackBook = s.blackBook || []; scoutBrief = s.scoutBrief || null;
     signingHypeWeeksLeft = s.signingHypeWeeksLeft || 0; signingHypeName = s.signingHypeName || '';
     pendingJobOffer = s.pendingJobOffer || null;
+    WORLD = (s.world && s.world.countries) ? s.world : null; /* v330 */
     pendingClubMove = s.pendingClubMove || null;
     pendingMidSeasonMove = s.pendingMidSeasonMove || null;
     openVacancies = Array.isArray(s.openVacancies) ? s.openVacancies : []; /* v238 : an older save predates this -- an honest empty list, not a guess at who might have been mid-search */
@@ -22659,6 +22682,7 @@ function initGameStateFresh(){
   signingHypeWeeksLeft = 0; signingHypeName = '';
   pendingJobOffer = null; pendingClubMove = null; pendingMidSeasonMove = null;
   openVacancies = []; /* v244 BUG FOUND DURING VERIFICATION (direct reproduction, flaky test caught it -- not a code read): never reset here before, only on LOAD (see the s.openVacancies fallback) -- so a SECOND new game started in the same browser tab could inherit an open vacancy left behind by whatever random tick happened to fire during the previous game's life, exactly the same class of same-tab-carryover bug already fixed for the Third Division master pools and fourthDivisionCreated (see initGameStateFresh's own v204 comment on those two). */
+  WORLD = null; /* v330 */
   englandJobOfferFired = false; pendingEnglandJobOffer = null; isEnglandManager = false; englandXI = []; /* v194/v195/v196 : a brand new game resets the one-off England opportunity; it is NOT reset at season close, since becoming England manager is a career-level achievement that should carry on into next season */
   assignDefaultCaptain();
   pendingUnhappyPlayerId = null;
@@ -36388,6 +36412,329 @@ function lireTxt(s){
   s = s.replace(/\b6d\b/g, 'L. 50'); /* the magazine cover price, 6d, is about L.44 : shown as L.50 */
   return s;
 }
+/* ===== v330 : ONE SHARED WORLD (England, Scotland, Italy ; built so Spain and West Germany plug in as one registry row + one seed per era) =====
+   Every country's leagues are played out together every season, whichever country the game was started in. The country you manage in runs on the full engine ;
+   every other country runs on this light layer : a fixed round-robin per division (circle method), results drawn from the clubs' strengths with a home edge (Poisson goals,
+   two points a win), season-end promotion and relegation by each country's own rule, a cup knockout, and a short news item. Seeds are the same sourced club lists the
+   start-a-game screens use (snapshotted at load, because the Scottish / Italian modes swap the 1966 globals). When the manager is appointed abroad the destination
+   country's membership comes from here, so the clubs that were promoted and relegated while you were away are the clubs you find. Fixtures are not stored : only the
+   tables and the round counter. Era : 1959-60 and 1966-67 starts (the 1946 / 1950 eras have no Italian data and stay England / Scotland only).
+   TO ADD A COUNTRY : add one row to WORLD_REG (tiers with up / down counts, cup name, goals per team), one seed per era in the IIFE below, the country's picker keys and engine
+   stub (as ITA has), and a row in WORLD_OFFER_RULES. Nothing else in this layer names a country. */
+var WORLD = null;
+var WORLD_REG = {
+  ENG:{name:'England', cup:'FA Cup', g0:1.34, tiers:[
+    {id:'D1', label:'English First Division', up:0, down:2, tier:3},
+    {id:'D2', label:'English Second Division', up:2, down:2, tier:2},
+    {id:'D3', label:'English Third Division', up:2, down:4, tier:1},
+    {id:'D4', label:'English Fourth Division', up:4, down:0, tier:0}]},
+  SCO:{name:'Scotland', cup:'Scottish Cup', g0:1.5, tiers:[
+    {id:'D1', label:'Scottish Division One', up:0, down:2, tier:3},
+    {id:'D2', label:'Scottish Division Two', up:2, down:0, tier:2}]},
+  ITA:{name:'Italy', cup:'Coppa Italia', g0:1.18, tiers:[
+    {id:'D1', label:'Serie A', up:0, down:3, tier:3},
+    {id:'D2', label:'Serie B', up:3, down:0, tier:2}]}
+};
+var WORLD_SEEDS = {};
+(function(){
+  function arr(names, masters){ masters = masters || []; return names.map(function(n){ var m = masters.find(function(c){ return c.n === n; }) || {}; return {n:n, s:(typeof m.s === 'number' ? m.s : 60), mgr:m.mgr || null, ground:m.ground || null}; }); }
+  function dict(def, names){ return names.map(function(n){ var m = (def.masters && def.masters[n]) || {}; return {n:n, s:(typeof m.s === 'number' ? m.s : 60), mgr:m.mgr || null, ground:m.ground || null}; }); }
+  function sane(t){ return t && t.length && t.every(function(x){ return x.length > 1; }); }
+  ['1959', '1966'].forEach(function(E){
+    var S = {};
+    try {
+      var eng = E === '1959'
+        ? [[CLUB_1959_FIRST_NAMES, firstDivisionMasterClubs1959_FIRST], [CLUB_1959_SECOND_NAMES, secondDivisionMasterClubs1959_SECOND], [CLUB_1959_THIRD_NAMES, thirdDivisionMasterClubs1959_THIRD], [CLUB_1959_FOURTH_NAMES, fourthDivisionMasterClubs1959_FOURTH]]
+        : [[CLUB_1966_FIRST_NAMES, firstDivisionMasterClubs1966_FIRST], [CLUB_1966_SECOND_NAMES, secondDivisionMasterClubs1966_SECOND], [CLUB_1966_THIRD_NAMES, thirdDivisionMasterClubs1966_THIRD], [CLUB_1966_FOURTH_NAMES, fourthDivisionMasterClubs1966_FOURTH]];
+      var et = eng.map(function(p){ return arr(p[0].slice(), p[1]); });
+      if (sane(et)) S.ENG = {tiers:et};
+    } catch (e) {}
+    try {
+      var st = E === '1966' ? [arr(SCO_BASE.d1.slice(), SCO_BASE.m1), arr(SCO_BASE.d2.slice(), SCO_BASE.m2)] : (SCO_ERA_DEFS[E] ? [dict(SCO_ERA_DEFS[E], SCO_ERA_DEFS[E].d1), dict(SCO_ERA_DEFS[E], SCO_ERA_DEFS[E].d2)] : null);
+      if (st && sane(st)) S.SCO = {tiers:st};
+    } catch (e) {}
+    try {
+      var d = FOR_ERA_DEFS.ITA[E];
+      if (d){ var it = [dict(d, d.d1), dict(d, d.d2)]; if (sane(it)) S.ITA = {tiers:it}; }
+    } catch (e) {}
+    if (S.ENG && S.SCO) WORLD_SEEDS[E] = S;
+  });
+})();
+var WORLD_INFO = {};
+function worldInfoFor(era, c, n){
+  var K = era + c;
+  if (!WORLD_INFO[K]){ WORLD_INFO[K] = {}; var S = WORLD_SEEDS[era] && WORLD_SEEDS[era][c]; if (S) S.tiers.forEach(function(t){ t.forEach(function(x){ WORLD_INFO[K][x.n] = x; }); }); }
+  return WORLD_INFO[K][n] || null;
+}
+function worldCur(){ return isSco() ? gameCountry : 'ENG'; }
+function worldEraKey(){ var e = isSco() ? scoEra : gameEra; return WORLD_SEEDS[e] ? e : ''; }
+function worldBlankTable(clubs){ var t = {}; clubs.forEach(function(c){ t[c.n] = {p:0,w:0,d:0,l:0,f:0,a:0,pts:0}; }); return t; }
+function worldKeys(c){ return WORLD_REG[c].tiers.map(function(t){ return t.id; }); }
+function worldInit(){
+  var E = worldEraKey();
+  if (!E || (!isSco() && !fourthDivisionCreated)){ WORLD = null; return false; }
+  var W = {v:1, era:E, countries:{}, news:[]};
+  Object.keys(WORLD_SEEDS[E]).forEach(function(c){
+    W.countries[c] = {hist:[], tiers:WORLD_SEEDS[E][c].tiers.map(function(t){ var cl = t.map(function(x){ return {n:x.n, s:x.s}; }); return {clubs:cl, table:worldBlankTable(cl), rd:0}; })};
+  });
+  WORLD = W;
+  worldSyncCurrent();
+  return true;
+}
+function worldEnsure(){
+  var E = worldEraKey();
+  if (WORLD && WORLD.era === E && WORLD.countries && E) return true;
+  return worldInit();
+}
+function worldAvailable(){ return !!(worldEraKey() && (isSco() || fourthDivisionCreated)); }
+/* the real strength of a club the engine is running, as the engine itself holds it */
+function worldEngineStrength(n, key, old){
+  if (n === ourClubName) return (old && old[n]) ? old[n].s : null;
+  var r = rivals.find(function(x){ return x.n === n; }); if (r) return r.s;
+  var d = aiBgDivFor(key).clubs.find(function(x){ return x.n === n; }); if (d) return d.s;
+  for (var k = 0; k < 4; k++){ var dd = aiBgDivFor(['D1','D2','D3','D4'][k]).clubs.find(function(x){ return x.n === n; }); if (dd) return dd.s; }
+  return null;
+}
+/* put the engine's real membership for the country being managed into the world (called when a season begins and after any move) */
+function worldSyncCurrent(){
+  if (!WORLD) return;
+  var c = worldCur(), C = WORLD.countries[c]; if (!C) return;
+  var keys = worldKeys(c);
+  keys.forEach(function(k, i){
+    var T = C.tiers[i], d = aiLiveTierData(k), old = {}; T.clubs.forEach(function(x){ old[x.n] = x; });
+    var names = d.names.filter(function(n, j){ return d.names.indexOf(n) === j; });
+    var known = names.map(function(n){ return worldEngineStrength(n, k, old); }).filter(function(v){ return v !== null; });
+    var avg = known.length ? Math.round(known.reduce(function(a, b){ return a + b; }, 0) / known.length) : 60;
+    T.clubs = names.map(function(n){
+      var s = worldEngineStrength(n, k, old);
+      if (s === null){ var inf = worldInfoFor(WORLD.era, c, n); s = (old[n] && old[n].s) || (inf ? inf.s : avg); }
+      return {n:n, s:s};
+    });
+    T.table = worldBlankTable(T.clubs); T.rd = 0;
+  });
+}
+function worldRounds(T){ var n = T.clubs.length, m = n + (n % 2); return 2 * (m - 1); }
+function worldPoisson(l){ var L = Math.exp(-l), k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L && k < 12); return k - 1; }
+function worldPlayRound(c, i){
+  var T = WORLD.countries[c].tiers[i], cl = T.clubs, n = cl.length; if (n < 2) return;
+  var m = n + (n % 2), per = m - 1, r = T.rd % per, second = T.rd >= per;
+  var others = []; for (var k = 1; k < m; k++) others.push(k);
+  var rot = others.slice(r).concat(others.slice(0, r)), L = [0].concat(rot), g0 = WORLD_REG[c].g0;
+  for (var j = 0; j < m / 2; j++){
+    var a = L[j], b = L[m - 1 - j]; if (a >= n || b >= n) continue;
+    var homeFirst = (j === 0) ? (r % 2 === 0) : true; if (second) homeFirst = !homeFirst;
+    var h = homeFirst ? cl[a] : cl[b], aw = homeFirst ? cl[b] : cl[a], d = h.s - aw.s;
+    var gh = worldPoisson(g0 * 1.17 * Math.exp(d / 70)), ga = worldPoisson(g0 * 0.85 * Math.exp(-d / 70));
+    var th = T.table[h.n], ta = T.table[aw.n];
+    th.p++; ta.p++; th.f += gh; th.a += ga; ta.f += ga; ta.a += gh;
+    if (gh > ga){ th.w++; th.pts += 2; ta.l++; } else if (gh < ga){ ta.w++; ta.pts += 2; th.l++; } else { th.d++; ta.d++; th.pts++; ta.pts++; }
+  }
+  T.rd++;
+}
+function worldFinishTier(c, i){ var T = WORLD.countries[c].tiers[i], R = worldRounds(T); while (T.rd < R) worldPlayRound(c, i); }
+function worldSeasonFrac(){
+  var mine = table[ourClubName], tot = rivals.length * 2;
+  if (!mine || !tot) return 0;
+  return Math.max(0, Math.min(1, mine.p / tot));
+}
+/* once a league week : every other country plays the same share of its season as ours has */
+function worldStepWeek(){
+  if (!worldEnsure()) return;
+  var frac = worldSeasonFrac(), cur = worldCur();
+  Object.keys(WORLD.countries).forEach(function(c){
+    if (c === cur) return;
+    WORLD.countries[c].tiers.forEach(function(T, i){
+      var goal = Math.min(worldRounds(T), Math.floor(frac * worldRounds(T) + 1e-9));
+      while (T.rd < goal) worldPlayRound(c, i);
+    });
+  });
+}
+function worldPctS(clubs, p){
+  var a = clubs.map(function(x){ return x.s; }).sort(function(x, y){ return x - y; });
+  if (!a.length) return 60;
+  return a[Math.max(0, Math.min(a.length - 1, Math.round(p * (a.length - 1))))];
+}
+function worldCupName(c){ var nm = WORLD_REG[c].cup; return (c === 'ENG' && isSco()) ? 'F\u200BA Cup' : nm; }
+function worldCupPlay(c){
+  var all = []; WORLD.countries[c].tiers.forEach(function(T, i){ T.clubs.forEach(function(x){ all.push({n:x.n, e:x.s - 10 * i}); }); });
+  all.sort(function(a, b){ return b.e - a.e; });
+  var size = 1; while (size < all.length) size *= 2;
+  var byes = size - all.length, field = all.slice(0, byes), rest = all.slice(byes);
+  for (var x = rest.length - 1; x > 0; x--){ var y = Math.floor(Math.random() * (x + 1)), t = rest[x]; rest[x] = rest[y]; rest[y] = t; }
+  var runner = null;
+  function duel(A, B, last){ var win = Math.random() < 1 / (1 + Math.exp(-(A.e - B.e) / 22)) ? A : B; if (last) runner = (win === A ? B : A); return win; }
+  var firstWinners = []; for (var q = 0; q < rest.length; q += 2) firstWinners.push(duel(rest[q], rest[q + 1], false));
+  var round = field.concat(firstWinners);
+  while (round.length > 1){
+    var nx = [];
+    for (var z = 0; z < round.length; z += 2) nx.push(duel(round[z], round[z + 1], round.length === 2));
+    round = nx;
+  }
+  return {winner:round[0].n, runnerUp:runner ? runner.n : null};
+}
+function worldAddNews(text){ WORLD.news.unshift(text); if (WORLD.news.length > 40) WORLD.news.length = 40; addNews('rivals', text); }
+/* season end (called at the top of startNewSeason, before the engine rolls the season over) */
+function worldEndSeason(){
+  if (!worldEnsure()) return;
+  var W = WORLD, cur = worldCur(), label = seasonLabel;
+  Object.keys(W.countries).forEach(function(c){
+    var C = W.countries[c], R = WORLD_REG[c], nT = C.tiers.length, keys = worldKeys(c);
+    var rec = {label:label, champs:{}, cup:null};
+    if (c === cur){
+      keys.forEach(function(k){ var d = aiLiveTierData(k), s = aiSortedStandings(d.names, d.table); rec.champs[k] = s[0] || null; });
+      rec.cup = (typeof cupBracket !== 'undefined' && cupBracket && cupBracket.championName) ? cupBracket.championName : null;
+      C.hist.push(rec); if (C.hist.length > 40) C.hist.shift();
+      return;
+    }
+    C.tiers.forEach(function(T, i){ worldFinishTier(c, i); });
+    var sorted = C.tiers.map(function(T){ return aiSortedStandings(T.clubs.map(function(x){ return x.n; }), T.table); });
+    var maps = C.tiers.map(function(T){ var o = {}; T.clubs.forEach(function(x){ o[x.n] = x; }); return o; });
+    var up = [], down = [], stay = [];
+    for (var i = 0; i < nT; i++){
+      var S = sorted[i], u = i > 0 ? Math.min(R.tiers[i].up, R.tiers[i - 1].down) : 0, d = i < nT - 1 ? Math.min(R.tiers[i].down, R.tiers[i + 1].up) : 0;
+      up[i] = S.slice(0, u); down[i] = d ? S.slice(S.length - d) : []; stay[i] = S.slice(u, S.length - d);
+    }
+    keys.forEach(function(k, i){ rec.champs[k] = sorted[i][0]; });
+    var cup = worldCupPlay(c); rec.cup = cup.winner;
+    var champPts = C.tiers[0].table[sorted[0][0]].pts;
+    var next = [];
+    for (var j = 0; j < nT; j++){
+      var tierClubs = [], mean = stay[j].length ? stay[j].reduce(function(a, b){ return a + maps[j][b].s; }, 0) / stay[j].length : 60;
+      var stayObjs = stay[j].map(function(nm, idx){
+        var x = maps[j][nm], rank = sorted[j].indexOf(nm), nn = sorted[j].length, perf = (0.5 - rank / Math.max(1, nn - 1)) * 2;
+        var s = Math.round(x.s + perf * 1.5 + 0.1 * (mean - x.s) + (Math.random() * 4 - 2));
+        return {n:nm, s:Math.max(40, Math.min(99, s))};
+      });
+      var arrivals = [];
+      if (j > 0) down[j - 1].forEach(function(nm, idx){ arrivals.push({n:nm, s:Math.max(40, Math.min(99, worldPctS(stayObjs, 0.62 + 0.3 * (1 - idx / Math.max(1, down[j - 1].length))) + Math.round(Math.random() * 3 - 1)))}); });
+      if (j < nT - 1) up[j + 1].forEach(function(nm, idx){ arrivals.push({n:nm, s:Math.max(40, Math.min(99, worldPctS(stayObjs, 0.12 + 0.2 * (1 - idx / Math.max(1, up[j + 1].length))) + Math.round(Math.random() * 3 - 1)))}); });
+      next.push(stayObjs.concat(arrivals));
+    }
+    C.tiers.forEach(function(T, i){ T.clubs = next[i]; T.table = worldBlankTable(next[i]); T.rd = 0; });
+    rec.up = up[1] ? up[1].slice() : []; rec.down = down[0].slice();
+    C.hist.push(rec); if (C.hist.length > 40) C.hist.shift();
+    var lg = R.tiers[0].label, bits = [rec.champs.D1 + ' take the ' + lg + ' title on ' + champPts + ' points'];
+    if (rec.down.length) bits.push(rec.down.join(', ') + ' go down');
+    if (rec.up.length) bits.push(rec.up.join(', ') + ' come up from ' + R.tiers[1].label);
+    worldAddNews('ABROAD (' + R.name + ', ' + label + '): ' + bits.join('; ') + '. ' + cup.winner + ' win the ' + worldCupName(c) + '.');
+  });
+}
+/* ----- the viewable side ----- */
+function worldNavRefresh(){
+  var a = document.querySelector('.navlink[data-view="abroad"]'); if (a) a.style.display = worldAvailable() ? '' : 'none';
+}
+var abroadSel = {c:null, t:0};
+function renderAbroad(){
+  var body = document.getElementById('abroad-body'); if (!body) return;
+  var sub = document.getElementById('abroad-sub'), cs = document.getElementById('abroad-country'), ts = document.getElementById('abroad-tier');
+  if (!worldEnsure()){
+    sub.textContent = 'THIS ERA HAS NO OTHER LEAGUES TO WATCH YET.'; body.innerHTML = ''; document.getElementById('abroad-hist').innerHTML = ''; document.getElementById('abroad-news').innerHTML = ''; return;
+  }
+  cs.onchange = function(){ abroadSel.c = cs.value; abroadSel.t = 0; renderAbroad(); };
+  ts.onchange = function(){ abroadSel.t = parseInt(ts.value, 10) || 0; renderAbroad(); };
+  var cur = worldCur(), codes = Object.keys(WORLD.countries);
+  if (!abroadSel.c || codes.indexOf(abroadSel.c) < 0) abroadSel.c = codes.filter(function(x){ return x !== cur; })[0] || cur;
+  if (cs.getAttribute('data-era') !== WORLD.era + cur){
+    cs.innerHTML = codes.map(function(x){ return '<option value="' + x + '">' + WORLD_REG[x].name.toUpperCase() + (x === cur ? ' (YOURS)' : '') + '</option>'; }).join('');
+    cs.setAttribute('data-era', WORLD.era + cur);
+  }
+  cs.value = abroadSel.c;
+  var R = WORLD_REG[abroadSel.c]; if (abroadSel.t >= R.tiers.length) abroadSel.t = 0;
+  ts.innerHTML = R.tiers.map(function(t, i){ return '<option value="' + i + '">' + t.label.toUpperCase() + '</option>'; }).join('');
+  ts.value = String(abroadSel.t);
+  var C = WORLD.countries[abroadSel.c], T = C.tiers[abroadSel.t], tr = R.tiers[abroadSel.t], isCur = abroadSel.c === cur, names, tbl, nT = R.tiers.length;
+  if (isCur){ var d = aiLiveTierData(worldKeys(abroadSel.c)[abroadSel.t]); names = d.names; tbl = d.table; } else { names = T.clubs.map(function(x){ return x.n; }); tbl = T.table; }
+  var sorted = aiSortedStandings(names, tbl), n = sorted.length;
+  var upN = abroadSel.t > 0 ? Math.min(tr.up, R.tiers[abroadSel.t - 1].down) : 0, dnN = abroadSel.t < nT - 1 ? Math.min(tr.down, R.tiers[abroadSel.t + 1].up) : 0;
+  var played = isCur ? (tbl[sorted[0]] ? tbl[sorted[0]].p : 0) : T.rd;
+  sub.innerHTML = R.name + ' : <span style="text-transform:none">' + tr.label + '</span>, ' + seasonLabel + (isCur ? ' (the league you manage in)' : ', ' + T.rd + ' of ' + worldRounds(T) + ' rounds played') + '. Every league in this world is played out alongside yours, season by season, wherever you manage.';
+  body.innerHTML = sorted.map(function(nm, i){
+    var r = tbl[nm] || {p:0,w:0,d:0,l:0,f:0,a:0,pts:0}, mark = (i < upN) ? 'border-left:3px solid #4a4' : (i >= n - dnN && dnN) ? 'border-left:3px solid #c44' : 'border-left:3px solid transparent';
+    return '<tr' + (nm === ourClubName ? ' class="us"' : '') + '><td style="' + mark + '">' + (i + 1) + '</td><td>' + nm.toUpperCase() + '</td><td>' + r.p + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l + '</td><td>' + r.f + '</td><td>' + r.a + '</td><td>' + r.pts + '</td></tr>';
+  }).join('');
+  var hist = C.hist.slice().reverse().slice(0, 12);
+  document.getElementById('abroad-hist').innerHTML = hist.length ? hist.map(function(h){ return '<tr><td>' + h.label + '</td><td>' + (h.champs.D1 || '--').toUpperCase() + '</td><td>' + (h.champs.D2 || '--').toUpperCase() + '</td><td>' + (h.cup || '--').toUpperCase() + '</td></tr>'; }).join('') : '<tr><td colspan="4">NO SEASON COMPLETED YET IN THIS SAVE.</td></tr>';
+  document.getElementById('abroad-hist-th').textContent = worldCupName(abroadSel.c).toUpperCase();
+  document.getElementById('abroad-news').innerHTML = WORLD.news.length ? WORLD.news.slice(0, 8).map(function(t){ return '<div class="news-item">' + t + '</div>'; }).join('') : '<div class="news-item">NOTHING YET : THE FIRST REPORTS COME AT THE END OF THE SEASON.</div>';
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var cs = document.getElementById('abroad-country'), ts = document.getElementById('abroad-tier');
+  if (cs) cs.addEventListener('change', function(){ abroadSel.c = cs.value; abroadSel.t = 0; renderAbroad(); });
+  if (ts) ts.addEventListener('change', function(){ abroadSel.t = parseInt(ts.value, 10) || 0; renderAbroad(); });
+});
+/* ----- job offers from any country (England <-> Scotland in 1966-67 keep their v318 functions) ----- */
+var WORLD_OFFER_RULES = [
+  {from:'ENG', to:'SCO', eras:['1959'], top:{rep:75, score:5, p:0.004}, second:{rep:85, score:5, p:0.002}, elite:2},
+  {from:'SCO', to:'ENG', eras:['1959'], top:{rep:75, score:4, p:0.006}, second:{rep:85, score:5, p:0.004}, elite:6},
+  {from:'ENG', to:'ITA', eras:['1959', '1966'], top:{rep:85, score:6, p:0.0016}, byEra:{'1966':0.0009}, elite:5},
+  {from:'SCO', to:'ITA', eras:['1959', '1966'], top:{rep:85, score:6, p:0.0016}, byEra:{'1966':0.0009}, elite:5},
+  {from:'ITA', to:'ENG', eras:['1959', '1966'], top:{rep:90, score:7, p:0.0003}, elite:6},
+  {from:'ITA', to:'SCO', eras:['1959', '1966'], top:{rep:90, score:7, p:0.0002}, elite:2}
+];
+function worldOfferNews(club, label, to){
+  var from = worldCur(), words = {ENG:'English football', SCO:'Scottish football', ITA:'Italian football'};
+  addNews('board', 'JOB OFFER FROM ' + WORLD_REG[to].name.toUpperCase() + ': ' + club + ' of the ' + label + ' have asked the board\'s permission to speak to you about their manager\'s vacancy. It would mean leaving ' + words[from] + ' for ' + words[to] + ' and starting again with a new squad that has never met you. You would take over in the summer.');
+}
+function maybeGenerateAbroadOffer(){
+  if (pendingJobOffer || pendingClubMove || pendingMidSeasonMove) return;
+  if (seasonNumber < 2 || divisionTier < 2) return;
+  if (!worldEnsure()) return;
+  var from = worldCur(), E = WORLD.era, rep = manager.rep || 50;
+  var rules = WORLD_OFFER_RULES.filter(function(r){ return r.from === from && r.eras.indexOf(E) >= 0 && WORLD.countries[r.to] && !(E === '1966' && ((from === 'ENG' && r.to === 'SCO') || (from === 'SCO' && r.to === 'ENG'))); });
+  if (!rules.length || !jobRecentGood()) return;
+  var score = ramseyScore();
+  for (var k = 0; k < rules.length; k++){
+    var r = rules[k], g = divisionTier === 3 ? r.top : r.second; if (!g) continue;
+    if (rep < g.rep || score < g.score) continue;                 /* every gate is checked before a random number is drawn */
+    var p = (r.byEra && r.byEra[E] !== undefined && divisionTier === 3) ? r.byEra[E] : g.p;
+    if (Math.random() >= p) continue;
+    var ti = divisionTier === 3 ? 0 : 1, T = WORLD.countries[r.to].tiers[ti]; if (!T) continue;
+    var ranked = T.clubs.slice().sort(function(a, b){ return b.s - a.s; });
+    var top = rep >= 90 && score >= 8;
+    var pool = ranked.slice(top ? 0 : r.elite).map(function(x){ return x.n; }).filter(function(nm){ return !jobVacant(nm); });
+    var club = pick(pool); if (!club) continue;
+    var lab = WORLD_REG[r.to].tiers[ti].label;
+    pendingJobOffer = {club:club, divisionLabel:lab, tier:WORLD_REG[r.to].tiers[ti].tier, country:r.to};
+    worldOfferNews(club, lab, r.to);
+    return;
+  }
+}
+/* the appointment itself : builds the destination country from the world's membership for the coming season and gives the manager a new squad */
+function worldCrossBorderMove(move){
+  var W = WORLD, target = move.country, E = W.era, oldClub = ourClubName, newClub = move.club, C = W.countries[target], R = WORLD_REG[target], fromC = worldCur();
+  var ti = -1; C.tiers.forEach(function(T, i){ if (T.clubs.some(function(x){ return x.n === newClub; })) ti = i; });
+  var clubsOf = C.tiers.map(function(T){ return T.clubs.map(function(x){ return {n:x.n, s:x.s}; }); });
+  if (ti < 0){ ti = Math.max(0, Math.min(R.tiers.length - 1, 3 - move.divisionTier)); clubsOf[ti].push({n:newClub, s:62}); }
+  scoSaveOldSquad(oldClub);
+  gameCountry = target; setCupConfigForCountry(); applyNamePoolsForCountry();
+  deactivateAnyEraStub();
+  if (target === 'ENG'){ gameEra = E; activate1959or66(E); scoRestoreDom(); }
+  else { gameEra = '1966'; scoEra = E; activateScotlandStub(); scoInstallDomFilter(); }
+  stripStaleClubProfiles();
+  function mk(label, list, seed){ return makeDivision(label, list.filter(function(x){ return x.n !== newClub; }).map(function(x){ return x.n; }), seed, list); }
+  firstDivision = mk('First Division', clubsOf[0], 11);
+  secondDivision = mk('Second Division', clubsOf[1] || [], 22);
+  thirdDivisionSouthBg = mk('Third Division', clubsOf[2] || [], 66);
+  thirdDivisionNorth = mk('Fourth Division', clubsOf[3] || [], 33);
+  [firstDivision, secondDivision, thirdDivisionNorth, thirdDivisionSouthBg].forEach(function(div){ div.lastLines = []; });
+  divisionTier = R.tiers[ti].tier; divisionRegion = null;
+  var words = ['FIRST DIVISION', 'SECOND DIVISION', 'THIRD DIVISION', 'FOURTH DIVISION'];
+  currentDivisionLabel = words[ti]; currentDivisionShort = isSco() ? scoDivShortFor(ti + 1) : 'DIV ' + (ti + 1);
+  rivals = clubsOf[ti].filter(function(x){ return x.n !== newClub; }).map(function(x){
+    var inf = worldInfoFor(E, target, x.n) || {};
+    return {n:x.n, s:x.s, mgr:inf.mgr || (pick(firstNamePool) + ' ' + pick(surnamePool)), ground:inf.ground || (clubProfiles[x.n] ? clubProfiles[x.n].ground : x.n + ' Ground')};
+  });
+  ourClubName = newClub;
+  scoAdoptClub(newClub);
+  aiClubForm = {}; aiClubInjuryCA = {}; scoLastNext = null;
+  cupRoundDates = cupProperDatesForSeason(seasonLabel);
+  generateBoardTarget();
+  var near = ((fromC === 'ENG' && target === 'SCO') || (fromC === 'SCO' && target === 'ENG'));
+  addNews('board', (near ? 'ACROSS THE BORDER' : 'A NEW COUNTRY') + ': you leave ' + oldClub + ' and take charge at ' + newClub.toUpperCase() + ' (' + R.tiers[ti].label + ') for the ' + seasonLabel + ' season. Your record, honours and reputation come with you; the players here have never met you, so it starts from scratch, and ' + oldClub + ' carry on under a new manager of their own.');
+  worldSyncCurrent();
+}
+function activate1959or66(E){ if (E === '1959') activate1959Stub(); else activate1966Stub(); }
+/* ===== END v330 SHARED WORLD ===== */
 var SCO_TXT_RULES = [[/F\.?A\.? (challenge )?cup/gi, function(m){ return scoCaseLike(m,foreignCupName().toUpperCase(),foreignCupName()); }],
   [/Wembley( Stadium)?/gi, function(m){ return scoCaseLike(m,foreignFinalGround().toUpperCase(),foreignFinalGround()); }],
   [/\bFootball League\b/gi, function(m){ return isIta() ? scoCaseLike(m,'ITALIAN LEAGUE','Italian League') : m; }],
@@ -37166,6 +37513,7 @@ function runFourthDivisionRestructuring(){
   addNews('board', 'THE FOOTBALL LEAGUE IS REORGANISED for '+nextSeasonLabel()+': Third Division South and Third Division North are abolished. The clubs of each (bar the two just promoted to Second Division) are split by last season\'s final placings into one new national Third Division and a brand new Fourth Division -- the first change to the League\'s basic shape since the regional Third Divisions were created in the 1920s.');
 }
 function startNewSeason(outcome){
+  try { worldEndSeason(); } catch (e) { if (typeof console !== 'undefined') console.error('world season end', e); } /* v330 : every other country finishes its season now */
   updateScoutReputations(); /* v142 : judged against the squad as it stood through the season just finished, before retirement/youth intake below changes it */
   developYouthProspectsForSeason(); /* v144 : ground-staff boys age a year, grow toward their potential, and become eligible for professional forms at 17 -- see the function itself */
   /* RE-ELECTION runs first, against THIS season's real final standings,
@@ -37447,7 +37795,8 @@ function startNewSeason(outcome){
      manual "change which club you manage" lever, not the ordinary season
      rollover this fix targets, and performClubMove() handles its own
      rivals/table setup for the destination club. */
-  if (pendingClubMove) performClubMove(); /* PER DIRECT REQUEST: a real move, not just leverage -- see performClubMove for exactly what does and doesn't carry over. Runs here, after the ordinary promotion/relegation/re-election handling above has already settled where the OLD club and everyone else stand next season, and before the fixtures/table below are built -- so that build now genuinely runs for the NEW club and its real rivals instead. */
+  try { worldSyncCurrent(); } catch (e) { if (typeof console !== 'undefined') console.error('world sync', e); }
+  if (pendingClubMove){ performClubMove(); try { worldSyncCurrent(); } catch (e) { if (typeof console !== 'undefined') console.error('world sync', e); } } /* PER DIRECT REQUEST: a real move, not just leverage -- see performClubMove for exactly what does and doesn't carry over. Runs here, after the ordinary promotion/relegation/re-election handling above has already settled where the OLD club and everyone else stand next season, and before the fixtures/table below are built -- so that build now genuinely runs for the NEW club and its real rivals instead. */
   buildReserveLeagueSeason(); /* v146 : a fresh Combination/Central League season, table and all -- run after any club move above so a relocated club's reserves join the region it actually now plays in */
   fixtures = buildPreseasonFixtures();
   rivals.forEach(function(r,i){ fixtures.push({opp:r.n, s:r.s, home:(i%2===0), played:false, res:null}); });
@@ -37932,6 +38281,7 @@ function finishMatch(){
   }
   maybeGenerateOffer();
   if (!f.isFriendly) maybeGenerateJobOffer();
+  if (!f.isFriendly){ try { worldStepWeek(); } catch (e) { if (typeof console !== 'undefined') console.error('world step', e); } } /* v330 */
   if (!f.isFriendly) maybeGenerateEnglandJobOffer();
   renderOffers(); renderTargets(); renderClub();
 
@@ -38054,7 +38404,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v329'; /* v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v330'; /* v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
