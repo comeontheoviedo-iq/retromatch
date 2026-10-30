@@ -3514,7 +3514,7 @@ function renderContractsBox(){
   var body = document.getElementById('contracts-body'); if (!body) return;
   var cap = currentMaxWage();
   var abolished = wageCapAbolished();
-  var maxWageEl = document.getElementById('contracts-max-wage'); if (maxWageEl) maxWageEl.textContent = abolished ? 'none' : cap;
+  var maxWageEl = document.getElementById('contracts-max-wage'); if (maxWageEl) maxWageEl.textContent = (abolished || (typeof isIta === 'function' && isIta())) ? 'none' : cap; /* v329 : Italy has no maximum wage rule */ if (maxWageEl && maxWageEl.previousSibling && maxWageEl.previousSibling.nodeType === 3) maxWageEl.previousSibling.nodeValue = (typeof isIta === 'function' && isIta()) ? 'vs Max (' : 'vs Max (£';
   var retainGone = retainAndTransferEnded();
   body.innerHTML = squad.slice().sort(function(a,b){ return posGroupOf(a) - posGroupOf(b) || (b.rep - a.rep) || a.n.localeCompare(b.n); }).map(function(p){
     /* v154 : from 1961 there is no legal ceiling left to sit "at" -- so past
@@ -15151,10 +15151,10 @@ function renderOffers(){
 
     if (o.negotiateAttempts > 0){
       var negWrap = document.createElement('div'); negWrap.style.marginTop = '6px';
-      var input = document.createElement('input'); input.type='number'; input.placeholder='YOUR ASKING PRICE'; input.style.width='120px'; input.style.marginRight='6px'; input.style.fontSize='15px';
+      var input = document.createElement('input'); input.type='number'; input.placeholder = isIta() ? 'YOUR ASKING PRICE (LIRE)' : 'YOUR ASKING PRICE'; input.style.width='120px'; input.style.marginRight='6px'; input.style.fontSize='15px';
       var negBtn = document.createElement('button'); negBtn.textContent='NEGOTIATE PRICE'; negBtn.style.padding='2px 10px'; negBtn.style.fontSize='15px'; negBtn.style.marginRight='6px';
       negBtn.addEventListener('click', function(){
-        var asked = parseInt(input.value, 10);
+        var asked = parseInt(input.value, 10); if (isIta() && asked) asked = Math.round(asked / LIRE_PER_POUND); /* v329 : typed in lire */
         if (!asked || asked <= o.fee){ addNews('board', 'Put a genuine asking price above their offer on the table before you go back to '+o.buyer+'.'); return; }
         o.negotiateAttempts--;
         var ratio = asked / o.fee;
@@ -16441,7 +16441,8 @@ function eraCaseText(t, atStart){
     if (isStart && !M.abbr[lw] && !keep && !dotted) res = res.charAt(0).toUpperCase() + res.slice(1);
     out += before + res + tail; pos = k.e;
   });
-  return out + t.substring(pos);
+  out = out + t.substring(pos);
+  return out.replace(/\b([Ss]erie) ([a-d])\b/g, function(m, w, c){ return w + ' ' + c.toUpperCase(); }); /* v329 : Serie A / Serie B */
 }
 function eraCaseAtStart(n){
   /* true when no text precedes this node within its block (so it opens a sentence) or the text before it ends a sentence */
@@ -36363,6 +36364,30 @@ function scoProfileFor(name, key){
 }
 /* Scottish wording : the engine's English wording is rewritten for display and for stored news, nothing else */
 function scoCaseLike(m, up, low){ return (m === m.toUpperCase()) ? up : low; }
+/* ===== v329 : ITALIAN MONEY IN LIRE. The sim keeps every sum in pounds internally (wages, fees, gates, bank) ; in Italy the DISPLAY converts each
+   pound sum at the fixed rate of the era : the lira was held at 625 to the US dollar from 1949 into the late 1960s (Banca d'Italia, World Bank
+   reports of 1958 and 1964) and the pound at 2.80 dollars until the November 1967 devaluation, so L.1,750 = 1 pound in both 1959-60 and 1966-67.
+   Written Italian-style, whole lire, thousands marked with dots. Nothing in the game logic reads rendered text. ===== */
+var LIRE_PER_POUND = 1750;
+function lireDots(n){ return String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function lireFromPounds(gbp){
+  var l = gbp * LIRE_PER_POUND;
+  if (Math.abs(l) >= 1e9) return 'L. ' + lireDots(l / 1e6) + ' milioni';
+  l = Math.round(l / 10) * 10;
+  return 'L. ' + lireDots(l);
+}
+function lireTxt(s){
+  if (typeof s !== 'string' || s.indexOf('\u00a3') < 0 && !/\b6d\b/.test(s)) return s;
+  s = s.replace(/\u00a3\s?(\d[\d,]*(?:\.\d+)?)(\s?million\b|m\b|k\b)?/gi, function(m, num, suf){
+    var v = parseFloat(num.replace(/,/g, ''));
+    if (isNaN(v)) return m;
+    if (suf){ suf = suf.toLowerCase().replace(/\s/g, ''); v = v * (suf === 'k' ? 1e3 : 1e6); }
+    return lireFromPounds(v);
+  });
+  s = s.replace(/\(\u00a3\)/g, '(L.)').replace(/\u00a3(?=NONE)/gi, '');
+  s = s.replace(/\b6d\b/g, 'L. 50'); /* the magazine cover price, 6d, is about L.44 : shown as L.50 */
+  return s;
+}
 var SCO_TXT_RULES = [[/F\.?A\.? (challenge )?cup/gi, function(m){ return scoCaseLike(m,foreignCupName().toUpperCase(),foreignCupName()); }],
   [/Wembley( Stadium)?/gi, function(m){ return scoCaseLike(m,foreignFinalGround().toUpperCase(),foreignFinalGround()); }],
   [/\bFootball League\b/gi, function(m){ return isIta() ? scoCaseLike(m,'ITALIAN LEAGUE','Italian League') : m; }],
@@ -36372,12 +36397,14 @@ var SCO_TXT_RULES = [[/F\.?A\.? (challenge )?cup/gi, function(m){ return scoCase
 function scoTxt(s){
   if (typeof s !== 'string' || !isSco()) return s;
   for (var i=0;i<SCO_TXT_RULES.length;i++) s = s.replace(SCO_TXT_RULES[i][0], SCO_TXT_RULES[i][1]);
+  if (isIta()) s = lireTxt(s);
   return s;
 }
 function scoDomFilter(root){
   if (!isSco() || typeof document === 'undefined' || !root) return;
   var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, hits = [];
-  while ((n = w.nextNode())){ var v = n.nodeValue; if (v && /FA (C|c)|F\.A\. (C|c)|Wembley|WEMBLEY|Football League|FOOTBALL LEAGUE|Saturday|SATURDAY|(First|FIRST|Second|SECOND) (Division|DIVISION)/.test(v)) hits.push(n); }
+  while ((n = w.nextNode())){ var v = n.nodeValue; if (v && /FA (C|c)|F\.A\. (C|c)|Wembley|WEMBLEY|Football League|FOOTBALL LEAGUE|Saturday|SATURDAY|\u00a3|\b6d\b|(First|FIRST|Second|SECOND) (Division|DIVISION)/.test(v)) hits.push(n); }
+  if (isIta() && root.querySelectorAll){ Array.prototype.forEach.call(root.querySelectorAll('[title]'), function(el){ var tv = el.getAttribute('title'); if (tv && tv.indexOf('\u00a3') >= 0) el.setAttribute('title', lireTxt(tv)); }); }
   hits.forEach(function(t){ var nv = scoTxt(t.nodeValue); if (nv !== t.nodeValue){ if (t.__scoNew === undefined || t.__scoNew !== t.nodeValue) t.__scoOrig = t.nodeValue; t.nodeValue = nv; t.__scoNew = nv; } });
 }
 /* v318 : leaving Scotland for England in the same page : put back every English word the Scottish filter rewrote */
@@ -38027,7 +38054,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v328'; /* v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v329'; /* v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
