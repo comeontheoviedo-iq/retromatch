@@ -278,6 +278,49 @@ body{margin:0;font-family:system-ui,sans-serif;color:#222;background:#26221f}
  .p66 .cover{height:400px}
 }
 
+/* ===== v3: plan of the field, set in type like the period scans ===== */
+.plan{container-type:inline-size;position:relative}
+.plan .pt{text-align:center;line-height:1.1;margin:2px 0 4px}
+.plan .pt b{display:block;text-transform:uppercase}
+.plan .pt i{font-style:normal;display:block}
+.plan .prow{position:relative;height:3.9em;margin:0}
+.plan .pl1{position:absolute;transform:translateX(-50%);text-align:center;line-height:1.08;white-space:nowrap}
+.plan .pl1 .n{display:block}
+.plan .pl1 .s{display:block;text-transform:uppercase}
+.plan .pl1 .p{display:block}
+.plan .mid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:2px 0;padding:6px 0}
+.plan .mid .ref{text-align:right}
+.plan .mid .ln{text-align:left}
+.plan .mid h5{margin:0 0 2px;font-weight:400}
+.plan .mid .ball{width:46px;height:46px;display:block}
+.teams.plansec{display:block;width:100%}
+.planwrap>.plan{min-width:0}
+.planwrap{display:grid;grid-template-columns:88px minmax(0,1fr) 88px;gap:8px;align-items:stretch}
+.planwrap .fl{box-sizing:border-box;min-width:0;border:2px solid var(--ink);padding:8px 4px;text-align:center;align-self:center;font:600 11px/1.25 'Oswald',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.planwrap .fl .bg{overflow-wrap:anywhere;font:700 13px/1.1 'Oswald',sans-serif;display:block;margin:3px 0}
+.planwrap .fl u{text-decoration:underline;text-decoration-thickness:2px}
+.planwrap .fl small{font:italic 400 9.5px 'Old Standard TT';text-transform:none;letter-spacing:0;display:block;margin-top:3px}
+@media (max-width:700px){.planwrap{grid-template-columns:1fr}.planwrap .fl{display:none}}
+.p46 .plan{font-size:clamp(7.5px,2.15cqw,12.5px)}
+.p46 .plan .pt b{font:600 1.55em 'Oswald',sans-serif;letter-spacing:.14em}
+.p46 .plan .pt i{font:italic 400 1em 'Old Standard TT'}
+.p46 .plan .pl1 .n{font:700 .95em 'Old Standard TT'}
+.p46 .plan .pl1 .s{font:600 1.1em 'Oswald',sans-serif;letter-spacing:.06em}
+.p46 .plan .pl1 .p{font:italic .88em 'Old Standard TT'}
+.p46 .plan .mid h5{font:italic 1.2em 'Old Standard TT'}
+.p46 .plan .mid .nm{font:600 .95em 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.p46 .plan .mid .nm span{display:block}
+.p59 .plan{font-size:clamp(7.5px,2.1cqw,12px)}
+.p59 .plan .pt b{font:400 1.5em 'Alfa Slab One';color:var(--spot);letter-spacing:.04em}
+.p59 .plan .pt i{font:italic 400 1em 'Libre Baskerville'}
+.p59 .plan .pl1 .n{font:400 1em 'Alfa Slab One';color:var(--spot)}
+.p59 .plan .pl1 .s{font:500 1.1em 'Oswald',sans-serif;letter-spacing:.06em}
+.p59 .plan .pl1 .p{font:italic .86em 'Libre Baskerville'}
+.p59 .plan .mid h5{font:500 1em 'Oswald';letter-spacing:.2em;text-transform:uppercase;color:var(--spot)}
+.p59 .plan .mid .nm{font:italic .95em 'Libre Baskerville'}
+.p59 .plan .mid .nm span{display:block}
+.shapes{font:12px system-ui,sans-serif;color:#9d9181}
+
 /* ===== v2: team sheets in formation (text rows) ===== */
 .teams{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
 .tm h4{margin:0 0 3px}
@@ -321,7 +364,7 @@ body{margin:0;font-family:system-ui,sans-serif;color:#222;background:#26221f}
  <button data-e="46" class="on">1946–50 · Austerity sheet</button>
  <button data-e="59">1959 · Two-colour</button>
  <button data-e="66">1966–67 · Glossy colour</button>
- <label>Home club: <select id="club"></select></label><div class="note">Mockup v2: team sheets set out in formation as text rows (no pitch drawing before 1966), and small local adverts named after the home town. All clubs, players, adverts and printers are fictional. No photos, crests or real brands.</div>
+ <label>Home club: <select id="club"></select></label><span class="shapes" id="shapes"></span><div class="note">Mockup v2: team sheets set out in formation as text rows (no pitch drawing before 1966), and small local adverts named after the home town. All clubs, players, adverts and printers are fictional. No photos, crests or real brands.</div>
 </div>
 
 <!-- ============================ 1946 ============================ -->
@@ -389,7 +432,7 @@ body{margin:0;font-family:system-ui,sans-serif;color:#222;background:#26221f}
  <section class="pg">
   <h3>The teams</h3>
   <div class="field">
-   <div class="teams" id="teams46"></div>
+   <div class="teams plansec" id="teams46"></div>
   </div>
   <div class="twocol">
    <div class="notes" style="padding-right:12px">
@@ -458,7 +501,7 @@ body{margin:0;font-family:system-ui,sans-serif;color:#222;background:#26221f}
 
   <div class="sec"><h2>Teams</h2>
    <div class="field">
-    <div class="teams" id="teams59"></div>
+    <div class="teams plansec" id="teams59"></div>
    </div>
   </div>
 
@@ -712,6 +755,43 @@ function ads66(T,R){
 }
 function renderAds(id,list){document.getElementById(id).innerHTML=list.map(x=>`<div class="ad ${x[0]}">${x[1]}</div>`).join('')}
 
+
+const REFS={'46':["Mr. G. C. Appleyard", "Mr. C. J. Barrick", "Mr. G. S. Blackhall", "Mr. H. Bryan", "Mr. A. C. Denham", "Mr. L. E. Gibbs", "Mr. A. C. Hall", "Mr. G. L. Iliffe", "Mr. S. E. Law", "Mr. S. McCarthy", "Mr. F. S. Milner", "Mr. W. B. Nixon", "Mr. J. H. Parker", "Mr. H. Pearce", "Mr. W. E. Plyer", "Mr. P. W. Poulter", "Mr. G. Reader", "Mr. G. Salmon", "Mr. D. Schofield", "Mr. T. Smith", "Mr. P. Snape", "Mr. P. Stevens", "Mr. J. Tregellas", "Mr. J. M. Wiltshire", "Mr. W. E. Wood", "Mr. F. W. Wort"],'59':["Mr. L. Callaghan", "Mr. P. H. Carr", "Mr. J. E. Carr", "Mr. W. Clements", "Mr. T. H. Cooper", "Mr. T. Dawes", "Mr. M. Dixon", "Mr. A. E. Ellis", "Mr. J. Finney", "Mr. H. Hackney", "Mr. L. Hamer", "Mr. J. H. Hemingway", "Mr. K. Howley", "Mr. J. W. Hunt", "Mr. E. T. Jennings", "Mr. R. M. Jordan", "Mr. C. W. Kingston", "Mr. R. T. Langdale", "Mr. R. J. Leafe", "Mr. R. H. Mann", "Mr. D. Martin", "Mr. J. Mitchell", "Mr. A. Murdoch", "Mr. G. W. Pullin", "Mr. P. Rhodes", "Mr. R. E. Smith", "Mr. D. W. Smith", "Mr. A. W. Sparling", "Mr. K. Stokes", "Mr. F. V. Stringer", "Mr. J. K. Taylor", "Mr. L. J. Tirebuck", "Mr. R. G. Warnke", "Mr. J. G. Williams", "Mr. R. H. Windle", "Mr. S. Yates"]};
+const POSLBL=['Goal','Right Back','Left Back','Right Half','Centre Half','Left Half','Outside Right','Inside Right','Centre','Inside Left','Outside Left'];
+const FLAGS=[['Red &amp; White','Blue &amp; White'],['Red','Yellow'],['Blue','Red &amp; White'],['Yellow','Black &amp; White'],['Green','Red']];
+const BALL=`<svg class="ball" viewBox="0 0 60 60" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="30" cy="30" r="27"/><path d="M30 17l10 7-4 12H24l-4-12z" fill="currentColor"/><path d="M30 17V4M40 24l13-5M36 36l8 11M24 36l-8 11M20 24L7 19"/><path d="M44 47c4-3 7-7 9-12M16 47c-4-3-7-7-9-12"/></g></svg>`;
+function rowX(shape,row,home){
+ const xs=row.map(n=>{const lat=ERA_PITCH[shape][n-1][0];return 50+(home?(50-lat):(lat-50))*0.95});
+ const order=row.map((n,i)=>i).sort((a,b)=>xs[a]-xs[b]);
+ const gap=row.length>=5?19:row.length===4?21:24;
+ for(let it=0;it<6;it++){for(let k=1;k<order.length;k++){const a=order[k-1],b=order[k];if(xs[b]-xs[a]<gap){const m=(xs[a]+xs[b])/2;xs[a]=m-gap/2;xs[b]=m+gap/2}}}
+ return xs;
+}
+function planRows(shape,names,home,capN,dup){
+ let rows=formRows(shape);if(!home)rows=rows.slice().reverse();
+ return rows.map(r=>{const rr=formRows(shape).find(x=>x[0]===r[0]||x.indexOf(r[0])>=0);const xs=rowX(shape,r,home);
+  const cells=r.map((n,i)=>{const nm=names[n-1],sp=nm.lastIndexOf(' '),first=nm.slice(0,sp),sur=nm.slice(sp+1);
+   const label=sur.toUpperCase()+(dup[sur]?', '+first[0]+'.':'')+(n===capN?' (Capt.)':'');
+   return `<div class="pl1" data-shirt="${n}" style="left:${xs[i].toFixed(1)}%"><span class="n">${n}</span><span class="s">${esc(label)}</span><span class="p">${POSLBL[n-1]}</span></div>`}).join('');
+  return `<div class="prow" data-shirts="${r.join(',')}">${cells}</div>`}).join('');
+}
+function renderPlan(id,era,club,hS,hNames,aS,aNames,flank){
+ const R=rngFor('plan'+era+club.name),refs=REFS[era];
+ const ref=refs[Math.floor(R()*refs.length)];
+ const f=pick(R,FLAGS),L1=pick(R,SURNAMES),L2=pick(R,SURNAMES.filter(x=>x!==L1));
+ const ini=()=>String.fromCharCode(65+Math.floor(R()*26))+'. '+(R()<.5?String.fromCharCode(65+Math.floor(R()*26))+'. ':'');
+ const capH=pick(R,[2,3,4,5,6,6]),capA=pick(R,[2,3,4,5,6,6]);
+ const dup={},cnt={};hNames.concat(aNames).forEach(n=>{const s=n.slice(n.lastIndexOf(' ')+1);cnt[s]=(cnt[s]||0)+1});Object.keys(cnt).forEach(k=>{if(cnt[k]>1)dup[k]=1});
+ const plan=`<div class="plan"><div class="pt"><b>${esc(club.name)}</b><i>(Red &amp; white)</i></div>`
+  +planRows(hS,hNames,true,capH,dup)
+  +`<div class="mid"><div class="ref"><h5>Referee</h5><div class="nm"><span>${esc(ref)}</span></div></div>${BALL}<div class="ln"><h5>Linesmen</h5><div class="nm"><span>${f[0]} Flag&mdash;Mr. ${esc(ini()+L1)}</span><span>${f[1]} Flag&mdash;Mr. ${esc(ini()+L2)}</span></div></div></div>`
+  +planRows(aS,aNames,false,capA,dup)
+  +`<div class="pt"><b>${esc(AWAY.name)}</b><i>(Blue)</i></div></div>`;
+ let h=plan;
+ if(flank){const T=club.town,a=pick(R,SURN_AD);
+  h=`<div class="planwrap"><div class="fl">Think of<br>a number<span class="bg">${esc(T)}<br>${2000+Math.floor(R()*7000)}</span><small>Cars for hire day &amp; night</small></div>${plan}<div class="fl"><u>Warm</u> homes,<br><u>warm</u> hearts<span class="bg">${esc(P(a))}<br>Coal</span><small>Coal &amp; coke merchants, ${esc(T)}</small></div></div>`}
+ document.getElementById(id).innerHTML=h;
+}
 /* ---------- apply a home club ---------- */
 const BASE={h46:NAMES.h46,a46:NAMES.a46,h59:NAMES.h59,a59:NAMES.a59,h66:NAMES.h66,a66:NAMES.a66};
 const origTxt=new WeakMap(),origAttr=new WeakMap();
@@ -733,10 +813,11 @@ function applyClub(ix){
  const s46=def?['pyr','wm']:[pick(R,['pyr','wm']),pick(R,['pyr','wm'])];
  const s59=def?['wm','424']:[pick(R,['wm','wm','424']),pick(R,['wm','424'])];
  const s66=def?['442','424']:[pick(R,['442','433','sweeper','424']),'424'];
- renderTeams('teams46',club.name,'(Red &amp; white)',s46[0],namesFor(club,'h46',BASE.h46),AWAY.name,'(Blue)',s46[1],namesFor(club,'a46',BASE.a46),true);
- renderTeams('teams59',club.name,'(Red &amp; white)',s59[0],namesFor(club,'h59',BASE.h59),AWAY.name,'(Blue)',s59[1],namesFor(club,'a59',BASE.a59),true);
+ renderPlan('teams46','46',club,s46[0],namesFor(club,'h46',BASE.h46),s46[1],namesFor(club,'a46',BASE.a46),true);
+ renderPlan('teams59','59',club,s59[0],namesFor(club,'h59',BASE.h59),s59[1],namesFor(club,'a59',BASE.a59),false);
  renderPitch('pitch66',s66[0],s66[1],'rgba(255,255,255,.85)');
  renderTeams('teams66',club.name,'Orange &amp; white',s66[0],namesFor(club,'h66',BASE.h66),AWAY.name,'Navy',s66[1],namesFor(club,'a66',BASE.a66),false);
+ document.getElementById('shapes').textContent='Shapes this match — 1946: '+SHAPE_NAME[s46[0]]+' v '+SHAPE_NAME[s46[1]]+' · 1959: '+SHAPE_NAME[s59[0]]+' v '+SHAPE_NAME[s59[1]]+' · 1966: '+SHAPE_NAME[s66[0]]+' v '+SHAPE_NAME[s66[1]];
  document.getElementById('shape66').textContent=SHAPE_NAME[s66[0]]+' v '+SHAPE_NAME[s66[1]];
  renderAds('ads1',ads46(T,rngFor('ads46'+club.name)));
  renderAds('ads2',ads59(T,rngFor('ads59'+club.name)));
