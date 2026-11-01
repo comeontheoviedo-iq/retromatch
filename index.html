@@ -16217,8 +16217,8 @@ function renderLineup(){
     var tdPos = document.createElement('td'); tdPos.className='pos'; tdPos.textContent = p.pos.toUpperCase();
     var tdForm = document.createElement('td'); tdForm.innerHTML = formTag(p.form);
     var tdView = document.createElement('td');
-    var viewBtn = document.createElement('button'); viewBtn.textContent='VIEW'; viewBtn.style.padding='2px 10px'; viewBtn.style.fontSize='15px';
-    viewBtn.addEventListener('click', function(e){ e.stopPropagation(); showProfile(p.id, 'lineup-profile-content'); });
+    var viewBtn = document.createElement('a'); viewBtn.href='#'; viewBtn.className='viewlink'; viewBtn.textContent='view'; viewBtn.setAttribute('data-nocase','1'); viewBtn.style.cssText='font-size:12px;text-decoration:underline;cursor:pointer;color:inherit;background:none;border:0;padding:0;'; /* v339 : a small text link, not a big button (Chris) */
+    viewBtn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); showProfile(p.id, 'lineup-profile-content'); });
     tdView.appendChild(viewBtn);
     tr.appendChild(tdCheck); tr.appendChild(tdName); tr.appendChild(tdPos); tr.appendChild(tdForm); tr.appendChild(tdView);
     body.appendChild(tr);
@@ -16874,6 +16874,47 @@ function eraCaseMaps(){
   eraCase.maps = {proper:proper, abbr:abbr, pairs:pairs, pcase:pcase};
   return eraCase.maps;
 }
+
+/* v339 : NAMES ARE NEVER CASE-TRANSFORMED, PER CHRIS ('Fosco risorti', 'Cesare francalancia' on the 1946 Italy team sheet). Rather than
+   growing word lists, every person name (players in every squad, youth, managers, scouts, referees) and every club name the save knows is
+   read from its own data field, and any run of words in a text that spells one of those names is written back exactly as the field
+   holds it. Single surnames (commentary, reports) are restored the same way for our own squad and the current opponent's, when not an everyday
+   English word. */
+var eraCaseNames = { sig:'', full:null, sur:null };
+var ERA_CASE_COMMON = ' link view file real club ground pitch a an the and or of in on at to by for is it as be he his him we us our you no not but all one two out off up down over under back fair fine good best young old new long short little small big high low hill bell wood field moss king brown white green black grey gray rose cross page hope lane park wall rich still ball hall bird cook baker smith mason hunter turner walker taylor fox lamb wolf swift strong love bright gold silver stone brook marsh hart day may march june april mark will bill pat ray sun fry hood ford bank booth hay hare law low rice rush sharp short spark star steel tower town ward wells west north south east wing post bar hand head leg foot side match game play goal team cup ';
+function eraCaseNameSig(){
+  try { return [typeof ourClubName!=='undefined'?ourClubName:'', typeof squad!=='undefined'&&squad?squad.length:0, typeof clubSquads!=='undefined'&&clubSquads?Object.keys(clubSquads).length:0, typeof rivals!=='undefined'&&rivals?rivals.length:0, typeof gameEra!=='undefined'?gameEra:'', typeof seasonLabel!=='undefined'?seasonLabel:'', typeof youth!=='undefined'&&youth?youth.length:0, typeof manager!=='undefined'&&manager?manager.name:'', typeof fixtureIdx!=='undefined'?fixtureIdx:''].join('|'); } catch(e){ return ''; }
+}
+function eraCaseNameData(){
+  var sig = eraCaseNameSig(); if (eraCaseNames.full && eraCaseNames.sig === sig) return eraCaseNames;
+  var full = {}, sur = {}, seenArr = [];
+  function addName(n, person, surOK){
+    if (typeof n !== 'string') return; n = n.replace(/\s*\([^)]*\)\s*/g, ' ').trim(); /* 'Suco (futbolista)' : the bracketed note is not part of the name */ if (n.length < 3 || !/[a-z]/.test(n) || n.length > 60) return;
+    var toks = n.match(/[A-Za-z\u00c0-\u024f][A-Za-z\u00c0-\u024f'\u2019]*/g); if (!toks) return;
+    if (toks.length > 1 || person) full[toks.map(function(t){ return t.toLowerCase(); }).join(' ')] = toks;
+    if (toks.length > 1 || person) full[toks.map(function(t){ return t.toUpperCase().toLowerCase(); }).join(' ')] = toks; /* the screen shows p.n.toUpperCase() : Preu\u00dfe arrives as PREUSSE */
+    if (person && surOK && toks.length > 1){ var last = toks[toks.length-1]; if (last.length >= 3 && /^[A-Z\u00c0-\u00de]/.test(last) && ERA_CASE_COMMON.indexOf(' '+last.toLowerCase()+' ') < 0) { sur[last.toLowerCase()] = last; sur[last.toUpperCase().toLowerCase()] = last; } }
+  }
+  function people(arr, surOK){ if (!arr || !arr.forEach || seenArr.indexOf(arr) >= 0) return; seenArr.push(arr); arr.forEach(function(p){ if (typeof p === 'string') addName(p, true, surOK); else if (p) addName(p.n || p.name, true, surOK); }); }
+  try { people(squad, true); } catch(e){}
+  try { var fx = fixtures[fixtureIdx] || fixtures.find(function(f){ return !f.played; }); if (fx && clubSquads && clubSquads[fx.opp]) people(clubSquads[fx.opp], true); } catch(e){}
+  try { people(youth); } catch(e){}
+  try { people(youthProspects); } catch(e){}
+  try { Object.keys(clubSquads || {}).forEach(function(k){ addName(k, false); people(clubSquads[k]); }); } catch(e){}
+  try { Object.keys(scouts || {}).forEach(function(k){ addName(k, true); }); } catch(e){}
+  try { if (manager && manager.name) addName(manager.name, true); } catch(e){}
+  try { people(refereeListNow()); } catch(e){}
+  try { addName(ourClubName, false); (rivals || []).forEach(function(r){ addName(r.n, false); }); Object.keys(table || {}).forEach(function(k){ addName(k, false); }); } catch(e){}
+  try { Object.keys(FOR_ERA_DEFS).forEach(function(c){ Object.keys(FOR_ERA_DEFS[c]).forEach(function(k){ var D2 = FOR_ERA_DEFS[c][k] || {};
+    Object.keys(D2.facts || {}).forEach(function(n){ addName(n, false); }); (D2.d1 || []).concat(D2.d2 || []).forEach(function(n){ addName(typeof n === 'string' ? n : n && n.n, false); });
+    (D2.pool || []).forEach(function(o){ if (o) addName(o.n, false); });
+    people(D2.refs);
+    var ma = D2.masters || {}; Object.keys(ma).forEach(function(n){ var m = ma[n] || {}; Object.keys(m).forEach(function(f){ if (/mgr|manager|coach|allen|entren|trainer/i.test(f)) { if (typeof m[f] === 'string') addName(m[f], true); else if (m[f] && m[f].n) addName(m[f].n, true); } }); people(m.squad); people(m.players); });
+    var sq = D2.squads || {}; Object.keys(sq).forEach(function(n){ people(sq[n]); });
+  }); }); } catch(e){}
+  eraCaseNames = { sig:sig, full:full, sur:sur };
+  return eraCaseNames;
+}
 function eraCaseText(t, atStart){
   var letters = t.replace(/[^A-Za-z\u00c0-\u024f]/g,''); if (letters.length < 2) return t;
   var ups = letters.replace(/[^A-Z\u00c0-\u00de]/g,'').length; /* v332 : accented letters count as letters */
@@ -16881,8 +16922,19 @@ function eraCaseText(t, atStart){
   if (!allUp) t = t.replace(/^(\d{1,2} )(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/, function(m,a,b){ return a + b.charAt(0) + b.slice(1).toLowerCase(); });
   var M = eraCaseMaps(), re = /[A-Za-z\u00c0-\u024f][A-Za-z\u00c0-\u024f'\u2019]*/g, m, toks = [];
   while ((m = re.exec(t))) toks.push({s:m.index, e:m.index + m[0].length, w:m[0]});
+  var NM = eraCaseNameData(), prot = {};
+  for (var ti = 0; ti < toks.length; ti++){
+    for (var len = Math.min(5, toks.length - ti); len >= 1; len--){
+      var okSep = true; for (var q = ti; q < ti+len-1; q++){ var sep = t.substring(toks[q].e, toks[q+1].s); if (!/^(\s|\.\s?|-)$/.test(sep)) { okSep = false; break; } }
+      if (!okSep) continue;
+      var key = toks.slice(ti, ti+len).map(function(x){ return x.w.toLowerCase(); }).join(' '), hit = NM.full[key];
+      if (hit && hit.length === len && (len > 1 || toks[ti].w.length > 2)){ for (var q2 = 0; q2 < len; q2++) prot[ti+q2] = hit[q2]; ti += len-1; break; }
+      if (len === 1){ var bw = toks[ti].w.replace(/['\u2019]s?$/i,''), sw = NM.sur[bw.toLowerCase()]; if (sw) prot[ti] = sw + toks[ti].w.slice(bw.length).toLowerCase(); }
+    }
+  }
   var out = '', pos = 0, startNext = atStart;
   toks.forEach(function(k, i){
+    if (prot[i] !== undefined){ out += t.substring(pos, k.s) + prot[i]; pos = k.e; return; }
     var w = k.w, tail = '', mm = w.match(/^(.*?)(['\u2019]s|['\u2019])$/i);
     var base = w; if (mm && mm[1]) { base = mm[1]; tail = mm[2].toLowerCase(); }
     var lw = base.toLowerCase(), res, keep = !allUp && (w !== w.toUpperCase() || base.length < 2);
@@ -39410,7 +39462,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v338'; /* v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v339'; /* v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
