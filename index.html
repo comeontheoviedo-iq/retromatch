@@ -9746,7 +9746,7 @@ function nextMidweekSlot(afterTime, excludeIdx){
     var thu = new Date(weekMonday.getTime() + 3*86400000);
     var fri = new Date(weekMonday.getTime() + 4*86400000);
     var closeToCallTime = wk*7*86400000 + afterTime > cap - 21*86400000; /* within 3 weeks of the hard cap : allow Friday too */
-    var candidates = closeToCallTime ? [tue, thu, mon, wed, fri] : [tue, thu, mon, wed];
+    var candidates = closeToCallTime ? [tue, wed, mon, thu, fri] : [tue, wed, mon, thu]; /* v338 : Tue/Wed are the real midweek nights; Thursday only as a fallback */
     for (var c=0;c<candidates.length;c++){ if (free(candidates[c])) return candidates[c]; }
   }
   return nextMidweekReplayDate(new Date(afterTime)); /* pathological congestion : just find the next Tue/Wed regardless */
@@ -23040,6 +23040,7 @@ function initGameStateFresh(){
     if (isSco()) fixtureRealDatesTemplate = fixtureRealDates.slice(2).map(function(d){ return new Date(d); });
   }
   if (gameEra === '1959') fixtureRealDates = generateGenericSeasonCalendar(1959); /* v243 : not reachable today, see ERA_1959_RESEARCH_COMPLETE */
+  if (gameEra !== '1946' && /^(1950|1959|1966)$/.test(gameEra)) rmApplyEngCalendar(gameEra==='1950' ? 1949 : +gameEra); /* v338 */
   currentDate = new Date(fixtureRealDates[0]);
   /* v188 : a brand-new 1950-era game starts roughly three real years into the international calendar
      (Sept 1946 to Aug 1949) and, before this fix, would have dumped every one of those years' real
@@ -32673,6 +32674,19 @@ function progCompLabel(f){
   if (k==='lcup' || k==='euro' || k==='other') return f.roundName || 'Cup tie';
   return (isSco() ? foreignLeagueName() : 'Football League')+' · '+progTitle(currentDivisionLabel);
 }
+function progHomeStyle(name, era){
+  /* v338 : the programme is printed in the HOME club's colours (from the save's club profile / colours table) */
+  try {
+    var k = pcardKit(progColours(name) || ''), cols = [k.c1, k.c2].filter(Boolean);
+    var light = function(h){ var n = parseInt(h.slice(1),16); return ((n>>16)*299 + ((n>>8)&255)*587 + (n&255)*114)/1000 > 150; };
+    var dark = cols.filter(function(h){ return !light(h); })[0], any = cols[0];
+    if (!any) return '';
+    var spot = dark || '#1c1c1c';
+    if (era==='59') return ' style="--spot:'+spot+';--tint:'+spot+'2e" data-home-colour="'+spot+'"';
+    if (era==='66') return ' style="--or:'+any+'" data-home-colour="'+any+'"';
+    return ' data-home-colour="'+spot+'"';
+  } catch(e){ return ''; }
+}
 function progColours(name){
   var c = (clubProfiles[name] && clubProfiles[name].colours) || (typeof clubColours1946!=='undefined' && clubColours1946[name]) || null;
   return c ? progTitle(c) : null;
@@ -32801,6 +32815,11 @@ function progContext(f){
   ctx.played = rows.reduce(function(s,r){ return s+r.p; },0);
   ctx.rival = rivals.find(function(r){ return r.n===f.opp; }) || null;
   ctx.xi = progOurXI();
+  /* v338 : the programme is always the HOME club's ; on an away day (or a neutral tie where we are the nominal away side) its notes and pen pictures come from the host's own save squad */
+  ctx.away = !f.home;
+  ctx.hostSquad = f.home ? squad : (function(){ try { return ensureClubSquad(host) || []; } catch(e){ return []; } })();
+  if (f.home) ctx.hostXI = ctx.xi;
+  else { var hn = progOppXI(f); ctx.hostXI = hn ? hn.map(function(n){ return ctx.hostSquad.find(function(p){ return p && p.n===n; }) || null; }) : null; if (ctx.hostXI && !ctx.hostXI.filter(Boolean).length) ctx.hostXI = null; }
   ctx.ourShape = progOurShape(); ctx.oppShape = progOppShape(f.opp);
   ctx.realOurShape = progRealOurShape(); ctx.realOppShape = progRealOppShape(f.opp); ctx.plain = progPlainList();
   return ctx;
@@ -32827,17 +32846,19 @@ function progFacts(c, rng){
       'To the terraces, '+host+' are simply '+c.hostProf.nickname+'.'
     ]));
   }
-  if (c.oppProf && c.oppProf.nickname && c.oppProf.founded){
+  var gProf = clubProfiles[guest] || null;
+  if (gProf && gProf.nickname && gProf.founded){
     add('oppnick', one([
-      'The opposition, '+c.oppProf.nickname+', were formed in '+c.oppProf.founded+'.',
-      opp+' (known as '+c.oppProf.nickname+') date from '+c.oppProf.founded+'.'
+      'The opposition, '+gProf.nickname+', were formed in '+gProf.founded+'.',
+      guest+' (known as '+gProf.nickname+') date from '+gProf.founded+'.'
     ]));
   }
-  if (c.rival && c.rival.mgr){
+  var gMgr = f.home ? (c.rival && c.rival.mgr) : (manager && manager.name && manager.name!=='Manager' ? manager.name : null);
+  if (gMgr){
     add('oppmgr', one([
-      opp+' are managed by '+c.rival.mgr+'.',
-      'In charge of '+opp+' is '+c.rival.mgr+'.',
-      'The visitors\' manager is '+c.rival.mgr+'.'
+      guest+' are managed by '+gMgr+'.',
+      'In charge of '+guest+' is '+gMgr+'.',
+      'The visitors\' manager is '+gMgr+'.'
     ]));
   }
   /* derby */
@@ -32865,9 +32886,10 @@ function progFacts(c, rng){
       host+' have scored '+N(hr.f)+' and conceded '+N(hr.a)+' in '+N(hr.p)+' match'+(hr.p===1?'':'es')+'.',
       'Goals so far for '+host+' : '+N(hr.f)+' for, '+N(hr.a)+' against.'
     ]));
-    if (orow && opp!==host) add('oppstand', one([
-      opp+' arrive '+O(c.rank[opp])+' in the table, '+N(orow.pts)+' point'+(orow.pts===1?'':'s')+' from '+N(orow.p)+' game'+(orow.p===1?'':'s')+'.',
-      'The visitors sit '+O(c.rank[opp])+' with '+N(orow.pts)+'.'
+    var grow = c.rows.find(function(r){ return r.name===guest; });
+    if (grow) add('oppstand', one([
+      guest+' arrive '+O(c.rank[guest])+' in the table, '+N(grow.pts)+' point'+(grow.pts===1?'':'s')+' from '+N(grow.p)+' game'+(grow.p===1?'':'s')+'.',
+      'The visitors sit '+O(c.rank[guest])+' with '+N(grow.pts)+'.'
     ]));
     var left = fixtures.slice(fixtureIdx+1).filter(function(g){ return !g.isFriendly && !g.isCup && !g.isLCup && !g.roundName; }).length;
     if (left>0) add('remain', one([
@@ -32916,11 +32938,11 @@ function progFacts(c, rng){
     ]));
   }
   /* squad */
-  var sq = squad.slice();
+  var sq = (c.hostSquad || []).slice();
   var scorers = sq.filter(function(p){ return (p.goalsSeason||0)>0; }).sort(function(a,b){ return b.goalsSeason-a.goalsSeason; });
   if (scorers.length) add('scorer', one([
-    scorers[0].n+' leads the '+us+' scorers with '+N(scorers[0].goalsSeason)+' goal'+(scorers[0].goalsSeason===1?'':'s')+' this season.',
-    'Top of the '+us+' scoring list : '+scorers[0].n+', '+N(scorers[0].goalsSeason)+'.'
+    scorers[0].n+' leads the '+host+' scorers with '+N(scorers[0].goalsSeason)+' goal'+(scorers[0].goalsSeason===1?'':'s')+' this season.',
+    'Top of the '+host+' scoring list : '+scorers[0].n+', '+N(scorers[0].goalsSeason)+'.'
   ]));
   var inj = sq.filter(function(p){ return (p.injuredWeeks||0)>0; });
   if (inj.length){
@@ -32929,17 +32951,17 @@ function progFacts(c, rng){
       p0.n+' is still receiving treatment and will be missed'+(inj.length>1 ? ' ; '+N(inj.length-1)+' other'+(inj.length>2?'s':'')+' on the injury list' : '')+'.',
       'The trainer reports '+p0.n+' not yet fit'+(inj.length>1 ? ', and '+N(inj.length-1)+' more on the list' : '')+'.'
     ]));
-  } else {
+  } else if (f.home) {
     add('inj', one([ 'The trainer has no injuries to report.', 'No names on the injury list this week.', 'The treatment room is empty today.' ]));
   }
-  if (c.xi){
-    var xi = c.xi.filter(Boolean);
+  if (c.hostXI){
+    var xi = c.hostXI.filter(Boolean);
     if (xi.length===11){
       var avg = Math.round(xi.reduce(function(s,p){ return s+p.age; },0)/11);
       var young = xi.slice().sort(function(a,b){ return a.age-b.age; })[0], old = xi.slice().sort(function(a,b){ return b.age-a.age; })[0];
       add('ages', one([
         'The average age of today\'s eleven is '+N(avg)+'.',
-        young.n+' is the youngest of '+us+'\'s eleven, at '+N(young.age)+'.',
+        young.n+' is the youngest of '+host+'\'s eleven, at '+N(young.age)+'.',
         old.n+', at '+N(old.age)+', is the senior man of the side.'
       ]));
       var capd = xi.filter(function(p){ return (p.caps||0)>0; }).sort(function(a,b){ return b.caps-a.caps; })[0];
@@ -32954,7 +32976,7 @@ function progFacts(c, rng){
       ]));
     }
   }
-  if (seasonHistory && seasonHistory.length){
+  if (f.home && seasonHistory && seasonHistory.length){
     var sh = seasonHistory[seasonHistory.length-1];
     if (sh && sh.position) add('lastseason', one([
       'Last season ('+sh.label+') '+us+' finished '+O(sh.position)+'.',
@@ -32968,7 +32990,7 @@ function progFacts(c, rng){
   ])); /* v333 : classic programmes never named the formation */
   /* ahead */
   var nh = progNextHome();
-  if (nh) add('nexthome', one([
+  if (nh && f.home) add('nexthome', one([
     'Our next home match is against '+nh.opp+' on '+progDateLong(nh.d)+'.',
     'Home again on '+progDateShort(nh.d)+' : '+nh.opp+' are the visitors.'
   ]));
@@ -33060,14 +33082,14 @@ function progStrength(p){
   return best && best.v>=14 ? best : null;
 }
 function progPortraits(c, rng){
-  if (!c.xi) return [];
+  var HX = c.hostXI || null; if (!HX) return [];
   function one2(a){ return progPickOne(rng, a); }
   var out = [];
-  var pick = progShuffle(rng, c.xi.map(function(p,i){ return {p:p,i:i}; }).filter(function(x){ return x.p; }));
+  var pick = progShuffle(rng, HX.map(function(p,i){ return {p:p,i:i}; }).filter(function(x){ return x.p; }));
   pick.slice(0,3).sort(function(a,b){ return a.i-b.i; }).forEach(function(x){
     var p = x.p, bits = [], N = function(n){ return String(Math.round(n)); };
-    var mine = (p.seasonHistory||[]).filter(function(h){ return h.club===c.us; });
-    var other = (p.seasonHistory||[]).filter(function(h){ return h.club && h.club!==c.us; }).slice(-1)[0];
+    var mine = (p.seasonHistory||[]).filter(function(h){ return h.club===c.host; });
+    var other = (p.seasonHistory||[]).filter(function(h){ return h.club && h.club!==c.host; }).slice(-1)[0];
     var facts = [];
     if ((p.goalsSeason||0)>0) facts.push(p.n+' has scored '+N(p.goalsSeason)+' this season in '+N(p.apps||0)+' appearance'+(p.apps===1?'':'s')+'.');
     else if ((p.apps||0)>0) facts.push('Has played '+N(p.apps)+' time'+(p.apps===1?'':'s')+' for the club this season.');
@@ -33353,14 +33375,14 @@ function progBuild46(c, rng, F){
   var hN = f.home ? ourN : oppN, aN = f.home ? oppN : ourN;
   var hc = progColours(home), ac = progColours(away);
   var groups = progKeyGroups(f);
-  var o = '<article class="p46" data-era="46" data-kind="'+c.kind+'">';
+  var o = '<article class="p46" data-era="46" data-kind="'+c.kind+'" data-home="'+progEsc(home)+'"'+progHomeStyle(home,'46')+'>';
   o += '<section class="pg"><div class="toprow"><div class="price"><small>PRICE</small>'+progPrice(c)+'</div><div class="lab">Season '+progEsc(season)+' &nbsp;·&nbsp; No. '+progNo()+'</div></div>'
     + '<div class="mast"><h1'+progFitStyle(home,0.74,76)+'>'+progEsc(home)+'</h1><div class="fc">Football Club</div></div><div class="banner">Official Programme</div>'
     + '<div class="sketch">'+PROG_SKETCH+'<div class="cap">The '+progEsc(home)+' ground'+(ground?', '+progEsc(ground):'')+'</div></div>'
     + '<div class="fix"><div class="date">'+progDateLong(d)+'</div><div class="vs">'+progEsc(home)+' <em>v.</em> '+progEsc(away)+'</div><div class="lab">'+progEsc(progCompLabel(f))+' · Kick-off '+progEsc(ko)+'</div></div>'
     + '<div class="pageno">— 1 —</div></section><div class="fold"><span>fold</span></div>';
   o += '<section class="pg"><h3>The teams</h3><div class="plansec">'+progPlanHTML(c, f, home, away, f.home?c.ourShape:c.oppShape, f.home?c.oppShape:c.ourShape, hN, aN, hc, ac, true, '46')
-    + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div>'
+    + (c.xi?'':'<div class="pnote">'+(f.home?'Our side has not yet been selected.':progEsc(away)+' have not yet named their side.')+'</div>') + '</div>'
     + '<div class="twocol"><div class="notes" style="padding-right:12px"><h2>Notes from the Club</h2>'
     + notes.map(function(n){ return '<p data-k="'+n.k+'">'+progEsc(n.t)+'</p>'; }).join('')
     + (inj ? '<h5>Trainer\'s report</h5><p data-k="inj">'+progEsc(inj.t)+'</p>' : '') + '</div>'
@@ -33370,9 +33392,9 @@ function progBuild46(c, rng, F){
   if (groups){
     o += '<h3>Half-time scoreboard — how to read it</h3><p style="margin:0 0 5px;font-size:12.5px;text-align:justify">The half-time scores of the other matches are hung on the board at the ground in the order of the letters printed below. Look for the letter against the match you want, then read off the score.</p>'+progKeyHTML(c, groups, '46');
   } else {
-    o += '<h3>Fixtures to come</h3>'+progFixturesHTML(c);
+    o += '<h3>'+(f.home?'Fixtures to come':progEsc(away)+' : fixtures to come')+'</h3>'+progFixturesHTML(c);
   }
-  var nh = progNextHome();
+  var nh = f.home ? progNextHome() : null;
   o += '<div class="pageno">— 4 —</div></section><div class="fold"><span>fold</span></div><section class="pg"><div class="adhead">Support our advertisers — they support the Club</div>'+progAdsHTML('46', home)
     + (nh ? '<div class="next">Next home match: v. '+progEsc(nh.opp)+' &nbsp;·&nbsp; '+progEsc(progDateLong(nh.d))+'</div>' : '')+'<div class="closer">'+progCloseHTML()+'</div><div class="pageno">— 5 —</div></section></article>';
   return o;
@@ -33388,20 +33410,20 @@ function progBuild59(c, rng, F){
   var intro = progChoose(F, rng, 1, ['derby','round','stand','form'], ['inj'])[0];
   var pen = progPortraits(c, rng);
   var groups = progKeyGroups(f);
-  var nh = progNextHome();
-  var o = '<article class="p59" data-era="59" data-kind="'+c.kind+'"><header class="cover"><div class="stripes"></div><div class="cv-in">'
+  var nh = f.home ? progNextHome() : null;
+  var o = '<article class="p59" data-era="59" data-kind="'+c.kind+'" data-home="'+progEsc(home)+'"'+progHomeStyle(home,'59')+'><header class="cover"><div class="stripes"></div><div class="cv-in">'
    + '<div class="cv-top"><span>Official Programme</span><span>Season '+progEsc(season)+'</span></div>'
    + '<div class="plate"><h1'+progFitStyle(home,1.0,70)+'>'+progEsc(home)+'</h1><div class="fcl">Football Club</div>'+(nick?'<div class="scr">'+progEsc(nick)+'</div>':'')+'</div>'
    + '<div class="cv-mid"><div class="ball">'+PROG_BALL+'</div><div class="cv-fix"><div class="d">'+progDateLong(d)+'</div><div class="v">'+progEsc(home)+' <em>v.</em> '+progEsc(away)+'</div><div class="k">'+progEsc(progCompLabel(f))+' · Kick-off '+progEsc(ko)+'</div></div></div>'
    + '<div class="cv-foot"><span>'+progEsc(ground||'')+'</span><span class="pr">'+progPrice(c)+'</span></div></div></header><div class="body">'
    + (intro ? '<div class="sec"><div class="intro" data-k="'+intro.k+'">'+progEsc(intro.t)+'</div></div>' : '')
    + '<div class="sec"><h2>Teams</h2><div class="plansec">'+progPlanHTML(c, f, home, away, f.home?c.ourShape:c.oppShape, f.home?c.oppShape:c.ourShape, hN, aN, hc, ac, false, '59')
-   + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div></div>'
+   + (c.xi?'':'<div class="pnote">'+(f.home?'Our side has not yet been selected.':progEsc(away)+' have not yet named their side.')+'</div>') + '</div></div>'
    + '<div class="cols2"><div class="sec"><h2>Pen portraits</h2><div class="pen">'
    + pen.map(function(p){ return '<article><div class="no">'+p.no+'</div><div><h4>'+progEsc(p.name)+'</h4><div class="st">'+progEsc(p.st)+'</div><p>'+progEsc(p.text)+'</p></div></article>'; }).join('')
-   + (pen.length ? '' : '<p>Our side has not yet been selected.</p>') + '</div></div><div>'
+   + (pen.length ? '' : '<p>'+(f.home?'Our side has not yet been selected.':'The '+progEsc(home)+' side will be announced over the loudspeakers.')+'</p>') + '</div></div><div>'
    + (progTableHTML(c,5,false) ? '<div class="sec"><h3>'+progEsc(progTitle(currentDivisionLabel))+' — nearby</h3>'+progTableHTML(c,5,false)+'</div>' : '')
-   + '<div class="sec"><h3>'+(groups?'Half-time scores':'Fixtures to come')+'</h3>'+(groups ? progKeyHTML(c, groups, '59') : progFixturesHTML(c))+'</div></div></div>'
+   + '<div class="sec"><h3>'+(groups?'Half-time scores':(f.home?'Fixtures to come':progEsc(away)+' : fixtures to come'))+'</h3>'+(groups ? progKeyHTML(c, groups, '59') : progFixturesHTML(c))+'</div></div></div>'
    + '<div class="sec adsec"><h2>Our friends</h2>'+progAdsHTML('59', home)+'</div>'
    + '<div class="foot"><span class="n">'+(nh?'Next home match: v. '+progEsc(nh.opp)+' · '+progEsc(progDateLong(nh.d)):'')+'</span>'+progCloseHTML()+'</div></div></article>';
   return o;
@@ -33416,19 +33438,19 @@ function progBuild66(c, rng, F){
   var vis = progVisitors(c, rng);
   var welcome = progChoose(F, rng, 1, ['derby','round','stand','form'], ['inj'])[0];
   var groups = progKeyGroups(f);
-  var burst = progBurst(c, rng), nh = progNextHome();
+  var burst = progBurst(c, rng), nh = f.home ? progNextHome() : null;
   var hs = f.home?c.ourShape:c.oppShape, as = f.home?c.oppShape:c.ourShape;
   var wc = (seasonLabel==='1966-67') ? progPick66WC(rng) : null;
-  var o = '<article class="p66" data-era="66" data-kind="'+c.kind+'"><header class="cover"><div class="op"></div><div class="op2"></div>'
+  var o = '<article class="p66" data-era="66" data-kind="'+c.kind+'" data-home="'+progEsc(home)+'"'+progHomeStyle(home,'66')+'><header class="cover"><div class="op"></div><div class="op2"></div>'
    + '<div class="bar"><span>Official matchday programme</span><b>'+progPrice(c)+'</b></div>'
    + '<div class="mast"><h1'+progFitStyle(home,0.5,104)+'>'+progEsc(home).replace(/ (\S+)$/,'<br><span>$1</span>')+'</h1><span class="strap">'+(nick?progEsc(nick)+' · ':'')+progEsc(progTitle(currentDivisionLabel))+'</span></div>'
    + '<div class="burst"><svg viewBox="0 0 100 100"><polygon fill="#ffc928" stroke="#10203f" stroke-width="2.5" points="50,2 58,20 76,8 76,28 96,28 84,46 98,60 78,64 82,84 62,78 54,98 44,80 26,94 26,74 6,70 18,54 4,38 24,36 20,16 40,22"/></svg><span>'+burst[0]+(burst[1]?'<b>'+burst[1]+'</b>':'')+'</span></div>'
    + '<div class="match"><div><div class="a">'+progDateLong(d)+' · '+progEsc(ko)+'</div><div class="b">'+progEsc(home)+' <em>v</em> '+progEsc(away)+'</div><div class="a" style="font-size:.8em">'+progEsc(progCompLabel(f))+'</div></div><div class="p"><small>PRICE</small>'+progPrice(c)+'</div></div></header><div class="stripe"></div><div class="body">'
    + (welcome ? '<div class="sec"><div class="welcome" data-k="'+welcome.k+'">'+progEsc(welcome.t)+'</div></div>' : '')
    + '<div class="sec"><h2>Line-ups</h2>'+(progPlainList() ? '' : '<div class="field"><div class="ttl"><span>'+progEsc(home)+(hc?' ('+progEsc(hc)+')':'')+'</span><span>'+progEsc(away)+(ac?' ('+progEsc(ac)+')':'')+'</span></div>'+progPitchHTML(c)+'</div>')
-   + progListsHTML(c, hN, aN, home, '', away, '') + (c.xi?'':'<div class="pnote">Our side has not yet been selected.</div>') + '</div>'
+   + progListsHTML(c, hN, aN, home, '', away, '') + (c.xi?'':'<div class="pnote">'+(f.home?'Our side has not yet been selected.':progEsc(away)+' have not yet named their side.')+'</div>') + '</div>'
    + '<div class="sec two"><div class="visitors"><h2>Today\'s visitors</h2><div class="cap">'+vis.cap+'</div>'+vis.paras.map(function(p){ return '<p>'+progEsc(p)+'</p>'; }).join('')+'</div>'
-   + '<div>'+(progTableHTML(c,5,true) ? '<h2>League table <i>'+progEsc(progTitle(currentDivisionShort||''))+'</i></h2>'+progTableHTML(c,5,true) : '<h2>Fixtures to come</h2>'+progFixturesHTML(c))+'</div></div>'
+   + '<div>'+(progTableHTML(c,5,true) ? '<h2>League table <i>'+progEsc(progTitle(currentDivisionShort||''))+'</i></h2>'+progTableHTML(c,5,true) : '<h2>'+(f.home?'Fixtures to come':progEsc(away)+' : fixtures to come')+'</h2>'+progFixturesHTML(c))+'</div></div>'
    + (wc ? '<div class="sec"><div class="wc"><div class="big">'+wc.big+'<small>'+wc.small+'</small></div><p><b>'+wc.head+'</b>'+wc.text+'</p></div></div>' : '')
    + (groups ? '<div class="sec"><h2>Half-time scores <i>letters A–z</i></h2>'+progKeyHTML(c, groups, '66')+'</div>' : '')
    + '<div class="sec adsec"><h2>Around the town</h2>'+progAdsHTML('66', home)+'</div>'
@@ -37678,6 +37700,57 @@ function scoInstallDomFilter(){
   scoDomFilter(document.body);
 }
 
+
+/* v338 : REAL ENGLISH SEASON CALENDAR, PER CHRIS (Aldershot's 1960s Fourth Division list had no Saturdays at all : fixtures 14-23 all Tue/Thu
+   floodlit). Root cause : the old generic calendar always held 42 dates, so a 46-game Third/Fourth Division season (plus the pre-season games,
+   which took the first league Saturdays) overflowed into June/July and enforceSeasonEndCutoff then crammed the backlog into Tue/Thu nights.
+   Now : pre-season games get their own August Saturdays; the league gets every Saturday from the opening day to early May at 3.0 P.M.; the
+   real Christmas (Christmas Day + Boxing Day to 1959-60, Boxing Day + the next day after) and Easter (Good Friday, Easter Saturday, Easter
+   Monday, from the real Easter date) holidays; and only as many midweek nights (Wednesdays, early season and April first) as the division
+   size genuinely needs. Nothing in June, no Sundays (Italy and Spain keep their Sunday calendars untouched). */
+function rmEaster(y){ var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return new Date(y,mo-1,da); }
+function rmEngSeasonDates(startYear, n, k){
+  var D=function(y,m,d){ return new Date(y,m,d); }, add=function(dt,x){ return new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()+x); };
+  var open = D(startYear,7,16); while (open.getDay()!==6) open = add(open,1);
+  var pre = []; for (var p=k; p>=1; p--) pre.push(add(open,-7*p));
+  var hol = [], c25 = D(startYear,11,25), c26 = D(startYear,11,26);
+  if (startYear <= 1959){
+    if (c25.getDay()===0) hol.push(D(startYear,11,26), D(startYear,11,27));
+    else if (c26.getDay()===0) hol.push(c25, D(startYear,11,27));
+    else hol.push(c25, c26);
+  } else {
+    var b = c26.getDay()===0 ? D(startYear,11,27) : c26; hol.push(b);
+    var b2 = add(b,1); if (b2.getDay()===0) b2 = add(b2,1); hol.push(b2);
+  }
+  var ea = rmEaster(startYear+1); hol.push(add(ea,-2), add(ea,1));
+  var end = D(startYear+1,4,1); while (end.getDay()!==6) end = add(end,1); /* first Saturday of May */
+  var lateEaster = add(ea,1).getTime() > add(end,-7).getTime();
+  if (lateEaster) end = add(end,7);
+  var seen = {}, out = [];
+  function put(dt){ var key = dt.getTime(); if (!seen[key]){ seen[key]=true; out.push(dt); } }
+  for (var s=new Date(open); s.getTime()<=end.getTime(); s=add(s,7)) put(s);
+  hol.forEach(put);
+  /* midweek nights only as needed : Wednesdays after the first Saturdays of the season, then April, then March, then September/October */
+  var mw = [];
+  for (var w=0; w<5; w++) mw.push(add(open,7*w+4));
+  for (var aw=add(D(startYear+1,3,1),0); aw.getMonth()===3; aw=add(aw,1)) if (aw.getDay()===3) mw.push(aw);
+  for (var mr=D(startYear+1,2,1); mr.getMonth()===2; mr=add(mr,1)) if (mr.getDay()===3) mw.push(mr);
+  for (var so=add(open,7*5+4); so.getMonth()<=9 && so.getFullYear()===startYear; so=add(so,7)) mw.push(so);
+  for (var q=0; out.length<n && q<mw.length; q++){ var nearHol = hol.some(function(h){ return Math.abs(h.getTime()-mw[q].getTime()) < 3*86400000; }); if (!nearHol) put(mw[q]); }
+  out.sort(function(a,b2){ return a.getTime()-b2.getTime(); });
+  /* a smaller division : drop the surplus from the season's tail (a Saturday never left between two holiday dates) */
+  while (out.length > n) out.pop();
+  return pre.concat(out);
+}
+function rmApplyEngCalendar(startYear){
+  if (typeof isCont==='function' && isCont()) return false;
+  if (typeof isSco==='function' && isSco()) return false;
+  var k = 0; while (k < fixtures.length && fixtures[k].isFriendly) k++;
+  var n = fixtures.filter(function(f){ return !f.isFriendly && !f.isCup && !f.isLCup; }).length || rivals.length*2;
+  fixtureRealDates = rmEngSeasonDates(startYear, n, k);
+  fixtureRealDatesTemplate = fixtureRealDates.map(function(d){ return new Date(d); });
+  return true;
+}
 function generateGenericSeasonCalendar(startYear){
   var dates = [];
   var d = new Date(startYear, 7, 16); /* 16 Aug : first Saturday on/after this */
@@ -38717,6 +38790,7 @@ function startNewSeason(outcome){
   table[ourClubName] = {p:0,w:0,d:0,l:0,f:0,a:0,pts:0};
   scoSeasonNews(); /* v322 */
   if (isSco()){ fixtureRealDates = scoPreseasonDates(newStartYear).concat(scoSeasonDates(newStartYear, rivals.length*2)); fixtureRealDatesTemplate = fixtureRealDates.map(function(d){ return new Date(d); }); } /* v317 */
+  rmApplyEngCalendar(newStartYear); /* v338 */
   resetClinchedCertainties(); /* v234 : a fresh season, nothing clinched yet */
   /* FIXED A REAL BUG HERE, per direct report: "league tables aren't right --
      it's showing results from last Saturday even though the season hasn't
@@ -39336,7 +39410,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v337'; /* v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v338'; /* v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
