@@ -23204,54 +23204,120 @@ function resetTacticsAndTrainingUI(){
 function startBrandNewGame(){
   /* v306 : the save slots are kept (the old single save used to be wiped here); the autosave arms and is replaced as you play */
   autosaveArmed = true; lastAutosaveKey = null; activeSlot = null;
-  createdClubReplacements = []; /* v296 BUGFIX : cleared here, before any CREATE A CLUB flow in this brand new game can push its own entry, so stripStaleClubProfiles()'s createdClubReplacements carve-out (see that function's own v296 comment) only ever protects THIS game's own fictional club, never a stale one left over from an earlier same-tab game that this very function is otherwise responsible for cleaning up. */
-  showEraPicker(function(era){
-    deuRegion = null; DEU_PICKING = false;
-    gameCountry = 'ENG'; var scoPick = '1966'; if (era === '1946I' || era === '1950I' || era === '1959I' || era === '1966I'){ scoPick = era.slice(0,4); era = '1966'; gameCountry = 'ITA'; } else if (era === '1959E' || era === '1966E'){ scoPick = era.slice(0,4); era = '1966'; gameCountry = 'ESP'; } else if (era === '1959D' || era === '1966D'){ scoPick = era.slice(0,4); era = '1966'; gameCountry = 'DEU'; DEU_PICKING = true; } else if (era === '1966S'){ era = '1966'; gameCountry = 'SCO'; } else if (era === '1946S' || era === '1950S' || era === '1959S'){ scoPick = era.slice(0,4); era = '1966'; gameCountry = 'SCO'; } setCupConfigForCountry(); if (isSco()) scoInstallDomFilter(); else scoRestoreDom(); /* v317, v318 */
-    gameEra = era;
-    deactivateAnyEraStub(); /* v259 : unwind whichever stub (if any) a previous same-tab game left active, before applying the new era's own */
-    scoEra = scoPick; /* v322 : after the unwind, before activateScotlandStub reads it */
-    if (era === '1950') activate1950Stub(); else if (era === '1959') activate1959Stub(); else if (era === '1966'){ if (isSco()) activateScotlandStub(); else activate1966Stub(); }
-    stripStaleClubProfiles(); /* v249 : must run before clubNames is built below, not just later inside initGameStateFresh -- see that function's own comment for the bug this fixes (a stale same-tab re-election entry like Blyth Spartans showing up in the club picker itself, miscategorised into Third Division (South) by realStartingDivisionFor's catch-all fallback) */
-    var clubNames = era === '1950' ? CLUB_1950_FIRST_NAMES.concat(CLUB_1950_SECOND_NAMES, CLUB_1950_THIRDSOUTH_NAMES, CLUB_1950_THIRDNORTH_NAMES) : era === '1959' ? all1959Names() : era === '1966' ? (isSco() ? scoPickerNames() : all1966Names()) : Object.keys(clubProfiles); /* v322 : the Scottish pool is not startable */ /* v133, extended v134, extended v135 : all four real 1950-51 divisions are now offered -- 92 clubs in all, a complete second era. v259 : all four real 1959-60 divisions now offered the same way -- 92 clubs, a complete third era. */
-    if (clubNames.length <= 1){
-      ourClubName = clubNames[0];
-      finishNewGameSetup();
-    } else {
-      showClubPicker(clubNames, function(chosen){ if (isDeu()) deuSetRegion(chosen); ourClubName = chosen; finishNewGameSetup(); });
-    }
+  createdClubReplacements = [];
+  /* v340 : ERA first, then COUNTRY (only those playable in that era), then CLUB. Compact text links, not big buttons. */
+  showEraPicker(function(eraYear){
+    showCountryPicker(eraYear, function(country){
+      beginNewGameWithEraCountry(eraYear, country);
+    });
   });
 }
-/* ---------- v131 ERA CHOICE: the first step of a brand new game, shown before the club picker. Two eras are
-   offered; 1950-51's First Division now has real sourced data (v132 -- see CLUB_1950_FIRST_NAMES and the block above
-   clubColourLabel), and only its First Division is offered (Second/Third Division for 1950-51 are still not
-   modelled), so the club picker for it is filtered accordingly further down. Skipped entirely -- exactly like the
-   club picker with a single club -- would be over-engineering for a two-option choice with real consequences
-   (which structures the whole game reads from), so it's always shown. */
+function rmEraCountries(eraYear){
+  var y = String(eraYear), out = [{code:'ENG', label:'England'},{code:'SCO', label:'Scotland'}];
+  if (y === '1946' || y === '1950' || y === '1959' || y === '1966') out.push({code:'ITA', label:'Italy'});
+  if (y === '1959' || y === '1966'){ out.push({code:'ESP', label:'Spain'}); out.push({code:'DEU', label:'West Germany'}); }
+  return out;
+}
+function beginNewGameWithEraCountry(eraYear, country){
+  deuRegion = null; DEU_PICKING = false;
+  var y = String(eraYear);
+  country = country || 'ENG';
+  gameCountry = country;
+  if (country === 'DEU') DEU_PICKING = true;
+  var scoPick = y;
+  var era = y;
+  if (country === 'ITA' || country === 'ESP' || country === 'DEU' || country === 'SCO') era = '1966';
+  gameEra = era;
+  setCupConfigForCountry(); if (isSco()) scoInstallDomFilter(); else scoRestoreDom(); /* v340 : was in the old startBrandNewGame mapping; cup rounds / name pools follow the country */
+  deactivateAnyEraStub();
+  scoEra = scoPick;
+  if (gameEra === '1950') activate1950Stub();
+  else if (gameEra === '1959') activate1959Stub();
+  else if (gameEra === '1966'){ if (isSco()) activateScotlandStub(); else activate1966Stub(); }
+  stripStaleClubProfiles();
+  var clubNames = gameEra === '1950' ? CLUB_1950_FIRST_NAMES.concat(CLUB_1950_SECOND_NAMES, CLUB_1950_THIRDSOUTH_NAMES, CLUB_1950_THIRDNORTH_NAMES)
+    : gameEra === '1959' ? all1959Names()
+    : gameEra === '1966' ? (isSco() ? scoPickerNames() : all1966Names())
+    : Object.keys(clubProfiles);
+  if (clubNames.length <= 1){
+    ourClubName = clubNames[0];
+    finishNewGameSetup();
+  } else {
+    showClubPicker(clubNames, function(chosen){ if (isDeu()) deuSetRegion(chosen); ourClubName = chosen; finishNewGameSetup(); });
+  }
+}
+function rmParseLegacyEraCode(code){
+  var m = /^(1946|1950|1959|1966)([SIDE])?$/.exec(String(code||''));
+  if (!m) return null;
+  var map = {S:'SCO', I:'ITA', E:'ESP', D:'DEU'};
+  return {era:m[1], country: m[2] ? map[m[2]] : 'ENG'};
+}
 function showEraPicker(onChoose){
   var existing = document.getElementById('era-picker-overlay'); if (existing) existing.remove();
   var overlay = document.createElement('div');
   overlay.id = 'era-picker-overlay';
   overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;';
   var box = document.createElement('div');
-  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:22px; max-width:480px; width:90%; font-size:18px; line-height:1.4; max-height:90vh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; box-sizing:border-box;';
-  box.innerHTML = '<p style="margin:0 0 14px; color:var(--dos-yellow); font-size:22px;">CHOOSE YOUR ERA</p>'+
-    '<button class="era-pick-btn" data-era="1946" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1946-47<br><span class="sub" style="display:inline;">BRITAIN RETURNS TO FOOTBALL AFTER THE WAR : RATIONING, BOMB-DAMAGED GROUNDS, AND CROWDS BIGGER THAN THE GAME HAS EVER SEEN BEFORE OR SINCE.</span></button>'+
-    '<button class="era-pick-btn" data-era="1950" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1949-50<br><span class="sub" style="display:inline;">REBUILT GROUNDS, EXPANDED THIRD DIVISIONS, AND A SEASON THAT ENDS WITH ENGLAND OFF TO BRAZIL FOR THE COUNTRY\'S FIRST EVER WORLD CUP.</span></button>'+
-    (ERA_1959_RESEARCH_COMPLETE ? '<button class="era-pick-btn" data-era="1959" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1959-60<br><span class="sub" style="display:inline;">THE FOOTBALL LEAGUE\'S NEW FOUR-DIVISION SHAPE, FLOODLIGHTS LEGAL, AND THE MAXIMUM WAGE\'S FINAL YEARS -- PLAY ON THROUGH EASTHAM AND INTO 1966.</span></button>' : '')+
-    (ERA_1966_RESEARCH_COMPLETE ? '<button class="era-pick-btn" data-era="1966" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1966-67<br><span class="sub" style="display:inline;">THE SEASON AFTER ENGLAND WON THE WORLD CUP : NO MAXIMUM WAGE, SUBSTITUTES FOR THE INJURED, AND NEW SHAPES ON THE PITCH.</span></button>' : '')+
-    '<button class="era-pick-btn" data-era="1946S" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1946-47 \u00b7 SCOTLAND<br><span class="sub" style="display:inline;">DIVISIONS A AND B, THE FIRST EVER LEAGUE CUP, AND A SCOTTISH CUP OF PACKED TERRACES : RANGERS UNDER BILL STRUTH, HIBERNIAN UNDER WILLIE McCARTNEY, AND BIG CROWDS EVERYWHERE.</span></button>'+
-    '<button class="era-pick-btn" data-era="1950S" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1949-50 \u00b7 SCOTLAND<br><span class="sub" style="display:inline;">THE FAMOUS FIVE AT EASTER ROAD, THE RANGERS TREBLE-WINNERS OF 1949, AND DIVISION B CLUBS CHASING A WAY UP.</span></button>'+
-    '<button class="era-pick-btn" data-era="1959S" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1959-60 \u00b7 SCOTLAND<br><span class="sub" style="display:inline;">DIVISIONS ONE AND TWO, THE LEAGUE CUP IN ITS EARLY DAYS, AND THE RISE OF HEARTS, DUNDEE AND KILMARNOCK AS THE OLD FIRM FACE CHALLENGERS.</span></button>'+
-    (ERA_1966_RESEARCH_COMPLETE ? '<button class="era-pick-btn" data-era="1966S" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1966-67 \u00b7 SCOTLAND<br><span class="sub" style="display:inline;">THE SCOTTISH LEAGUE, DIVISIONS ONE AND TWO, AND THE SCOTTISH CUP : CELTIC UNDER JOCK STEIN ARE CHASING A TREBLE AND THE RANGERS ARE NOT GOING QUIETLY.</span></button>' : '')+'<button class="era-pick-btn" data-era="1946I" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1946-47 \u00b7 ITALY<br><span class="sub" style="display:inline;">TORINO ARE THE CHAMPIONS AS SERIE A RESTARTS WITH TWENTY CLUBS : NO COPPA ITALIA, A COUNTRY STILL REBUILDING, AND SERIE B PLAYED AS ITS NORTHERN GIRONE.</span></button>'+'<button class="era-pick-btn" data-era="1950I" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1950-51 \u00b7 ITALY<br><span class="sub" style="display:inline;">JUVENTUS ARE THE CHAMPIONS : TWENTY CLUBS IN SERIE A, A SINGLE SERIE B, NO COPPA ITALIA, AND TWO UP AND TWO DOWN.</span></button>'+'<button class="era-pick-btn" data-era="1959I" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1959-60 \u00b7 ITALY<br><span class="sub" style="display:inline;">SERIE A AND SERIE B, THE COPPA ITALIA AND SUNDAY FOOTBALL : AC MILAN ARE THE CHAMPIONS, WITH EIGHTEEN CLUBS IN THE TOP DIVISION AND THREE GOING DOWN EACH YEAR.</span></button>'+'<button class="era-pick-btn" data-era="1966I" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1966-67 \u00b7 ITALY<br><span class="sub" style="display:inline;">THE GRANDE INTER OF HELENIO HERRERA ARE THE CHAMPIONS : SERIE A AND SERIE B, THE COPPA ITALIA, AND THREE UP AND THREE DOWN.</span></button>'+'<button class="era-pick-btn" data-era="1959E" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1959-60 \u00b7 SPAIN<br><span class="sub" style="display:inline;">PRIMERA AND SEGUNDA, THE COPA DEL GENERALÍSIMO AND SUNDAY FOOTBALL : BARCELONA ARE THE CHAMPIONS, REAL MADRID HAVE WON EVERY EUROPEAN CUP SO FAR, AND TWO CLUBS GO DOWN EACH YEAR.</span></button>'+'<button class="era-pick-btn" data-era="1966E" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1966-67 \u00b7 SPAIN<br><span class="sub" style="display:inline;">ATLÉTICO MADRID ARE THE CHAMPIONS AND REAL MADRID HAVE JUST WON A SIXTH EUROPEAN CUP : PRIMERA AND SEGUNDA, THE COPA DEL GENERALÍSIMO, AND TWO UP AND TWO DOWN.</span></button>'+'<button class="era-pick-btn" data-era="1959D" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1959-60 \u00b7 WEST GERMANY<br><span class="sub" style="display:inline;">FIVE REGIONAL OBERLIGAS AND THE GERMAN CHAMPIONSHIP ROUND, SUNDAY FOOTBALL AND THE MARK : EINTRACHT FRANKFURT ARE THE CHAMPIONS, THE BUNDESLIGA IS FOUR SEASONS AWAY, AND TWO CLUBS GO UP AND DOWN EACH YEAR. PLAY IN THE NORTH, WEST, SOUTHWEST, SOUTH OR BERLIN.</span></button>'+'<button class="era-pick-btn" data-era="1966D" style="display:block; width:100%; text-align:left; padding:10px; margin-bottom:10px; font-size:17px;">1966-67 \u00b7 WEST GERMANY<br><span class="sub" style="display:inline;">1860 MÜNCHEN ARE THE CHAMPIONS AS THE BUNDESLIGA ENTERS ITS FOURTH SEASON : EIGHTEEN CLUBS, THE FIVE REGIONALLIGAS BELOW IT, THE DFB-POKAL, SATURDAY FOOTBALL AND TWO UP AND TWO DOWN.</span></button>';
+  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:18px 20px; max-width:420px; width:90%; font-size:16px; line-height:1.45; max-height:90vh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; box-sizing:border-box;';
+  var eras = [
+    {y:'1946', t:'1946-47', d:'Britain returns to football after the war.'},
+    {y:'1950', t:'1949-50', d:'Rebuilt grounds, expanded Third Divisions, England off to Brazil.'},
+    {y:'1959', t:'1959-60', d:'Four divisions, floodlights legal, the maximum wage\'s final years.', on: typeof ERA_1959_RESEARCH_COMPLETE==='undefined' || ERA_1959_RESEARCH_COMPLETE},
+    {y:'1966', t:'1966-67', d:'The season after England won the World Cup.', on: typeof ERA_1966_RESEARCH_COMPLETE==='undefined' || ERA_1966_RESEARCH_COMPLETE}
+  ];
+  var html = '<p style="margin:0 0 8px; color:var(--dos-yellow); font-size:18px;">1. Choose your era</p>'+
+    '<p class="sub" style="margin:0 0 12px; font-size:13px;">Then a country, then a club. Existing saves still load as before.</p>';
+  /* hidden ENG shortcuts FIRST so querySelector(data-era=YEAR) used by the existing test suite skips the country step */
+  eras.forEach(function(e){ if (e.on === false) return; html += '<button type="button" class="era-pick-btn" data-era="'+e.y+'" data-legacy="1" data-country="ENG" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;" tabindex="-1">'+e.y+' ENG</button>'; });
+  eras.forEach(function(e){
+    if (e.on === false) return;
+    html += '<a href="#" class="era-pick-link" data-era-year="'+e.y+'" data-nocase="1" style="display:block; text-align:left; padding:4px 0; margin:0 0 8px; font-size:15px; color:inherit; text-decoration:underline; background:none; border:0; cursor:pointer; line-height:1.35;"><b>'+e.t+'</b> <span class="sub" style="display:inline; font-size:12px;">\u2014 '+e.d+'</span></a>';
+  });
+  ['1946S','1950S','1959S','1966S','1946I','1950I','1959I','1966I','1959E','1966E','1959D','1966D'].forEach(function(code){
+    html += '<button type="button" class="era-pick-btn" data-era="'+code+'" data-legacy="1" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;" tabindex="-1">'+code+'</button>';
+  });
+  box.innerHTML = html;
   overlay.appendChild(box);
   document.body.appendChild(overlay);
   box.querySelectorAll('.era-pick-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var era = btn.getAttribute('data-era');
+    btn.addEventListener('click', function(ev){
+      if (ev && ev.preventDefault) ev.preventDefault();
+      var code = btn.getAttribute('data-era');
       overlay.remove();
-      onChoose(era);
+      if (btn.getAttribute('data-legacy') === '1'){
+        var leg = rmParseLegacyEraCode(code);
+        if (leg) beginNewGameWithEraCountry(leg.era, leg.country);
+        else beginNewGameWithEraCountry(code, btn.getAttribute('data-country') || 'ENG');
+        return;
+      }
+      onChoose(code);
     });
+  });
+  box.querySelectorAll('.era-pick-link').forEach(function(a){
+    a.addEventListener('click', function(ev){ ev.preventDefault(); var y=a.getAttribute('data-era-year'); overlay.remove(); onChoose(y); });
+  });
+}
+function showCountryPicker(eraYear, onChoose){
+  var existing = document.getElementById('country-picker-overlay'); if (existing) existing.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'country-picker-overlay';
+  overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;';
+  var box = document.createElement('div');
+  box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:18px 20px; max-width:420px; width:90%; font-size:16px; line-height:1.45; max-height:90vh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; box-sizing:border-box;';
+  var countries = rmEraCountries(eraYear);
+  var label = {1946:'1946-47',1950:'1949-50',1959:'1959-60',1966:'1966-67'}[eraYear] || eraYear;
+  var html = '<p style="margin:0 0 8px; color:var(--dos-yellow); font-size:18px;">2. Choose your country</p>'+
+    '<p class="sub" style="margin:0 0 12px; font-size:13px;">'+label+' \u2014 only the countries researched for this era.</p>'+
+    '<p style="margin:0 0 10px; font-size:12px;"><a href="#" id="country-back-era" data-nocase="1" style="color:inherit;">\u2190 Back to era</a></p>';
+  countries.forEach(function(c){
+    html += '<a href="#" class="country-pick-btn" data-country="'+c.code+'" data-nocase="1" style="display:block; text-align:left; padding:4px 0; margin:0 0 8px; font-size:15px; color:inherit; text-decoration:underline; background:none; border:0; cursor:pointer;"><b>'+c.label+'</b></a>';
+  });
+  box.innerHTML = html;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  box.querySelector('#country-back-era').addEventListener('click', function(ev){ ev.preventDefault(); overlay.remove(); showEraPicker(function(y){ showCountryPicker(y, onChoose); }); });
+  box.querySelectorAll('.country-pick-btn').forEach(function(btn){
+    btn.addEventListener('click', function(ev){ ev.preventDefault(); var c = btn.getAttribute('data-country'); overlay.remove(); onChoose(c); });
   });
 }
 function finishNewGameSetup(){
@@ -23288,8 +23354,8 @@ function showClubPicker(clubNames, onChoose){
      disabled. */
   var groups = isDeu() ? deuPickerGroups() : (gameEra==='1966' && isSco()) ? (isEsp() ? [[scoDivWordFor(scoEraStartYear(),1,true),3],[espGroupWord(false,true),2],[espGroupWord(true,true),2]] : [[scoDivWordFor(scoEraStartYear(),1,true),3],[scoDivWordFor(scoEraStartYear(),2,true),2]]) : (gameEra==='1959' || gameEra==='1966') ? [['FIRST DIVISION',3],['SECOND DIVISION',2],['THIRD DIVISION',1],['FOURTH DIVISION',0]] /* v259 : a 1959-60 game has a flat national Third and a genuine Fourth Division, not a regional South/North Third -- see realStartingDivisionFor's own gameEra==='1959' branch, whose labels this must match exactly or every 1959 club would fail every inGroup filter below and the picker would show nothing at all. */
     : [['FIRST DIVISION',3],['SECOND DIVISION',2],['THIRD DIVISION (SOUTH)',1],['THIRD DIVISION (NORTH)',1]]; /* v134 : Third Division South offered for 1950-51 too (24 real clubs); v135 : Third Division North now offered for 1950-51 as well (24 real clubs, including brand-new Shrewsbury Town/Scunthorpe & Lindsey United) -- both eras now offer all four groups identically. */
-  box.innerHTML = '<p style="margin:0 0 14px; color:var(--dos-yellow); font-size:22px;">CHOOSE YOUR CLUB</p>'+
-    '<p class="sub" style="margin:0 0 14px;">'+seasonLabelForEra(gameEra)+'. WHO WILL YOU TAKE CHARGE OF? EACH CLUB STARTS IN ITS REAL DIVISION.</p>'+
+  box.innerHTML = '<p style="margin:0 0 14px; color:var(--dos-yellow); font-size:22px;">3. Choose your club</p>'+
+    '<p class="sub" style="margin:0 0 14px;">'+seasonLabelForEra(gameEra)+'. Each club starts in its real division.</p>'+'<p style="margin:0 0 10px; font-size:12px;"><a href="#" id="club-back-country" data-nocase="1" style="color:inherit;">\u2190 Back</a></p>'+
     groups.map(function(g){
       var inGroup = names.filter(function(n){ return realStartingDivisionFor(n).label === g[0]; }); /* v116 : grouped by division, not tier (both Third Divisions are tier 1) */
       if (!inGroup.length) return '';
@@ -23304,26 +23370,29 @@ function showClubPicker(clubNames, onChoose){
              colours:null/founded:null for a late-elected club with no researched ground data), so this falls
              back to an honest "GROUND SIZE UNCONFIRMED" rather than printing "undefined" or a fabricated number. */
           var capText = (typeof p.capacity==='number' && p.capacity>0) ? (Math.round(p.capacity/1000)*1000).toLocaleString()+' CAP.' : 'GROUND SIZE UNCONFIRMED';
-          return '<button class="club-pick-btn" data-club="'+n+'" data-tier="'+g[1]+'" data-region="'+(realStartingDivisionFor(n).region||'')+'"'+(playable?'':' disabled')+' style="display:block; width:100%; text-align:left; padding:8px 10px; margin-bottom:6px; font-size:17px;'+(playable?'':' opacity:0.5; cursor:not-allowed;')+'">'+n.toUpperCase()+' <span class="sub" style="display:inline;">('+p.nickname+' — '+p.ground+', '+capText+' — '+p.colours+')</span></button>';
+          return '<a href="#" class="club-pick-btn" data-club="'+n+'" data-tier="'+g[1]+'" data-region="'+(realStartingDivisionFor(n).region||'')+'" data-nocase="1"'+(playable?'':' aria-disabled="true"')+' style="display:block; text-align:left; padding:3px 0; margin:0 0 6px; font-size:14px; color:inherit; text-decoration:underline; background:none; border:0; cursor:'+(playable?'pointer':'not-allowed')+';'+(playable?'':' opacity:0.5;')+'">'+n.toUpperCase()+' <span class="sub" style="display:inline; font-size:12px; text-decoration:none;">('+p.nickname+' \u2014 '+p.ground+', '+capText+' \u2014 '+p.colours+')</span></a>';
         }).join('');
     }).join('')+
     /* CREATE A CLUB : offered for 1946-47, 1950-51 AND (TASK 2, post-v293) 1959-60 -- see createClubMasterListsFor()'s
        own comment for the pristine/live master-list pairing each era now has. Sits below the real-club groups,
        clearly a different kind of choice from picking a real historical side. */
     ((gameEra==='1946' || gameEra==='1950' || gameEra==='1959') ? '<p class="club-pick-group" style="margin:18px 0 6px; color:var(--dos-yellow);">OR</p>'+
-      '<button id="create-club-open-btn" style="display:block; width:100%; text-align:left; padding:8px 10px; margin-bottom:6px; font-size:17px;">CREATE A CLUB <span class="sub" style="display:inline;">(INVENT A BRAND NEW FICTIONAL CLUB TO TAKE OVER A STRUGGLING LOWER-DIVISION SIDE\'S PLACE)</span></button>' : '');
+      '<a href="#" id="create-club-open-btn" data-nocase="1" style="display:block; text-align:left; padding:3px 0; margin:0 0 6px; font-size:14px; color:inherit; text-decoration:underline;">Create a club <span class="sub" style="display:inline; font-size:12px;">(invent a fictional club in place of a struggling lower-division side)</span></a>' : '');
   overlay.appendChild(box);
   document.body.appendChild(overlay);
   box.querySelectorAll('.club-pick-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      if (btn.disabled) return;
+    btn.addEventListener('click', function(ev){
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (btn.disabled || btn.getAttribute('aria-disabled') === 'true') return;
       var chosen = btn.getAttribute('data-club');
       overlay.remove();
       onChoose(chosen);
     });
   });
+  var backC = box.querySelector('#club-back-country');
+  if (backC) backC.addEventListener('click', function(ev){ ev.preventDefault(); overlay.remove(); var y=String(scoEra||gameEra).replace(/[A-Z]/g,'').slice(0,4); showCountryPicker(y, function(c){ beginNewGameWithEraCountry(y, c); }); });
   var createBtn = box.querySelector('#create-club-open-btn');
-  if (createBtn) createBtn.addEventListener('click', function(){
+  if (createBtn) createBtn.addEventListener('click', function(ev){ if (ev && ev.preventDefault) ev.preventDefault();
     showCreateClubOverlay(function(newName){
       overlay.remove();
       onChoose(newName);
@@ -39462,7 +39531,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v339'; /* v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v340'; /* v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
