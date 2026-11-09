@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MATCH — RetroMatch 1980s UI mockup</title>
+<!-- Standalone mockup of a proposed 1981-82 era skin, in the spirit of Match / early-80s Shoot! magazine.
+     Compact UI, small text links, no big buttons or boxes. No game logic; figures illustrative (Liverpool, First Division, Aug 1981).
+     NOT wired into the game — for Chris to review before any adopt. -->
+<style>
+:root{
+  --ink:#0d0d0d; --paper:#f6f3ea; --paper2:#ebe6d8; --red:#c41230; --reddk:#8e0c22;
+  --blue:#0b3d91; --yellow:#f5d76e; --mute:#5c584c; --line:#c9c2b0;
+  --disp:Impact,'Arial Black',Haettenschweiler,sans-serif;
+  --cond:'Arial Narrow',Arial,Helvetica,sans-serif;
+  --body:Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.35;
+  background:#222;background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 3px)}
+a{color:var(--blue);text-decoration:underline;text-underline-offset:2px}
+a:hover{color:var(--red)}
+.mag{max-width:920px;margin:12px auto;background:var(--paper);box-shadow:0 12px 40px rgba(0,0,0,.55);overflow:hidden}
+.topbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;background:var(--ink);color:#fff;font-family:var(--cond);text-transform:uppercase;letter-spacing:.16em;font-size:10px;padding:4px 14px}
+.mast{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;background:var(--red);padding:8px 14px 6px;border-bottom:3px solid var(--ink)}
+.mast .kicker{font-family:var(--cond);font-weight:700;letter-spacing:.2em;text-transform:uppercase;font-size:10px;color:#fff}
+.mast h1{margin:0;font-family:var(--disp);font-weight:400;font-size:clamp(42px,11vw,84px);line-height:.85;letter-spacing:.01em;color:#fff;text-transform:uppercase;text-shadow:2px 2px 0 var(--ink)}
+.mast h1 span{color:var(--yellow)}
+.mast .issue{font-family:var(--cond);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#fff;text-align:right;line-height:1.3}
+.mast .issue b{display:block;font-size:18px;font-family:var(--disp);color:var(--yellow)}
+.stripe{height:6px;background:repeating-linear-gradient(90deg,var(--ink) 0 10px,var(--yellow) 10px 20px,var(--blue) 20px 30px,var(--red) 30px 40px)}
+.note-banner{background:var(--yellow);color:var(--ink);font-family:var(--cond);font-size:12px;letter-spacing:.05em;text-transform:uppercase;padding:6px 14px;border-bottom:2px solid var(--ink)}
+.note-banner b{color:var(--red)}
+
+/* compact nav — text links only */
+.nav{display:flex;flex-wrap:wrap;gap:0 14px;padding:6px 14px;background:var(--paper2);border-bottom:1px solid var(--line);font-family:var(--cond);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.nav a{color:var(--ink);text-decoration:none;border-bottom:2px solid transparent;padding:2px 0}
+.nav a:hover,.nav a.on{border-bottom-color:var(--red);color:var(--red)}
+.nav a i{font-style:normal;color:var(--mute);margin-right:4px}
+
+section{padding:14px 14px 6px}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin:0 0 8px;border-bottom:2px solid var(--ink);padding-bottom:3px}
+.sec-h .no{font-family:var(--disp);font-size:18px;color:var(--red);line-height:1}
+.sec-h h2{margin:0;font-family:var(--cond);font-weight:700;font-size:16px;letter-spacing:.12em;text-transform:uppercase}
+.sec-h .tg{margin-left:auto;font-family:var(--cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+
+h3{font-family:var(--cond);font-weight:700;font-size:14px;letter-spacing:.1em;margin:0 0 4px;text-transform:uppercase}
+h4{font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:11px;margin:0 0 4px;color:var(--red)}
+p{margin:0 0 6px}
+.lab{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:10px;color:var(--mute)}
+
+.grid{display:grid;gap:10px}
+.g-main{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+@media (max-width:720px){.g-main,.prog{grid-template-columns:1fr}}
+
+/* compact panels — thin borders, no chunky shadow boxes */
+.panel{background:#fff;border:1px solid var(--line);padding:8px 10px}
+.panel.hi{border-color:var(--ink);border-left:3px solid var(--red)}
+
+/* TABLE — dense */
+table.lg{width:100%;border-collapse:collapse;font-family:var(--cond);font-size:12px}
+table.lg th{background:var(--ink);color:#fff;text-transform:uppercase;letter-spacing:.08em;font-weight:600;padding:3px 5px;text-align:left;font-size:10px}
+table.lg td{padding:2px 5px;border-bottom:1px solid var(--line)}
+table.lg tr:nth-child(even) td{background:#faf8f2}
+table.lg tr.us td{background:var(--yellow);font-weight:700}
+table.lg .num{text-align:right;font-variant-numeric:tabular-nums;width:2em}
+table.lg .club{font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+table.lg .pos{width:1.5em;font-family:var(--disp);font-size:14px;color:var(--red);text-align:center}
+
+/* SQUAD dense */
+.squad{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--cond)}
+.squad th{text-transform:uppercase;letter-spacing:.1em;font-size:10px;text-align:left;padding:2px 5px;border-bottom:2px solid var(--ink);color:var(--red)}
+.squad td{padding:2px 5px;border-bottom:1px dotted var(--line)}
+.squad .n{font-weight:700;text-transform:uppercase}
+.squad .pos{color:var(--blue);font-weight:600;width:3em}
+.pill{display:inline-block;background:var(--ink);color:var(--yellow);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:0 4px;margin-left:3px}
+
+/* FIXTURES */
+.fx{width:100%;border-collapse:collapse;font-family:var(--cond);font-size:12px}
+.fx th{background:var(--blue);color:#fff;text-transform:uppercase;letter-spacing:.08em;font-size:10px;padding:3px 5px;text-align:left}
+.fx td{padding:3px 5px;border-bottom:1px solid var(--line)}
+.fx tr.mid td{background:#fff8d6}
+.fx .d{font-family:var(--disp);color:var(--red);font-size:13px;width:2.4em}
+.fx .ko{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+.fx .ha{font-weight:700;width:1.2em}
+
+/* PROGRAMME — plain numbered, compact */
+.prog{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid var(--ink);background:#fff}
+.prog .side{padding:8px 10px}
+.prog .side+ .side{border-left:1px solid var(--ink)}
+.prog .club{font-family:var(--disp);font-size:20px;line-height:1;text-transform:uppercase;margin:0 0 2px;color:var(--red)}
+.prog .vs{font-family:var(--cond);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:0 0 6px}
+.prog ol{list-style:none;margin:0;padding:0;counter-reset:xi}
+.prog ol li{display:grid;grid-template-columns:22px 1fr;gap:6px;align-items:baseline;padding:2px 0;border-bottom:1px dotted var(--line);font-family:var(--cond);font-size:12px}
+.prog ol li::before{counter-increment:xi;content:counter(xi);font-family:var(--disp);font-size:14px;color:var(--red);line-height:1}
+.prog .foot{grid-column:1/-1;background:var(--ink);color:#fff;padding:5px 10px;font-family:var(--cond);font-size:10px;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.prog-banner{background:var(--paper2);border:1px solid var(--line);border-left:3px solid var(--red);padding:6px 8px;margin:0 0 8px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+
+/* rules strip — compact text, not big buttons */
+.rules{display:flex;flex-wrap:wrap;gap:4px 12px;font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:6px 0}
+.rules span{border-bottom:1px dotted var(--line);padding:1px 0}
+.rules b{color:var(--red)}
+
+.footer{background:var(--ink);color:#aaa;padding:10px 14px;font-family:var(--cond);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-top:12px}
+.footer b{color:var(--yellow)}
+
+/* deliberately NOT big buttons — text links only */
+.links{font-family:var(--cond);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.links a{margin-right:12px}
+</style>
+</head>
+<body>
+<div class="mag">
+  <div class="topbar">
+    <span>Britain’s liveliest football weekly · mockup</span>
+    <span>Season 1981–82 · Issue preview</span>
+  </div>
+  <header class="mast">
+    <div>
+      <div class="kicker">RetroMatch presents</div>
+      <h1>Match<span>!</span></h1>
+      <p style="margin:2px 0 6px;font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:#fff">Proposed 1980s era look · Match / early-80s Shoot · not yet in the game</p>
+    </div>
+    <div class="issue">Price <b>20p</b>3pts for a win<br>from this season</div>
+  </header>
+  <div class="stripe"></div>
+  <div class="note-banner">Review only — <b>do not adopt</b> until Chris says so. 1981-82 data may ship first under the Shoot! skin.</div>
+  <nav class="nav" aria-label="Sections">
+    <a class="on" href="#table"><i>01</i>Table</a>
+    <a href="#squad"><i>02</i>Squad</a>
+    <a href="#fixtures"><i>03</i>Fixtures</a>
+    <a href="#programme"><i>04</i>Programme</a>
+    <a href="#rules"><i>05</i>Rules</a>
+  </nav>
+
+  <section id="table">
+    <div class="sec-h"><span class="no">1</span><h2>Football League · First Division</h2><span class="tg">after 4 matches · mock</span></div>
+    <div class="grid g-main">
+      <div class="panel" style="padding:0;overflow:hidden">
+        <table class="lg">
+          <thead><tr><th></th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">F</th><th class="num">A</th><th class="num">GD</th><th class="num">Pts</th></tr></thead>
+          <tbody>
+            <tr><td class="pos">1</td><td class="club">Ipswich Town</td><td class="num">4</td><td class="num">3</td><td class="num">1</td><td class="num">0</td><td class="num">9</td><td class="num">2</td><td class="num">+7</td><td class="num">10</td></tr>
+            <tr class="us"><td class="pos">2</td><td class="club">Liverpool ★</td><td class="num">4</td><td class="num">3</td><td class="num">0</td><td class="num">1</td><td class="num">8</td><td class="num">3</td><td class="num">+5</td><td class="num">9</td></tr>
+            <tr><td class="pos">3</td><td class="club">Manchester United</td><td class="num">4</td><td class="num">2</td><td class="num">2</td><td class="num">0</td><td class="num">6</td><td class="num">2</td><td class="num">+4</td><td class="num">8</td></tr>
+            <tr><td class="pos">4</td><td class="club">Tottenham Hotspur</td><td class="num">4</td><td class="num">2</td><td class="num">1</td><td class="num">1</td><td class="num">7</td><td class="num">4</td><td class="num">+3</td><td class="num">7</td></tr>
+            <tr><td class="pos">5</td><td class="club">Arsenal</td><td class="num">4</td><td class="num">2</td><td class="num">1</td><td class="num">1</td><td class="num">5</td><td class="num">3</td><td class="num">+2</td><td class="num">7</td></tr>
+            <tr><td class="pos">6</td><td class="club">Swansea City</td><td class="num">4</td><td class="num">2</td><td class="num">0</td><td class="num">2</td><td class="num">6</td><td class="num">5</td><td class="num">+1</td><td class="num">6</td></tr>
+            <tr><td class="pos">21</td><td class="club">Wolves</td><td class="num">4</td><td class="num">0</td><td class="num">1</td><td class="num">3</td><td class="num">2</td><td class="num">8</td><td class="num">−6</td><td class="num">1</td></tr>
+            <tr><td class="pos">22</td><td class="club">Middlesbrough</td><td class="num">4</td><td class="num">0</td><td class="num">0</td><td class="num">4</td><td class="num">1</td><td class="num">10</td><td class="num">−9</td><td class="num">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="panel hi" style="margin-bottom:8px">
+          <h4>Three points for a win</h4>
+          <p style="margin:0;font-size:12px">England adopts <b>3 pts</b> for a win from <b>1981-82</b>. Goal difference already in use (from 1976-77). Scotland still on 2 pts until 1994-95.</p>
+        </div>
+        <div class="panel">
+          <h4>Compact UI brief</h4>
+          <p style="margin:0;font-size:12px">Small text links instead of big buttons; dense tables; thin panels; Match-red masthead. Fits the game’s existing screens without chunky boxes.</p>
+          <p class="links" style="margin-top:6px"><a href="#squad">Squad →</a><a href="#fixtures">Fixtures →</a><a href="#programme">Programme →</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="squad">
+    <div class="sec-h"><span class="no">2</span><h2>Liverpool · squad list</h2><span class="tg">mock · Aug 1981</span></div>
+    <div class="panel" style="padding:0;overflow:hidden">
+      <table class="squad">
+        <thead><tr><th>Pos</th><th>Name</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="pos">GK</td><td class="n">Grobbelaar</td><td>new signing</td></tr>
+          <tr><td class="pos">DF</td><td class="n">Neal</td><td></td></tr>
+          <tr><td class="pos">DF</td><td class="n">Thompson</td><td>captain <span class="pill">c</span></td></tr>
+          <tr><td class="pos">DF</td><td class="n">Hansen</td><td></td></tr>
+          <tr><td class="pos">MF</td><td class="n">Lee</td><td></td></tr>
+          <tr><td class="pos">MF</td><td class="n">Souness</td><td></td></tr>
+          <tr><td class="pos">MF</td><td class="n">McDermott</td><td></td></tr>
+          <tr><td class="pos">FW</td><td class="n">Dalglish</td><td></td></tr>
+          <tr><td class="pos">FW</td><td class="n">Rush</td><td></td></tr>
+          <tr><td class="pos">FW</td><td class="n">Johnson</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lab" style="margin-top:6px">Real names for illustration only — not a claim about every 1981-82 registration.</p>
+  </section>
+
+  <section id="fixtures">
+    <div class="sec-h"><span class="no">3</span><h2>Fixtures</h2><span class="tg">Sat 3pm · few midweek</span></div>
+    <div class="panel" style="padding:0;overflow:hidden">
+      <table class="fx">
+        <thead><tr><th></th><th>Date</th><th>KO</th><th></th><th>Opponent</th><th>Comp</th></tr></thead>
+        <tbody>
+          <tr><td class="d">Sat</td><td>29 Aug</td><td><span class="ko">3.00</span></td><td class="ha">H</td><td>Wolves</td><td>League</td></tr>
+          <tr class="mid"><td class="d">Wed</td><td>2 Sep</td><td><span class="ko">7.30</span></td><td class="ha">A</td><td>Arsenal</td><td>League · floodlit</td></tr>
+          <tr><td class="d">Sat</td><td>5 Sep</td><td><span class="ko">3.00</span></td><td class="ha">H</td><td>Middlesbrough</td><td>League</td></tr>
+          <tr><td class="d">Sat</td><td>12 Sep</td><td><span class="ko">3.00</span></td><td class="ha">A</td><td>Ipswich Town</td><td>League</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="programme">
+    <div class="sec-h"><span class="no">4</span><h2>Matchday programme</h2><span class="tg">plain numbered XI</span></div>
+    <div class="prog-banner">Still the plain 1–11 list (from 1969-70). Home club’s programme; visitors opposite.</div>
+    <div class="prog">
+      <div class="side">
+        <div class="club">Liverpool</div>
+        <div class="vs">Home · red shirts</div>
+        <ol>
+          <li>Grobbelaar</li><li>Neal</li><li>Thompson</li><li>Hansen</li><li>Lawrenson</li>
+          <li>Lee</li><li>Souness</li><li>McDermott</li><li>Dalglish</li><li>Rush</li><li>Johnson</li>
+        </ol>
+      </div>
+      <div class="side">
+        <div class="club" style="color:var(--blue)">Everton</div>
+        <div class="vs">Away · blue shirts</div>
+        <ol>
+          <li>Southall</li><li>Stevens</li><li>Bailey</li><li>Higgins</li><li>Wright</li>
+          <li>Ratcliffe</li><li>McMahon</li><li>Heath</li><li>Sharp</li><li>Latchford</li><li>Richardson</li>
+        </ol>
+      </div>
+      <div class="foot">
+        <span>Referee · pool name</span>
+        <span>Anfield · Sat 3.00</span>
+        <span>Sub · two permitted from 1982-83*</span>
+      </div>
+    </div>
+    <p class="lab" style="margin-top:6px">*1981-82 still one substitute in League matches — confirm in era rules when wired.</p>
+  </section>
+
+  <section id="rules">
+    <div class="sec-h"><span class="no">5</span><h2>Era rules · 1981-82</h2><span class="tg">England + Scotland</span></div>
+    <div class="rules">
+      <span><b>ENG</b> 3 pts for a win</span>
+      <span><b>SCO</b> still 2 pts</span>
+      <span>Goal difference</span>
+      <span>Re-election (bottom D4)</span>
+      <span>No play-offs yet (1986-87)</span>
+      <span>Plain numbered XI</span>
+      <span>Shoot! skin until this Match look is approved</span>
+    </div>
+    <p class="lab">Skin follows the <b>current season</b> of a save (v344): a 1940s start reaches Match from 1981-82 once adopted.</p>
+  </section>
+
+  <footer class="footer">
+    <b>RetroMatch · preview-1980s.html</b> — Match / early-80s magazine proposal for the 1981-82 start.
+    Compact type, red masthead, text links, dense tables. Approve before wiring into <b>gaffer.html</b>.
+  </footer>
+</div>
+</body>
+</html>
