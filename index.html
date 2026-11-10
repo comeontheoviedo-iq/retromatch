@@ -1489,6 +1489,141 @@ body.theme-shoot #theme-pitch{display:none;}
   body.theme-shoot .menubar>a, body.theme-shoot .menubar>.menu-group>.navgrouplabel{border-bottom:1px solid #333;}
 }
 </style>
+<style id="era-theme-match">
+/* ===== ERA THEME: MATCH (1981-82 onward). Scoped to body.theme-match; set by applyEraTheme() from ERA_THEMES['1981'] by current season.
+   Approved preview-1980s.html (10 Nov 2026): Match-red masthead, compact UI, small text links, dense tables, thin panels.
+   System / already-inlined fonts only; no remote resources. */
+body.theme-match{
+  --yellow:#f5d76e; --yellow2:#f5d76e; --red:#c41230; --reddk:#8e0c22;
+  --paper:#f6f3ea; --paper2:#ebe6d8; --paper3:#fff; --sky:#0b3d91; --green:#1f7a3a;
+  --grey:#2a2a2a; --mute:#5c584c; --line:#c9c2b0;
+  --dos-blue:#f6f3ea; --dos-blue-dark:#ebe6d8; --dos-black:#0d0d0d; --dos-white:#f6f3ea;
+  --ink:#0d0d0d; --dos-grey:#5c584c; --dos-yellow:#7a3a00; --dos-cyan:#0b3d91; --dos-green:#1f7a3a; --dos-red:#c41230;
+  --pink:#f6f3ea; --pink3:#fff; --soft:#5c584c;
+  --t-disp:Impact,'Arial Black',Haettenschweiler,sans-serif;
+  --t-body:Arial,Helvetica,sans-serif;
+  --t-cond:'Barlow Condensed','Arial Narrow',Arial,Helvetica,sans-serif;
+  --font-dos:var(--t-body);
+  font-family:var(--t-body); font-size:14px; line-height:1.35; letter-spacing:0; padding:12px 8px 26px; background:#222;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 3px);
+}
+body.theme-match .screen{
+  max-width:1100px; border:0; box-shadow:0 16px 50px rgba(0,0,0,.7); padding:0 22px 16px; overflow:hidden;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>"),
+    var(--paper);
+}
+body.theme-match .titlebar{font-family:var(--t-cond); font-size:12px; letter-spacing:.14em; text-transform:uppercase; padding:6px 0 4px; border-bottom:1px solid var(--ink); color:var(--ink);}
+body.theme-match .titlebar .name{color:var(--ink); font-weight:700;}
+body.theme-match .titlebar .era{white-space:nowrap; background:var(--ink); color:var(--yellow); padding:1px 8px;}
+body.theme-match .statusbar{font-family:var(--t-cond); font-size:13px; letter-spacing:.1em; text-transform:uppercase; padding:5px 0 6px; gap:2px 22px; color:var(--soft); border-bottom:4px solid var(--ink);}
+body.theme-match .statusbar b{font-weight:700; color:var(--ink);}
+body.theme-match .menubar{border:3px solid var(--ink); margin:12px 0 4px; background:var(--ink); overflow:visible;}
+body.theme-match .menubar>a, body.theme-match .menu-group>.navgrouplabel{font-family:var(--t-cond); text-transform:uppercase; letter-spacing:.12em; font-size:14px; font-weight:600; padding:10px 14px; border-right:1px solid #333; color:var(--yellow);}
+body.theme-match .menubar>a:last-child{border-right:0;}
+body.theme-match .menubar a .hot{color:inherit; text-decoration:none;}
+body.theme-match .menubar a.active, body.theme-match .menu-group.has-active>.navgrouplabel{background:var(--red); color:#fff;}
+body.theme-match .menubar a:hover:not(.active), body.theme-match .menu-group>.navgrouplabel:hover{background:var(--red); color:#fff;}
+body.theme-match .menu-dropdown{background:var(--paper); border:3px solid var(--ink); box-shadow:4px 4px 0 var(--ink);}
+body.theme-match .menu-dropdown a{border-right:0; border-bottom:1px dotted var(--ink); color:var(--ink);}
+body.theme-match .menu-dropdown a:last-child{border-bottom:0;}
+body.theme-match .body{padding:10px 0 14px;}
+body.theme-match h1{font-family:var(--t-disp); font-size:clamp(28px,5.4vw,50px); line-height:.95; letter-spacing:.02em; color:var(--ink); margin:6px 0 6px; border-top:0; padding-top:6px; text-transform:uppercase;}
+body.theme-match p.sub, body.theme-match div.sub{font-family:var(--t-cond); font-style:normal; font-size:14px; color:var(--mute); border-bottom:3px solid var(--ink); padding-bottom:6px; margin:0 0 12px; text-transform:uppercase; letter-spacing:.08em;}
+body.theme-match .box{border:3px solid var(--ink); background:#fff; padding:10px 12px; margin-bottom:14px; box-shadow:4px 4px 0 var(--ink);}
+body.theme-match .box .box-title{display:block; margin:-2px 0 8px; padding:6px 8px; text-align:left; background:var(--red); color:#fff; font-family:var(--t-cond); font-weight:700; font-size:13px; letter-spacing:.14em; text-transform:uppercase; border:3px solid var(--ink);}
+body.theme-match .scoreboard{border:3px solid var(--ink); background:#fff; box-shadow:4px 4px 0 var(--ink);}
+body.theme-match table{font-size:15px; font-variant-numeric:tabular-nums; font-family:var(--t-cond);}
+body.theme-match th{font-family:var(--t-cond); font-weight:600; font-size:12px; letter-spacing:.1em; background:var(--ink); color:var(--yellow); border-top:0; border-bottom:0; padding:6px 6px; text-transform:uppercase;}
+body.theme-match td{border-bottom:1px solid #ddd; padding:5px 6px;}
+body.theme-match tbody tr:nth-child(odd) td{background:transparent;}
+body.theme-match tbody tr:nth-child(even) td{background:#faf6ea;}
+body.theme-match tbody tr:hover td{background:var(--yellow); color:var(--ink);}
+body.theme-match tbody tr.us td{background:var(--yellow); color:var(--ink); font-weight:700;}
+body.theme-match tbody tr.picked td, body.theme-match tbody tr.picked:hover td{background:var(--yellow); color:var(--ink); font-weight:700;}
+body.theme-match tbody tr.zone-up td:first-child{border-left:4px solid var(--dos-green);}
+body.theme-match tbody tr.zone-down td:first-child{border-left:4px solid var(--dos-red);}
+body.theme-match tbody tr.zone-warn td:first-child{border-left:4px solid var(--yellow2);}
+body.theme-match .pos{color:var(--red); font-family:var(--t-disp); font-size:18px;} body.theme-match tbody tr.us .pos, body.theme-match tbody tr:hover td.pos, body.theme-match tbody tr.picked td.pos{color:var(--red);}
+body.theme-match .scroll-box{border:3px solid var(--ink);}
+body.theme-match .field{color:var(--mute);}
+body.theme-match button, body.theme-match input[type=button]{font-family:var(--t-cond); text-transform:uppercase; letter-spacing:.12em; font-size:13px; font-weight:600; background:var(--yellow); color:var(--ink); border:3px solid var(--ink); padding:8px 14px; min-height:40px; border-radius:0; box-shadow:3px 3px 0 var(--ink);}
+body.theme-match button:hover:not(:disabled), body.theme-match button.primary{background:var(--red); color:#fff; border-color:var(--ink);}
+body.theme-match button.primary:hover:not(:disabled){background:var(--reddk); color:#fff;}
+body.theme-match button:focus-visible, body.theme-match a:focus-visible, body.theme-match select:focus-visible, body.theme-match input:focus-visible{outline:3px solid var(--sky); outline-offset:2px;}
+body.theme-match button.newsfilter, body.theme-match .newsfilter{font-size:12px; padding:3px 10px; min-height:34px; background:#fff; color:var(--ink); box-shadow:2px 2px 0 var(--ink);}
+body.theme-match .newsfilter.active{background:var(--ink); color:var(--yellow);}
+body.theme-match select, body.theme-match input[type=text], body.theme-match input[type=number], body.theme-match input:not([type]), body.theme-match textarea{font-family:var(--t-body); font-size:15px; background:#fff; color:var(--ink); border:2px solid var(--ink); border-radius:0; padding:4px 6px;}
+body.theme-match input[type=range]{accent-color:var(--red);}
+body.theme-match .news-item{font-size:15px; border-bottom:1px dotted #bbb; padding:5px 0; line-height:1.3;}
+body.theme-match .news-item .tag{font-family:var(--t-cond); font-size:10px; letter-spacing:.12em; text-transform:uppercase; border:2px solid var(--ink); background:var(--yellow); color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
+body.theme-match .news-item .tag.board, body.theme-match .news-item .tag.injury{background:var(--ink); color:var(--yellow);}
+body.theme-match blockquote{border-left:4px solid var(--red); font-size:15px; font-style:italic;}
+body.theme-match .cite{color:var(--mute); font-size:13px;}
+body.theme-match .statline{font-size:15px;} body.theme-match .statline .lbl{color:var(--mute);}
+body.theme-match .bar{color:var(--ink); font-family:var(--t-cond);}
+/* Shoot! masthead */
+body.theme-match #theme-masthead{display:block; padding:0; margin:0 -22px 0; background:var(--ink);}
+#theme-masthead .mt-top{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; background:var(--ink); color:var(--yellow); font-family:var(--t-cond); text-transform:uppercase; letter-spacing:.18em; font-size:11px; padding:5px 18px; font-weight:500;}
+#theme-masthead .mt-mast{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end; background:var(--yellow); padding:10px 18px 0; border-bottom:6px solid var(--ink);}
+#theme-masthead .mt-kick{font-family:var(--t-cond); font-weight:700; letter-spacing:.22em; text-transform:uppercase; font-size:12px; color:var(--red);}
+#theme-masthead .mt-h{display:block; margin:0; font-family:var(--t-disp); font-weight:400; font-size:clamp(48px,12vw,100px); line-height:.85; letter-spacing:.02em; color:var(--ink); text-transform:uppercase;}
+#theme-masthead .mt-h span{color:var(--red);}
+#theme-masthead .mt-sub{font-family:var(--t-cond); font-weight:600; text-transform:uppercase; letter-spacing:.1em; font-size:13px; color:var(--reddk); margin:4px 0 10px;}
+#theme-masthead .mt-price{width:78px; height:78px; border-radius:50%; background:var(--red); color:var(--yellow); border:4px solid var(--ink); display:grid; place-items:center; text-align:center; font-family:var(--t-disp); font-size:22px; line-height:1; transform:rotate(-8deg); box-shadow:3px 3px 0 var(--ink); margin-bottom:8px;}
+#theme-masthead .mt-price small{display:block; font-family:var(--t-cond); font-size:10px; letter-spacing:.14em;}
+#theme-masthead .mt-stripe{height:10px; background:repeating-linear-gradient(90deg,var(--red) 0 18px,var(--ink) 18px 28px,var(--sky) 28px 46px,var(--ink) 46px 56px,var(--yellow2) 56px 74px,var(--ink) 74px 84px);}
+body.theme-match .titlebar{margin:6px 4px 0; padding:6px 8px; font-family:var(--t-cond); font-weight:600; font-size:15px; letter-spacing:.12em; text-transform:uppercase; border-bottom:2px solid var(--ink); color:var(--ink); background:transparent;}
+body.theme-match .titlebar .era{background:var(--red); color:#fff; padding:1px 8px;}
+body.theme-match .statusbar{margin:0 4px; border-bottom:0;}
+body.theme-match .statusbar b{color:var(--red);}
+body.theme-match .menubar{margin:10px 4px 4px;}
+body.theme-match .hotkeys{font-family:var(--t-cond); text-transform:uppercase; letter-spacing:.08em; font-size:12px; color:var(--mute);}
+body.theme-match tbody tr.next-fix td{background:var(--sky)!important; color:#fff!important;}
+body.theme-match #theme-pitch{display:none;}
+@media (max-width:760px){
+  body.theme-match{padding:8px 4px 24px; font-size:16px;}
+  body.theme-match .screen{padding:0 10px 14px;}
+  body.theme-match #theme-masthead{margin:0 -10px 0;}
+  #theme-masthead .mt-price{width:64px; height:64px; font-size:19px;}
+  body.theme-match .menubar{display:grid; grid-template-columns:1fr 1fr;}
+  body.theme-match .menubar>a, body.theme-match .menubar>.menu-group>.navgrouplabel{border-bottom:1px solid #333;}
+}
+
+/* Match compact layer: small text links, thin panels, dense tables, Match masthead */
+body.theme-match .menubar{border:0; border-bottom:1px solid var(--line); background:var(--paper2); margin:6px 0 4px; display:flex; flex-wrap:wrap; gap:0 14px; padding:4px 10px;}
+body.theme-match .menubar>a, body.theme-match .menubar>.menu-group>.navgrouplabel, body.theme-match .menu-group>.navgrouplabel{font-family:var(--t-cond); font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; padding:2px 0; border:0; border-bottom:2px solid transparent; color:var(--ink); background:transparent; box-shadow:none;}
+body.theme-match .menubar>a:last-child{border:0; border-bottom:2px solid transparent;}
+body.theme-match .menubar a.active, body.theme-match .menu-group.has-active>.navgrouplabel, body.theme-match .menubar a:hover:not(.active), body.theme-match .menu-group>.navgrouplabel:hover{background:transparent; color:var(--red); border-bottom-color:var(--red); box-shadow:none;}
+body.theme-match .menu-dropdown{background:var(--paper); border:1px solid var(--ink); box-shadow:2px 2px 0 rgba(0,0,0,.25);}
+body.theme-match .box{border:1px solid var(--line); background:#fff; padding:8px 10px; margin-bottom:10px; box-shadow:none;}
+body.theme-match .box .box-title{background:transparent; color:var(--ink); border:0; border-bottom:2px solid var(--ink); padding:0 0 3px; margin:0 0 6px; font-size:13px; letter-spacing:.12em;}
+body.theme-match .scoreboard{border:1px solid var(--ink); border-left:3px solid var(--red); box-shadow:none;}
+body.theme-match table{font-size:12px;}
+body.theme-match th{font-size:10px; padding:3px 5px; color:#fff;}
+body.theme-match td{padding:2px 5px; border-bottom:1px solid var(--line);}
+body.theme-match .pos{font-size:14px;}
+body.theme-match .scroll-box{border:1px solid var(--line);}
+body.theme-match button, body.theme-match input[type=button]{font-family:var(--t-cond); font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; background:var(--paper2); color:var(--ink); border:1px solid var(--line); box-shadow:none; padding:3px 8px; min-height:0;}
+body.theme-match button:hover:not(:disabled){background:var(--paper); color:var(--red); border-color:var(--red);}
+body.theme-match button.primary{background:var(--red); color:#fff; border-color:var(--ink); font-weight:700;}
+body.theme-match button.primary:hover:not(:disabled){background:var(--reddk); color:#fff; border-color:var(--ink);}
+body.theme-match button.newsfilter, body.theme-match .newsfilter{min-height:0; padding:1px 6px; box-shadow:none; background:transparent; border:0; border-bottom:2px solid transparent; text-transform:uppercase;}
+body.theme-match .newsfilter.active{background:transparent; color:var(--red); border-bottom-color:var(--red);}
+body.theme-match h1{font-size:clamp(22px,4vw,36px);}
+body.theme-match .news-item{font-size:13px;}
+body.theme-match .news-item .tag{border:1px solid var(--ink);}
+body.theme-match #theme-masthead{margin:0 0 2px; background:transparent;}
+body.theme-match #theme-masthead .mt-top{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; background:var(--ink); color:#fff; font-family:var(--t-cond); text-transform:uppercase; letter-spacing:.16em; font-size:10px; padding:4px 14px;}
+body.theme-match #theme-masthead .mt-mast{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:end; background:var(--red); padding:8px 14px 6px; border-bottom:3px solid var(--ink);}
+body.theme-match #theme-masthead .mt-kick{font-family:var(--t-cond); font-weight:700; letter-spacing:.2em; text-transform:uppercase; font-size:10px; color:#fff;}
+body.theme-match #theme-masthead .mt-h{display:block; margin:0; font-family:var(--t-disp); font-weight:400; font-size:clamp(42px,11vw,84px); line-height:.85; letter-spacing:.01em; color:#fff; text-transform:uppercase; text-shadow:2px 2px 0 var(--ink);}
+body.theme-match #theme-masthead .mt-h span{color:var(--yellow);}
+body.theme-match #theme-masthead .mt-sub{margin:2px 0 6px; font-family:var(--t-cond); font-weight:700; text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:#fff;}
+body.theme-match #theme-masthead .mt-price{width:auto; height:auto; min-width:0; border-radius:0; background:transparent; border:0; display:block; transform:none; box-shadow:none; margin:0 0 6px; padding:0; font-family:var(--t-cond); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#fff; text-align:right; line-height:1.3;}
+body.theme-match #theme-masthead .mt-price b{display:block; font-size:18px; font-family:var(--t-disp); font-weight:400; color:var(--yellow);}
+body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-linear-gradient(90deg,var(--ink) 0 10px,var(--yellow) 10px 20px,var(--sky) 20px 30px,var(--red) 30px 40px);}
+</style>
 <style id="pcard-css">
 /*PCARD-CSS-START*/
 /* v323 : era player cards (everything is pc- prefixed and scoped to .pc-stage so no game or theme rule can reach it) */
@@ -16976,6 +17111,7 @@ var ERA_THEMES = {
   '1950': {name:'pink', sentenceCase:true, masthead:{the:'The', main:'Saturday', accent:'Pink', left:'Football \u00b7 Cricket \u00b7 Racing \u00b7 Boxing', badge:'Late Edition', right:'Four pages', note:'Printed on reduced newsprint. Space is short, so please read the small type.'}}
   ,'1959': {name:'turnstile', sentenceCase:true, masthead:{kind:'turnstile', left:'Football \u00b7 Fixtures \u00b7 Results \u00b7 Pools', badge:'Season 1959\u201360', right:'Price 6d', title:'Turnstile', script:'The football magazine for the terraces', stamp:'Match<br><b>Day</b>Special'}}
   ,'1970': {name:'shoot', sentenceCase:true, masthead:{kind:'shoot', kicker:'RetroMatch presents', title:'Shoot', bang:'!', price:'6d', priceSub:'still', topLeft:'Britain\u2019s brightest football weekly', topRight:'Season 1970\u201371'}}
+  ,'1981': {name:'match', sentenceCase:true, masthead:{kind:'match', kicker:'RetroMatch presents', title:'Match', bang:'!', price:'20p', priceSub:'3pts for a win', priceSubSco:'2pts for a win', topLeft:'Britain\u2019s liveliest football weekly'}}
   ,'1966': {name:'programme', sentenceCase:true, masthead:{kind:'programme', kicker:'RetroMatch \u00b7 The Gaffer \u00b7 1966-67 edition', title:'Matchday<br>Programme', price:'6d'}}
 };
 /* ---------- v312 SENTENCE-CASE DISPLAY LAYER. Most of the game's copy is typed in capitals (that is the DOS look). A theme with
@@ -17235,10 +17371,10 @@ function themeSeasonYear(){
   return parseInt(e, 10) || 1946;
 }
 function themeEraCodeForYear(y){
-  /* pink to 1958-59; turnstile 1959-60..1965-66; programme 1966-67..1969-70; Shoot! 1970-71..1980-81; 1980s skin from 1981-82 once approved (until then Shoot!). Pre-1946 -> no theme. */
+  /* pink to 1958-59; turnstile 1959-60..1965-66; programme 1966-67..1969-70; Shoot! 1970-71..1980-81; Match from 1981-82. Pre-1946 -> no theme. */
   y = +y || 0;
   if (y < 1946) return null;
-  if (y >= 1981) return '1970'; /* placeholder until Match/Shoot-80s theme is approved */
+  if (y >= 1981) return '1981'; /* v347 : Match skin approved 10 Nov 2026 */
   if (y >= 1970) return '1970';
   if (y >= 1966) return '1966';
   if (y >= 1959) return '1959';
@@ -17257,6 +17393,15 @@ function applyEraTheme(){
   if (m){
     var d = t && t.masthead;
     if (d && d.kind==='turnstile') m.innerHTML = '<div class="tm-top"><span>'+d.left+'</span><span>'+d.badge+'</span><span>'+d.right+'</span></div><div class="tm-mast"><span class="tm-h">'+d.title+'</span><span class="tm-sub">'+d.script+'</span><span class="tm-stamp"><span>'+d.stamp+'</span></span></div>';
+    else if (d && d.kind==='match'){
+      var dv = ({3:'Division One',2:'Division Two',1:'Division Three',0:'Division Four'})[(typeof divisionTier!=='undefined')?divisionTier:3] || 'Division One';
+      if (typeof isSco === 'function' && isSco()){ var which = (typeof divisionTier!=='undefined' && divisionTier===3) ? 1 : (divisionTier===2 ? 2 : 3); dv = (typeof scoDivWordFor==='function') ? scoDivWordFor(null, which, false) : dv; }
+      else if (typeof isCont === 'function' && isCont()) dv = scoDivWordFor(null, divisionTier===3 ? 1 : 2, false);
+      var league = (typeof isSco === 'function' && isSco()) ? ((typeof foreignLeagueName==='function' && foreignLeagueName()) || 'Scottish League') : 'Football League';
+      var season = (typeof seasonLabel === 'string' && seasonLabel) ? seasonLabel : '1981-82';
+      var priceSub = (typeof isSco === 'function' && isSco()) ? (d.priceSubSco || '2pts for a win') : (d.priceSub || '3pts for a win');
+      m.innerHTML = '<div class="mt-top"><span>'+(d.topLeft||'')+'</span><span>'+('Season '+String(season).replace('-','\u2013'))+'</span></div><div class="mt-mast"><div><div class="mt-kick">'+(d.kicker||'')+'</div><span class="mt-h">'+(d.title||'Match')+'<span>'+(d.bang||'!')+'</span></span><div class="mt-sub">'+season+' \u00b7 '+league+' \u00b7 '+dv+'</div></div><div class="mt-price">Price <b>'+(d.price||'20p')+'</b>'+priceSub+'</div></div><div class="mt-stripe"></div>';
+    }
     else if (d && d.kind==='shoot'){
       var dv = ({3:'Division One',2:'Division Two',1:'Division Three',0:'Division Four'})[(typeof divisionTier!=='undefined')?divisionTier:3] || 'Division One'; if (typeof isCont === 'function' && isCont()) dv = scoDivWordFor(null, divisionTier===3 ? 1 : 2, false);
       var league = (typeof isSco === 'function' && isSco()) ? ((typeof foreignLeagueName==='function' && foreignLeagueName()) || 'Scottish League') : 'Football League';
@@ -40134,7 +40279,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v346'; /* v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v347'; /* v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
