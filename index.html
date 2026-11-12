@@ -1821,6 +1821,56 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
 /*PCARD-CSS-END*/
 </style>
 <!--THEME-CSS-END-->
+<style id="v359-type-scale">
+/* v359 : compact UI type scale. Skin .sub rules (16-18px italic/serif, sometimes
+   18px !important, sometimes --dos-cyan) were leaking into tables, captions,
+   help text and scouting nationality tags, and scout-slip <q> notes were a
+   large blue serif in later skins. Keep each skin's body family (--t-body)
+   but at the compact small-text-link size the rest of the chrome uses. */
+html body .sub{
+  font-family: var(--t-body, sans-serif) !important;
+  font-size: 11px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  line-height: 1.35 !important;
+  text-transform: none !important;
+  color: inherit !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+html body .quiet{
+  font-family: var(--t-body, sans-serif);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.35;
+  text-transform: none;
+  color: inherit;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+html body .rmx q,
+html body .rmx.rmx .slip q,
+html body .rmx.rmx .sl q,
+html body .rmx.rmx .sn q{
+  font-family: var(--t-body, sans-serif) !important;
+  font-size: 12px !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  color: inherit !important;
+  line-height: 1.4 !important;
+  quotes: none !important;
+}
+/* decorative masthead / programme subtitles keep their component typography */
+html body .rmx .cover .k,
+html body .rmx header .k,
+html body .rmx .ttl{ }
+</style>
+
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <div class="screen">
@@ -2130,7 +2180,7 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
         <p class="sub" id="southern-results"></p>
         <div class="scroll-box" style="max-height:240px;"><table><thead><tr><th class="num">POS</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">F</th><th class="num">A</th><th class="num">PTS</th></tr></thead><tbody id="southern-table-body"></tbody></table></div>
       </div>
-      <div class="box" style="margin-top:16px;"><div class="box-title">ISTHMIAN LEAGUE (AMATEUR)</div>
+      <div class="box" style="margin-top:16px;"><div class="box-title" id="isthmian-box-title">ISTHMIAN LEAGUE (AMATEUR)</div>
         <p class="sub" id="isthmian-results"></p>
         <div class="scroll-box" style="max-height:240px;"><table><thead><tr><th class="num">POS</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">F</th><th class="num">A</th><th class="num">PTS</th></tr></thead><tbody id="isthmian-table-body"></tbody></table></div>
       </div>
@@ -3543,8 +3593,19 @@ function wageCapAbolished(){
    dividing back out and re-multiplying by whatever the current cap is
    preserves the SAME relative pecking order between reps at every season. */
 var REP_WAGE_ANCHOR_CAP = 12;
-function wageForRep(rep){
+function wageForRep(rep, clubName){
   var base = repWage[rep] || repWage[1];
+  var typ = null;
+  try {
+    var who = clubName || (typeof ourClubName!=='undefined' ? ourClubName : null);
+    if (who && typeof typicalWageForTier==='function' && typeof clubTierAndRankQ==='function'){
+      typ = typicalWageForTier(clubTierAndRankQ(who).tier);
+    }
+  } catch (e) { typ = null; }
+  if (typ){
+    /* post-1961 : a typical regular (rep 3, anchor 7) sits on the era's divisional average; other reps keep the same relative pecking order. */
+    return Math.max(1, Math.round(base / 7 * typ));
+  }
   return Math.round(base / REP_WAGE_ANCHOR_CAP * currentMaxWage());
 }
 /* v235 BUG INVESTIGATED, PER DIRECT REPORT ("wages not recalibrated after promotion"): confirmed the
@@ -4372,7 +4433,11 @@ var FEE_SEASON_STEPS = [
   {from:1970, index:10.00},
   {from:1971, index:11.00},
   {from:1972, index:11.25},
-  {from:1974, index:17.50}
+  {from:1974, index:17.50},
+  {from:1977, index:25.00},  /* Kevin Keegan, Liverpool -> Hamburger SV, £500,000 */
+  {from:1979, index:73.45},  /* Andy Gray, Aston Villa -> Wolves, £1,469,000 (after Francis £1,180,000 in Feb and Daley £1,450,000 earlier in Sep) */
+  {from:1981, index:75.00},  /* Bryan Robson, West Brom -> Manchester United, £1,500,000, October 1981 */
+  {from:1986, index:115.00}  /* Mark Hughes, Manchester United -> Barcelona, £2,300,000, May 1986 */
 ];
 function feeSeasonIndex(year){
   if (typeof year!=='number' || isNaN(year)) year = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
@@ -4380,7 +4445,7 @@ function feeSeasonIndex(year){
   if (FEE_SEASON_INDEX[year]) return FEE_SEASON_INDEX[year];
   var idx = FEE_SEASON_STEPS[0].index;
   FEE_SEASON_STEPS.forEach(function(row){ if (year >= row.from) idx = row.index; });
-  if (year > 1974) idx = Math.min(30.0, 17.50 * Math.pow(1.04, year-1974)); /* estimate beyond the researched window, capped */
+  if (year > 1986) idx = Math.min(200.0, 115.00 * Math.pow(1.04, year-1986)); /* estimate beyond the last researched record step */
   return idx;
 }
 /* [ca, fee in 1946-47 money] : log-linear between points */
@@ -4396,10 +4461,23 @@ function realisticTransferFee(ca, sellerTier, age, year, noise){
   else for (var i=0;i<a.length-1;i++){
     if (ca >= a[i][0] && ca < a[i+1][0]){ var t=(ca-a[i][0])/(a[i+1][0]-a[i][0]); base = Math.exp(Math.log(a[i][1])+t*(Math.log(a[i+1][1])-Math.log(a[i][1]))); break; }
   }
-  var fee = base * (FEE_TIER_MULT[sellerTier] || 0.8) * feeSeasonIndex(year);
-  if (typeof age==='number'){ if (age>=33) fee *= 0.35; else if (age>=31) fee *= 0.6; } /* the ageing player band : often under £1,000 */
+  var nl = (sellerTier === -1 || sellerTier === 'nl');
+  var fee;
+  if (nl){
+    /* English/Welsh non-league : a small fraction of the League scale, hard-capped at the era's sourced record (Tyler £25,000 in 1972, Barton £33,000 inc. VAT). */
+    var cap = (typeof eraEcon==='function' && eraEcon(year, 'nonLeagueFeeCap')) || 750;
+    fee = base * 0.35 * Math.min(feeSeasonIndex(year), 8);
+    if (fee > cap) fee = cap;
+  } else {
+    fee = base * (FEE_TIER_MULT[sellerTier] || 0.8) * feeSeasonIndex(year);
+  }
+  if (typeof age==='number'){ if (age>=33) fee *= 0.35; else if (age>=31) fee *= 0.6; }
   var n = (typeof noise==='number') ? noise : Math.random();
   fee *= 0.85 + n*0.3;
+  if (nl){
+    var cap2 = (typeof eraEcon==='function' && eraEcon(year, 'nonLeagueFeeCap')) || 750;
+    if (fee > cap2) fee = cap2;
+  }
   return roundFeeToConvention(fee);
 }
 /* v283 FEATURE, PER DIRECT REPORT ("it is really obvious a player's quality purely by the price tag...
@@ -4450,7 +4528,8 @@ function startingBalanceFor(clubName){
   else if (r.tier===1) bal = 500 + q*3500;
   else if (r.tier===0) bal = 300 + q*1200; /* v158 : Fourth Division, poorer still -- my own further calibration below tier 1, not sourced */
   else bal = 500;
-  return Math.round(bal/10)*10;
+  var scale = (typeof eraEcon==='function') ? (eraEcon(null, 'bankScale') || 1) : 1;
+  return Math.round(bal * scale / 10) * 10;
 }
 /* v117 : Entertainments Duty, a real tax on every gate until 1957. Part J4 : ~29% in 1945 (3½d in 1s, Hansard),
    "a quarter to a fifth" by 1956. 27% throughout 1946-50 is an INTERPOLATED midpoint (V2), not the statutory
@@ -4563,7 +4642,7 @@ function aiNetGateFor(attendance){ return Math.round(attendance * 0.075 * (1-ENT
    rule (it recalls a small central levy and a visitors' share, percentages unconfirmed). No central levy is taken. */
 var LEAGUE_AWAY_SHARE = 0.2;
 function leagueGateSplit(attendance, pricePerHead){
-  var gross = Math.round(attendance * (pricePerHead || 0.075));
+  var gross = Math.round(attendance * (pricePerHead || (typeof currentPricePerHead==='function' ? currentPricePerHead() : 0.075)));
   var net = Math.round(gross * (1-ENTERTAINMENTS_DUTY));
   var away = Math.round(net * LEAGUE_AWAY_SHARE);
   return {gross:gross, duty:gross-net, net:net, home:net-away, away:away};
@@ -4759,7 +4838,12 @@ function buildPreseasonFixtures(){
      genuinely real, specifically sourced, and specific to Aldershot, so there's no reason to replace them
      with an invented trial -- but they are NOT extended to any other club, since there's no evidence other
      clubs had a comparable outside friendly fixed in their pre-season at all. */
-  var avgCA = Math.round(squad.reduce(function(s,p){return s+p.ca;},0) / squad.length);
+  var year = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  var style = (typeof eraEcon==='function') ? (eraEcon(year, 'preseason') || 'trials') : 'trials';
+  if (style === 'friendlies' && typeof buildOrganisedFriendlies==='function'){
+    return buildOrganisedFriendlies();
+  }
+  var avgCA = Math.round((squad&&squad.length ? squad.reduce(function(s,p){return s+(p.ca||50);},0) / squad.length : 50));
   var out = [{opp:'The Possibles', s:avgCA, home:true, played:false, res:null, isFriendly:true, isTrial:true}];
   if (ourClubName === 'Aldershot'){
     out.push({opp:'Aldershot Command', s:45, home:false, played:false, res:null, isFriendly:true});
@@ -4874,6 +4958,8 @@ function renderIsthmianTable(){
   }).join('');
   var resEl = document.getElementById('isthmian-results');
   if (resEl) resEl.textContent = isthmianLastLines.length ? isthmianLastLines.join(', ') : 'NO MATCHES PLAYED YET THIS SEASON.';
+  var titleEl = document.getElementById('isthmian-box-title');
+  if (titleEl && typeof isthmianLeagueTitle==='function') titleEl.textContent = isthmianLeagueTitle();
 }
 
 var fixtureIdx = 0, week = 1, lineup = [], lineupConfirmed = false, live = null, tickTimer = null;
@@ -4924,8 +5010,8 @@ function generateStaffNames(){
   scouts = {};
   var scout1Name = pick(firstNamePool).charAt(0)+'. '+freshSurname();
   var scout2Name = pick(firstNamePool).charAt(0)+'. '+freshSurname();
-  scouts[scout1Name] = {rep:30, wage:2, specialty:null};
-  scouts[scout2Name] = {rep:70, wage:3, specialty:null};
+  scouts[scout1Name] = {rep:30, wage:(typeof eraScoutWage==='function'?eraScoutWage(2):2), specialty:null};
+  scouts[scout2Name] = {rep:70, wage:(typeof eraScoutWage==='function'?eraScoutWage(3):3), specialty:null};
 }
 /* ---------- PLAYER-MANAGERS: a genuinely common arrangement at this level of
    the game in this era (plenty of secretary-managers in the lower divisions
@@ -6415,6 +6501,305 @@ function managerJobTitleLabel(form, season, country){
   if (form === 'title') return String(t).replace(/(^|-)([a-z])/g, function(_, a, b){ return a + b.toUpperCase(); });
   return t;
 }
+
+/* ===== v359 : ERA ECONOMICS =====
+   Data-only table, stepped by season-start year and looked up like SEASON_RULES
+   (later rows override only the keys they name). Driven by the CURRENT season,
+   so a long save is rescaled as it reaches 1970, 1975, 1981, 1986, etc.
+
+   Wages after the maximum wage was abolished (January 1961) are typical BASIC
+   weekly pay by division, not a continued national cap. The old post-1961
+   "cap" of £100 was Johnny Haynes' exceptional Fulham wage, not an average,
+   and had frozen every later era (including a Fourth Division regular) on
+   about £50/week.
+
+   Figures used (basic £/week unless noted), with sources in the row comments:
+     1961 D1 average £20 — Sporting Intelligence, 20 Jan 2011, "From £20 to
+       £33,868 per week", marking 50 years since abolition.
+     1970/71 : Kevin Keegan, Fourth Division Scunthorpe United, £30 basic
+       (and £8/£4 win/draw bonus); Liverpool offered £45 then settled at
+       £50 basic. Keegan autobiography, cited by Sporting Intelligence, same
+       article. Other 1970 divisions are interpolated from those two anchors
+       and the 1961 average, and are labelled as such.
+     Mid-1970s D1 "£15- to £17,000 a year" — The 1888 Letter, "A Short History
+       of Wages in English Football". Taken here as £16,000/year ≈ £308/week
+       for 1975 D1. That source says "salary" and may include extras; it is
+       the best mid-1970s average found. Lower divisions interpolated.
+     1984-85 official PFA basic averages, published by Sporting Intelligence
+       (30 Oct 2011) and quoted by The Mag and the Football Supporters'
+       Association: D1 £479, D2 £298, D3 £216, D4 £160 per week
+       (annual £24,934 / £15,507 / £11,261 / £8,314). The 1981 row is a
+       straight interpolation between the 1975 and 1984-85 anchors, labelled
+       as such. The 1986 row holds the official 1984-85 basics (the next fully
+       transcribed PFA step was not copied here); SI notes wages rose steadily
+       through the 1980s.
+     1980 anecdote: a Carlisle United first-team player on about £120/week
+       (News & Star, on a 1980 contract). Carlisle were then in the Third
+       Division; used only as a sense-check, not as the table figure.
+
+   Bank balances are the existing 1946 division-and-rank calibration (Part J5)
+   multiplied by bankScale, so a Fourth Division club in 1981 is no longer
+   left on a 1946-sized balance of a few hundred to £1,500. bankScale is the
+   game's own scaling from era wages and ticket prices, not a sourced bank
+   statement. Clubs of this period often ran an overdraft (Sheffield United
+   had cleared a £40,000 overdraft earlier in the 1970s — Ain't Got A Barrel
+   of Money); the game still opens on a positive working balance.
+
+   Ticket prices are a blended "per head" figure (terrace majority, some seats),
+   matching the game's 1946 1s6d (~£0.075) convention:
+     1960-61 Manchester United terraces 12.5–17.5p, seats 32.5–40p (red11.org) → £0.20
+     1970-71 MU terraces 30–35p, seats 40–75p (red11.org) → £0.40
+     1975-76 MU terraces 65–70p, seats 80p–£1.30 (red11.org) → £0.80
+     1981 newspaper of all 92 League clubs (Plymouth Herald / period press):
+       typical terraces £1.30–£2.00, seats £1.60–£4 (Liverpool Kop £1.50,
+       Argyle £1.50/£2, MU £1.60–£1.80 / £2.20–£3.50) → £1.80 blended
+     1986-87 MU terraces £2.80, seats £3.40–£5.20 (red11.org) → £3.20 blended
+
+   Transfer-fee index continues the existing "record / £20,000" scale with
+   later British record steps from the widely reproduced progression (Barnes,
+   News of the World Football Annual 2007/08, via the standard record table):
+     1977 Keegan Liverpool→Hamburger SV £500,000 (index 25.00)
+     1979 Feb Francis Birmingham→Forest £1,180,000 (index 59.00)
+     1979 Sep Gray Aston Villa→Wolves £1,469,000 (index 73.45)
+     1981 Oct Robson West Brom→Manchester United £1,500,000 (index 75.00)
+     1986 May Hughes Manchester United→Barcelona £2,300,000 (index 115.00)
+   Non-league fees are capped separately. Period records for a non-league
+   player include Peter Collins, Chelmsford City→Tottenham, £5,500 (1968);
+   Dudley Tyler, a record £25,000 to West Ham, June 1972; John Barton,
+   Worcester City→Everton, £33,000 including VAT, a record at the time.
+   Typical asking prices sat well below those records, never routinely £100k+.
+
+   Pre-season: until 1961 the FA only allowed intra-squad public practice
+   matches (Probables v Possibles, colours) in the close season, with charity
+   gates. The FA changed the rule in 1961 to allow friendlies against other
+   clubs (Grecian Archive, citing the 1960/61 FA Handbook and the 1961 change;
+   NonLeagueMatters: "Until 1961 clubs could only play internal... The F.A.
+   then changed the rule"). West Ham and Charlton used the new ruling in
+   August 1961; Exeter's first was v Plymouth, 14 August 1962. From 1961-62
+   the game therefore stages organised friendlies against real opponents.
+
+   Youth language: "ground-staff boy" is the 1940s/50s term. Associated
+   schoolboy forms continue throughout; from 1960 the staff term is
+   "apprentice"; from 1983 the Youth Training Scheme (YTS) is the usual
+   route for 16-year-olds. Official amateur status was abolished by The FA
+   Council in 1974 (last FA Amateur Cup 1973-74; FA Vase history; National
+   Football Museum). Isthmian clubs such as Kingstonian and Dulwich Hamlet
+   are not labelled "Amateur" from 1974-75.
+*/
+var ERA_ECONOMICS = [
+  {from:1946, wageByTier:null, bankScale:1, pricePerHead:0.075, feeIndex:null, nonLeagueFeeCap:750, preseason:'trials', youthPath:'ground-staff', amateurOfficial:true, retainerScale:1, groundstaffWage:2, gateMult:null},
+  {from:1961, wageByTier:{3:20, 2:18, 1:16, 0:15}, bankScale:2, pricePerHead:0.20, nonLeagueFeeCap:2500, preseason:'friendlies', youthPath:'apprentice', retainerScale:1.5, groundstaffWage:3, gateMult:0.75},
+  {from:1966, wageByTier:{3:45, 2:35, 1:28, 0:24}, bankScale:3.5, pricePerHead:0.22, retainerScale:2, groundstaffWage:4, gateMult:0.72}, /* interpolated between 1961 SI £20 and 1970 Keegan-era anchors; MU terraces 20-25p (red11.org) */
+  {from:1968, nonLeagueFeeCap:6000},
+  {from:1970, wageByTier:{3:70, 2:50, 1:40, 0:30}, bankScale:5, pricePerHead:0.40, nonLeagueFeeCap:15000, youthPath:'apprentice', retainerScale:3, groundstaffWage:5, gateMult:0.70},
+  {from:1972, nonLeagueFeeCap:25000},
+  {from:1974, amateurOfficial:false, nonLeagueFeeCap:33000},
+  {from:1975, wageByTier:{3:308, 2:216, 1:169, 0:129}, bankScale:10, pricePerHead:0.80, retainerScale:8, groundstaffWage:8, gateMult:0.62},
+  {from:1981, wageByTier:{3:422, 2:271, 1:200, 0:150}, bankScale:18, pricePerHead:1.80, retainerScale:12, groundstaffWage:12, gateMult:0.55},
+  {from:1983, youthPath:'yts', groundstaffWage:25},
+  {from:1986, wageByTier:{3:479, 2:298, 1:216, 0:160}, bankScale:24, pricePerHead:3.20, retainerScale:14, groundstaffWage:27, gateMult:0.52, nonLeagueFeeCap:40000}
+];
+function eraEcon(year, key){
+  if (typeof ERA_ECONOMICS==='undefined' || !ERA_ECONOMICS || !ERA_ECONOMICS.length) return key ? undefined : {};
+  var y = (typeof year==='number' && !isNaN(year)) ? year : ((typeof seasonStartYear==='function') ? seasonStartYear() : 1946);
+  var val, found = false;
+  for (var i = 0; i < ERA_ECONOMICS.length; i++){
+    if (y >= ERA_ECONOMICS[i].from && (key ? Object.prototype.hasOwnProperty.call(ERA_ECONOMICS[i], key) : true)){
+      if (!key){
+        /* merge */
+      }
+      if (key){ val = ERA_ECONOMICS[i][key]; found = true; }
+    }
+  }
+  if (key) return found ? val : undefined;
+  var out = {};
+  for (var j = 0; j < ERA_ECONOMICS.length; j++){
+    if (y >= ERA_ECONOMICS[j].from){
+      for (var k in ERA_ECONOMICS[j]){ if (k!=='from') out[k] = ERA_ECONOMICS[j][k]; }
+    }
+  }
+  return out;
+}
+function typicalWageForTier(tier, year){
+  var w = eraEcon(year, 'wageByTier');
+  if (!w) return null;
+  if (tier===3 || tier===2 || tier===1 || tier===0) return w[tier];
+  return w[0];
+}
+function currentPricePerHead(){
+  var p = eraEcon(null, 'pricePerHead');
+  return (typeof p==='number') ? p : 0.075;
+}
+function currentGroundstaffWage(){
+  var w = eraEcon(null, 'groundstaffWage');
+  return (typeof w==='number') ? w : ((typeof GROUNDSTAFF_WAGE==='number') ? GROUNDSTAFF_WAGE : 2);
+}
+function eraScoutWage(base){
+  var s = eraEcon(null, 'retainerScale');
+  var b = (typeof base==='number' && base>0) ? base : 2;
+  return Math.max(2, Math.round(b * ((typeof s==='number') ? s : 1)));
+}
+function officialAmateurStatus(year){
+  var v = eraEcon(year, 'amateurOfficial');
+  return (v===undefined) ? true : !!v;
+}
+function youthPath(year){
+  return eraEcon(year, 'youthPath') || 'ground-staff';
+}
+function youthSignButtonLabel(){
+  var p = youthPath();
+  if (p==='ground-staff') return 'SIGN AS GROUND-STAFF BOY';
+  return 'SIGN ON SCHOOLBOY FORMS';
+}
+function youthStatusLabel(age){
+  var p = youthPath();
+  if (p==='ground-staff') return (age>=15 ? 'GROUND-STAFF, AGE '+age : 'ON THE GROUND-STAFF, AGE '+age);
+  if (p==='yts') return (age>=16 ? 'YTS TRAINEE, AGE '+age : 'SCHOOLBOY, AGE '+age);
+  return (age>=16 ? 'APPRENTICE, AGE '+age : 'SCHOOLBOY, AGE '+age);
+}
+function youthJoinNews(name){
+  var p = youthPath();
+  if (p==='ground-staff') return name+' has signed schoolboy forms and joins the ground-staff : too young to play for us yet, but ours to bring on now, on the same terms every other club\'s promising boys come through.';
+  if (p==='yts') return name+' has signed schoolboy forms and will come through the YTS / apprenticeship route : too young for the first team yet, but ours to bring on now.';
+  return name+' has signed schoolboy forms and joins the club as an apprentice prospect : too young to play for us yet, but ours to bring on now.';
+}
+function amateurClubSuffix(){
+  return officialAmateurStatus() ? ' (Amateur)' : '';
+}
+function amateurRecordLine(){
+  return officialAmateurStatus() ? 'AMATEUR, UNCAPPED' : 'NON-LEAGUE, UNCAPPED';
+}
+function isthmianLeagueTitle(){
+  return officialAmateurStatus() ? 'ISTHMIAN LEAGUE (AMATEUR)' : 'ISTHMIAN LEAGUE';
+}
+function isNonLeagueSeller(club){
+  if (!club) return false;
+  if (typeof divisionMembersFor==='function'){
+    var d = divisionMembersFor(club);
+    if (d && typeof d.tier==='number') return false;
+  }
+  var lists = [];
+  if (typeof southernLeague!=='undefined') lists = lists.concat(southernLeague);
+  if (typeof isthmianLeague!=='undefined') lists = lists.concat(isthmianLeague);
+  if (typeof midlandLeagueClubs!=='undefined') lists = lists.concat(midlandLeagueClubs);
+  var i, n;
+  for (i=0;i<lists.length;i++){
+    n = lists[i] && (lists[i].n || lists[i]);
+    if (n===club) return true;
+  }
+  if (typeof amateurSourceClubs!=='undefined' && amateurSourceClubs.indexOf(club)>=0) return true;
+  if (typeof proSourceClubs!=='undefined'){
+    for (i=0;i<proSourceClubs.length;i++){
+      if (proSourceClubs[i].club===club && (proSourceClubs[i].nation==='England' || proSourceClubs[i].nation==='Wales')) return true;
+    }
+  }
+  return false;
+}
+function sellerFeeTier(club){
+  if (typeof divisionMembersFor==='function'){
+    var d = club ? divisionMembersFor(club) : null;
+    if (d && typeof d.tier==='number') return d.tier;
+  }
+  if (isNonLeagueSeller(club)) return -1;
+  return 0;
+}
+function pickPreseasonOpponent(kind, used){
+  used = used || [];
+  var names = [], i, n, d, clubs;
+  function add(name, allowLeague){
+    if (!name || name===ourClubName || used.indexOf(name)>=0) return;
+    if (!allowLeague){
+      try {
+        if (typeof divisionMembersFor==='function'){ var d = divisionMembersFor(name); if (d && typeof d.tier==='number') return; }
+        if (typeof aiLiveTierData==='function'){
+          var keys=['D1','D2','D3','D4','3N','3S'];
+          for (var ki=0;ki<keys.length;ki++){
+            var data = aiLiveTierData(keys[ki]);
+            if (data && data.names && data.names.indexOf(name)>=0) return;
+          }
+        }
+      } catch (e) {}
+    }
+    if (names.indexOf(name)<0) names.push(name);
+  }
+  if (kind==='nonleague'){
+    if (typeof southernLeague!=='undefined') southernLeague.forEach(function(r){ add(r.n||r); });
+    if (typeof isthmianLeague!=='undefined') isthmianLeague.forEach(function(r){ add(r.n||r); });
+    if (typeof midlandLeagueClubs!=='undefined') midlandLeagueClubs.forEach(function(r){ add(r.n||r); });
+    if (typeof amateurSourceClubs!=='undefined') amateurSourceClubs.forEach(add);
+  } else if (kind==='lower'){
+    var key = (typeof ourDivisionKey==='function') ? ourDivisionKey() : 'D1';
+    var lowerKeys = key==='D1' ? ['D2','D3','D4'] : key==='D2' ? ['D3','D4'] : (key==='D3'||key==='3N'||key==='3S') ? ['D4'] : [];
+    if (typeof aiLiveTierData==='function'){
+      lowerKeys.forEach(function(k){
+        try {
+          var data = aiLiveTierData(k);
+          if (data && data.names) data.names.forEach(function(n){ add(n, true); });
+        } catch (e) {}
+      });
+    }
+    if (!names.length){
+      if (typeof southernLeague!=='undefined') southernLeague.forEach(function(r){ add(r.n||r); });
+      if (typeof isthmianLeague!=='undefined') isthmianLeague.forEach(function(r){ add(r.n||r); });
+    }
+  } else if (kind==='scottish'){
+    if (typeof proSourceClubs!=='undefined') proSourceClubs.forEach(function(s){ if (s.nation==='Scotland') add(s.club); });
+    var scoNames = ['Celtic','Rangers','Hearts','Hibernian','Aberdeen','Dundee United','Dundee','Kilmarnock','Partick Thistle','Motherwell','St Mirren'];
+    scoNames.forEach(add);
+  } else if (kind==='foreign'){
+    var foreign = ['Juventus','Milan','Internazionale','Torino','Roma','Barcelona','Real Madrid','Atletico Madrid','Valencia','Athletic Bilbao','Hamburger SV','Bayern Munich','Borussia Moenchengladbach','Eintracht Frankfurt','Feyenoord','Ajax','Benfica','Sporting CP','Anderlecht','Standard Liege'];
+    foreign.forEach(add);
+  }
+  if (!names.length && kind!=='nonleague'){
+    return pickPreseasonOpponent('nonleague', used);
+  }
+  if (!names.length) return null;
+  return names[Math.floor(Math.random()*names.length)];
+}
+function buildOrganisedFriendlies(){
+  var avgCA = Math.round((squad||[]).reduce(function(s,p){return s+(p.ca||50);},0) / Math.max(1,(squad||[]).length));
+  var me = (typeof clubTierAndRankQ==='function') ? clubTierAndRankQ(ourClubName).tier : 3;
+  var used = [], out = [], i, kind, opp, home, s;
+  var plan;
+  /* two matches, same count as the old trial pair, so the league calendar does not start a week earlier */
+  if (me>=2) plan = ['nonleague', (Math.random()<0.5 ? 'scottish' : 'foreign')]; /* First/Second : a local side plus a Scottish or continental tour */
+  else if (me===1) plan = ['nonleague', (Math.random()<0.5 ? 'lower' : 'scottish')];
+  else plan = ['nonleague','nonleague'];
+  /* unique kinds, but allow two non-league names for a Fourth Division club */
+  for (i=0;i<plan.length;i++){
+    kind = plan[i];
+    if (kind==='foreign' && Math.random()<0.5) kind = 'scottish';
+    opp = pickPreseasonOpponent(kind, used);
+    if (!opp) continue;
+    used.push(opp);
+    home = (kind==='foreign' || kind==='scottish') ? false : (i%2===0);
+    s = (kind==='foreign') ? Math.round(avgCA+4) : (kind==='scottish') ? Math.round(avgCA) : Math.max(20, Math.round(avgCA-12));
+    out.push({opp:opp, s:s, home:home, played:false, res:null, isFriendly:true, isTrial:false});
+  }
+  if (!out.length){
+    var fallback = pickPreseasonOpponent('nonleague', []);
+    out.push({opp:fallback||'Guildford City', s:avgCA, home:true, played:false, res:null, isFriendly:true, isTrial:false});
+  }
+  return out;
+}
+function refreshPreseasonFriendlies(){
+  if (typeof fixtures==='undefined' || !fixtures) return;
+  if (typeof eraEcon==='function' && eraEcon(null,'preseason')!=='friendlies') return;
+  var rest = fixtures.filter(function(f){ return !f.isFriendly && !f.isTrial; });
+  fixtures = buildPreseasonFixtures().concat(rest);
+}
+function runEraWageCatchUp(){
+  if (typeof squad==='undefined' || !squad || !squad.length) return 0;
+  if (!typicalWageForTier(3)) return 0; /* still a maximum-wage season : the cap path already handles rises */
+  var raised = 0;
+  squad.forEach(function(p){
+    if (p.isManagerPlayer) return;
+    var nw = wageForRep(p.rep, ourClubName);
+    if (nw > (p.wage||0)){ p.wage = nw; raised++; }
+  });
+  return raised;
+}
+
 
 /* ===== v353 : SNAPSHOT LOADER =====
    Standard shape per country and era:
@@ -12950,7 +13335,8 @@ var gateMultBySeasonYear = [
   {from:1946, m:1.00}, {from:1947, m:1.13}, {from:1948, m:1.16}, {from:1949, m:1.14},
   {from:1950, m:1.06}, {from:1951, m:1.05}, {from:1952, m:1.00}, {from:1953, m:0.97},
   {from:1954, m:0.92}, {from:1955, m:0.89}, {from:1956, m:0.88}, {from:1957, m:0.90},
-  {from:1958, m:0.90}, {from:1959, m:0.87}, {from:1960, m:0.77}, {from:1961, m:0.75}
+  {from:1958, m:0.90}, {from:1959, m:0.87}, {from:1960, m:0.77}, {from:1961, m:0.75},
+  {from:1970, m:0.70}, {from:1975, m:0.62}, {from:1981, m:0.55}, {from:1986, m:0.52}
 ];
 function gateMultForSeasonYear(startYear){
   var m = gateMultBySeasonYear[0].m;
@@ -15052,8 +15438,8 @@ function maybeGenerateNonLeagueTip(){
      clubs are deliberately left untagged : those competitions allowed professionals (several of this game's
      own real Football League squads elsewhere draw players who'd been paid at Southern League level), so
      labelling every one of their names "(Amateur)" would be inaccurate, not just imprecise. */
-  var isAmateurClub = /\(Amateur\)/.test(club) || isthmianLeague.some(function(r){ return r.n === club; });
-  var t = {n:name, pos:pos, club:club+(isAmateurClub?' (Amateur)':''), nation:homeNation(), contract:'amateur', price:0, rep:1+Math.floor(Math.random()*3), apps:0, goals:0, age:18+Math.floor(Math.random()*9),
+  var isAmateurClub = /\(Amateur\)/.test(club) || ((typeof officialAmateurStatus==='function' ? officialAmateurStatus() : true) && isthmianLeague.some(function(r){ return r.n === club; }));
+  var t = {n:name, pos:pos, club:club+(isAmateurClub?((typeof amateurClubSuffix==='function')?amateurClubSuffix():' (Amateur)'):''), nation:homeNation(), contract:'amateur', price:0, rep:1+Math.floor(Math.random()*3), apps:0, goals:0, age:18+Math.floor(Math.random()*9),
     scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false,
     note:'"Word from the non-league scene : '+pick(nonLeagueTipTemplates)+'"'};
   targets.push(t);
@@ -15687,16 +16073,29 @@ function scoutTrustLabel(rep){
   if (rep >= 25) return 'UNPROVEN : A NEW CONTACT, NOT YET TESTED';
   return 'SHAKY : HIS LAST FEW TIPS HAVE NOT WORKED OUT';
 }
+function scoutContactBlurb(c){
+  /* later-era wording for the same real shape of contact (the 1940s/50s 'publican / schoolmaster' flavour is kept before 1970). */
+  var y = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  if (y < 1970) return c.blurb;
+  var later = {
+    'H. Croall':'Covers the Scottish junior and senior game, and the traffic of players south.',
+    'E. Pritchard':'A Welsh contact with a good eye for a youngster coming out of the schools and the lower clubs.',
+    'P. Duignan':'Covers the League of Ireland clubs and the regular traffic across the Irish Sea.',
+    'S. McAvoy':'A Belfast contact with good standing at Linfield and Glentoran.',
+    'D. Fairweather':'A well-known face around the lower divisions. General coverage, nothing specialist.'
+  };
+  return later[c.name] || c.blurb;
+}
 function renderScoutingNetworkBox(){
   var box = document.getElementById('scouting-network-box'); if (!box) return;
   var rows = Object.keys(scouts).map(function(name){
     var s = scouts[name];
-    return '<tr><td>'+name+(s.specialty?(' <span class="sub">('+s.specialty.toUpperCase()+' CONTACT)</span>'):'')+'</td><td>'+scoutTrustLabel(s.rep)+'</td><td class="num">£'+s.wage+'/WK</td>'+
-      '<td><button class="dismiss-scout-btn" data-name="'+name+'" style="padding:2px 8px;font-size:14px;">LET GO</button></td></tr>';
+    return '<tr><td>'+name+(s.specialty?(' <span class="quiet">('+s.specialty+' contact)</span>'):'')+'</td><td>'+scoutTrustLabel(s.rep)+'</td><td class="num">£'+s.wage+'/WK</td>'+
+      '<td><button class="dismiss-scout-btn" data-name="'+name+'" style="padding:2px 8px;font-size:11px;">LET GO</button></td></tr>';
   }).join('');
   var poolRows = SCOUT_HIRE_POOL.filter(function(c){ return !scouts[c.name]; }).map(function(c){
-    return '<tr><td>'+c.name+(c.specialty?(' <span class="sub">('+c.specialty.toUpperCase()+' CONTACT)</span>'):'')+'</td><td class="sub">'+c.blurb+'</td><td class="num">£'+c.wage+'/WK</td>'+
-      '<td><button class="hire-scout-btn" data-name="'+c.name+'" style="padding:2px 8px;font-size:14px;">TAKE HIM ON</button></td></tr>';
+    return '<tr><td>'+c.name+(c.specialty?(' <span class="quiet">('+c.specialty+' contact)</span>'):'')+'</td><td class="quiet">'+((typeof scoutContactBlurb==='function')?scoutContactBlurb(c):c.blurb)+'</td><td class="num">£'+(typeof eraScoutWage==='function'?eraScoutWage(c.wage):c.wage)+'/WK</td>'+
+      '<td><button class="hire-scout-btn" data-name="'+c.name+'" style="padding:2px 8px;font-size:11px;">TAKE HIM ON</button></td></tr>';
   }).join('');
   box.innerHTML = '<p class="sub">YOUR NETWORK, EACH PAID A MODEST WEEKLY RETAINER (AN ESTIMATE : NO PERIOD FIGURE SURVIVES FOR A CLUB AT THIS LEVEL), DEDUCTED LIKE ANY OTHER WAGE. A SPECIALIST CONTACT RAISES THE ODDS OF A TIP FROM HIS OWN COUNTRY.</p>'+
     '<table><thead><tr><th>Contact</th><th>Standing</th><th class="num">Cost</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="sub">NOBODY ON THE BOOKS.</td></tr>')+'</tbody></table>'+
@@ -15713,7 +16112,7 @@ function renderScoutingNetworkBox(){
     btn.addEventListener('click', function(){
       var nm = btn.getAttribute('data-name'), c = SCOUT_HIRE_POOL.find(function(x){ return x.name===nm; });
       if (!c) return;
-      scouts[nm] = {rep:30, wage:c.wage, specialty:c.specialty};
+      scouts[nm] = {rep:30, wage:(typeof eraScoutWage==='function'?eraScoutWage(c.wage):c.wage), specialty:c.specialty};
       addNews('board', nm+' has been taken on as a scouting contact'+(c.specialty?(', with a particular eye on '+c.specialty):'')+', on a weekly retainer of £'+c.wage+'.');
       renderScoutingNetworkBox(); renderYouthProspectsBox();
     });
@@ -15723,15 +16122,15 @@ function renderScoutingNetworkBox(){
    shows his progress; one who's turned 17 (readyForPro) gets the actual decision buttons. */
 function renderYouthProspectsBox(){
   var box = document.getElementById('youth-prospects-box'); if (!box) return;
-  if (!youthProspects.length){ box.innerHTML = '<p class="sub">NOBODY ON SCHOOLBOY FORMS AT PRESENT : A SCOUT\'S SCHOOLBOY TIP (SEE SCOUTED TARGETS) IS SIGNED HERE, NOT STRAIGHT INTO THE SQUAD.</p>'; return; }
+  if (!youthProspects.length){ box.innerHTML = '<p class="sub">NOBODY ON SCHOOLBOY FORMS AT PRESENT : A SCOUT\'S SCHOOLBOY TIP (SEE SCOUTED TARGETS) IS SIGNED HERE, NOT STRAIGHT INTO THE SQUAD'+(typeof youthPath==='function' && youthPath()==='yts' ? ' (YTS / APPRENTICESHIP ROUTE FROM 16)' : (typeof youthPath==='function' && youthPath()==='apprentice' ? ' (THEN THE APPRENTICESHIP ROUTE)' : ''))+'.</p>'; return; }
   var rows = youthProspects.slice().sort(function(a,b){ return posGroupOf(a) - posGroupOf(b) || a.n.localeCompare(b.n); }).map(function(p){
     var action;
     if (p.readyForPro) action = '<button class="sign-pro-btn" data-id="'+p.id+'" style="padding:2px 8px;font-size:14px;">SIGN PROFESSIONAL FORMS</button> <button class="release-youth-btn" data-id="'+p.id+'" style="padding:2px 8px;font-size:14px;">RELEASE</button>';
-    else if (p.age >= 15) action = '<span class="sub">GROUND-STAFF, AGE '+p.age+'</span> <button class="callup-early-btn" data-id="'+p.id+'" style="padding:2px 8px;font-size:14px;">CALL HIM UP EARLY (GAMBLE)</button>';
-    else action = '<span class="sub">ON THE GROUND-STAFF, AGE '+p.age+'</span>';
+    else if (p.age >= 15) action = '<span class="sub">'+(typeof youthStatusLabel==='function' ? youthStatusLabel(p.age) : ('GROUND-STAFF, AGE '+p.age))+'</span> <button class="callup-early-btn" data-id="'+p.id+'" style="padding:2px 8px;font-size:14px;">CALL HIM UP EARLY (GAMBLE)</button>';
+    else action = '<span class="sub">'+(typeof youthStatusLabel==='function' ? youthStatusLabel(p.age) : ('ON THE GROUND-STAFF, AGE '+p.age))+'</span>';
     return '<tr><td>'+p.n+'</td><td>'+p.pos+'</td><td class="num">'+p.age+'</td><td class="num">'+stars(p.rep)+'</td><td>'+action+'</td></tr>';
   }).join('');
-  box.innerHTML = '<p class="sub">SIGNED ON SCHOOLBOY FORMS, £'+GROUNDSTAFF_WAGE+'/WK EACH (AN ESTIMATE, NOT A SOURCED PERIOD FIGURE) : TOO YOUNG FOR SELECTION, BUT DEVELOPING ON THE STAFF -- FASTER IF HE ACTUALLY GETS RESERVE-TEAM GAMES (SEE THE FOOTBALL COMBINATION REPORT). OFFERED PROFESSIONAL FORMS AT 17, OR CALLED UP EARLY FROM 15 AS A GENUINE GAMBLE : REAL PRECEDENT, NOT THE NORM (DUNCAN EDWARDS DEBUTED FOR MANCHESTER UNITED AT 16 IN 1953, THOUGH MOST BOYS OF THE ERA REALLY DID WAIT).</p>'+
+  box.innerHTML = '<p class="sub">SIGNED ON SCHOOLBOY FORMS, £'+(typeof currentGroundstaffWage==='function' ? currentGroundstaffWage() : GROUNDSTAFF_WAGE)+'/WK EACH (AN ESTIMATE, NOT A SOURCED PERIOD FIGURE'+(typeof youthPath==='function' && youthPath()==='yts' ? ' ; FROM 1983 THE USUAL ROUTE AT 16 IS THE YTS' : (typeof youthPath==='function' && youthPath()==='apprentice' ? ' ; FROM THIS ERA THE BOYS COME THROUGH AS APPRENTICES' : ''))+') : TOO YOUNG FOR SELECTION, BUT DEVELOPING ON THE STAFF -- FASTER IF HE ACTUALLY GETS RESERVE-TEAM GAMES (SEE THE FOOTBALL COMBINATION REPORT). OFFERED PROFESSIONAL FORMS AT 17, OR CALLED UP EARLY FROM 15 AS A GENUINE GAMBLE : REAL PRECEDENT, NOT THE NORM (DUNCAN EDWARDS DEBUTED FOR MANCHESTER UNITED AT 16 IN 1953, THOUGH MOST BOYS OF THE ERA REALLY DID WAIT).</p>'+
     '<table><thead><tr><th>Boy</th><th>Pos</th><th class="num">Age</th><th class="num">Rep</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
   box.querySelectorAll('.sign-pro-btn').forEach(function(btn){ btn.addEventListener('click', function(){ decideYouthPro(parseInt(btn.getAttribute('data-id'),10), true); }); });
   box.querySelectorAll('.release-youth-btn').forEach(function(btn){ btn.addEventListener('click', function(){ decideYouthPro(parseInt(btn.getAttribute('data-id'),10), false); }); });
@@ -15918,8 +16317,8 @@ function makeProTarget(forcedPos, brief){
   var goals = /Forward|Outside/.test(pos) ? Math.floor(apps*(0.15+Math.random()*0.15)) : Math.floor(apps*Math.random()*0.08);
   var note = brief && brief.attr ? ('"Just what you asked for : '+attributeBriefLabels[brief.attr]+', by all accounts. '+pick(proNoteTemplates)+'"') : ('"'+pick(proNoteTemplates)+'"');
   var prof = rollTargetProfile(rep, pos);
-  var priced = mispricedAsking(realisticTransferFee(prof.ca, 1, age), true); /* v283 : wide mispricing -- every one of these sources is exactly the small/obscure level this feature targets */
-  return {n:genMarketPlayerName(src.nation), pos:pos, club:src.club, nation:src.nation, contract:'pro', price:priced.price, _trueValueFee:priced.trueFee, rep:rep, /* v117 : non-League/Scottish/Irish sources priced as the bottom tier */ apps:apps, goals:goals, age:age, ca:prof.ca, attrs:prof.attrs,
+  var priced = mispricedAsking(realisticTransferFee(prof.ca, (typeof sellerFeeTier==='function' ? sellerFeeTier(src.club) : 1), age), true); /* v359 : English non-league (Chelmsford, Guildford, etc.) uses the non-league cap; Scottish/Irish league sides stay on a lower-League scale */
+  return {n:genMarketPlayerName(src.nation), pos:pos, club:src.club, nation:src.nation, contract:'pro', price:priced.price, _trueValueFee:priced.trueFee, rep:rep, apps:apps, goals:goals, age:age, ca:prof.ca, attrs:prof.attrs,
     scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:note, briefAttr:(brief?brief.attr:null)};
 }
 /* ---------- RAW TALENT SPIKES: a real gap fixed here, per direct report.
@@ -15946,7 +16345,7 @@ function makeAmateurTarget(){
   var pos = pick(transferMarketPositions);
   var repA = 1+Math.floor(Math.random()*3), profA = rollTargetProfile(repA, pos);
   applyRawTalentSpikes(profA.attrs);
-  return {n:genMarketPlayerName(), pos:pos, club:pick(isIta() ? ITA_AMATEUR_SOURCES : isEsp() ? ESP_AMATEUR_SOURCES : isDeu() ? DEU_AMATEUR_SOURCES : amateurSourceClubs)+' (Amateur)', nation:homeNation(), contract:'amateur', price:0, rep:repA, apps:0, goals:0, age:18+Math.floor(Math.random()*7), ca:profA.ca, attrs:profA.attrs,
+  return {n:genMarketPlayerName(), pos:pos, club:pick(isIta() ? ITA_AMATEUR_SOURCES : isEsp() ? ESP_AMATEUR_SOURCES : isDeu() ? DEU_AMATEUR_SOURCES : amateurSourceClubs)+(typeof amateurClubSuffix==='function' ? amateurClubSuffix() : ' (Amateur)'), nation:homeNation(), contract:'amateur', price:0, rep:repA, apps:0, goals:0, age:18+Math.floor(Math.random()*7), ca:profA.ca, attrs:profA.attrs,
     scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:'"'+pick(amateurNoteTemplates)+'"'};
 }
 function makeSchoolboyTarget(noteOverride){
@@ -16116,7 +16515,7 @@ function renderTargets(){
   targets.sort(function(a,b){ return posGroupOf(a) - posGroupOf(b) || a.n.localeCompare(b.n); });
   targets.forEach(function(t, i){
     var tr = document.createElement('tr');
-    var recordLine = t.contract==='schoolboy' ? 'SCHOOLBOY, UNCAPPED' : t.contract==='amateur' ? 'AMATEUR, UNCAPPED' : (t.apps+' APPS, '+t.goals+' GOALS');
+    var recordLine = t.contract==='schoolboy' ? 'SCHOOLBOY, UNCAPPED' : t.contract==='amateur' ? ((typeof amateurRecordLine==='function') ? amateurRecordLine() : 'AMATEUR, UNCAPPED') : (t.apps+' APPS, '+t.goals+' GOALS');
     var priceLine = t.contract!=='pro' ? 'TRIAL ONLY' : ('£'+t.price+' ASKING');
     tr.innerHTML = '<td>'+t.n.toUpperCase()+'</td><td class="pos">'+t.pos.toUpperCase()+'</td><td>'+t.club.toUpperCase()+'</td><td class="num">'+t.age+'</td><td class="num">'+recordLine+'</td><td class="num">'+priceLine+'</td><td></td>';
     if (t.awaitingTrialDecision){
@@ -16126,7 +16525,7 @@ function renderTargets(){
       rejectBtn.addEventListener('click', function(){ decideTrial(i, false); });
       tr.lastElementChild.appendChild(signBtn); tr.lastElementChild.appendChild(rejectBtn);
     } else {
-      var btn = document.createElement('button'); btn.textContent = t.contract==='schoolboy' ? 'SIGN AS GROUND-STAFF BOY' : t.contract==='amateur' ? 'INVITE FOR TRIAL' : 'NEGOTIATE'; btn.style.padding='2px 10px'; btn.style.fontSize='15px';
+      var btn = document.createElement('button'); btn.textContent = t.contract==='schoolboy' ? ((typeof youthSignButtonLabel==='function') ? youthSignButtonLabel() : 'SIGN AS GROUND-STAFF BOY') : t.contract==='amateur' ? 'INVITE FOR TRIAL' : 'NEGOTIATE'; btn.style.padding='2px 10px'; btn.style.fontSize='15px';
       btn.disabled = !!(negotiation && negotiation.tid===t._tid) || targets[i].pending || (t.contract==='pro' && pastTransferDeadline());
       if (targets[i].pending) btn.textContent = 'AWAITING REPLY';
       else if (t.contract==='pro' && pastTransferDeadline()) btn.textContent = 'DEADLINE PASSED';
@@ -16321,13 +16720,13 @@ function signSchoolboyToYouth(t){
   nextId++;
   var idx = targets.indexOf(t); if (idx>=0) targets.splice(idx,1);
   if (t.isRealGem && t.realGemId && realGemTargetsState[t.realGemId]) realGemTargetsState[t.realGemId].resolved = true;
-  addNews('board', t.n+' has signed schoolboy forms and joins the ground-staff : too young to play for us yet, but ours to bring on now, on the same terms every other club\'s promising boys come through.');
+  addNews('board', (typeof youthJoinNews==='function') ? youthJoinNews(t.n) : (t.n+' has signed schoolboy forms and joins the ground-staff : too young to play for us yet, but ours to bring on now, on the same terms every other club\'s promising boys come through.'));
   renderTargets(); renderYouthProspectsBox(); renderClub();
 }
 /* v144 : weekly ground-staff wage for every boy currently on schoolboy forms, same cadence as the
    scouting retainer -- see GROUNDSTAFF_WAGE above for the honesty note on the figure itself. */
 function payGroundstaffWages(){
-  if (youthProspects.length) finances.bank -= youthProspects.length * GROUNDSTAFF_WAGE;
+  if (youthProspects.length) finances.bank -= youthProspects.length * (typeof currentGroundstaffWage==='function' ? currentGroundstaffWage() : GROUNDSTAFF_WAGE);
 }
 /* v144 : called once a season, from startNewSeason, after squad/clubSquads have already had their
    own close-season pass. A boy on the ground-staff genuinely was being coached and playing in junior
@@ -24576,6 +24975,7 @@ function showCountryPicker(eraYear, onChoose){
 }
 function finishNewGameSetup(){
   initGameStateFresh();
+  if (typeof refreshPreseasonFriendlies==='function') refreshPreseasonFriendlies();
   resetTacticsAndTrainingUI();
   renderSquad(); renderLineup(); renderLineupCount(); renderClub(); renderFixtures(); renderTable(); renderStatus(); renderDivisionLabels();
   renderSouthernTable(); renderIsthmianTable(); renderReserveLeagueTable(); renderReserveXIBox(); renderReserveFormBox(); renderReserveAppearancesBox(); renderAllBackgroundDivisions(); renderCupTab(); renderTargets(); renderOffers();
@@ -37450,7 +37850,7 @@ function rmxSlipHTML(t, i, kind){
   var price = t.contract!=='pro' ? 'trial only' : rmxMoney(t.price)+' asking';
   var meta = [kind==='46' ? rmxLc(t.pos) : t.pos, t.age ? 'aged '+Math.round(t.age) : null, t.club ? (kind==='46' ? t.club : t.club) : 'club not known', price].filter(Boolean).join(' \u00b7 ');
   var q = String(t.note||'').replace(/^["\u201c]+|["\u201d]+$/g,'');
-  var rec = t.contract==='schoolboy' ? 'schoolboy, uncapped' : t.contract==='amateur' ? 'amateur, uncapped' : (Math.round(t.apps)+' apps, '+Math.round(t.goals)+' goals');
+  var rec = t.contract==='schoolboy' ? 'schoolboy, uncapped' : t.contract==='amateur' ? ((typeof amateurRecordLine==='function') ? amateurRecordLine().toLowerCase() : 'amateur, uncapped') : (Math.round(t.apps)+' apps, '+Math.round(t.goals)+' goals');
   var whoName = scouts[t.scout] || t.scout==='YOUR OWN INQUIRY' ? rmxTitle(t.scout) : rmxTitle(t.scout||'the scouts');
   var who = (kind==='46' ? 'Reported by '+whoName : whoName)+' \u00b7 '+rmxWatched(t.timesWatched)+' \u00b7 '+rec+(t.lastCheckedWeek ? ' \u00b7 last checked week '+t.lastCheckedWeek : '');
   var sep = kind==='46' ? ' <i>\u00b7</i> ' : kind==='59' ? ' <i>\u25ba</i> ' : ' ';
@@ -37459,7 +37859,7 @@ function rmxSlipHTML(t, i, kind){
     L.push('<a class="go neg" role="button" tabindex="0" data-k="sign" data-i="'+i+'" title="Sign him">sign him</a>');
     L.push('<a class="go neg" role="button" tabindex="0" data-k="let" data-i="'+i+'" title="Let him go">let him go</a>');
   } else {
-    var lbl = t.contract==='schoolboy' ? 'sign as ground-staff boy' : t.contract==='amateur' ? 'invite for trial' : 'negotiate';
+    var lbl = t.contract==='schoolboy' ? ((typeof youthSignButtonLabel==='function') ? youthSignButtonLabel().toLowerCase() : 'sign as ground-staff boy') : t.contract==='amateur' ? 'invite for trial' : 'negotiate';
     var dis = !!(negotiation && negotiation.tid===t._tid) || t.pending || (t.contract==='pro' && pastTransferDeadline());
     if (t.pending) lbl = 'awaiting reply'; else if (t.contract==='pro' && pastTransferDeadline()) lbl = 'deadline passed';
     L.push(dis ? '<span class="go dis" style="opacity:.55;cursor:default">'+lbl+'</span>' : '<a class="go neg" role="button" tabindex="0" data-k="neg" data-i="'+i+'">'+lbl+'</a>');
@@ -41238,6 +41638,7 @@ function startNewSeason(outcome){
   try { worldSyncCurrent(); } catch (e) { if (typeof console !== 'undefined') console.error('world sync', e); }
   if (pendingClubMove){ performClubMove(); try { worldSyncCurrent(); } catch (e) { if (typeof console !== 'undefined') console.error('world sync', e); } } /* PER DIRECT REQUEST: a real move, not just leverage -- see performClubMove for exactly what does and doesn't carry over. Runs here, after the ordinary promotion/relegation/re-election handling above has already settled where the OLD club and everyone else stand next season, and before the fixtures/table below are built -- so that build now genuinely runs for the NEW club and its real rivals instead. */
   buildReserveLeagueSeason(); /* v146 : a fresh Combination/Central League season, table and all -- run after any club move above so a relocated club's reserves join the region it actually now plays in */
+  if (typeof runEraWageCatchUp==='function') runEraWageCatchUp();
   fixtures = buildPreseasonFixtures();
   rivals.forEach(function(r,i){ fixtures.push({opp:r.n, s:r.s, home:(i%2===0), played:false, res:null}); });
   rivals.forEach(function(r,i){ fixtures.push({opp:r.n, s:r.s, home:!(i%2===0), played:false, res:null}); });
@@ -41654,7 +42055,7 @@ function finishMatch(){
   } else {
     recentForm.push(outcome==='win'?1:outcome==='loss'?-1:0);
     if (recentForm.length>5) recentForm.shift();
-    var pricePerHead = 0.075; /* ~1s6d blended average, 1946 terms */
+    var pricePerHead = (typeof currentPricePerHead==='function') ? currentPricePerHead() : 0.075; /* era blended average; 1946 is ~1s6d */
     var attendance = live.attendanceFigure; /* the same figure announced over the tannoy during the match, not recalculated after the fact */
     var gate;
     if (f.isCup || (f.isLCup && f.neutralVenue)){
@@ -41872,7 +42273,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v358'; /* v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v359'; /* v359 : era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
