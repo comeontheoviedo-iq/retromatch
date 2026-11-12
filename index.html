@@ -3717,7 +3717,8 @@ function retainAndTransferEnded(){
 function subsAllowed(){
   var y = (typeof seasonLabel === 'string') ? parseInt(seasonLabel.split('-')[0], 10) : NaN;
   if (isNaN(y)) y = 1946;
-  return y >= 1965;
+  if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1966; /* Scotland: first senior substitute 13 Aug 1966 (1966-67) */
+  return y >= 1965; /* England from 1965-66; other countries keep this existing gate */
 }
 /* v313 : ERA FLAG. Substitutes were INJURY-ONLY from 1965-66 (one named man, brought on only for a player unable to continue); the Football
    League let a side use him for ANY reason from 1967-68 (the season after the 1966-67 era this flag was added for). SUB_ANY_REASON_FROM is
@@ -4874,7 +4875,8 @@ var fixtureIdx = 0, week = 1, lineup = [], lineupConfirmed = false, live = null,
    still fires them exactly once, cup-replay weeks included. See the gate around simulateReserves() in
    finishMatch() below. */
 var lastBgSimDateMs = null;
-var substituteId = null; /* v157 : the one nominated substitute, injury-only, from the real 1965-66 season on -- see subsAllowed() */
+var substituteId = null; /* v157 : the first nominated substitute, injury-only, from the real 1965-66 season on -- see subsAllowed() */
+var substituteId2 = null; /* v352 : second named substitute, when the rules allow two */
 var lineupSlots = []; /* [{slot:'CENTRE-FORWARD', playerId:N}, ...] : the real 1-11 shirt-number convention (GK, RB, LB, RH, CH, LH, OR, IR, CF, IL, OL) held across every tactical system of the day, WM included, even as the roles under those numbers changed. Feeds the matchday programme and a small scoring weight. */
 var formationSlotLabels = ['GOALKEEPER','RIGHT-BACK','LEFT-BACK','RIGHT-HALF','CENTRE-HALF','LEFT-HALF','OUTSIDE-RIGHT','INSIDE-RIGHT','CENTRE-FORWARD','INSIDE-LEFT','OUTSIDE-LEFT'];
 var finances = {bank:1140, lastGate:0, lastBonus:0, seasonBonusTotal:0}; /* placeholder only : initGameStateFresh sets the real v117 starting balance */
@@ -6293,7 +6295,14 @@ function pointsForWin(){
 function seasonStartYear(){ return (typeof seasonLabel === 'string' && /^\d{4}/.test(seasonLabel)) ? parseInt(seasonLabel, 10) : 0; }
 function engPlayOffsOn(){ return !(typeof isSco === 'function' && isSco()) && !(typeof isCont === 'function' && isCont()) && seasonStartYear() >= 1986; }
 function engReElectionOn(){ return !engPlayOffsOn() && !!fourthDivisionCreated && !(typeof isSco === 'function' && isSco()) && !(typeof isCont === 'function' && isCont()); }
-function engEuropeBanOn(y){ y = (y == null) ? seasonStartYear() : +y; return y >= 1985 && y <= 1989; } /* 1985-86 through 1989-90; English clubs only */
+function engEuropeBanOn(y){ y = (y == null) ? seasonStartYear() : +y; return (typeof gameCountry === 'string' ? gameCountry === 'ENG' : (typeof isSco === 'function' ? !isSco() : true)) && y >= 1985 && y <= 1989; } /* 1985-86 through 1989-90; English clubs only */
+function engClubEuropeBanned(club, y){
+  /* v352 : the Heysel ban lifts for English clubs in 1990-91, but Liverpool served one extra year and only returned in 1991-92. */
+  y = (y == null) ? seasonStartYear() : +y;
+  if (typeof gameCountry === 'string' && gameCountry !== 'ENG') return false;
+  if (typeof engEuropeBanOn === 'function' && engEuropeBanOn(y)) return true;
+  return y === 1990 && club === 'Liverpool';
+}
 function engLeagueCupName(){ var y = seasonStartYear(); if (y >= 1986 && y <= 1989) return 'Littlewoods Cup'; if (y >= 1982 && y <= 1985) return 'Milk Cup'; return 'League Cup'; }
 function scoLeagueCupName(){ var y = seasonStartYear(); if (y >= 1984 && y <= 1992) return 'Skol Cup'; return 'Scottish League Cup'; }
 function currentLeagueCupName(){ if (typeof isSco === 'function' && isSco()) return scoLeagueCupName(); return engLeagueCupName(); }
@@ -6304,9 +6313,35 @@ function subsAllowedCount(){
   var y = seasonStartYear();
   var f = (typeof fixtures !== 'undefined' && typeof fixtureIdx === 'number') ? fixtures[fixtureIdx] : null;
   var isCup = !!(f && (f.isCup || f.isLCup || f.isPlayOff || f.isEuroCup || f.isCWC || f.isFairs));
-  if (isCup && y >= 1986) return 2;
-  if (!isCup && y >= 1987) return 2;
+  if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1973 ? 2 : 1; /* Scotland: two named substitutes in all matches from 1973-74 */
+  if (isCup && y >= 1986) return 2; /* England: FA Cup, League Cup, play-offs and Europe from 1986-87 */
+  if (!isCup && y >= 1987) return 2; /* England: League from 1987-88 */
   return (typeof subsAllowed === 'function' && subsAllowed()) ? 1 : 0;
+}
+/* v352 : how many substitutes you may NAME this season (the cups may allow two before the League does). */
+function subsNamedMax(){
+  if (typeof subsAllowed === 'function' && !subsAllowed()) return 0;
+  var y = seasonStartYear();
+  if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1973 ? 2 : 1;
+  if (y >= 1986) return 2;
+  return 1;
+}
+function namedSubstitutePlayers(){
+  var n = (typeof subsAllowedCount === 'function') ? subsAllowedCount() : 1;
+  var ids = [];
+  if (typeof substituteId === 'number') ids.push(substituteId);
+  if (typeof substituteId2 === 'number' && ids.indexOf(substituteId2) < 0) ids.push(substituteId2);
+  return ids.slice(0, Math.max(n, 0)).map(function(id){
+    return squad.find(function(p){ return p.id === id && !unavailableReason(p); });
+  }).filter(Boolean);
+}
+function takeLiveSub(){
+  if (!live || !live.subPlayers) return null;
+  var p = live.subPlayers[live.subsUsed || 0];
+  if (!p) return null;
+  live.subsUsed = (live.subsUsed || 0) + 1;
+  live.subUsed = live.subsUsed >= live.subPlayers.length;
+  return p;
 }
 
 /* --- 1986-87 / 1987-88 inter-divisional play-off shape (one club from the division above + three from below). From 1988-89 the higher-division club drops out. */
@@ -6571,9 +6606,13 @@ function applyEngPlayOffMovements(mv){
 }
 
 function useGoalAverage(){
-  /* England used goal average until the end of 1975-76; goal difference from 1976-77. Scotland already on GD by 1975. */
-  if (typeof isSco === 'function' && isSco()) return false;
+  /* England used goal average until the end of 1975-76; goal difference from 1976-77.
+     Scotland used goal average until the end of 1970-71; goal difference from 1971-72.
+     Italy, Spain and West Germany stay on goal difference (do not use isSco(), which is "not England"). */
   var y = (typeof seasonLabel === 'string' && /^\d{4}/.test(seasonLabel)) ? parseInt(seasonLabel, 10) : 9999;
+  if (typeof isScoOnly === 'function' && isScoOnly()) return y > 0 && y <= 1970;
+  if (typeof isCont === 'function' && isCont()) return false;
+  if (typeof isSco === 'function' && isSco()) return false;
   return y > 0 && y <= 1975;
 }
 function tableTieBreak(a,b){
@@ -6585,7 +6624,7 @@ function tableTieBreak(a,b){
   return b.gd - a.gd || b.f - a.f;
 }
 
-function seasonLabelForEra(era){ if ((era === '1966' || era === '1970' || era === '1975' || era === '1981' || era === '1986') && isSco() && scoEraDef()) return scoEraDef().label; /* v322/v341/v345/v346/v348 */ return era === '1986' ? '1986-87' : era === '1981' ? '1981-82' : era === '1975' ? '1975-76' : era === '1970' ? '1970-71' : era === '1966' ? '1966-67' : era === '1959' ? '1959-60' : era === '1950' ? '1949-50' : '1946-47'; } /* v243 : not reachable today, see ERA_1959_RESEARCH_COMPLETE */
+function seasonLabelForEra(era){ if ((era === '1966' || era === '1970' || era === '1975' || era === '1981' || era === '1986') && isSco() && scoEraDef()) return scoEraDef().label; /* v322/v341/v345/v346/v348 */ return era === '1986' ? '1986-87' : era === '1981' ? '1981-82' : era === '1975' ? '1975-76' : era === '1970' ? '1970-71' : era === '1966' ? '1966-67' : era === '1959' ? '1959-60' : era === '1950' ? '1950-51' : '1946-47'; } /* v352 : England 1950 start data is 1950-51; Scotland 1950 still returns scoEraDef().label (1949-50). Existing saves keep whatever seasonLabel they stored. */
 var seasonNumber = 1; var seasonLabel = '1946-47';
 var seasonEndPending = false;
 var currentDivisionLabel = 'THIRD DIVISION (SOUTH)'; var currentDivisionShort = 'DIV 3 (S)';
@@ -11302,8 +11341,8 @@ function foreignCupName(){ var c = foreignCfg(); return c ? c.cup : 'FA Cup'; }
 function foreignCupBr(){ var c = foreignCfg(); return c ? c.cupBr : 'F.A.<br>Cup'; }
 function foreignLeagueName(){ var c = foreignCfg(); return c ? c.league : 'Football League'; }
 function foreignFinalGround(){ var c = foreignCfg(); return c ? c.finalGround : 'Wembley'; }
-function promoN(){ if (isPyr()) return espRule(parseInt(seasonLabel,10)).up; var c = foreignCfg(); return c ? c.up : 2; }
-function relN(){ if (isPyr()) return espRule(parseInt(seasonLabel,10)).d1d; var c = foreignCfg(); return c ? c.down : 2; }
+function promoN(){ if (typeof isScoOnly === 'function' && isScoOnly()){ var _y = parseInt(String(seasonLabel||'').split('-')[0], 10); if (_y === 1985){ if (divisionTier === 2) return 3; if (divisionTier === 3) return 0; if (divisionTier === 1) return 2; } } if (isPyr()) return espRule(parseInt(seasonLabel,10)).up; var c = foreignCfg(); return c ? c.up : 2; }
+function relN(){ if (typeof isScoOnly === 'function' && isScoOnly()){ var _y = parseInt(String(seasonLabel||'').split('-')[0], 10); if (_y === 1985){ if (divisionTier === 3) return 1; if (divisionTier === 2) return 2; return 0; } } if (isPyr()) return espRule(parseInt(seasonLabel,10)).d1d; var c = foreignCfg(); return c ? c.down : 2; }
 var espDropped = false, ESP_LOCK = null;
 function espWorldRegSet(cc){ cc = cc || 'ESP'; var R = espRule(parseInt(seasonLabel,10), cc); WORLD_REG[cc].tiers[0].down = R.d1d; WORLD_REG[cc].tiers[1].up = (cc === 'ITA' || cc === 'DEU' || R.mode === 'single') ? R.up : 2; }
 function espWorldAdjust(C, next, sorted, cc){ /* the other-country Spain : the same reforms as the live engine, in outline */
@@ -13108,7 +13147,8 @@ function initEuropeanCupForSeason(){
      European Cup (1955-56) by the Football League. If THIS game's champions that year are Chelsea (and the user isn't
      Chelsea, whose decision it would be), they stay out here too, which is what the scripted headline says. */
   var chelseaOut = (seasonLabel === '1955-56' && championName === 'Chelsea' && ourClubName !== 'Chelsea');
-  var entrants = chelseaOut ? [] : [{n:championName, s: cupEntrantStrength(championName, 80)}];
+  var clubBanned = (typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(championName));
+  var entrants = (chelseaOut || clubBanned) ? [] : [{n:championName, s: cupEntrantStrength(championName, 80)}];
   EURO_GIANTS.forEach(function(g){ if (g.n!==championName || chelseaOut) entrants.push({n:g.n, s:g.s}); });
   var needed = Math.max(0, 16 - entrants.length);
   for (var i=0;i<needed;i++) entrants.push(genEuroForeignClub(i, seasonLabel));
@@ -13119,6 +13159,7 @@ function initEuropeanCupForSeason(){
   var weAreIn = entrants.some(function(c){ return c.n===ourClubName; });
   recordHonour(seasonLabel, {euroEntrant: chelseaOut ? null : championName}); /* v309 : who the English entrant was, for the Manchester United 1956 item */
   if (chelseaOut) addNews('rivals', 'CHELSEA STAY HOME: the champions Chelsea, invited into the brand-new European Cup, have withdrawn under pressure from the Football League Management Committee, who judged it not in the League\'s interests. The field of '+entrants.length+' goes ahead without an English club.');
+  else if (clubBanned) addNews('board', championName.toUpperCase()+' STAY OUT: the champions remain banned from UEFA competition for one further year after Heysel, and return in 1991-92. The field of '+entrants.length+' goes ahead without them.');
   else addNews('board', 'EUROPEAN CUP: '+championName+' enter the European Cup as champions, one of '+entrants.length+' clubs drawn into the field for '+seasonLabel+'.'+(weAreIn?' We are in it ourselves.':''));
 }
 function euroDecisiveMatch(a,b){
@@ -13377,6 +13418,8 @@ function initCupWinnersCupForSeason(){
   if (isSco()) return; /* v317 */
   if (!cwcGateYearOk(seasonLabel)) return;
   var winnerName = lastFaCupWinnerName;
+  if (winnerName && typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(winnerName)) winnerName = lastFaCupRunnerUpName;
+  if (winnerName && typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(winnerName)) winnerName = null;
   if (!winnerName) return; /* nobody recorded yet (the gate year reached before any FA Cup has finished in this save) -- nothing real to enter */
   if (cupWinnersCup.active && cupWinnersCup.label===seasonLabel) return; /* already built for this season (e.g. a reload mid-season) */
   var entrants = [{n:winnerName, s: cupEntrantStrength(winnerName, 75)}];
@@ -13579,6 +13622,7 @@ function initFairsCupForSeason(){
   if (isSco()) return; /* v317 */
   if (!fairsCupGateYearOk(seasonLabel)) return;
   var runnerUpName = divisionChampions && divisionChampions.D1RunnerUp;
+  if (runnerUpName && typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(runnerUpName)) runnerUpName = null;
   if (!runnerUpName) return; /* nobody recorded yet (the gate year reached before any season in this save has completed with a recorded runner-up) -- nothing real to enter */
   if (fairsCup.active && fairsCup.label===seasonLabel) return; /* already built for this season (e.g. a reload mid-season) */
   var entrants = [{n:runnerUpName, s: cupEntrantStrength(runnerUpName, 73)}];
@@ -13894,13 +13938,14 @@ function euQualifyAll(label){
       var dd = euData(c, y); if (!dd) return;
       dd.f.forEach(function(r){
         var cl = EURO_CLUBS[r.id], n = EU_ALIAS[cl[0]] || cl[0];
-        if (cl[1] === nat && euIsNative(n)) out[c].push({n:n, e:r.e});
+        if (cl[1] === nat && euIsNative(n) && !(typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(n, y))) out[c].push({n:n, e:r.e});
       });
     });
     return (euQualCache = out);
   }
   var h = simHonour(prev) || {};
   var top = (dc.D1Top && dc.D1Top.length ? dc.D1Top : [dc.D1, dc.D1RunnerUp]).filter(Boolean).filter(euIsNative);
+  if (typeof engClubEuropeBanned === 'function') top = top.filter(function(n){ return !engClubEuropeBanned(n, y); });
   var taken = {};
   function holderRound(dd){ var hr = dd.f.filter(function(r){ return dd.h.indexOf(r.id) >= 0; })[0]; return hr ? hr.e : (dd.n === 6 ? 1 : 0); }
   /* EUROPEAN CUP : the champions, plus the holders from the early years of the holders' rule */
@@ -13913,7 +13958,7 @@ function euQualifyAll(label){
         if (dc && dc.D1 === 'Chelsea' && ourClubName !== 'Chelsea'){ slots = []; out.chelseaOut = 'Chelsea'; }
       }
       var hold = h.europeanCup;
-      if (hold && euIsNative(hold) && y >= 1957){ out.ec.push({n:hold, e:holderRound(dd), holder:true}); taken[hold] = true; }
+      if (hold && euIsNative(hold) && y >= 1957 && !(typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(hold, y))){ out.ec.push({n:hold, e:holderRound(dd), holder:true}); taken[hold] = true; }
       var i = 0;
       slots.forEach(function(e){
         while (i < top.length && taken[top[i]]) i++;
@@ -13926,9 +13971,9 @@ function euQualifyAll(label){
     var dd2 = euData('cwc', y);
     if (dd2){
       var slots2 = natRounds(dd2);
-      var cands = [lastFaCupWinnerName, lastFaCupRunnerUpName].filter(function(n){ return n && euIsNative(n); });
+      var cands = [lastFaCupWinnerName, lastFaCupRunnerUpName].filter(function(n){ return n && euIsNative(n) && !(typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(n, y)); });
       var hold2 = h.cwc;
-      if (hold2 && euIsNative(hold2) && !taken[hold2]){ out.cwc.push({n:hold2, e:holderRound(dd2), holder:true}); taken[hold2] = true; }
+      if (hold2 && euIsNative(hold2) && !taken[hold2] && !(typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(hold2, y))){ out.cwc.push({n:hold2, e:holderRound(dd2), holder:true}); taken[hold2] = true; }
       var cj = 0;
       slots2.forEach(function(e){
         while (cj < cands.length && taken[cands[cj]]) cj++;
@@ -13951,7 +13996,7 @@ function euQualifyAll(label){
     /* v320 : THE LEAGUE CUP ROUTE (English clubs, from 1966-67) : the winners, if a First Division club, play in the Fairs / UEFA Cup;
        one already in Europe by another way passes the place down the League table (so nothing changes for them) */
     var lcW = (nat==='ENG' && y >= 1967 && slots3.length && typeof elcEuropeanWinner==='function') ? elcEuropeanWinner(prev) : null;
-    if (lcW && euIsNative(lcW) && !taken[lcW] && !out.fairs.some(function(r){ return r.n===lcW; }) && out.fairs.length){
+    if (lcW && euIsNative(lcW) && !taken[lcW] && !out.fairs.some(function(r){ return r.n===lcW; }) && out.fairs.length && !(typeof engClubEuropeBanned === 'function' && engClubEuropeBanned(lcW, y))){
       var lastE = out.fairs[out.fairs.length-1];
       out.fairs[out.fairs.length-1] = {n:lcW, e:lastE.e, lc:true};
       taken[lcW] = true;
@@ -14372,6 +14417,9 @@ function renderEurope(){
     html += '<div class="box"><div class="box-title">'+name.toUpperCase()+' '+seasonLabel+'</div>';
     if (typeof euNat==='function' && euNat()==='ENG' && typeof engEuropeBanOn==='function' && engEuropeBanOn(y)){
       html += '<p class="sub">ENGLISH CLUBS ARE BANNED FROM EUROPE THIS SEASON, AFTER HEYSEL (MAY 1985). THE BAN RUNS THROUGH 1989-90. SCOTTISH CLUBS ARE NOT BANNED.</p></div>'; return;
+    }
+    if (typeof euNat==='function' && euNat()==='ENG' && typeof engClubEuropeBanned==='function' && engClubEuropeBanned(ourClubName, y)){
+      html += '<p class="sub">LIVERPOOL REMAIN BANNED FROM UEFA COMPETITION THIS SEASON, THE EXTRA YEAR SERVED AFTER HEYSEL. THEY RETURN IN 1991-92. OTHER ENGLISH CLUBS ARE NO LONGER BANNED.</p>';
     }
     if (!st || st.label !== seasonLabel || !st.roundNames){
       html += '<p class="sub">NOT YET UNDER WAY THIS SEASON.</p></div>'; return;
@@ -16875,23 +16923,46 @@ function renderLineupCount(){
    reasons. Picked from whoever's fit but NOT already in the eleven. */
 function renderSubstituteBox(){
   var box = document.getElementById('substitute-box'); if (!box) return;
-  if (!subsAllowed()){ box.style.display = 'none'; substituteId = null; return; }
+  if (!subsAllowed()){ box.style.display = 'none'; substituteId = null; substituteId2 = null; return; }
   box.style.display = 'block';
-  var pool = squad.filter(function(p){ return lineup.indexOf(p.id) < 0 && !unavailableReason(p); });
-  if (substituteId !== null && pool.indexOf(pool.find(function(p){return p.id===substituteId;})) < 0){
-    /* he's since become unavailable or been picked into the eleven itself */
-    if (!pool.some(function(p){return p.id===substituteId;})) substituteId = null;
+  var want = (typeof subsNamedMax === 'function') ? subsNamedMax() : 1;
+  if (want < 2) substituteId2 = null;
+  function opts(selected, otherId){
+    var pool = squad.filter(function(p){ return lineup.indexOf(p.id) < 0 && p.id !== otherId && !unavailableReason(p); });
+    if (selected !== null && !pool.some(function(p){ return p.id === selected; })) selected = null;
+    var html = '<option value="" '+(selected===null?'selected':'')+'>-- none --</option>' + pool.map(function(p){
+      return '<option value="'+p.id+'"'+(selected===p.id?' selected':'')+'>'+p.n.toUpperCase()+' ('+p.pos.toUpperCase()+')</option>';
+    }).join('');
+    return {html:html, selected:selected};
   }
-  var options = '<option value="" '+(substituteId===null?'selected':'')+'>-- NO SUBSTITUTE NAMED --</option>' + pool.map(function(p){
-    return '<option value="'+p.id+'"'+(substituteId===p.id?' selected':'')+'>'+p.n.toUpperCase()+' ('+p.pos.toUpperCase()+')</option>';
-  }).join('');
-  box.innerHTML = '<div class="box-title">SUBSTITUTE</div><p class="sub">' + (subAnyReasonAllowed()
-    ? 'The Football League now lets a side use its ONE named substitute for ANY reason, injury or a tactical change, once during the match. Name him here, or leave it blank and go with your eleven alone.'
-    : 'The Football League permits ONE named substitute from this season on, ' +
-    'and only if a named player is actually unable to continue through injury -- not a tactical change. Name him here, or leave it blank and go ' +
-    'with your eleven alone, same as every season before this one.') + '</p><select id="substitute-select" style="font-size:15px; margin-top:6px;">'+options+'</select>';
+  var word = (typeof isScoOnly === 'function' && isScoOnly()) ? 'The Scottish League' : (typeof isCont === 'function' && isCont()) ? 'The League' : 'The Football League';
+  var note;
+  if (want >= 2){
+    if (typeof seasonStartYear === 'function' && seasonStartYear() === 1986 && !(typeof isScoOnly === 'function' && isScoOnly()))
+      note = 'Name two substitutes. Two may be used in the cups; League matches still allow one.';
+    else
+      note = subAnyReasonAllowed() ? 'Two named substitutes. Either may be used for injury or a tactical change.' : 'Two named substitutes, injury only.';
+  } else {
+    note = subAnyReasonAllowed()
+      ? word + ' now lets a side use its ONE named substitute for any reason, injury or a tactical change, once in the match.'
+      : word + ' permits ONE named substitute from this season on, and only if a named player is actually unable to continue through injury -- not a tactical change.';
+  }
+  var a = opts(substituteId, want >= 2 ? substituteId2 : null); substituteId = a.selected;
+  var html = '<div class="box-title">'+(want>=2?'SUBSTITUTES':'SUBSTITUTE')+'</div><p class="sub">'+note+' Name them here, or leave blank and go with the eleven alone.</p>';
+  html += '<p class="sub" style="margin:6px 0 2px;"><a class="sub">1.</a> <select id="substitute-select" style="font-size:13px;">'+a.html+'</select></p>';
+  if (want >= 2){
+    var b = opts(substituteId2, substituteId); substituteId2 = b.selected;
+    html += '<p class="sub" style="margin:2px 0;"><a class="sub">2.</a> <select id="substitute-select-2" style="font-size:13px;">'+b.html+'</select></p>';
+  }
+  box.innerHTML = html;
   document.getElementById('substitute-select').addEventListener('change', function(){
     substituteId = this.value ? parseInt(this.value,10) : null;
+    if (substituteId2 === substituteId) substituteId2 = null;
+    renderSubstituteBox();
+  });
+  var s2 = document.getElementById('substitute-select-2');
+  if (s2) s2.addEventListener('change', function(){
+    substituteId2 = this.value ? parseInt(this.value,10) : null;
   });
 }
 /* ---------- FORMATION SLOTS: the real 1-11 shirt-number convention (see
@@ -19156,7 +19227,26 @@ function eastham1963Fire(baseText){
    Entries dated to the START YEAR with no month stay live (they fire in the first weeks, as in 1946).
    A 1946 game is untouched (its start is the data's own first date). */
 function silenceHistoryBeforeStart(){
-  if (gameEra !== '1950' && gameEra !== '1959' && gameEra !== '1966') return 0;
+  /* v352 : also 1970, 1975, 1981 and 1986, so later English starts do not dump decades of old news in week one.
+     A 1946 game still does not mark the past (its start is the data's own first date), but it does reset
+     manager-timeline flags so a previous game in the same page session cannot swallow later changes. */
+  function hushTimelines(){
+    var today = isoOf(currentDate);
+    function hush(list, resetFuture){
+      (list || []).forEach(function(st){
+        if (st.date <= today) st.said = true;
+        else if (resetFuture) st.said = false;
+      });
+    }
+    hush(typeof MANAGER_TIMELINE_1950 !== 'undefined' ? MANAGER_TIMELINE_1950 : [], true);
+    hush(typeof MANAGER_TIMELINE_1966 !== 'undefined' ? MANAGER_TIMELINE_1966 : [], true);
+  }
+  if (gameEra === '1946'){
+    if (typeof MANAGER_TIMELINE_1950 !== 'undefined') MANAGER_TIMELINE_1950.forEach(function(st){ st.said = false; });
+    if (typeof MANAGER_TIMELINE_1966 !== 'undefined') MANAGER_TIMELINE_1966.forEach(function(st){ st.said = false; });
+    return 0;
+  }
+  if (gameEra !== '1950' && gameEra !== '1959' && gameEra !== '1966' && gameEra !== '1970' && gameEra !== '1975' && gameEra !== '1981' && gameEra !== '1986') return 0;
   var y = currentDate.getFullYear(), m = currentDate.getMonth(), today = isoOf(currentDate), n = 0;
   futureLegends.forEach(function(e){
     var past = (e.month===undefined) ? (y > e.year) : (y > e.year || (y === e.year && m >= e.month));
@@ -19168,7 +19258,7 @@ function silenceHistoryBeforeStart(){
     if (past && !e.fired){ e.fired = true; n++; }
   });
   historicalOneOffsPost1949.forEach(function(e){ if (e.date <= today && !e.fired){ e.fired = true; n++; } });
-  MANAGER_TIMELINE_1966.forEach(function(st){ st.said = false; }); /* v315 : a second 1966 game in the same page session replays its manager changes */
+  hushTimelines(); /* v352 : past manager changes are marked said (not re-applied: later-era opening managers already reflect them); future ones stay live so a 1959 save still gets the 1966 timeline */
   historicalOneOffs.forEach(function(e){ if (!e.fired){ e.fired = true; n++; } }); /* 1946-49 kit/rationing notes : all before either start */
   return n;
 }
@@ -19405,7 +19495,7 @@ var MANAGER_TIMELINE_1950 = [
   {date:'1951-03-05', club:'Halifax Town', from:'Jack Breedon', to:'Billy Wootton', text:'MANAGER: Billy Wootton has been appointed manager of Halifax Town.'}
 ];
 function checkManagerTimeline1950(){
-  if (gameEra !== '1950') return;
+  if (typeof isSco === 'function' && isSco()) return; /* English clubs; v352 : no longer locked to a 1950 start, so a 1946 save still gets these changes when the calendar reaches them */
   var today = isoOf(currentDate);
   MANAGER_TIMELINE_1950.forEach(function(st){
     if (st.date > today) return;
@@ -19428,7 +19518,7 @@ var MANAGER_TIMELINE_1966 = [
 ];
 function checkManagerTimeline1966(){
   if (isSco()) return; /* v317 */
-  if (gameEra !== '1966') return;
+  /* v352 : no longer locked to a 1966 start, so a longer save still gets these changes when the calendar reaches them */
   var today = isoOf(currentDate);
   MANAGER_TIMELINE_1966.forEach(function(st){
     if (st.date > today) return;
@@ -22900,7 +22990,7 @@ function buildSaveState(){
     trainerName:trainerName, clubSecretaryName:clubSecretaryName, /* v206 : without these, reloading a save would show the generic default "Bert Symons"/"W. H. Cobbett" names even though a different trainer/secretary were generated and shown for the rest of that save */
     reserveLeagueRegion:reserveLeagueRegion, reserveLeagueTable:reserveLeagueTable, reserveLeagueLastLines:reserveLeagueLastLines, reserveFixtureQueue:reserveFixtureQueue, reserveXISelection:reserveXISelection, reservesRecord:reservesRecord, reserveRecentForm:reserveRecentForm,
     southernLastLines:southernLastLines, ourDivisionLastLines:ourDivisionLastLines, firstDivision:firstDivision, secondDivision:secondDivision, thirdDivisionSouthBg:thirdDivisionSouthBg, thirdDivisionNorth:thirdDivisionNorth, midlandLeague:midlandLeague, northEasternLeague:northEasternLeague,
-    manager:manager, lineupSlots:lineupSlots, substituteId:substituteId, seasonNumber:seasonNumber, seasonLabel:seasonLabel, seasonHistory:seasonHistory, signingLog:signingLog, divisionChampions:divisionChampions, honoursHistory:honoursHistory, europeanCup:europeanCup, cupWinnersCup:cupWinnersCup, fairsCup:fairsCup, lastFaCupWinnerName:lastFaCupWinnerName, lastFaCupRunnerUpName:lastFaCupRunnerUpName, reservesRecord:reservesRecord,
+    manager:manager, lineupSlots:lineupSlots, substituteId:substituteId, substituteId2:substituteId2, seasonNumber:seasonNumber, seasonLabel:seasonLabel, seasonHistory:seasonHistory, signingLog:signingLog, divisionChampions:divisionChampions, honoursHistory:honoursHistory, europeanCup:europeanCup, cupWinnersCup:cupWinnersCup, fairsCup:fairsCup, lastFaCupWinnerName:lastFaCupWinnerName, lastFaCupRunnerUpName:lastFaCupRunnerUpName, reservesRecord:reservesRecord,
     currentDivisionLabel:currentDivisionLabel, currentDivisionShort:currentDivisionShort, seasonEndPending:seasonEndPending, divisionTier:divisionTier, divisionRegion:divisionRegion, fourthDivisionCreated:fourthDivisionCreated,
     thirdDivisionExpanded1950:thirdDivisionExpanded1950,
     tacticalWrinkle:tacticalWrinkle, wrinkleFamiliarity:wrinkleFamiliarity, wrinkleCottonedOn:wrinkleCottonedOn, fixtureRealDates:fixtureRealDates.map(isoOf), cupRoundDates:cupRoundDates,
@@ -23326,7 +23416,7 @@ function applyLoadedState(s, silent){
     seasonStartSnap = s.seasonStartSnap || null; seasonSummaryOpen = s.seasonSummaryOpen || null; /* v305 */
     boardGuidance = s.boardGuidance || null; /* v304 : old saves simply have none until the next season start / warning */
     lineupSlots = s.lineupSlots || [];
-    substituteId = (typeof s.substituteId === 'number') ? s.substituteId : null; /* v157 : old saves predate this, defaults to none named */
+    substituteId = (typeof s.substituteId === 'number') ? s.substituteId : null; substituteId2 = (typeof s.substituteId2 === 'number') ? s.substituteId2 : null; /* v157 : old saves predate this, defaults to none named */
     seasonNumber = s.seasonNumber || 1; seasonLabel = s.seasonLabel || '1946-47'; seasonHistory = s.seasonHistory || []; signingLog = s.signingLog || []; divisionChampions = s.divisionChampions || null;
     honoursHistory = s.honoursHistory || []; /* v237 : an older save predates this record entirely -- an empty list is the honest answer, not a backfilled guess, same standard backfillDivisionChampions already uses for divisionChampions */
     if (s.europeanCup) europeanCup = s.europeanCup; /* v237 BUG FIX : europeanCup was never saved at all before this pass -- a reload mid-competition silently lost the whole bracket and any in-progress tie. An older save with no europeanCup field keeps the fresh {active:false,label:null} default, which is exactly what a save made before the European Cup existed should show. */
@@ -23848,7 +23938,7 @@ function initGameStateFresh(){
      the 1950 World Cup itself, since it falls AFTER that start date -- still fires normally, live, as
      the save's calendar genuinely reaches it. A 1946-era game is unaffected: its start date IS the
      calendar's own first date, so intlFiredBackfill() there would just return an empty array anyway. */
-  intlFired = (gameEra === '1950' || gameEra === '1959' || gameEra === '1966') ? intlFiredBackfill() : []; /* v243 : same reasoning as the 1950 case -- not reachable today */
+  intlFired = (gameEra === '1950' || gameEra === '1959' || gameEra === '1966' || gameEra === '1970' || gameEra === '1975' || gameEra === '1981' || gameEra === '1986') ? intlFiredBackfill() : []; /* v243/v352 : later English starts also mark past internationals as already reported */
   extendIntlCalendarIfNeeded(10); /* v194 : seed a decade of generated Home Championship seasons ahead of either start era, on top of the real 1946-1950 research */
   intlBreakthroughs = {}; intlSelChecked = {}; intlCallUpChecked = {}; intlAnnounced = {}; /* v248 */
   realRetirementsFired = {}; /* v249 */
@@ -24018,7 +24108,7 @@ function showEraPicker(onChoose){
   box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:18px 20px; max-width:420px; width:90%; font-size:16px; line-height:1.45; max-height:90vh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; box-sizing:border-box;';
   var eras = [
     {y:'1946', t:'1946-47', d:'Britain returns to football after the war.'},
-    {y:'1950', t:'1949-50', d:'Rebuilt grounds, expanded Third Divisions, England off to Brazil.'},
+    {y:'1950', t:'1950-51', d:'England and Italy in 1950-51, with the expanded Third Divisions in England. Scotland\'s 1950 start is 1949-50, the World Cup summer.'},
     {y:'1959', t:'1959-60', d:'Four divisions, floodlights legal, the maximum wage\'s final years.', on: typeof ERA_1959_RESEARCH_COMPLETE==='undefined' || ERA_1959_RESEARCH_COMPLETE},
     {y:'1966', t:'1966-67', d:'The season after England won the World Cup.', on: typeof ERA_1966_RESEARCH_COMPLETE==='undefined' || ERA_1966_RESEARCH_COMPLETE},
     {y:'1970', t:'1970-71', d:'Arsenal\'s Double season : two points for a win, one substitute, plain numbered programmes.', on: typeof ERA_1970_RESEARCH_COMPLETE==='undefined' || ERA_1970_RESEARCH_COMPLETE},
@@ -24066,7 +24156,7 @@ function showCountryPicker(eraYear, onChoose){
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--dos-white); color:var(--ink); border:3px solid var(--ink); padding:18px 20px; max-width:420px; width:90%; font-size:16px; line-height:1.45; max-height:90vh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; box-sizing:border-box;';
   var countries = rmEraCountries(eraYear);
-  var label = {1946:'1946-47',1950:'1949-50',1959:'1959-60',1966:'1966-67',1970:'1970-71',1975:'1975-76',1981:'1981-82',1986:'1986-87'}[eraYear] || eraYear;
+  var label = {1946:'1946-47',1950:(eraYear==='1950'?'1950-51':'1950-51'),1959:'1959-60',1966:'1966-67',1970:'1970-71',1975:'1975-76',1981:'1981-82',1986:'1986-87'}[eraYear] || eraYear; /* v352 : 1950 start is 1950-51 (Scotland still opens as 1949-50 once chosen) */
   var html = '<p style="margin:0 0 8px; color:var(--dos-yellow); font-size:18px;">2. Choose your country</p>'+
     '<p class="sub" style="margin:0 0 12px; font-size:13px;">'+label+' \u2014 only the countries researched for this era.</p>'+
     '<p style="margin:0 0 10px; font-size:12px;"><a href="#" id="country-back-era" data-nocase="1" style="color:inherit;">\u2190 Back to era</a></p>';
@@ -27493,7 +27583,7 @@ var thirdDivisionMasterClubs1959_THIRD = [
   {n:"Bury", s:85, mgr:"Dave Russell", ground:"Gigg Lane"},
   {n:"Queens Park Rangers", s:83, mgr:"Alec Stock", ground:"Loftus Road"},
   {n:"Colchester United", s:81, mgr:"Benny Fenton", ground:"Layer Road"},
-  {n:"Bournemouth & Boscombe Athletic", s:79, mgr:"Don Welsh", ground:"Dean Court"},
+  {n:"Bournemouth", s:79, mgr:"Don Welsh", ground:"Dean Court"},
   {n:"Reading", s:77, mgr:"Harry Johnston", ground:"Elm Park"},
   {n:"Southend United", s:75, mgr:"Eddie Perry", ground:"Roots Hall"},
   {n:"Newport County", s:73, mgr:"Billy Lucas", ground:"Somerton Park"},
@@ -33621,8 +33711,38 @@ var clubProfilesSCO_D1 = scoBuildProfiles(CLUB_SCO_D1_NAMES, "Division One", SQU
 var clubProfilesSCO_D2 = scoBuildProfiles(CLUB_SCO_D2_NAMES, "Division Two", SQUADS_SCO_D2);
 var SCO_BASE = {d1:CLUB_SCO_D1_NAMES, d2:CLUB_SCO_D2_NAMES, m1:firstDivisionMasterClubsSCO_D1, m2:secondDivisionMasterClubsSCO_D2, p1:clubProfilesSCO_D1, p2:clubProfilesSCO_D2, col:clubColoursSCO, facts:SCO_FACTS, sq1:SQUADS_SCO_D1, sq2:SQUADS_SCO_D2};
 /* v322 : point the Scottish data globals at the chosen era's data (or back at 1966). Called by scoSwap(true) only, so the English/1966 names are never touched. */
+function scoReuseNearestCaps(d){
+  /* v352 : 1970 Scotland facts shipped with cap:null. Copy a sourced capacity (and gate) from the 1966 baseline only. Do not invent, and do not use later eras whose caps are uniform placeholders. */
+  if (!d || !d.facts) return;
+  var src = (typeof SCO_BASE !== 'undefined' && SCO_BASE.facts) || {};
+  Object.keys(d.facts).forEach(function(n){
+    if (d.facts[n].cap == null && src[n] && src[n].cap) d.facts[n].cap = src[n].cap;
+    if (d.facts[n].gate == null && src[n] && src[n].gate) d.facts[n].gate = src[n].gate;
+  });
+}
+function scoImportClubFromEra(name, era){
+  /* v352 : bring an already-researched club (Meadowbank Thistle from the 1975 set) into a longer save. No new players or managers are invented. */
+  var src = (typeof SCO_ERA_DEFS === 'object' && SCO_ERA_DEFS[era]) || null;
+  if (!src || !src.masters || !src.masters[name]) return false;
+  var m = src.masters[name];
+  if (!SCO_FACTS[name] && src.facts && src.facts[name]){
+    var f = src.facts[name], cap = f.cap, gate = (cap && f.gate) ? Math.min(cap, Math.round(f.gate * (src.gateMult || 1))) : f.gate;
+    SCO_FACTS[name] = {nick:f.nick, founded:f.founded, rivals:(f.rivals || []).slice(), cap:cap, gate:gate, city:f.city};
+    if (f.colours && typeof clubColoursSCO === 'object') clubColoursSCO[name] = f.colours;
+    if (typeof CLUB_GATE_1946 === 'object') CLUB_GATE_1946[name] = [gate, cap];
+  }
+  if (typeof SCO_POOL !== 'undefined' && !SCO_POOL.some(function(p){ return p.n === name; })) SCO_POOL.push({n:name, from:1974, until:9999});
+  if (typeof SCO_POOL_MASTERS !== 'undefined' && SCO_POOL_MASTERS.every(function(x){ return x.n !== name; })) SCO_POOL_MASTERS.push({n:name, s:m.s, mgr:m.mgr, ground:m.ground});
+  if (src.squads && src.squads[name] && typeof scoBuildProfiles === 'function' && typeof clubProfilesSCO_POOL === 'object' && !clubProfilesSCO_POOL[name]){
+    var sq = {}; sq[name] = src.squads[name];
+    var p3 = scoBuildProfiles([name], 'Second Division', sq);
+    Object.keys(p3).forEach(function(k){ clubProfilesSCO_POOL[k] = p3[k]; });
+  }
+  return true;
+}
 function scoLoadEra(){
   var d = scoEraDef(), b = SCO_BASE;
+  if (d && typeof scoReuseNearestCaps === 'function') scoReuseNearestCaps(d);
   if (!d){
     CLUB_SCO_D1_NAMES = b.d1; CLUB_SCO_D2_NAMES = b.d2; firstDivisionMasterClubsSCO_D1 = b.m1; secondDivisionMasterClubsSCO_D2 = b.m2;
     clubProfilesSCO_D1 = b.p1; clubProfilesSCO_D2 = b.p2; clubColoursSCO = b.col; SCO_FACTS = b.facts; SQUADS_SCO_D1 = b.sq1; SQUADS_SCO_D2 = b.sq2;
@@ -33651,7 +33771,9 @@ var SCO_MOVES = {
   '1948-49': {inn:['East Stirlingshire']},
   '1949-50': {out:['East Stirlingshire'], inn:['Forfar Athletic']},
   '1953-54': {inn:['Brechin City']},
-  '1955-56': {inn:['East Stirlingshire','Montrose','Stranraer','Berwick Rangers'], up2:true}
+  '1955-56': {inn:['East Stirlingshire','Montrose','Stranraer','Berwick Rangers'], up2:true},
+  '1967-68': {out:['Third Lanark']}, /* folded at the end of 1966-67 */
+  '1974-75': {inn:['Meadowbank Thistle']} /* already in the 1975 data; imported when a pre-1975 save reaches this season */
 };
 /* v322 : Division A/B until 1954-55, Division One/Two from 1955-56 (the League's own renaming) */
 function scoDivWordFor(startYear, which, upper){
@@ -35498,10 +35620,11 @@ document.getElementById('btn-kickoff').addEventListener('click', function(){
   /* v157 : the nominated substitute (see renderSubstituteBox) only actually
      exists for this match if subsAllowed() still holds and he hasn't since
      become unavailable between picking the lineup and now. */
-  var subPlayer = (subsAllowed() && substituteId !== null) ? squad.find(function(p){ return p.id===substituteId && !unavailableReason(p); }) : null;
+  var subList = (subsAllowed() && typeof namedSubstitutePlayers === 'function') ? namedSubstitutePlayers() : ((subsAllowed() && substituteId !== null) ? [squad.find(function(p){ return p.id===substituteId && !unavailableReason(p); })].filter(Boolean) : []);
+  var subPlayer = subList[0] || null;
   live = {f:f, minute:0, usScore:0, oppScore:0, oppSquad:oppSquad, ourXI:ourXI, halfShown:false, scorers:[], usGoals:[], oppGoals:[], shotsUs:0, shotsOpp:0, pitchMod:pitch.mod*weather.mod, weather:weather, refName:refName, maxLeadUs:0, maxLeadOpp:0, attendanceFigure:computeAttendanceFigure(f), attendanceAnnounced:false, attendanceAnnounceAt: 52+Math.floor(Math.random()*20), /* second half only : a real tannoy attendance call came well after kick-off, not while the gates were still turning */
     stoppage1: 1+Math.floor(Math.random()*3), stoppage2: 1+Math.floor(Math.random()*4), stoppage1Announced:false, stoppage2Announced:false,
-    teamTalkAtk:1, teamTalkDef:1, teamTalkGiven:false, subPlayer:subPlayer, subUsed:false, hobbledIds:[]}; /* v169 : see effectiveCA and the injury branch of simulateMinuteBlock */
+    teamTalkAtk:1, teamTalkDef:1, teamTalkGiven:false, subPlayer:subPlayer, subPlayers:subList, subUsed:false, subsUsed:0, hobbledIds:[]}; /* v169 : see effectiveCA and the injury branch of simulateMinuteBlock */
   var pmp2 = document.getElementById('prematch-panel-match'); if (pmp2) pmp2.style.display = 'none'; /* v303 : the match is on, the comparison panel steps aside */
   live.oppApproach = 'balanced';
   live.oppApproach = chooseAiApproach(f.opp, oppStrengthAvg(), ourStrengthAvg()); /* v109 : see aiClubForm */
@@ -35653,7 +35776,7 @@ function eraStart(f){
     function rec(p, team){ return {n:p.n, pos:p.pos, slot:p.slot, team:team, rep:p.rep}; }
     live.ourXI.forEach(function(p){ who.push(rec(p,'us')); });
     live.oppSquad.forEach(function(p){ who.push(rec(p,'opp')); });
-    if (live.subPlayer) who.push(Object.assign(rec(live.subPlayer,'us'), {bench:true}));
+    (live.subPlayers && live.subPlayers.length ? live.subPlayers : (live.subPlayer ? [live.subPlayer] : [])).forEach(function(p){ who.push(Object.assign(rec(p,'us'), {bench:true})); });
     var meta = {era:gameEra, seasonLabel:seasonLabel, club:ourClubName, opp:f.opp, home:f.home, comp:(f.isCup?'cup':f.isLCup?'leaguecup':f.isFriendly?'friendly':'league'), roundName:f.roundName||null,
       ground:document.getElementById('match-sub').textContent, ref:live.refName, weather:live.weather.label, pitch:pitchConditionFor(currentDate).label, date:isoOf(currentDate), dow:currentDate.getDay(),
       kickoff:kickoffTimeFor(currentDate), fixtureIdx:fixtureIdx, division:currentDivisionLabel, subs:subsAllowed(), subAny:subAnyReasonAllowed(), cards:cardsInUseNow(), formation:tactics.formation, who:who, subPlayer:live.subPlayer?live.subPlayer.n:null};
@@ -37510,11 +37633,13 @@ function simulateMinuteBlock(skipHalfPause){
   live.minute += 3 + Math.floor(Math.random()*4);
   /* v313 : the any-reason substitution (SUB_ANY_REASON_FROM, default 1967-68) : the one named man may come on for tactical reasons too, so once the
      match is past the hour a side not winning swaps its weakest outfield man for him. Never runs in an injury-only season. */
-  if (subAnyReasonAllowed() && live.subPlayer && !live.subUsed && live.minute >= 60 && live.ourXI && live.usScore <= live.oppScore){
-    var offP = live.ourXI.filter(function(x){ return x !== live.subPlayer && !/goalkeeper/i.test(x.pos); }).sort(function(a,b){ return effectiveCA(a) - effectiveCA(b); })[0];
-    if (offP){
-      live.ourXI[live.ourXI.indexOf(offP)] = live.subPlayer; live.subUsed = true;
-      addLine('card', 'A CHANGE : ' + live.subPlayer.n.toUpperCase() + ' COMES ON FOR ' + offP.n.toUpperCase() + ' -- A TACTICAL SUBSTITUTION, THE BENCH USED FOR ANY REASON NOW.');
+  if (subAnyReasonAllowed() && ((live.subPlayers && !live.subUsed) || (live.subPlayer && !live.subUsed)) && live.minute >= 60 && live.ourXI && live.usScore <= live.oppScore){
+    var bench = live.subPlayers || (live.subPlayer ? [live.subPlayer] : []);
+    var offP = live.ourXI.filter(function(x){ return bench.indexOf(x) < 0 && !/goalkeeper/i.test(x.pos); }).sort(function(a,b){ return effectiveCA(a) - effectiveCA(b); })[0];
+    var onP = (typeof takeLiveSub === 'function') ? takeLiveSub() : live.subPlayer;
+    if (offP && onP){
+      live.ourXI[live.ourXI.indexOf(offP)] = onP; if (!live.subPlayers) live.subUsed = true;
+      addLine('card', 'A CHANGE : ' + onP.n.toUpperCase() + ' COMES ON FOR ' + offP.n.toUpperCase() + ' -- A TACTICAL SUBSTITUTION, THE BENCH USED FOR ANY REASON NOW.');
     }
   }
   /* ---------- PENALTY PACING: a spot-kick awarded and a spot-kick taken were
@@ -37779,11 +37904,12 @@ function simulateMinuteBlock(skipHalfPause){
     var injTeam = Math.random()<0.5 ? ourClubName : live.f.opp;
     if (injTeam === ourClubName){
     var injured = scorerFor(ourClubName);
-    if (live.subPlayer && !live.subUsed){
+    var onPInj = (typeof takeLiveSub === 'function') ? takeLiveSub() : ((live.subPlayer && !live.subUsed) ? live.subPlayer : null);
+    if (onPInj){
       var onIdx = live.ourXI.indexOf(injured);
-      live.ourXI[onIdx] = live.subPlayer;
-      live.subUsed = true;
-      addLine('card', injured.n.toUpperCase()+' IS DOWN INJURED AND CANNOT CONTINUE -- '+live.subPlayer.n.toUpperCase()+' IS SENT ON IN HIS PLACE, THE CLUB\'S SUBSTITUTE FOR THE DAY.');
+      live.ourXI[onIdx] = onPInj;
+      if (!live.subPlayers) live.subUsed = true;
+      addLine('card', injured.n.toUpperCase()+' IS DOWN INJURED AND CANNOT CONTINUE -- '+onPInj.n.toUpperCase()+' IS SENT ON IN HIS PLACE, THE CLUB\'S SUBSTITUTE FOR THE DAY.');
     } else {
       /* ---------- v169 REAL IN-MATCH INJURIES, PER DIRECT REPORT ("players never get injured in a match"), REVISED
          PER DIRECT FOLLOW-UP: a genuine knock, with no substitute to cover it, only ever had two honest real-football
@@ -39001,19 +39127,64 @@ function scoNeutralVenueFor(roundName, oppName, avoidGround){
 /* Scottish league structure at season end : Division One bottom two go down, Division Two top two go up, Division Two has no relegation */
 function scoNextMembers(){
   if (isPyr()) return espNextMembers(); /* v333 */
+  var yFin = parseInt(seasonLabel, 10);
   var d1 = aiLiveTierData('D1'), d2 = aiLiveTierData('D2');
   var s1 = aiSortedStandings(d1.names, d1.table), s2 = aiSortedStandings(d2.names, d2.table);
-  var KK = promoN(), rel = s1.slice(-KK), pro = s2.slice(0,KK);
-  var n1 = s1.filter(function(n){ return rel.indexOf(n)<0; }).concat(pro);
-  var n2 = s2.filter(function(n){ return pro.indexOf(n)<0; }).concat(rel);
+  var d3live = aiLiveTierData('D3');
+  var s3 = (d3live && d3live.names && d3live.names.length) ? aiSortedStandings(d3live.names, d3live.table) : [];
+  var n1, n2, n3 = s3.slice(), userKey = null;
+  function noUs(a){ return a.filter(function(n){ return n!==ourClubName; }); }
+  function setUserKey(){
+    if (n1.indexOf(ourClubName) >= 0) userKey = 'D1';
+    else if (n2.indexOf(ourClubName) >= 0) userKey = 'D2';
+    else if (n3.indexOf(ourClubName) >= 0) userKey = 'D3';
+  }
+  function pack(){
+    setUserKey();
+    return {D1:noUs(n1), D2:noUs(n2), D3:noUs(n3), D4:[], '3S':[], '3N':[], userKey:userKey};
+  }
+  /* v352 : 1974-75 -> 1975-76 reconstruction. Top 10 of Division One form the Premier; the rest of Division One plus the top 6 of Division Two form the First (14); the rest of Division Two form the Second (14). Meadowbank Thistle, already in the 1975 data, is added if the league is a club short. */
+  if (isScoOnly() && yFin === 1974 && s1.length >= 16){
+    n1 = s1.slice(0, 10);
+    n2 = s1.slice(10).concat(s2.slice(0, 6));
+    n3 = s2.slice(6);
+    if (n1.concat(n2, n3).indexOf('Meadowbank Thistle') < 0){
+      if (typeof scoImportClubFromEra === 'function') scoImportClubFromEra('Meadowbank Thistle', '1975');
+      if (SCO_ERA_DEFS['1975'] && SCO_ERA_DEFS['1975'].masters && SCO_ERA_DEFS['1975'].masters['Meadowbank Thistle']) n3.push('Meadowbank Thistle');
+    }
+    return pack();
+  }
+  /* v352 : 1985-86 -> 1986-87. Premier grows 10 to 12 by one down and three up; First and Second then exchange two. */
+  if (isScoOnly() && yFin === 1985 && s1.length <= 10){
+    var relP = s1.slice(-1), proF = s2.slice(0, 3);
+    n1 = s1.filter(function(n){ return relP.indexOf(n) < 0; }).concat(proF);
+    var relF = s2.slice(-2), proS = s3.slice(0, 2);
+    n2 = s2.filter(function(n){ return proF.indexOf(n) < 0 && relF.indexOf(n) < 0; }).concat(relP, proS);
+    n3 = s3.filter(function(n){ return proS.indexOf(n) < 0; }).concat(relF);
+    return pack();
+  }
+  var KK = 2;
+  var rel = s1.slice(-KK), pro = s2.slice(0, KK);
+  n1 = s1.filter(function(n){ return rel.indexOf(n)<0; }).concat(pro);
+  if (isScoOnly() && (s3.length || yFin >= 1975)){
+    var rel2 = s2.slice(-KK), pro3 = s3.slice(0, KK);
+    n2 = s2.filter(function(n){ return pro.indexOf(n)<0 && rel2.indexOf(n)<0; }).concat(rel, pro3);
+    n3 = s3.filter(function(n){ return pro3.indexOf(n)<0; }).concat(rel2);
+    return pack();
+  }
+  n2 = s2.filter(function(n){ return pro.indexOf(n)<0; }).concat(rel);
+  n3 = [];
   var sy = parseInt(seasonLabel, 10) + 1, lab = sy + '-' + ('0' + ((sy + 1) % 100)).slice(-2);
   var mv = (isScoOnly() && scoEraDef()) ? SCO_MOVES[lab] : null; /* v322 : real Division C / expansion moves, scripted by season; every step is skipped if the club is not where the script expects it, so the result stays a pure function of the live tables */
   if (mv){
-    var inLeague = n1.concat(n2);
-    (mv.out || []).forEach(function(n){ var k = n2.indexOf(n); if (k >= 0 && n !== ourClubName) n2.splice(k, 1); });
+    (mv.out || []).forEach(function(n){
+      var k = n2.indexOf(n); if (k < 0) k = n1.indexOf(n);
+      if (k >= 0 && n !== ourClubName){ if (n2.indexOf(n) >= 0) n2.splice(n2.indexOf(n), 1); else n1.splice(n1.indexOf(n), 1); }
+    });
     (mv.inn || []).forEach(function(n){
       var p = SCO_POOL.find(function(q){ return q.n === n; });
-      if (!p || sy < p.from || sy >= p.until) return;
+      if (!p && typeof scoImportClubFromEra === 'function' && scoImportClubFromEra(n, '1975')) p = {n:n, from:0, until:9999};
+      if (!p || (p.from && sy < p.from) || (p.until && sy >= p.until)) return;
       if (n1.indexOf(n) >= 0 || n2.indexOf(n) >= 0 || n === ourClubName) return;
       n2.push(n);
     });
@@ -39022,8 +39193,7 @@ function scoNextMembers(){
       rest.forEach(function(n){ n2.splice(n2.indexOf(n), 1); n1.push(n); });
     }
   }
-  function noUs(a){ return a.filter(function(n){ return n!==ourClubName; }); }
-  return {D1:noUs(n1), D2:noUs(n2), D3:[], D4:[], '3S':[], '3N':[]};
+  return pack();
 }
 function scoProfileFor(name, key){
   var m1 = firstDivisionMasterClubs1966_FIRST.find(function(c){ return c.n===name; });
@@ -40432,8 +40602,30 @@ function startNewSeason(outcome){
   var oldStartYear = parseInt(seasonLabel.split('-')[0], 10);
   var finishedSeasonLabel = seasonLabel; /* v237 : seasonLabel is about to be overwritten below -- captured here so the squad.forEach archive pass further down records apps/goals against the season that just ended, not the one about to start */
   seasonLabel = nextSeasonLabel();
+  if (typeof isScoOnly === 'function' && isScoOnly() && aiNextMembers){ /* v352 : reconstruction placement, D3 persistence, structure news */
+    if (aiNextMembers.userKey){
+      var uk = aiNextMembers.userKey, prevKey = (divisionTier===3?'D1':divisionTier===2?'D2':(fourthDivisionCreated?'D3':(divisionRegion==='N'?'3N':'3S')));
+      if (uk === 'D1') divisionTier = 3;
+      else if (uk === 'D2') divisionTier = 2;
+      else if (uk === 'D3'){ divisionTier = 1; fourthDivisionCreated = true; }
+      currentDivisionLabel = scoDivWordFor(null, uk==='D1'?1:uk==='D2'?2:3, true);
+      currentDivisionShort = scoDivShortFor(uk==='D1'?1:uk==='D2'?2:3);
+      if (uk !== prevKey){
+        if ((prevKey==='D2'&&uk==='D1')||(prevKey==='D3'&&uk==='D2')||(prevKey==='D3'&&uk==='D1')) outcome = 'promoted';
+        else if ((prevKey==='D1'&&uk==='D2')||(prevKey==='D2'&&uk==='D3')||(prevKey==='D1'&&uk==='D3')) outcome = 'relegated';
+      }
+      promoted = outcome === 'promoted';
+    }
+    if (aiNextMembers.D3){
+      ESP_D3_NAMES = aiNextMembers.D3.slice();
+      if (aiNextMembers.userKey === 'D3' && ESP_D3_NAMES.indexOf(ourClubName) < 0) ESP_D3_NAMES.push(ourClubName);
+      CLUB_1966_THIRD_NAMES = ESP_D3_NAMES.slice();
+    }
+    if (finishedSeasonLabel === '1974-75') addNews('board', 'The Scottish League is reconstructed for 1975-76: a 10-club Premier Division, a 14-club First Division and a 14-club Second Division.');
+    if (finishedSeasonLabel === '1985-86') addNews('board', 'The Scottish Premier Division is enlarged to 12 clubs for 1986-87. One club goes down and three come up from the First Division.');
+  }
   if (isEsp()){ var __ey = parseInt(seasonLabel,10); if (__ey === 1962) addNews('board', 'THE BORDERS CLOSE: after the failure of the national side at the World Cup in Chile, Spanish clubs may no longer sign foreign players, bar the oriundos of Spanish descent. Every signing you scout will be Spanish, and the ban is set to last until 1973.'); else if (__ey === 1973) addNews('board', 'THE BORDERS REOPEN: from this season each Primera and Segunda club may register up to two non-Spanish players. (This game does not yet put foreign players on the market.)'); }
-  if (isSco() && scoEraDef() && (divisionTier===3 || divisionTier===2) && (isDeu() || /^(DIVISION (A|B|ONE|TWO)|SERIE [AB]|.* \u00b7 GRUPO II?)$/.test(currentDivisionLabel))){ currentDivisionLabel = scoDivWordFor(null, divisionTier===3 ? 1 : 2, true); currentDivisionShort = scoDivShortFor(divisionTier===3 ? 1 : 2); } /* v322 : the Scottish League renamed A/B as One/Two in 1955-56 */
+  if (isSco() && scoEraDef() && (divisionTier===3 || divisionTier===2 || divisionTier===1) && (isDeu() || /^(DIVISION (A|B|ONE|TWO)|PREMIER DIVISION|FIRST DIVISION|SECOND DIVISION|SERIE [AB]|.* \u00b7 GRUPO II?)$/.test(currentDivisionLabel))){ currentDivisionLabel = scoDivWordFor(null, divisionTier===3 ? 1 : divisionTier===2 ? 2 : 3, true); currentDivisionShort = scoDivShortFor(divisionTier===3 ? 1 : divisionTier===2 ? 2 : 3); } /* v322/v352 : A/B -> One/Two in 1955-56; One/Two -> Premier/First/Second in 1975-76 */
   initEuropeanCupForSeason(); /* v233 : reads divisionChampions.D1 as just recorded by processSeasonEnd's recordDivisionChampions() for the season just finished; gated to never fire before the real 1955-56 European Cup -- see euroCupGateYearOk */
   initCupWinnersCupForSeason(); /* v236 : reads lastFaCupWinnerName as just recorded by processSeasonEnd's recordFaCupWinner() for the season just finished; gated to never fire before the real 1960-61 Cup Winners' Cup -- see cwcGateYearOk */
   initFairsCupForSeason(); /* v258 : reads divisionChampions.D1RunnerUp as just recorded by processSeasonEnd's recordDivisionChampions() for the season just finished; gated to never fire before the real single-season 1960-61 Fairs Cup -- see fairsCupGateYearOk */
@@ -41276,7 +41468,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v351'; /* v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v352'; /* v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
