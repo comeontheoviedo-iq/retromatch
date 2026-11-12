@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RetroMatch — start-up preview</title>
+<!--
+  PREVIEW ONLY. A proposed start-up look for the title screen, the new-game
+  flow (Era, Country, Club) and the load screen, before any save is running.
+  Generically retro: a teleprinter results strip and a compact Championship
+  Manager-style text menu, drawing lightly on every decade, not tied to the
+  1940s Pink (or any other era skin). Compact small text links, no big boxes
+  or buttons. Not wired into the game — for Chris to review first.
+-->
+<style>
+:root{
+  --ink:#1a1a18;
+  --paper:#efece3;
+  --rule:#b7b1a3;
+  --mute:#5c574c;
+  --link:#1c3f73;
+  --hot:#8b1c1c;
+  --tp:#0c0f0c;
+  --tp-green:#7dff7a;
+  --tp-dim:#3a5a3a;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:#2a2a28;
+  color:var(--ink);
+  font:13px/1.45 "Georgia","Palatino Linotype",Palatino,"Times New Roman",serif;
+}
+a{color:var(--link);text-decoration:underline;text-underline-offset:2px}
+a:hover{color:var(--hot)}
+a:focus{outline:1px dotted var(--ink);outline-offset:2px}
+.wrap{max-width:720px;margin:16px auto;padding:0 14px 28px}
+.banner{
+  font:11px/1.35 "Arial Narrow",Arial,Helvetica,sans-serif;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:#ddd8cc;
+  margin:0 0 10px;
+}
+.sheet{
+  background:var(--paper);
+  border:1px solid #cfc9bb;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  padding:18px 20px 16px;
+}
+.wordmark{
+  font:700 13px/1 "Arial Narrow",Arial,Helvetica,sans-serif;
+  letter-spacing:.38em;
+  text-transform:uppercase;
+  margin:0 0 4px;
+}
+h1{
+  font:italic 28px/1.05 Georgia,"Palatino Linotype",Palatino,serif;
+  font-weight:400;
+  margin:0 0 2px;
+}
+.tag{
+  margin:0 0 14px;
+  color:var(--mute);
+  font-size:12px;
+}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:10px 0}
+.menu{
+  font:13px/1.7 "Arial Narrow",Arial,Helvetica,sans-serif;
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.menu li{margin:0}
+.menu .n{
+  display:inline-block;
+  min-width:1.4em;
+  color:var(--mute);
+  font-variant-numeric:tabular-nums;
+}
+.hint{margin:12px 0 0;font-size:11px;color:var(--mute)}
+.crumb{
+  font:11px/1.4 "Arial Narrow",Arial,Helvetica,sans-serif;
+  color:var(--mute);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin:0 0 8px;
+}
+.crumb a{color:var(--mute)}
+h2{
+  font:italic 18px/1.2 Georgia,"Palatino Linotype",Palatino,serif;
+  font-weight:400;
+  margin:0 0 8px;
+}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+@media (max-width:560px){ .cols{grid-template-columns:1fr} }
+.screen{display:none}
+.screen.on{display:block}
+.load-meta{font-size:12px;color:var(--mute);margin:0 0 2px}
+.tp{
+  margin-top:12px;
+  background:var(--tp);
+  color:var(--tp-green);
+  font:12px/1.55 "Courier New",Courier,monospace;
+  padding:8px 12px 10px;
+  min-height:4.6em;
+  letter-spacing:.02em;
+}
+.tp .hd{color:var(--tp-dim);text-transform:uppercase;font-size:10px;letter-spacing:.14em;margin-bottom:4px}
+.tp .line{white-space:nowrap;overflow:hidden;text-overflow:clip}
+.hidden{position:absolute;left:-9999px}
+button.link{
+  background:none;border:0;padding:0;margin:0;
+  font:inherit;color:var(--link);text-decoration:underline;
+  text-underline-offset:2px;cursor:pointer;
+}
+button.link:hover{color:var(--hot)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="banner">Preview only — start-up look, not in the game yet. Small text links, no era skin.</p>
+  <div class="sheet">
+
+    <section id="sc-title" class="screen on">
+      <p class="wordmark">Retromatch</p>
+      <h1>Association football management</h1>
+      <p class="tag">A career from the post-war years through to the mid-1980s.</p>
+      <hr class="rule">
+      <ol class="menu">
+        <li><span class="n">1.</span> <a href="#era" data-go="era">New game</a></li>
+        <li><span class="n">2.</span> <a href="#load" data-go="load">Load game</a></li>
+        <li><span class="n">3.</span> <span style="color:var(--mute)">How to play</span> <span class="hint" style="display:inline;margin:0">(not in this preview)</span></li>
+      </ol>
+      <p class="hint">A compact text menu in the old Championship Manager manner, with a results service underneath. The Pink, Shoot! and Match looks stay with the era you actually play — they would no longer colour this first screen.</p>
+    </section>
+
+    <section id="sc-era" class="screen">
+      <p class="crumb"><a href="#title" data-go="title">Title</a> · Era</p>
+      <h2>Choose your era</h2>
+      <p class="tag">The season you start in. A long save can run on past it.</p>
+      <div class="cols">
+        <ol class="menu">
+          <li><span class="n">1.</span> <a href="#country" data-go="country" data-era="1946-47">1946-47</a></li>
+          <li><span class="n">2.</span> <a href="#country" data-go="country" data-era="1950-51">1950-51</a></li>
+          <li><span class="n">3.</span> <a href="#country" data-go="country" data-era="1959-60">1959-60</a></li>
+          <li><span class="n">4.</span> <a href="#country" data-go="country" data-era="1966-67">1966-67</a></li>
+        </ol>
+        <ol class="menu" start="5">
+          <li><span class="n">5.</span> <a href="#country" data-go="country" data-era="1970-71">1970-71</a></li>
+          <li><span class="n">6.</span> <a href="#country" data-go="country" data-era="1975-76">1975-76</a></li>
+          <li><span class="n">7.</span> <a href="#country" data-go="country" data-era="1981-82">1981-82</a></li>
+          <li><span class="n">8.</span> <a href="#country" data-go="country" data-era="1986-87">1986-87</a></li>
+        </ol>
+      </div>
+      <p class="hint"><a href="#title" data-go="title">Back</a></p>
+    </section>
+
+    <section id="sc-country" class="screen">
+      <p class="crumb"><a href="#title" data-go="title">Title</a> · <a href="#era" data-go="era">Era</a> · Country</p>
+      <h2>Choose your country</h2>
+      <p class="tag" id="country-tag">Starting season selected.</p>
+      <ol class="menu">
+        <li><span class="n">1.</span> <a href="#club" data-go="club" data-country="England">England</a></li>
+        <li><span class="n">2.</span> <a href="#club" data-go="club" data-country="Scotland">Scotland</a></li>
+        <li><span class="n">3.</span> <a href="#club" data-go="club" data-country="Italy">Italy</a></li>
+        <li><span class="n">4.</span> <a href="#club" data-go="club" data-country="Spain">Spain</a></li>
+        <li><span class="n">5.</span> <a href="#club" data-go="club" data-country="West Germany">West Germany</a></li>
+      </ol>
+      <p class="hint"><a href="#era" data-go="era">Back</a>. Not every country is playable in every season — this preview only shows the shape of the screen.</p>
+    </section>
+
+    <section id="sc-club" class="screen">
+      <p class="crumb"><a href="#title" data-go="title">Title</a> · <a href="#era" data-go="era">Era</a> · <a href="#country" data-go="country">Country</a> · Club</p>
+      <h2>Choose your club</h2>
+      <p class="tag" id="club-tag">A short, typographic list — not a grid of big buttons.</p>
+      <div class="cols" id="club-list"></div>
+      <p class="hint"><a href="#country" data-go="country">Back</a>. In the game this list is the real division you picked. Here it is only a sample, to show the look.</p>
+    </section>
+
+    <section id="sc-load" class="screen">
+      <p class="crumb"><a href="#title" data-go="title">Title</a> · Load</p>
+      <h2>Load a saved game</h2>
+      <p class="tag">The same compact list, not a panel of cards.</p>
+      <ol class="menu">
+        <li>
+          <span class="n">1.</span> <button type="button" class="link" disabled>Sheffield United, 1981-82</button>
+          <p class="load-meta">Fourth Division · October 1981 · manager’s copy, last written this machine</p>
+        </li>
+        <li>
+          <span class="n">2.</span> <button type="button" class="link" disabled>Arsenal, 1946-47</button>
+          <p class="load-meta">First Division · March 1947</p>
+        </li>
+        <li>
+          <span class="n">3.</span> <button type="button" class="link" disabled>Celtic, 1966-67</button>
+          <p class="load-meta">Scottish First Division · August 1966</p>
+        </li>
+      </ol>
+      <p class="hint"><a href="#title" data-go="title">Back</a>. Loading is disabled in this preview — nothing here will open a save or change the live game.</p>
+    </section>
+
+  </div>
+
+  <div class="tp" aria-live="polite">
+    <div class="hd">Results service</div>
+    <div id="tp-lines"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var chosen = {era:'1981-82', country:'England'};
+  var sample = {
+    England:['Arsenal','Aston Villa','Liverpool','Manchester United','Sheffield United','Tottenham Hotspur','West Ham United','Wolverhampton Wanderers'],
+    Scotland:['Aberdeen','Celtic','Dundee United','Hearts','Hibernian','Rangers'],
+    Italy:['Inter','Juventus','Milan','Roma','Torino'],
+    Spain:['Athletic Bilbao','Atletico Madrid','Barcelona','Real Madrid','Valencia'],
+    'West Germany':['Bayern Munich','Borussia Moenchengladbach','Eintracht Frankfurt','Hamburger SV']
+  };
+  var results = [
+    'LIVERPOOL 2-0 EVERTON',
+    'CELTIC 1-1 RANGERS',
+    'JUVENTUS 3-1 TORINO',
+    'REAL MADRID 2-2 BARCELONA',
+    'HAMBURGER SV 1-0 BAYERN',
+    'SHEFF UTD 1-0 WALSALL',
+    'ARSENAL 2-1 WOLVES',
+    'SPURS 0-0 CHELSEA',
+    'ABERDEEN 2-0 DUNDEE UTD',
+    'MILAN 1-1 INTER'
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function show(name){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('on', s.id==='sc-'+name); });
+    if (name==='country') $('country-tag').textContent = 'Starting in '+chosen.era+'.';
+    if (name==='club'){
+      $('club-tag').textContent = chosen.country+', '+chosen.era+' — a sample list only.';
+      var clubs = sample[chosen.country] || sample.England;
+      var mid = Math.ceil(clubs.length/2);
+      var col = function(arr, start){
+        return '<ol class="menu" start="'+(start+1)+'">'+arr.map(function(n,i){
+          return '<li><span class="n">'+(start+i+1)+'.</span> <span>'+n+'</span></li>';
+        }).join('')+'</ol>';
+      };
+      $('club-list').innerHTML = col(clubs.slice(0,mid),0)+col(clubs.slice(mid),mid);
+    }
+  }
+  document.querySelectorAll('[data-go]').forEach(function(a){
+    a.addEventListener('click', function(ev){
+      ev.preventDefault();
+      if (a.getAttribute('data-era')) chosen.era = a.getAttribute('data-era');
+      if (a.getAttribute('data-country')) chosen.country = a.getAttribute('data-country');
+      show(a.getAttribute('data-go'));
+    });
+  });
+
+  var i = 0, held = [];
+  function tick(){
+    held.push(results[i % results.length]);
+    if (held.length > 3) held.shift();
+    i++;
+    $('tp-lines').innerHTML = held.map(function(line){ return '<div class="line">'+line+'</div>'; }).join('');
+  }
+  tick(); tick(); tick();
+  setInterval(tick, 2200);
+})();
+</script>
+</body>
+</html>
