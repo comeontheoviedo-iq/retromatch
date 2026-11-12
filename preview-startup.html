@@ -252,9 +252,17 @@ button.link:hover{color:var(--hot)}
       ev.preventDefault();
       if (a.getAttribute('data-era')) chosen.era = a.getAttribute('data-era');
       if (a.getAttribute('data-country')) chosen.country = a.getAttribute('data-country');
-      show(a.getAttribute('data-go'));
+      var name = a.getAttribute('data-go');
+      show(name);
+      if (history.replaceState) history.replaceState(null, '', '#'+name);
+      else location.hash = name;
     });
   });
+  (function initHash(){
+    var h=(location.hash||'#title').replace('#','');
+    if (!document.getElementById('sc-'+h)) h='title';
+    show(h);
+  })();
 
   var i = 0, held = [];
   function tick(){
