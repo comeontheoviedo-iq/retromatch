@@ -1,330 +1,1163 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RetroMatch — match events preview</title>
-<!-- Standalone preview of a bigger match-events treatment, inspired by how The Greats
-     stages commentary (build-up, then resolution; spoiler-safe labels; reading-time dwell).
-     Two eras: 1966-67 highlights voice, and a proposed 1986-87 Match-magazine voice.
-     Driven by a scripted but realistic sequence of sim events. Not wired into the game.
-     Compact UI, small text links, no big buttons. Whole numbers. Real 1966 / 1986
-     first-team names; on-pitch events only; this is not a historical result. -->
 <style>
-:root{--ink:#1a1a1a;--paper:#f4f1ea;--mute:#5c584c;--line:#c9c2b0;--link:#1a1a1a;--accent:#1b2a4a}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--paper);color:var(--ink);font:13px/1.45 Georgia,"Times New Roman",serif}
-body[data-era="1986"]{font-family:Arial,Helvetica,sans-serif;background:#ece9e0;--accent:#c41230}
-a{color:var(--link);text-decoration:underline;text-underline-offset:2px}
-a:hover{color:var(--accent)}
-.wrap{max-width:720px;margin:0 auto;padding:16px 18px 40px}
-header.top{border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
-header.top p{margin:0 0 6px;color:var(--mute);font-size:12px;max-width:640px}
-header.top h1{margin:0 0 6px;font-size:18px;font-weight:normal;letter-spacing:.02em}
-.nav{font-size:12px}
-.nav a{margin-right:14px}
-.nav a.now{text-decoration:none;border-bottom:1px solid var(--accent);color:var(--accent);font-weight:700}
-.board{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:baseline;border:1px solid var(--line);padding:8px 12px;margin:12px 0;background:#fff}
-.board .fix{flex:1 1 220px}
-.board .score{font-size:22px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
-.board .meta{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
-.mom{font-size:11px;color:var(--mute)}
-.stage{min-height:7.2em;border:1px solid var(--line);background:#fff;padding:12px 14px;margin:0 0 10px}
-.kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 6px;font-family:Arial,Helvetica,sans-serif}
-.stage p{margin:0;font-size:16px;line-height:1.55}
-body[data-era="1986"] .stage p{font-size:15px;line-height:1.5}
-.stage.kind-goal{background:#111;color:#f4f1ea;border-color:#111}
-.stage.kind-goal .kicker{color:#f5d76e}
-.ctl{font-size:12px;margin:0 0 14px}
-.ctl a{margin-right:14px}
-.log{list-style:none;margin:0;padding:0;font-size:12px}
-.log li{border-top:1px solid var(--line);padding:5px 0;display:flex;gap:10px}
-.log .min{flex:0 0 36px;color:var(--mute);font-variant-numeric:tabular-nums}
-.log .gone{color:var(--mute)}
-.note{font-size:11px;color:var(--mute);margin-top:18px;max-width:640px}
-.era-tag{float:right;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+  :root { --ink:#17110f; --paper:#f1c0ba; --rule:#17110f; --accent:#17110f; --muted:#5a3d38; --card:#fff8f4; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font: 13px/1.45 Georgia, "Palatino Linotype", Palatino, "Times New Roman", Times, serif;
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 10px 14px 28px;
+  }
+  a { color: var(--ink); text-decoration: underline; cursor: pointer; }
+  a.dead { color: var(--muted); text-decoration: none; cursor: default; pointer-events: none; }
+  h1 { font-weight: 700; margin: 0; }
+  .kicker { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 2px; }
+  header#top { border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin-bottom: 8px; }
+  header#top h1 { font-size: 1.35rem; line-height: 1.15; }
+  .note { font-size: 11px; color: var(--muted); margin: 4px 0 0; }
+  nav.eras, nav.ctrls, nav.touch { font-size: 12px; margin: 6px 0; }
+  nav.eras { border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  nav.eras a[aria-current="page"] { font-weight: 700; text-decoration: none; border-bottom: 2px solid var(--accent); }
+  #board { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin: 8px 0 6px; font-size: 14px; }
+  #board .score { font-weight: 700; letter-spacing: .02em; }
+  #board .meta { font-size: 12px; color: var(--muted); }
+  #momentum { font-size: 11px; color: var(--muted); margin: 0 0 8px; }
+  #momentum .pips { letter-spacing: 2px; }
+  #stage { min-height: 2.9em; margin: 0 0 8px; font-size: 14px; }
+  #stage .pending { color: var(--muted); font-style: italic; }
+  #moment { display:none; margin: 8px 0 10px; padding: 10px 12px; border: 2px solid var(--rule); background: var(--card); }
+  #moment.show { display:block; }
+  #moment .eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  #moment .who { font-size: 1.35rem; font-weight: 700; line-height: 1.1; margin: 2px 0; }
+  #moment .how { font-size: 13px; margin: 2px 0; }
+  #moment .flash { font-size: 1.1rem; font-weight: 700; margin: 6px 0 2px; }
+  #moment .crowd { font-size: 12px; font-style: italic; }
+  #log { margin: 0 0 8px; padding: 0; list-style: none; font-size: 12.5px; }
+  #log li { margin: 0 0 3px; }
+  #log li.ko, #log li.ht, #log li.ft { font-weight: 700; }
+  #log li.muted { color: var(--muted); }
+  #ftwrap { display:none; margin: 10px 0 8px; padding: 10px 12px; border: 1px solid var(--rule); }
+  #ftwrap.show { display:block; }
+  #ftwrap .hed { font-size: 1.05rem; font-weight: 700; margin: 0 0 6px; }
+  #ftwrap p { margin: 0 0 6px; }
+  footer { border-top: 1px solid var(--rule); margin-top: 12px; padding-top: 6px; font-size: 11px; color: var(--muted); }
+  body.skin-pink { --ink:#17110f; --paper:#f1c0ba; --rule:#17110f; --accent:#17110f; --muted:#5a3d38; --card:#fbe4df; }
+  body.skin-pink header#top h1 { font-family: Palatino, "Palatino Linotype", "Book Antiqua", "Times New Roman", Times, serif; }
+  body.skin-turnstile { --ink:#2a1810; --paper:#f4ecd6; --rule:#b32323; --accent:#b32323; --muted:#7a4a2a; --card:#fff8e6; font-family: Baskerville, "Baskerville Old Face", "Times New Roman", Times, serif; }
+  body.skin-turnstile header#top h1 { color:#b32323; letter-spacing:.04em; }
+  body.skin-programme { --ink:#1b2236; --paper:#efe5c9; --rule:#a82414; --accent:#a82414; --muted:#5c4a3a; --card:#f7f0d8; font-family: "Arial Narrow", "Franklin Gothic Medium", Arial, sans-serif; }
+  body.skin-programme header#top h1 { font-family: Georgia, "Times New Roman", Times, serif; color:#1b2236; }
+  body.skin-shoot { --ink:#111; --paper:#fffdf5; --rule:#e31c23; --accent:#e31c23; --muted:#444; --card:#ffe14a; font-family: "Arial Narrow", Arial, Helvetica, sans-serif; }
+  body.skin-shoot header#top h1 { font-family: Impact, "Arial Narrow", Arial, sans-serif; color:#e31c23; letter-spacing:.02em; text-transform:uppercase; }
+  body.skin-shoot #moment { background:#ffe14a; border-color:#e31c23; }
+  body.skin-match { --ink:#1a1a1a; --paper:#f6f3ea; --rule:#c41230; --accent:#c41230; --muted:#555; --card:#f5d76e; font-family: Arial, Helvetica, sans-serif; }
+  body.skin-match header#top h1 { font-family: Impact, Arial, sans-serif; color:#c41230; text-transform:uppercase; }
+  body.skin-match #moment { background:#f5d76e; border-color:#c41230; }
+  @media (max-width: 420px) {
+    body { padding: 8px 10px 24px; font-size: 13px; }
+    header#top h1 { font-size: 1.15rem; }
+    #board { font-size: 13px; }
+    #moment .who { font-size: 1.15rem; }
+  }
 </style>
 </head>
-<body data-era="1966">
-<div class="wrap">
-  <header class="top">
-    <p>Review only — not the live game. A bigger treatment of match events, tried here in two eras, from a realistic sequence of sim events. The live site and the game file are untouched.</p>
-    <h1>Match events <span class="era-tag" id="era-tag">1966-67 · highlights</span></h1>
-    <nav class="nav">
-      <a href="#1966" id="link-1966" class="now">1966-67 highlights</a>
-      <a href="#1986" id="link-1986">1986-87 Match voice</a>
-    </nav>
-  </header>
-
-  <div class="board" id="board">
-    <div class="fix">
-      <div class="meta" id="comp">Football League · Division One</div>
-      <div id="fixname">Liverpool v Leeds United</div>
-    </div>
-    <div>
-      <div class="meta" id="clock">KO</div>
-      <div class="score" id="score">0–0</div>
-    </div>
-    <div class="mom" id="mom">Even at the start</div>
-  </div>
-
-  <div class="stage" id="stage">
-    <div class="kicker" id="kicker">Preview</div>
-    <p id="line">Choose an era, then play. Each chance and goal is held in the air for a beat before the resolution. The score only changes when that beat lands.</p>
-  </div>
-
-  <p class="ctl" id="ctl">
-    <a href="#play" id="btn-play">Play</a>
-    <a href="#pause" id="btn-pause">Pause</a>
-    <a href="#next" id="btn-next">Next beat</a>
-    <a href="#skip" id="btn-skip">Skip to end</a>
-    <a href="#reset" id="btn-reset">Reset</a>
-  </p>
-
-  <ol class="log" id="log"></ol>
-
-  <p class="note">Names are the real 1966-67 and 1986-87 first-team men. The scoreline and the incidents are a simulated preview sequence, not a claim about a real afternoon. Bookings and knocks are ordinary match events; nothing off the pitch is invented. Whole numbers only. Controls are text links.</p>
+<body class="skin-pink">
+<header id="top">
+  <p class="kicker" id="kicker">Review only — not the live game</p>
+  <h1 id="mast">The Wireless</h1>
+  <p class="note">A standalone preview of match events and era voices. The live game is unchanged. Every line is driven by a simulated event; names are the clubs’ real first-team players. Nothing here is a claim about anyone off the pitch.</p>
+</header>
+<nav class="eras" id="eras"></nav>
+<div id="board">
+  <div class="score" id="score">Arsenal 0–0 Derby County</div>
+  <div class="meta" id="clock">—</div>
 </div>
+<div id="momentum"><span id="mom-label">Even</span> <span class="pips" id="mom-pips">·····</span></div>
+<div id="stage"><span class="pending">Press Play to kick off.</span></div>
+<div id="moment"></div>
+<ul id="log"></ul>
+<nav class="ctrls" id="ctrls">
+  <a id="btn-play">Play</a> ·
+  <a id="btn-pause">Pause</a> ·
+  <a id="btn-next">Next</a> ·
+  <a id="btn-skip">Skip</a> ·
+  Speed: <a id="spd-slow">Slow</a> · <a id="spd-med">Medium</a> · <a id="spd-fast">Fast</a>
+  · <a id="btn-replay">Replay with a new seed</a>
+  · <a id="btn-sound">Sound: off</a>
+</nav>
+<nav class="touch" id="touch" hidden>
+  Touchline: <a id="btn-shout">A shout from the bench</a><span id="touch-sub-wrap"> · <a id="btn-sub">Send the substitute</a></span>
+</nav>
+<div id="ftwrap"></div>
+<footer>
+  Seed <span id="seed-label">—</span>. Scene, weather and the referee are drawn from period banks; the referee is a real official from that season’s pool. Sound is generated in the browser and is off until you turn it on. This page is designed to drop into the match engine later — see COMMENTARY_IDEAS.md (INTEGRATION).
+</footer>
 <script>
-/* Simulated sequences, filled from the same event shape the game already uses
-   (kind, minute, players, score after). Build-up stages never name the outcome. */
-var MATCHES = {
+(function(){
+'use strict';
+
+var ERAS = {
+  '1946': {
+    id:'1946', year:1946, voice:'1946', skin:'pink',
+    mast:'The Wireless', kicker:'1946–47 · a Saturday afternoon broadcast',
+    home:{ club:'Arsenal', short:'Arsenal', ground:'Highbury',
+      gk:'George Swindin',
+      def:['Laurie Scott','Walley Barnes','Les Compton','George Male'],
+      mid:['Paddy Sloan','Ernest Collett','Jimmy Logie'],
+      att:['Ian McPherson','Reg Lewis','Cliff Bastin','Bryn Jones'],
+      sub:null },
+    away:{ club:'Derby County', short:'Derby', ground:'The Baseball Ground',
+      gk:'Vic Woodley',
+      def:['Jack Howe','Bert Mozley','Leon Leuty'],
+      mid:['Walter Musson','Tim Ward','Jack Nicholas'],
+      att:['Raich Carter','Peter Doherty','Jack Stamps','Reg Harrison','Angus Morrison'],
+      sub:null },
+    refs:['Mr. G. C. Appleyard','Mr. C. J. Barrick','Mr. G. S. Blackhall','Mr. H. Bryan','Mr. A. C. Denham','Mr. L. E. Gibbs','Mr. A. C. Hall','Mr. G. L. Iliffe'],
+    cards:false, subs:false, floodlit:false, paper:true
+  },
+  '1950': {
+    id:'1950', year:1950, voice:'1950', skin:'pink',
+    mast:'The Wireless', kicker:'1950–51 · a Saturday afternoon broadcast',
+    home:{ club:'Arsenal', short:'Arsenal', ground:'Highbury',
+      gk:'George Swindin',
+      def:['Walley Barnes','Lionel Smith','Les Compton','Laurie Scott'],
+      mid:['Joe Mercer','Alex Forbes','Jimmy Logie'],
+      att:['Don Roper','Doug Lishman','Reg Lewis','Freddie Cox'],
+      sub:null },
+    away:{ club:'Portsmouth', short:'Portsmouth', ground:'Fratton Park',
+      gk:'Ernie Butler',
+      def:['Harry Ferrier','Phil Rookes','Reg Flewin'],
+      mid:['Jimmy Scoular','Jimmy Dickinson','Len Phillips'],
+      att:['Peter Harris','Duggie Reid','Ike Clarke','Jack Froggatt','Cliff Parker'],
+      sub:null },
+    refs:['Mr. R. L. Aldridge','Mr. E. W. Baker','Mr. H. Beacock','Mr. R. J. Burgess','Mr. R. C. Carter','Mr. E. V. Crook','Mr. W. E. Dellow','Mr. A. C. Denham'],
+    cards:false, subs:false, floodlit:false, paper:true
+  },
+  '1959': {
+    id:'1959', year:1959, voice:'1959', skin:'turnstile',
+    mast:'Molineux Newsreel', kicker:'1959–60 · a floodlit newsreel',
+    home:{ club:'Wolverhampton Wanderers', short:'Wolves', ground:'Molineux',
+      gk:'Malcolm Finlayson',
+      def:['Eddie Stuart','Gerry Harris','George Showell','Bill Slater'],
+      mid:['Ron Flowers','Eddie Clamp','Peter Broadbent'],
+      att:['Jimmy Murray','Norman Deeley','Des Horne','Micky Lill'],
+      sub:null },
+    away:{ club:'Tottenham Hotspur', short:'Tottenham', ground:'White Hart Lane',
+      gk:'Bill Brown',
+      def:['Peter Baker','Ron Henry','Maurice Norman'],
+      mid:['Danny Blanchflower','Dave Mackay','Tony Marchi'],
+      att:['Cliff Jones','Bobby Smith','Terry Dyson','Terry Medwin','Tommy Harmer'],
+      sub:null },
+    refs:['Mr. L. Callaghan','Mr. P. H. Carr','Mr. J. E. Carr','Mr. W. Clements','Mr. T. H. Cooper','Mr. T. Dawes','Mr. M. Dixon','Mr. A. E. Ellis'],
+    cards:false, subs:false, floodlit:true, paper:false
+  },
   '1966': {
-    tag: '1966-67 · highlights',
-    comp: 'Football League · Division One',
-    home: 'Liverpool', away: 'Leeds United',
-    voice: 'highlights',
-    events: [
-      {min:0, kind:'kickoff', us:0, them:0, mom:'Even at the start', stages:[
-        'Anfield on a First Division afternoon, and the highlights open with Liverpool in red, Leeds in white. Lawrence, Yeats, Hunt, Ian St. John; Sprake, Charlton, Bremner, Lorimer.',
-        'The referee has a look at his watch, and we are under way.'
-      ]},
-      {min:7, kind:'chance', us:0, them:0, mom:'Liverpool feeling their way', stages:[
-        'Callaghan carries it down the right and rolls one inside for Hunt, who is a yard ahead of Hunter.',
-        'Hunt hits it early, and Sprake, down to his right, turns it behind. A first sight of goal, nothing more.'
-      ]},
-      {min:14, kind:'chance', us:0, them:0, mom:'Leeds break', stages:[
-        'Leeds come away through Michael Giles, and Lorimer is suddenly in space on the far side.',
-        'The shot is struck cleanly, but it climbs over the bar. Lawrence, for a moment, was unsighted.'
-      ]},
-      {min:23, kind:'goal', us:1, them:0, mom:'Liverpool in front', stages:[
-        'Thompson beats Reaney on the left and looks up. Hunt is making the run Yeats always wants.',
-        'The ball is pulled back, and Hunt meets it first time, low, across Sprake.',
-        'It is in the far corner. Liverpool one, Leeds nil, and Hunt has the afternoon’s first goal.'
-      ]},
-      {min:31, kind:'name', us:1, them:0, mom:'A harder edge', stages:[
-        'Smith and Bremner go together into a tackle on the halfway line, and the referee is quickly in.',
-        'He has a word with Smith, and takes his name. No card in this era: the book is enough.'
-      ]},
-      {min:41, kind:'save', us:1, them:0, mom:'Leeds press before the interval', stages:[
-        'A long throw is flicked on by Charlton, and Edwin Gray, arriving at the near post, looks certain to equalise.',
-        'Lawrence is out quickly and smothers it on the line. The half will end with Liverpool still in front.'
-      ]},
-      {min:45, kind:'ht', us:1, them:0, mom:'Liverpool lead at the interval', stages:[
-        'Half-time at Anfield: Liverpool 1, Leeds United 0, Hunt the scorer. Bremner will have had a word.'
-      ]},
-      {min:58, kind:'goal', us:1, them:1, mom:'Level, and the ground finds its voice', stages:[
-        'Leeds keep the ball in the Liverpool half. Michael Giles finds Lorimer, twenty yards out, slightly right of centre.',
-        'Lorimer has time to set himself, and the drive is hit with that familiar whip.',
-        'Lawrence gets a hand to it, but it is too strong. One each, and Lorimer has his goal.'
-      ]},
-      {min:67, kind:'injury', us:1, them:1, mom:'A stoppage', stages:[
-        'Callaghan stays down after a clash with Cooper on the touchline. The trainer is on.',
-        'He is helped off. It looks a knock, not worse, and Strong is getting ready.'
-      ]},
-      {min:68, kind:'sub', us:1, them:1, mom:'Strong on', stages:[
-        'Geoff Strong comes on for Ian Callaghan, Liverpool’s one permitted substitute.'
-      ]},
-      {min:79, kind:'chance', us:1, them:1, mom:'Liverpool sniff a winner', stages:[
-        'Strong holds off Charlton and lays it into the path of Ian St. John, eight yards out.',
-        'The shot is on target, and Sprake throws himself to his left to push it away. So close.'
-      ]},
-      {min:84, kind:'goal', us:2, them:1, mom:'Liverpool back in front', stages:[
-        'A corner from the right, Yeats up from the back, and the ball drops loose in the six-yard box.',
-        'St. John is first to it, a sharp stab, before Hunter can clear.',
-        'Sprake is beaten, and Liverpool are back in front: two-one, St. John this time.'
-      ]},
-      {min:90, kind:'ft', us:2, them:1, mom:'Liverpool take it 2–1', stages:[
-        'Full time, and the highlights close on a 2–1 win for Liverpool. Hunt and St. John the scorers, Lorimer for Leeds. A proper First Division afternoon, settled late, and nothing in it until the last kick was gone.'
-      ]}
-    ]
+    id:'1966', year:1966, voice:'1966', skin:'programme',
+    mast:'Saturday Highlights', kicker:'1966–67 · Saturday-night highlights',
+    home:{ club:'Liverpool', short:'Liverpool', ground:'Anfield',
+      gk:'Tommy Lawrence',
+      def:['Gerry Byrne','Chris Lawler','Ron Yeats','Tommy Smith'],
+      mid:['Willie Stevenson','Ian Callaghan','Gordon Milne'],
+      att:['Peter Thompson','Ian St. John','Roger Hunt'],
+      sub:'Geoff Strong' },
+    away:{ club:'Leeds United', short:'Leeds', ground:'Elland Road',
+      gk:'Gary Sprake',
+      def:['Paul Reaney','Terry Cooper','Jack Charlton','Norman Hunter'],
+      mid:['Billy Bremner','Michael Giles','Paul Madeley'],
+      att:['Peter Lorimer','Jimmy Greenhoff','Edwin Gray'],
+      sub:'Mick Bates' },
+    refs:['Mr. K. H. Burns','Mr. N. C. Burtenshaw','Mr. P. Bye','Mr. L. Callaghan','Mr. N. Callender','Mr. J. E. Carr','Mr. F. Cowen','Mr. W. Crossley'],
+    cards:false, subs:'injury', floodlit:false, paper:false
+  },
+  '1970': {
+    id:'1970', year:1970, voice:'1970', skin:'shoot',
+    mast:'Shoot! Highlights', kicker:'1970–71 · terrace television',
+    home:{ club:'Leeds United', short:'Leeds', ground:'Elland Road',
+      gk:'Gary Sprake',
+      def:['Paul Reaney','Terry Cooper','Jack Charlton','Norman Hunter'],
+      mid:['Billy Bremner','Johnny Giles','Eddie Gray'],
+      att:['Peter Lorimer','Mick Jones','Allan Clarke'],
+      sub:'Mick Bates' },
+    away:{ club:'Chelsea', short:'Chelsea', ground:'Stamford Bridge',
+      gk:'Peter Bonetti',
+      def:['John Hollins','Ron Harris','John Dempsey','Eddie McCreadie'],
+      mid:['Charlie Cooke','Alan Hudson','Peter Houseman'],
+      att:['Peter Osgood','Ian Hutchinson','Tommy Baldwin'],
+      sub:'Paddy Mulligan' },
+    refs:['Jack Taylor','Gordon Hill','Norman Burtenshaw','Keith Walker','Ray Tinkler','Jim Finney','Eric Jennings','Pat Partridge'],
+    cards:true, subs:true, floodlit:false, paper:false
   },
   '1986': {
-    tag: '1986-87 · Match voice',
-    comp: 'Football League · Division One · 3pts for a win',
-    home: 'Liverpool', away: 'Everton',
-    voice: 'match',
-    events: [
-      {min:0, kind:'kickoff', us:0, them:0, mom:'Derby afternoon, nothing in it yet', stages:[
-        'Anfield, a Merseyside derby, and Match has a seat in the stand. Grobbelaar, Hansen, Rush, Whelan; Southall, Ratcliffe, Reid, Sheedy.',
-        'The whistle goes. Three points for a win, and no one in this ground needs telling.'
-      ]},
-      {min:6, kind:'chance', us:0, them:0, mom:'Liverpool start on the front foot', stages:[
-        'Nicol overlaps, and the cut-back is meant for Rush, sliding in at the near post.',
-        'Southall is there first, strong hands, and the chance is gone. Early warning for Everton.'
-      ]},
-      {min:16, kind:'chance', us:0, them:0, mom:'Everton break', stages:[
-        'Reid nicks it in midfield and Sheedy is away down the left, Steven arriving in the middle.',
-        'The cross is just too high. Grobbelaar watches it sail through. Let-off.'
-      ]},
-      {min:21, kind:'goal', us:1, them:0, mom:'Rush, of course', stages:[
-        'Whelan to Jan Mølby, one touch, and Rush is already on the move, in behind Mountfield.',
-        'He takes it round Southall — one look, one finish, low, into the far side.',
-        'Goal. Liverpool 1, Everton 0, and it is Ian Rush. The Kop is up as one.'
-      ]},
-      {min:34, kind:'card', us:1, them:0, mom:'The derby finds its bite', stages:[
-        'McMahon goes through the back of Reid, and the referee is on the spot.',
-        'Yellow card, McMahon. A name in the book, and Reid is up, shaking his head.'
-      ]},
-      {min:44, kind:'save', us:1, them:0, mom:'Everton finish the half on the attack', stages:[
-        'Sheedy’s free-kick, whipped, and Watson plants a header from six yards.',
-        'Grobbelaar throws himself full length and turns it round the post. Still 1–0 at the break.'
-      ]},
-      {min:45, kind:'ht', us:1, them:0, mom:'Liverpool lead at half-time', stages:[
-        'Half-time: Liverpool 1, Everton 0. Rush the scorer. Everton will fancy they are still in this.'
-      ]},
-      {min:57, kind:'goal', us:1, them:1, mom:'Level — the away end finds its voice', stages:[
-        'Everton recycle it on the left. Sheedy has a yard on Venison and shapes to cross, then thinks again.',
-        'He goes for goal, curling, twenty-two yards, toward the far corner.',
-        'Grobbelaar fingertips it — not enough. It drops in. One-one, Kevin Sheedy, and this derby is alive.'
-      ]},
-      {min:64, kind:'injury', us:1, them:1, mom:'A break in play', stages:[
-        'Whelan comes out of a challenge with Snodin and stays down, holding the thigh.',
-        'The trainer is on. Whelan is helped off; it looks a knock. Walsh is stripping off.'
-      ]},
-      {min:65, kind:'sub', us:1, them:1, mom:'Walsh on', stages:[
-        'Paul Walsh comes on for Ronnie Whelan — Liverpool’s one named substitute.'
-      ]},
-      {min:77, kind:'chance', us:1, them:1, mom:'Walsh nearly wins it', stages:[
-        'Hansen’s long ball, Walsh peels off Ratcliffe, one bounce, and the shot is rising.',
-        'Southall tips it over. A foot either side and the net would have bulged. Still level.'
-      ]},
-      {min:83, kind:'goal', us:2, them:1, mom:'Liverpool in front again', stages:[
-        'A corner, Jan Mølby’s delivery, and the first header is nodded down into the six-yard box.',
-        'Walsh stabs at it, Southall blocks, and the rebound sits up.',
-        'Nicol slams it in from close range. Two-one Liverpool, and the ground erupts.'
-      ]},
-      {min:90, kind:'ft', us:2, them:1, mom:'Liverpool take the derby 2–1', stages:[
-        'Full time, and Match closes the book on Liverpool 2, Everton 1. Rush and Nicol the scorers, Sheedy for Everton. A derby with a swing in it, a booking, a knock, and a late winner — the sort of afternoon the magazine was made for.'
-      ]}
-    ]
+    id:'1986', year:1986, voice:'1986', skin:'match',
+    mast:'Match — The Derby', kicker:'1986–87 · a First Division afternoon',
+    home:{ club:'Liverpool', short:'Liverpool', ground:'Anfield',
+      gk:'Bruce Grobbelaar',
+      def:['Alan Hansen','Mark Lawrenson','Jim Beglin','Steve Nicol'],
+      mid:['Jan Mølby','Steve McMahon','Ronnie Whelan','Craig Johnston'],
+      att:['Ian Rush','Paul Walsh','Kenny Dalglish'],
+      sub:'John Aldridge' },
+    away:{ club:'Everton', short:'Everton', ground:'Goodison Park',
+      gk:'Neville Southall',
+      def:['Kevin Ratcliffe','Dave Watson','Gary Stevens','Pat Van den Hauwe'],
+      mid:['Trevor Steven','Peter Reid','Kevin Sheedy','Alan Harper'],
+      att:['Graeme Sharp','Adrian Heath','Wayne Clarke'],
+      sub:'Paul Wilkinson' },
+    refs:['Keith Hackett','George Courtney','Neil Midgley','Clive Thomas','Pat Partridge','Ken Burns','Roger Milford','John Homewood'],
+    cards:true, subs:true, floodlit:false, paper:false
   }
 };
 
-var era='1966', evIdx=0, stIdx=0, timer=null, playing=false, revealed=[];
+var WEATHER = {
+  '1946':['a grey, still afternoon','a raw wind off the North London streets','a fine rain falling steadily','weak sunshine after a morning shower','a heavy sky, the turf holding up well'],
+  '1950':['a bright, cold afternoon','a gusty wind down the pitch','light rain, the ball skidding','clear and still, a good day for it','overcast, the turf a little heavy'],
+  '1959':['a sharp autumn night under the lights','a clear, cold evening, the floodlights hard and white','a thin rain glittering in the lamps','a still night, the smoke hanging over the stands'],
+  '1966':['a blustery Merseyside afternoon','weak sun, a typical November pitch','a wet day, the ball holding up in patches','a raw wind from the river','grey and still, a good crowd in'],
+  '1970':['a raw Yorkshire afternoon','a bit of sun, the pitch firm enough','a greasy surface after earlier rain','cold and still, breath on the air','a typical Elland Road blow'],
+  '1986':['a grey Merseyside afternoon','a damp, heavy pitch','clear and cold, a proper derby day','a bit of rain in the air','still, with a full house packed in']
+};
+var CROWD = {
+  '1946':['a full house on the terraces','a dense, muffled crowd all round the ground','the Clock End already in voice','a big holiday attendance'],
+  '1950':['the terraces packed close','a stirring attendance at Highbury','a good Saturday crowd','the banks of the ground well filled'],
+  '1959':['a packed Molineux under the lamps','the terraces a dark mass beyond the touchline','a restless, expectant crowd','the ground full, the noise held in until the ball moves'],
+  '1966':['Anfield close to capacity','the Kop already in song','a big Saturday gate','the ground full and patient'],
+  '1970':['Elland Road packed and noisy','the Lowfields in good voice','a full house, scarves and rattle','the terraces rolling as the sides come out'],
+  '1986':['a full Anfield, the Kop in full voice','a classic derby gate','the ground tight and loud','scarves up on every side']
+};
+var ATTEND = [41000,44000,47000,48000,51000,52000,54000,58000];
 
+var W1=['nil','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+var TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function words(n){ n=n|0; if(n<20) return W1[n]; var t=Math.floor(n/10), o=n%10; return TENS[t]+(o?'-'+W1[o]:''); }
+function scoreWords(a,b){ return words(a)+'\u2014'+words(b); }
+function fill(t, ctx){
+  var s = String(t).replace(/\{([A-Za-z0-9]+)\}/g, function(_,k){ return ctx[k]==null?'':ctx[k]; });
+  return s.replace(/([.!?]\s+)([a-z])/g, function(_,p,c){ return p+c.toUpperCase(); });
+}
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function pick(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+function outfield(side){ return side.def.concat(side.mid, side.att); }
+
+var BANKS = {
+  '1946': {
+    ko:[
+      'Good afternoon. We are at {G}, and it is {W}. {C}. {H} against {A}, and the referee is {R}.',
+      'This is {G}. {W}. {C}. {H} entertain {A}, {R} in charge of the contest.',
+      'From {G} this afternoon: {W}, and {C}. {H} meet {A}. The referee is {R}.'
+    ],
+    ko2:[
+      'The teams are out, and the leather is on the centre-spot. We shall have kick-off in a moment.',
+      'Both sides are ready. The whistle should go at any time now.',
+      'A last word with the captains, and we are almost ready.'
+    ],
+    kick:[
+      'And they are off. {H} set the ball rolling.',
+      'The whistle goes, and we are under way at {G}.',
+      'Kick-off, and the contest is begun.'
+    ],
+    build:[
+      '{P} has it on the right, looking for {P2}.',
+      'A long ball down the middle — {P} is after it.',
+      '{P} and {P2} exchange passes just outside the area.',
+      'A centre from the left, and {P} is up to meet it.',
+      '{side} come again. {P} has a sight of goal.',
+      '{P} beats his man and looks up. {P2} is calling for it.'
+    ],
+    save:[
+      'A fine save by {K}. He had to be sure with that one.',
+      '{K} goes down to his right and holds the leather.',
+      'Over the bar — no, {K} had a hand in it, a capital stop.',
+      '{K} gathers cleanly under the bar. The danger is gone.',
+      'A full-length save by {K}. The crowd applaud him.'
+    ],
+    miss:[
+      'Just wide of the upright. A let-off for {O}.',
+      'Over the top. {P} will feel he might have done better.',
+      'The flag stays down, but the shot skids the wrong side of the post.',
+      'A great chance, and it slips by. The crowd draw breath.',
+      'Inches the wrong side. {O} have had a narrow escape.'
+    ],
+    goalBuild:[
+      '{P} is through the middle — this may be the opening.',
+      'A swift movement, {P2} to {P}, and the defence is stretched.',
+      '{P} takes it on, one defender to beat.',
+      'A centre, and {P} is unmarked in front of goal.',
+      '{P} has a clear sight. {K} is off his line.'
+    ],
+    goalRes:[
+      "It's there. {P}, {how}, and the board reads {sc}.",
+      '{P} has scored. {how}. It is {sc}.',
+      'A goal. {P} has put it past {K}. {sc}.',
+      '{P} finds the net, {how}. {sc} at {G}.'
+    ],
+    crowd:[
+      'A great roar rolls round {G}.',
+      'The crowd are up as one.',
+      'A shout that will be heard in the streets outside.',
+      'The terraces find their voice.'
+    ],
+    penAward:[
+      'The referee points to the spot. A penalty to {side}.',
+      '{R} has no doubt. Penalty kick.'
+    ],
+    penRun:[
+      '{P} places the leather. {K} waits on his line.',
+      '{P} takes a short run. A long moment, this.'
+    ],
+    penIn:[
+      'Scored. {P} sends {K} the wrong way. {sc}.',
+      'Low to the corner, and it is a goal. {P} from the spot. {sc}.'
+    ],
+    penOut:[
+      'Saved! {K} has it. A remarkable stop.',
+      'Over the bar. {P} will not wish to see that one again.',
+      'Off the post, and away. The penalty is missed.'
+    ],
+    name:[
+      '{R} has a word with {P}. His name is taken.',
+      'A stern talking-to for {P}, and the notebook is out.'
+    ],
+    off:[
+      '{P} is sent from the field. {R} will have no more of it.',
+      'Off he goes. {P} has been dismissed, and {side} are down to ten men.'
+    ],
+    injury:[
+      '{P} is down, and the trainer is on with the sponge.',
+      'A heavy knock for {P}. He is slow to rise.',
+      '{P} is helped to the touchline. There is no replacement in these days, and {side} must go on with ten.'
+    ],
+    ht:[
+      'Half-time at {G}, and it is {sc}.',
+      'The whistle for the interval. {sc} at the break.'
+    ],
+    shout:[
+      'A shout from the {side} bench. They want more from the forward line.',
+      'The {side} trainer is up, waving them on.'
+    ],
+    pressure:[
+      '{side} have the better of the play now.',
+      '{side} are pressing, the defence under a long spell.'
+    ]
+  },
+  '1959': {
+    ko:[
+      'And here we are at {G}, on {W}. {C}. {H} and {A}, with {R} the man in the middle.',
+      'Floodlit {G}. {W}. {C}. A big night, this, {H} against {A}, {R} in charge.',
+      'The lamps are up at {G}. {W}. {C}. {H} meet {A} tonight, {R} the referee.'
+    ],
+    ko2:[
+      'The players come into the light, long shadows on the turf.',
+      'Out they come, under the lamps. A picture, this.',
+      'A glitter of light on the ball as the sides take their places.'
+    ],
+    kick:[
+      'And they are off, the ball rolling under the lights.',
+      'The whistle, and we are away on a floodlit night at {G}.',
+      'Kick-off under the lamps, and we are underway.'
+    ],
+    build:[
+      'A lovely sweep out to {P}, looking for {P2} in the middle.',
+      '{P} has it, shimmies past one, and centres.',
+      'Here come {side} again, {P} the architect.',
+      'A sharp ball in from the right, and {P} is arriving.',
+      '{P} turns neatly and finds {P2}. A promising move, this.'
+    ],
+    save:[
+      'A splendid save by {K}, down at the near post.',
+      '{K} tips it over, a very good one under the lights.',
+      'Held, cleanly, by {K}. Nothing comes of it.',
+      '{K} spreads himself and keeps it out. Well done.'
+    ],
+    miss:[
+      'Just over. The crowd thought it was in.',
+      'A lick of paint on the post, and away to safety.',
+      'Wide, but only just. A let-off, that.',
+      'Up and over. {P} will rue that one.'
+    ],
+    goalBuild:[
+      '{P} is in. The defence is at sixes and sevens.',
+      'A clever ball from {P2}, and {P} is through.',
+      'Watch {P} here — a sight of goal under the lamps.',
+      '{P} arrives at the far post, unmarked.'
+    ],
+    goalRes:[
+      'A goal. {P}, {how}. It is {sc}.',
+      "It's there, a beauty from {P}. {sc} under the lights.",
+      '{P} finds the net. {how}. The board turns to {sc}.',
+      'A goal, and a good one. {P}, {how}. {sc}.'
+    ],
+    crowd:[
+      'A roar to lift the roof off {G}.',
+      'The terraces come alive in the floodlights.',
+      'What a noise from the packed ground.',
+      'The lamps seem to shake with it.'
+    ],
+    penAward:['The referee points to the spot. Penalty to {side}.','{R} is in no doubt. A penalty, this.'],
+    penRun:['{P} sets the ball. A hush under the lights.','{K} on his line, {P} with the run-up.'],
+    penIn:['In it goes. {P} from the spot. {sc}.','Low and true. A penalty, and it is {sc}.'],
+    penOut:['Saved by {K}! A fine stop in the glare.','Missed. Up and over, and the chance is gone.'],
+    name:['A word for {P}, and his name goes into the book.','{R} takes the name of {P}.'],
+    off:['{P} is sent off. Ten men now for {side}.','Off. {R} has seen enough of {P}.'],
+    injury:['{P} is hurt, and the trainer jogs on.','A knock for {P}. He looks a doubtful stayer.','{P} cannot continue, and there is no substitute to be had. {side} must make do.'],
+    ht:['Half-time, and the score stands {sc}.','The interval, with the lights still bright. {sc}.'],
+    shout:['A wave from the touchline, {side} urged on.','The {side} bench are up and shouting.'],
+    pressure:['{side} have a spell of pressure now.','The ball is living in the {O} half.']
+  }
+};
+BANKS['1950'] = BANKS['1946'];
+
+BANKS['1966'] = {
+  ko:[
+    'Good evening. Highlights first from {G}, where {W}. {C}. {H} against {A}, referee {R}.',
+    'From {G} this afternoon: {H} and {A}, {W}, {C}, {R} with the whistle.',
+    '{G} this Saturday. {W}. {C}. {H} face {A}, and {R} is the referee.'
+  ],
+  ko2:['The sides come out to a warm reception.','Both teams are out, and we are nearly ready.','A good welcome for both sides as they take the field.'],
+  kick:['Kick-off, and {H} get us under way.','The whistle goes, and we are off at {G}.','And we are underway at {G}.'],
+  build:[
+    '{P} takes it on, looks up, {P2} is up with him.',
+    'A ball down the line for {P}, who centres first time.',
+    '{P} and {P2} keep it simply in midfield, waiting for the opening.',
+    '{side} build from the back. {P} has a yard.',
+    '{P} turns and finds {P2}. A measured pass.'
+  ],
+  save:['A fine save, this, from {K}.','{K} gets down well and holds it.','Tipped away by {K}. A good stop.','{K} is equal to it. Nothing given away.'],
+  miss:['Just past the post. Close, that.','{P} heads over from a good position.','A chance, and it goes wide. {O} breathe again.','Not far away. {P} had the goal at his mercy.'],
+  goalBuild:['{P} is in on goal. This looks promising.','{P2} slips it through, and {P} is clear.','A centre, and {P} is arriving at the far post.','{P} has a sight of goal, {K} coming out.'],
+  goalRes:['A goal. {P}, {how}. {sc}.','{P} scores. {how}. The score is {sc}.',"That's in. {P}, {how}, and it is {sc}.",'{P} has scored, {how}. {sc} at {G}.'],
+  crowd:['A great cheer from {G}.','The home crowd are up.','A roar that tells you it is in.','The ground finds its voice.'],
+  penAward:['Penalty to {side}. {R} points to the spot.','The referee has given a penalty.'],
+  penRun:['{P} will take it. {K} waits.','A pause, then {P} begins his run.'],
+  penIn:['Scored, from the spot, by {P}. {sc}.','{P} puts it away. Penalty, and it is {sc}.'],
+  penOut:['Saved by {K}. A very good stop.','Missed. The penalty goes wide.'],
+  name:["{R} takes {P}'s name. A caution, in all but the colour of a card.",'{P} is spoken to, and the name goes down.'],
+  off:['{P} is sent off. {side} down to ten.','The referee sends {P} from the field.'],
+  injury:['{P} is down, and it looks a nasty knock.','The trainer is on for {P}.','{P} has taken a knock and may not be able to continue.'],
+  sub:['{sub} comes on for {P}. The one named substitute, for injury.','A change, forced by the knock: {sub} on, {P} off.'],
+  ht:['Half-time at {G}: {sc}.','That is the interval. {sc}.'],
+  shout:['A word from the bench for {side}.','The {side} trainer wants more tempo.'],
+  pressure:['{side} are having a good spell.','Pressure now from {side}.']
+};
+BANKS['1970'] = {
+  ko:[
+    "Right then — {G}, {W}, and {C}. It's {H} against {A}, and {R} has the whistle.",
+    "From {G} this afternoon, a proper crowd in. {W}. {H} v {A}, {R} in the middle.",
+    "{G} on a Saturday. {W}. {C}. {H} and {A}, with {R} in charge."
+  ],
+  ko2:["Out come the sides, and the noise goes up a notch.","The terraces are ready. This should be a game.","A roar as they come out. You can feel it from here."],
+  kick:["And we're off. {H} get it going.","Whistle's gone — we're under way at {G}.","Kick-off, and the ball is rolling."],
+  build:[
+    "{P} to {P2} — they want it wide, they want it early.",
+    "Here's {P}, dropping the shoulder, looking for {P2}.",
+    "{side} knock it about. {P}'s got a yard of space.",
+    "A long throw, a flick, and {P} is in the mixer.",
+    "{P} nicks it and drives forward. {P2} is up in support."
+  ],
+  save:["What a save! {K} keeps it out.","{K} gets a hand to it — somehow.","Down low, {K}. That's a good one.","{K} stands up big and blocks it."],
+  miss:["Over the bar. The crowd were up already.","How did that stay out? {P} will be sick.","Just wide. You could hear the intake of breath.","Off the post, and away. So close from {P}."],
+  goalBuild:["{P}'s in! Come on — this is the one.","The ball's loose, and {P} is first to it.","{P2} slips him in. {P} has only the keeper to beat.","They're in behind. {P} stretching for it."],
+  goalRes:["Goal! {P}, {how}. It's {sc}.","Back of the net — {P}! {sc}.","They're in. {P} has scored, {how}, and it's {sc}.","{P} buries it, {how}. {sc}."],
+  crowd:["The place erupts.","The ground lets it rip.","You can feel that one in the stands.","A roar from every side."],
+  penAward:["Penalty! {R} points to the spot for {side}.","That's a penalty. No argument from here."],
+  penRun:["{P} on the spot. {K} on his line. The ground goes quiet.","A long walk, this. {P} places the ball."],
+  penIn:["In! {P} from the spot. {sc}.","He buries it. Penalty, {P}, and it's {sc}."],
+  penOut:["Saved! {K}! What a stop.","Missed — over the top. You can hear a pin drop."],
+  name:["Yellow card. {P}'s name is in the book.","That's a booking — {P}, no complaints."],
+  off:["He's off! {P} is sent off, and {side} are down to ten.","Red card. {R} has gone to the pocket. {P} is gone."],
+  injury:["{P}'s down, and it doesn't look clever.","The physio's on. {P} has taken a knock.","{P} is in some trouble here."],
+  sub:["Here comes the substitute: {sub} on for {P}.","A change for {side} — {sub} replaces {P}."],
+  ht:["Half-time, {sc}, and there's been plenty in it.","The whistle for the break. {sc} at {G}."],
+  shout:["A shout from the bench — {side} want it thrown forward.","The manager's up, clapping them on."],
+  pressure:["{side} are camped in the other half now.","Spell of pressure, this, from {side}."]
+};
+BANKS['1986'] = {
+  ko:[
+    "Afternoon from {G}. {W}. {C}. It's {H} against {A} — {R} in charge.",
+    "{G}, a derby afternoon. {W}. {C}. {H} v {A}, referee {R}.",
+    "From {G}: {W}, {C}. {H} against {A}, and {R} has today's whistle."
+  ],
+  ko2:["The two sides come out, and you can feel it in the ground.","Teams are out. This one doesn't need selling.","A wall of noise as they walk out."],
+  kick:["Kick-off. {H} get us going.","And we're underway at {G}.","The whistle goes, and we are off."],
+  build:[
+    "{P} turns, looks for {P2} — a bit of quality in midfield.",
+    "Wide to {P}, early ball in, {P2} attacking it.",
+    "{side} keep it, probe, then switch it to {P}.",
+    "{P} drives forward. They've got numbers up.",
+    "{P} and {P2} work a short one-two on the edge of the box."
+  ],
+  save:["Fine save, {K}. He had to be sharp.","{K} palms it away. A proper stop.","Comfortable, in the end, for {K} — but it was coming.","{K} gets down and holds it well."],
+  miss:["Just over. The crowd were ready to explode.","A yard wide. {P} holds his head.","Off the woodwork, and away. So close.","{P} drags it wide from a good position."],
+  goalBuild:["{P} is in here. This is a chance.","Squared by {P2}, and {P} has a sight of goal.","They've carved {O} open. {P} arriving.","{P} peels off the last man. This is on."],
+  goalRes:["Goal. {P}, {how}. {sc}.","It's there — {P}! {sc}.","{P} scores. {how}. The scoreboard goes {sc}.","{P} finds the net, {how}. {sc}."],
+  crowd:["The ground erupts.","A derby roar, that one.","The crowd take the roof off.","You won't hear yourself think."],
+  penAward:["Penalty to {side}. {R} points straight to the spot.","That's a spot-kick. {R} is certain."],
+  penRun:["{P} to take it. {K} waits, not a sound.","The walk, the pause, {P} starting his run."],
+  penIn:["In, from the spot, {P}. {sc}.","{P} sends him the wrong way. Penalty, and it's {sc}."],
+  penOut:["Saved by {K}! Huge moment.","Missed. High and wide, and the chance has gone."],
+  name:["Yellow. {P} goes into the book.","That's a booking for {P}."],
+  off:["He's off! {P} is sent off. Ten men for {side}.","Red card. {R} goes to the pocket. {P} is walking."],
+  injury:["{P} is down, and it looks a problem.","A knock for {P}. They're taking a look at him.","{P} has gone down and play is stopped."],
+  sub:["A change: {sub} on, {P} off. The one named substitute.","Here comes {sub}, replacing {P}."],
+  ht:["Half-time at {G}, {sc}.","That's the break. {sc}, and there's more in this."],
+  shout:["A shout from the touchline — {side} want it higher up the pitch.","The bench is up. They want a response."],
+  pressure:["{side} have the momentum now.","A spell, this, with {side} on the front foot."]
+};
+var HOW = ['a low drive','a header from the centre','a close-range finish','a shot from distance','a glancing header','a rebound from the keeper'];
+function bank(voice, key){ var b=BANKS[voice]||BANKS['1966']; return b[key]||BANKS['1966'][key]||BANKS['1946'][key]; }
+
+function generateMatch(eraId, seed, force){
+  force = force || {};
+  var era = ERAS[eraId];
+  var rng = mulberry(seed>>>0 || 1);
+  var home=era.home, away=era.away;
+  var weather=pick(rng, WEATHER[eraId]||WEATHER['1966']);
+  var crowd=pick(rng, CROWD[eraId]||CROWD['1966']);
+  var ref=pick(rng, era.refs);
+  var attend=pick(rng, ATTEND);
+  var used={};
+  function nextMin(lo,hi){
+    var n, guard=0;
+    do { n=lo+Math.floor(rng()*(hi-lo+1)); guard++; } while(used[n] && guard<40);
+    if(used[n]){ for(var i=lo;i<=hi;i++) if(!used[i]){ n=i; break; } }
+    used[n]=1; return n;
+  }
+  var offField={};
+  function living(side){ return outfield(side).filter(function(p){ return !offField[p]; }); }
+  function pickAttacker(side){ var pool=side.att.concat(side.mid).filter(function(n){ return !offField[n]; }); if(!pool.length) pool=living(side); return pick(rng, pool); }
+  function pickMate(side, not){ var p=living(side).filter(function(n){ return n!==not; }); return p.length?pick(rng,p):not; }
+  function pickDef(side){ var p=side.def.concat(side.mid).filter(function(n){ return !offField[n]; }); return p.length?pick(rng,p):pick(rng,living(side)); }
+
+  var evs=[];
+  evs.push({type:'kickoff', min:0});
+
+  var nGoals = force.goals!=null ? force.goals : (rng()<0.08?0: rng()<0.40?1: rng()<0.82?2:3);
+  var nChances = 3 + Math.floor(rng()*3);
+  var wantPen = force.penalty || (rng()<0.20);
+  var wantBook = force.booking || (rng()<0.68);
+  var wantOff = !!(force.sendingoff || rng()<0.18);
+  var wantInj = !!(force.injury || rng()<0.46);
+  var wantSub = era.subs && (wantInj || rng()<0.28 || force.sub);
+  if(era.subs==='injury' && !wantInj) wantSub=false;
+
+  var goalPlan=[];
+  for(var g=0;g<nGoals;g++){
+    var sideHome = rng() < 0.55;
+    var min = g===0 ? nextMin(8,38) : nextMin(48,86);
+    goalPlan.push({home:sideHome, min:min, penalty:false});
+  }
+  if(wantPen){
+    if(goalPlan.length && rng()<0.55){
+      var gp=goalPlan[Math.floor(rng()*goalPlan.length)];
+      gp.penalty=true;
+    } else {
+      evs.push({type:'penalty', min:nextMin(20,78), home: rng()<0.5, scored:false});
+    }
+  }
+  goalPlan.forEach(function(gp){
+    if(gp.penalty) evs.push({type:'penalty', min:gp.min, home:gp.home, scored:true});
+    else evs.push({type:'goal', min:gp.min, home:gp.home});
+  });
+  for(var c=0;c<nChances;c++){
+    evs.push({type: rng()<0.45?'save':'miss', min:nextMin(4,88), home: rng()<0.5});
+  }
+  if(wantBook) evs.push({type:'booking', min:nextMin(16,70), home: rng()<0.5});
+  if(wantOff) evs.push({type:'sendingoff', min:nextMin(52,84), home: rng()<0.5});
+  var injPlayerSide=null, injMin=null;
+  if(wantInj){
+    var ih=rng()<0.5; injMin=nextMin(20,76);
+    evs.push({type:'injury', min:injMin, home:ih, replaced:!!wantSub});
+    injPlayerSide=ih;
+  }
+  if(wantSub){
+    var smin = injMin ? Math.min(89, injMin+(used[injMin+1]?2:1)) : nextMin(55,80);
+    if(used[smin]) smin = nextMin(Math.min(88,smin), 89);
+    used[smin]=1;
+    evs.push({type:'sub', min:smin, home: injPlayerSide==null? rng()<0.5 : injPlayerSide, forInjury:!!injMin});
+  }
+  evs.push({type:'half', min:45});
+  evs.push({type:'fulltime', min:90});
+  evs.sort(function(a,b){ return a.min-b.min || (a.type==='kickoff'?-1: a.type==='fulltime'?1:0); });
+
+  var hs=0, as=0, mom=0, lastScorer=null, lastHow=null;
+  var goals=[], bookings=[], sentOff=null, subUsed={home:false,away:false};
+
+  function sideOf(isHome){ return isHome?home:away; }
+  function otherOf(isHome){ return isHome?away:home; }
+
+  evs.forEach(function(ev){
+    var isH = ev.home;
+    var side = isH!=null ? sideOf(isH) : null;
+    var other = isH!=null ? otherOf(isH) : null;
+    if(ev.type==='goal' || ev.type==='penalty' || ev.type==='save' || ev.type==='miss'){
+      ev.player = pickAttacker(side);
+      ev.mate = pickMate(side, ev.player);
+      ev.keeper = other.gk;
+    }
+    if(ev.type==='booking' || ev.type==='sendingoff'){
+      ev.player = pickDef(side);
+      if(ev.type==='sendingoff'){ offField[ev.player]=1; sentOff={name:ev.player, side:side.short, home:isH}; }
+      else bookings.push(ev.player);
+    }
+    if(ev.type==='injury'){
+      ev.player = pick(rng, living(side));
+      if(!ev.replaced) offField[ev.player]=1;
+    }
+    if(ev.type==='sub'){
+      ev.player = ev.player || (function(){
+        var prev=null;
+        evs.forEach(function(x){ if(x.type==='injury' && x.home===ev.home && x.min<=ev.min) prev=x.player; });
+        return prev && !offField[prev] ? prev : pick(rng, living(side));
+      })();
+      ev.sub = side.sub;
+      offField[ev.player]=1;
+      subUsed[isH?'home':'away']=true;
+    }
+    if(ev.type==='goal'){
+      ev.how = pick(rng, HOW);
+      ev.assist = rng()<0.62 ? ev.mate : null;
+      if(isH) hs++; else as++;
+      ev.hs=hs; ev.as=as;
+      goals.push(ev);
+      lastScorer=ev.player; lastHow=ev.how;
+      mom = isH ? Math.min(2, mom+1) : Math.max(-2, mom-1);
+    }
+    if(ev.type==='penalty'){
+      ev.how = 'a penalty kick';
+      ev.assist=null;
+      if(ev.scored){ if(isH) hs++; else as++; ev.hs=hs; ev.as=as; goals.push(ev); lastScorer=ev.player; lastHow=ev.how; }
+      else { ev.hs=hs; ev.as=as; }
+      mom = isH ? Math.min(2, mom+1) : Math.max(-2, mom-1);
+    }
+    if(ev.type==='save' || ev.type==='miss'){
+      mom = isH ? Math.min(2, mom+1) : Math.max(-2, mom-1);
+      ev.hs=hs; ev.as=as;
+    }
+    ev.hs = ev.hs!=null?ev.hs:hs;
+    ev.as = ev.as!=null?ev.as:as;
+    ev.mom = mom;
+  });
+
+  var voice=era.voice;
+  evs.forEach(function(ev){
+    var isH=ev.home;
+    var side=isH!=null?sideOf(isH):home;
+    var other=isH!=null?otherOf(isH):away;
+    var ctx={
+      H:home.club, A:away.club, Hshort:home.short, Ashort:away.short,
+      G:home.ground, R:ref, W:weather, C:crowd,
+      P:ev.player||'', P2:ev.mate||ev.assist||'', K:ev.keeper||'',
+      m:String(ev.min), mw:words(ev.min),
+      sc: home.short+' '+(ev.hs||0)+'\u2013'+(ev.as||0)+' '+away.short,
+      scw: scoreWords(ev.hs||0, ev.as||0),
+      how: ev.how||'', side: side.short, O: other.short,
+      sub: ev.sub||'', att: String(attend)
+    };
+    ev.ctx=ctx;
+    ev.lines=[];
+    ev.card=null;
+    function add(key){ var arr=bank(voice,key); if(!arr) return; ev.lines.push(fill(pick(rng,arr), ctx)); }
+    if(ev.type==='kickoff'){ add('ko'); add('ko2'); add('kick'); ev.sound='whistle'; }
+    else if(ev.type==='miss'){ add('build'); add('miss'); ev.sound='gasp'; }
+    else if(ev.type==='save'){ add('build'); add('save'); ev.sound='gasp'; }
+    else if(ev.type==='goal'){
+      add('goalBuild');
+      ev.card={kind:'goal', player:ev.player, min:ev.min, how:ev.how, assist:ev.assist, score:ctx.sc, crowd:fill(pick(rng,bank(voice,'crowd')),ctx), side:side.short, hs:ev.hs, as:ev.as};
+      ev.lines.push(fill(pick(rng,bank(voice,'goalRes')),ctx));
+      ev.sound='goal';
+    }
+    else if(ev.type==='penalty'){
+      add('penAward'); add('penRun');
+      if(ev.scored){
+        ev.card={kind:'goal', player:ev.player, min:ev.min, how:'a penalty kick', assist:null, score:ctx.sc, crowd:fill(pick(rng,bank(voice,'crowd')),ctx), side:side.short, hs:ev.hs, as:ev.as};
+        ev.lines.push(fill(pick(rng,bank(voice,'penIn')),ctx));
+        ev.sound='goal';
+      } else {
+        ev.lines.push(fill(pick(rng,bank(voice,'penOut')),ctx));
+        ev.sound='gasp';
+      }
+    }
+    else if(ev.type==='booking'){ add('name'); ev.sound='whistle'; ev.card={kind:'booking', player:ev.player, min:ev.min, side:side.short, cards:era.cards}; }
+    else if(ev.type==='sendingoff'){ add('off'); ev.sound='whistle'; ev.card={kind:'off', player:ev.player, min:ev.min, side:side.short, cards:era.cards}; }
+    else if(ev.type==='injury'){ add('injury'); }
+    else if(ev.type==='sub'){ add('sub'); ev.card={kind:'sub', player:ev.player, sub:ev.sub, min:ev.min, side:side.short}; }
+    else if(ev.type==='half'){ add('ht'); ev.sound='whistle'; }
+    else if(ev.type==='fulltime'){
+      ev.lines.push(fullTimeLine(voice, {H:home.club,A:away.club,G:home.ground,R:ref,sc:home.short+' '+hs+'\u2013'+as+' '+away.short}));
+      ev.report = fullTimeReport(era, voice, rng, {home:home,away:away,hs:hs,as:as,goals:goals,ref:ref,weather:weather,crowd:crowd,attend:attend,bookings:bookings,sentOff:sentOff});
+      ev.sound='whistle';
+    }
+  });
+
+  return {
+    era:era, seed:seed, weather:weather, crowd:crowd, ref:ref, attend:attend,
+    events:evs, final:{hs:hs, as:as}
+  };
+}
+
+function fullTimeLine(voice, ctx){
+  var lines={
+    '1946':'The whistle has gone for time. {sc}. We shall have the report for you in a moment.',
+    '1950':'And that is full time at {G}. {sc}.',
+    '1959':'And so the whistle goes, and the lights will soon come down. {sc}.',
+    '1966':"That's full time at {G}. {sc}.",
+    '1970':"And that's your lot from {G}. {sc}.",
+    '1986':'Full time at {G}, and that is {sc}.'
+  };
+  return fill(lines[voice]||lines['1966'], ctx);
+}
+
+function describeGoals(goals, home, away){
+  if(!goals.length) return 'There was no scoring.';
+  return goals.map(function(g){
+    var cl = g.home?home.short:away.short;
+    var how = (g.type==='penalty'||g.how==='a penalty kick') ? 'from the penalty spot' : (g.how||'');
+    var assist = (g.assist && g.type!=='penalty') ? ', with '+g.assist+' the provider' : '';
+    return g.player+' ('+cl+', '+g.min+'\u2032)'+(how? ', '+how:'')+assist;
+  }).join('; ')+'.';
+}
+
+function fullTimeReport(era, voice, rng, d){
+  var home=d.home, away=d.away, hs=d.hs, as=d.as;
+  var sc = home.short+' '+hs+'\u2013'+as+' '+away.short;
+  var att = String(d.attend).replace(/(\d{2})(\d{3})/,'$1,$2');
+  var tally = describeGoals(d.goals, home, away);
+  var sent = d.sentOff ? ' '+d.sentOff.name+' was sent from the field.' : '';
+  var book = d.bookings.length ? (era.cards? ' Booked: '+d.bookings.join(', ')+'.' : ' Names taken: '+d.bookings.join(', ')+'.') : '';
+  if(voice==='1946'||voice==='1950'){
+    var hed;
+    if(hs===as) hed = 'HONOURS EVEN AT '+home.ground.toUpperCase()+' \u2014 '+hs+'\u2013'+as;
+    else if(hs>as) hed = home.club.toUpperCase()+' PREVAIL IN A STERN CONTEST \u2014 '+hs+'\u2013'+as;
+    else hed = away.club.toUpperCase()+' TAKE THE POINTS AT '+home.ground.toUpperCase()+' \u2014 '+hs+'\u2013'+as;
+    var p1 = (hs===as)
+      ? (home.club+' and '+away.club+' shared the points at '+home.ground+' this afternoon, the contest ending '+scoreWords(hs,as)+'.')
+      : ((hs>as?home.club:away.club)+' had the better of a hard-fought match at '+home.ground+', the final score '+scoreWords(hs,as)+' in '+(hs>as?'their':'the visitors\'')+' favour.');
+    var p2 = tally+' The referee was '+d.ref+'. Attendance '+att+'.'+book+sent;
+    return {kind:'paper', hed:hed, paras:[p1,p2]};
+  }
+  if(voice==='1959'){
+    return {kind:'newsreel', hed:'Newsreel sign-off', paras:[
+      'And so the lights go down on a stirring night at '+home.ground+'. '+sc+'. '+tally,
+      'This is the newsreel, returning you to the programme. The referee was '+d.ref+'. A crowd of '+att+'.'+book+sent
+    ]};
+  }
+  if(voice==='1966'){
+    return {kind:'highlights', hed:'Highlights summary', paras:[
+      "That's the tale of "+home.ground+" this afternoon. "+sc+'. '+tally,
+      'Referee: '+d.ref+'. Attendance '+att+'.'+book+sent
+    ]};
+  }
+  if(voice==='1970'){
+    return {kind:'highlights', hed:'From the terraces', paras:[
+      "And that's your lot from "+home.ground+'. '+sc+', and the football has been worth a Saturday in the stands. '+tally,
+      d.ref+' had charge of it. A gate of '+att+'.'+book+sent
+    ]};
+  }
+  return {kind:'highlights', hed:'Full time', paras:[
+    'Full time at '+home.ground+', and that is a proper afternoon. '+sc+'. '+tally,
+    'Referee '+d.ref+'. Attendance '+att+'.'+book+sent
+  ]};
+}
+
+var audio={on:false, ctx:null, amb:null, filt:null, gain:null};
+function A(){
+  if(!audio.ctx){
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return null;
+    audio.ctx=new AC();
+  }
+  if(audio.ctx.state==='suspended') audio.ctx.resume();
+  return audio.ctx;
+}
+function noiseBuf(ctx, sec){
+  var n=Math.floor(ctx.sampleRate*sec), b=ctx.createBuffer(1,n,ctx.sampleRate), d=b.getChannelData(0);
+  var last=0;
+  for(var i=0;i<n;i++){ last=(last+0.02*(Math.random()*2-1))/1.02; d[i]=last*6; }
+  return b;
+}
+function stopAmb(){
+  if(audio.amb){ try{ audio.amb.stop(); }catch(e){} audio.amb=null; }
+  if(audio.gain){ try{ audio.gain.disconnect(); }catch(e){} }
+  audio.gain=null; audio.filt=null;
+}
+function startAmb(era){
+  stopAmb();
+  if(!audio.on) return;
+  var ctx=A(); if(!ctx) return;
+  var src=ctx.createBufferSource();
+  src.buffer=noiseBuf(ctx, 2);
+  src.loop=true;
+  var f=ctx.createBiquadFilter(); f.type='lowpass';
+  f.frequency.value = (era.voice==='1946'||era.voice==='1950') ? 1400 : 900;
+  var g=ctx.createGain();
+  g.gain.value = (era.voice==='1946'||era.voice==='1950') ? 0.012 : 0.02;
+  src.connect(f); f.connect(g); g.connect(ctx.destination);
+  src.start();
+  audio.amb=src; audio.filt=f; audio.gain=g;
+}
+function beep(freq, dur, type, vol){
+  if(!audio.on) return;
+  var ctx=A(); if(!ctx) return;
+  var o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type||'sine'; o.frequency.value=freq;
+  g.gain.setValueAtTime(vol||0.04, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+(dur||0.25));
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime+(dur||0.25)+0.05);
+}
+function roar(){
+  if(!audio.on) return;
+  var ctx=A(); if(!ctx) return;
+  var src=ctx.createBufferSource(); src.buffer=noiseBuf(ctx, 1.2);
+  var f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=500; f.Q.value=0.7;
+  var g=ctx.createGain();
+  g.gain.setValueAtTime(0.0001, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime+0.08);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+1.1);
+  src.connect(f); f.connect(g); g.connect(ctx.destination);
+  src.start(); src.stop(ctx.currentTime+1.2);
+}
+function playSound(kind){
+  if(!audio.on) return;
+  if(kind==='whistle') beep(1760, 0.18, 'square', 0.03);
+  else if(kind==='gasp') beep(220, 0.15, 'sine', 0.02);
+  else if(kind==='goal') roar();
+}
+
+var S = {
+  eraId:'1946', seed:1, match:null,
+  ev:0, st:0, shownHs:0, shownAs:0, shownMin:null,
+  playing:false, timer:null, speed:1,
+  shoutUsed:false, subUsed:false, revealedMom:0
+};
+var SPEEDS={slow:1.45, med:1, fast:0.55};
 function $(id){ return document.getElementById(id); }
-function dash(a,b){ return a+'\u2013'+b; }
-function labelFor(kind, last){
-  if(!last) return 'Live';
-  return ({kickoff:'Kick-off', chance:'Chance', goal:'Goal', save:'Save', name:'Name taken', card:'Booking', injury:'Injury', sub:'Substitution', ht:'Half-time', ft:'Full time', pressure:'Spell'})[kind]||'Live';
-}
-function momText(s){ return s||''; }
-function dwell(text, last){
-  var n=String(text||'').split(/\s+/).filter(Boolean).length;
-  var ms=(last?2200:1500)+n*95;
-  return Math.min(last?5200:4200, ms);
-}
-function stop(){ if(timer){ clearTimeout(timer); timer=null; } playing=false; }
-function current(){ return MATCHES[era]; }
-function ev(){ return current().events[evIdx]; }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function paintBoard(scoreUs, scoreThem, minute, mom, started){
-  $('score').textContent=dash(scoreUs, scoreThem);
-  $('clock').textContent = minute===0 && !started ? 'KO' : (minute===45 && ev() && ev().kind==='ht' ? 'HT' : (minute>=90 ? 'FT' : minute+"'"));
-  $('mom').textContent=momText(mom);
+function applySkin(era){
+  document.body.className='skin-'+era.skin;
+  $('kicker').textContent=era.kicker+' \u2014 review only, not the live game';
+  $('mast').textContent=era.mast;
+  document.querySelectorAll('#eras a').forEach(function(a){
+    a.setAttribute('aria-current', a.getAttribute('data-era')===era.id ? 'page' : null);
+  });
 }
-function setEra(next){
-  stop();
-  era=next;
-  document.body.setAttribute('data-era', next);
-  $('era-tag').textContent=current().tag;
-  $('link-1966').className=next==='1966'?'now':'';
-  $('link-1986').className=next==='1986'?'now':'';
-  $('comp').textContent=current().comp;
-  $('fixname').textContent=current().home+' v '+current().away;
-  reset(true);
+function scoreText(era, hs, as){ return era.home.short+' '+hs+'\u2013'+as+' '+era.away.short; }
+function momText(era, mom){
+  var label='Even';
+  if(mom>=2) label=era.home.short+' press';
+  else if(mom===1) label=era.home.short+' have a spell';
+  else if(mom<=-2) label=era.away.short+' come at them';
+  else if(mom===-1) label=era.away.short+' have a spell';
+  var idx=2+Math.max(-2, Math.min(2, mom));
+  var pips=[0,1,2,3,4].map(function(i){ return i===idx?'\u25cf':'\u00b7'; }).join('');
+  return {label:label, pips:pips};
 }
-function reset(keepEra){
-  stop();
-  evIdx=0; stIdx=0; revealed=[];
-  $('log').innerHTML='';
-  paintBoard(0,0,0,'Even at the start', false);
-  $('stage').className='stage';
-  $('kicker').textContent='Preview';
-  $('line').textContent='Play to start this sequence. Build-up first; the score changes only when the resolution lands.';
+function renderBoard(){
+  var era=S.match.era;
+  $('score').textContent=scoreText(era, S.shownHs, S.shownAs);
+  $('clock').textContent = S.shownMin==null ? '\u2014' : (S.shownMin===90?'90\u2032 + FT': S.shownMin===45?'45\u2032 HT': S.shownMin+'\u2032');
+  var m=momText(era, S.revealedMom);
+  $('mom-label').textContent=m.label;
+  $('mom-pips').textContent=m.pips;
 }
-
-function showStage(){
-  var e=ev();
-  if(!e){ playing=false; return; }
-  var last=stIdx>=e.stages.length-1;
-  var text=e.stages[stIdx];
-  $('kicker').textContent=labelFor(e.kind, last);
-  $('line').textContent=text;
-  $('stage').className='stage'+(last && e.kind==='goal'?' kind-goal':'');
-  if(last){
-    paintBoard(e.us, e.them, e.min, e.mom, true);
-    var li=document.createElement('li');
-    li.innerHTML='<span class="min">'+(e.min===0?'KO':(e.kind==='ht'?'HT':(e.kind==='ft'?'FT':e.min+"'")))+'</span><span>'+text+'</span>';
-    $('log').appendChild(li);
-  } else if(evIdx===0 && stIdx===0){
-    paintBoard(0,0,0,e.mom,false);
+function hideMoment(){ var el=$('moment'); el.className=''; el.innerHTML=''; }
+function showMoment(card){
+  var el=$('moment');
+  if(!card){ hideMoment(); return; }
+  var html='';
+  if(card.kind==='goal'){
+    html='<div class="eyebrow">Goal</div>';
+    html+='<div class="who">'+esc(card.player)+'</div>';
+    html+='<div class="how">'+esc(card.min)+'\u2032 \u00b7 '+esc(card.how)+(card.assist?' \u00b7 '+esc(card.assist):'')+'</div>';
+    html+='<div class="flash">'+esc(card.score)+'</div>';
+    html+='<div class="crowd">'+esc(card.crowd)+'</div>';
+  } else if(card.kind==='off'){
+    html='<div class="eyebrow">'+(card.cards?'Red card':'Sent from the field')+'</div>';
+    html+='<div class="who">'+esc(card.player)+'</div>';
+    html+='<div class="how">'+esc(card.min)+'\u2032 \u00b7 '+esc(card.side)+' down to ten</div>';
+  } else if(card.kind==='booking'){
+    html='<div class="eyebrow">'+(card.cards?'Yellow card':'Name taken')+'</div>';
+    html+='<div class="who">'+esc(card.player)+'</div>';
+    html+='<div class="how">'+esc(card.min)+'\u2032</div>';
+  } else if(card.kind==='sub'){
+    html='<div class="eyebrow">Substitute</div>';
+    html+='<div class="who">'+esc(card.sub)+'</div>';
+    html+='<div class="how">on for '+esc(card.player)+' \u00b7 '+esc(card.min)+'\u2032</div>';
   }
+  el.innerHTML=html;
+  el.className='show'+(card.kind==='off'||card.kind==='booking'?' dismiss':'');
 }
+function appendLog(text, cls){
+  var li=document.createElement('li');
+  if(cls) li.className=cls;
+  li.textContent=text;
+  $('log').appendChild(li);
+}
+function dwellFor(text, isRes){
+  var wc=(String(text||'').trim().split(/\s+/).filter(Boolean).length);
+  var ms=Math.min(7000, 850 + wc*95);
+  if(isRes) ms=Math.min(8500, Math.floor(ms*1.35)+400);
+  return Math.floor(ms * S.speed);
+}
+function currentEvent(){ return S.match && S.match.events[S.ev]; }
 
+function revealStage(){
+  var ev=currentEvent();
+  if(!ev){ stopPlay(); return 0; }
+  var line=ev.lines[S.st];
+  if(line){
+    $('stage').textContent=line;
+    var cls = ev.type==='kickoff'?'ko': ev.type==='half'?'ht': ev.type==='fulltime'?'ft':'';
+    appendLog((ev.min?ev.min+'\u2032  ':'')+line, cls);
+  }
+  S.shownMin=ev.min;
+  if(ev.mom!=null) S.revealedMom=ev.mom;
+  var last = S.st === ev.lines.length-1;
+  if(last && (ev.type==='goal' || (ev.type==='penalty' && ev.scored))){
+    S.shownHs=ev.hs; S.shownAs=ev.as;
+    showMoment(ev.card);
+    playSound('goal');
+  } else if(last && ev.card && ev.type!=='goal'){
+    showMoment(ev.card);
+    if(ev.sound) playSound(ev.sound);
+  } else if(!last){
+    hideMoment();
+    if(S.st===0 && ev.sound && ev.type!=='goal' && ev.type!=='penalty') playSound(ev.sound);
+  }
+  if(last && ev.type==='penalty' && !ev.scored) playSound('gasp');
+  if(last && ev.type==='fulltime'){ showReport(ev.report); stopPlay(); }
+  if(S.st===0 && ev.type==='kickoff') playSound('whistle');
+  if(S.st===0 && ev.type==='half') playSound('whistle');
+  renderBoard();
+  updateTouch();
+  var extra = last && ev.card && ev.card.kind==='goal' ? 2200 : (last && ev.card ? 1400 : 0);
+  return dwellFor(line, last) + Math.floor(extra * S.speed);
+}
+function showReport(rep){
+  if(!rep) return;
+  var el=$('ftwrap');
+  var h='<div class="hed">'+esc(rep.hed)+'</div>';
+  rep.paras.forEach(function(p){ h+='<p>'+esc(p)+'</p>'; });
+  el.innerHTML=h;
+  el.className='show';
+}
 function advance(){
-  var e=ev();
-  if(!e){ stop(); return; }
-  if(stIdx<e.stages.length-1){ stIdx++; showStage(); schedule(); return; }
-  evIdx++; stIdx=0;
-  if(evIdx>=current().events.length){ stop(); return; }
-  showStage();
-  schedule();
-}
-function schedule(){
-  if(!playing) return;
-  var e=ev(); if(!e){ stop(); return; }
-  var last=stIdx>=e.stages.length-1;
-  timer=setTimeout(advance, dwell(e.stages[stIdx], last));
-}
-function play(){
-  if(evIdx>=current().events.length) reset();
-  playing=true;
-  if($('kicker').textContent==='Preview') showStage();
-  schedule();
-}
-function nextBeat(){
-  stop();
-  if($('kicker').textContent==='Preview'){ showStage(); return; }
-  var e=ev();
-  if(!e){ return; }
-  if(stIdx<e.stages.length-1){ stIdx++; showStage(); return; }
-  evIdx++; stIdx=0;
-  if(evIdx>=current().events.length) return;
-  showStage();
-}
-function skipEnd(){
-  stop();
-  while(evIdx<current().events.length){
-    var e=ev();
-    stIdx=e.stages.length-1;
-    showStage();
-    evIdx++; stIdx=0;
+  var ev=currentEvent();
+  if(!ev){ stopPlay(); return; }
+  S.st++;
+  if(S.st >= ev.lines.length){
+    S.ev++; S.st=0;
+    hideMoment();
+    if(!currentEvent()){ stopPlay(); return; }
+  }
+  var wait=revealStage();
+  if(S.playing){
+    clearTimeout(S.timer);
+    S.timer=setTimeout(advance, wait);
   }
 }
-
-$('link-1966').addEventListener('click', function(e){ e.preventDefault(); setEra('1966'); });
-$('link-1986').addEventListener('click', function(e){ e.preventDefault(); setEra('1986'); });
-$('btn-play').addEventListener('click', function(e){ e.preventDefault(); play(); });
-$('btn-pause').addEventListener('click', function(e){ e.preventDefault(); stop(); });
-$('btn-next').addEventListener('click', function(e){ e.preventDefault(); nextBeat(); });
-$('btn-skip').addEventListener('click', function(e){ e.preventDefault(); skipEnd(); });
-$('btn-reset').addEventListener('click', function(e){ e.preventDefault(); reset(); });
-
-function bootEra(){ setEra(/1986/.test(location.hash)?'1986':'1966'); }
-window.addEventListener('hashchange', bootEra);
-bootEra();
+function startPlay(){
+  if(!S.match) return;
+  if(S.ev>=S.match.events.length) return;
+  S.playing=true;
+  if(audio.on) startAmb(S.match.era);
+  if($('log').children.length===0){
+    var wait=revealStage();
+    S.timer=setTimeout(advance, wait);
+  } else if(!S.timer){
+    S.timer=setTimeout(advance, 200);
+  }
+  $('btn-play').classList.add('dead');
+}
+function stopPlay(){
+  S.playing=false;
+  clearTimeout(S.timer); S.timer=null;
+  $('btn-play').classList.remove('dead');
+}
+function nextOnce(){
+  stopPlay();
+  if(!S.match) return;
+  if($('log').children.length===0){ revealStage(); return; }
+  advance();
+}
+function skipAll(){
+  stopPlay();
+  hideMoment();
+  while(S.match && S.ev < S.match.events.length){
+    var ev=currentEvent();
+    while(S.st < ev.lines.length){
+      revealStage();
+      S.st++;
+    }
+    S.ev++; S.st=0;
+  }
+  if(S.match){
+    S.shownHs=S.match.final.hs; S.shownAs=S.match.final.as; S.shownMin=90;
+    renderBoard();
+  }
+}
+function updateTouch(){
+  var era=S.match && S.match.era;
+  var wrap=$('touch');
+  if(!era || S.shownMin==null || S.shownMin<50 || S.shownMin>=90){ wrap.hidden=true; return; }
+  wrap.hidden=false;
+  $('btn-shout').className = S.shoutUsed ? 'dead' : '';
+  var canSub = !!era.subs && !!era.home.sub && !S.subUsed && S.shownMin>=50 && S.shownMin<88;
+  $('touch-sub-wrap').hidden = !era.subs || !era.home.sub;
+  $('btn-sub').className = canSub ? '' : 'dead';
+}
+function doShout(){
+  if(S.shoutUsed || !S.match || S.shownMin<50) return;
+  S.shoutUsed=true;
+  var era=S.match.era;
+  var line=fill(pick(mulberry(S.seed+99), bank(era.voice,'shout')), {side:era.home.short, O:era.away.short});
+  $('stage').textContent=line;
+  appendLog((S.shownMin||'')+'\u2032  '+line, 'muted');
+  S.revealedMom=Math.min(2, S.revealedMom+1);
+  renderBoard();
+  updateTouch();
+}
+function doSub(){
+  var era=S.match && S.match.era;
+  if(!era || !era.subs || !era.home.sub || S.subUsed || S.shownMin<50) return;
+  var pending=S.match.events.some(function(e,i){ return i>=S.ev && e.type==='sub'; });
+  S.subUsed=true;
+  if(pending){
+    var line='The substitute is ready on the touchline.';
+    $('stage').textContent=line;
+    appendLog((S.shownMin||'')+'\u2032  '+line, 'muted');
+  } else {
+    var offp=era.home.att[era.home.att.length-1];
+    var ev={type:'sub', min:Math.min(88, (S.shownMin||60)+1), home:true, player:offp, sub:era.home.sub, hs:S.shownHs, as:S.shownAs, mom:S.revealedMom, lines:[],
+      card:{kind:'sub', player:offp, sub:era.home.sub, min:Math.min(88,(S.shownMin||60)+1), side:era.home.short}};
+    ev.lines=[fill(pick(mulberry(S.seed+7), bank(era.voice,'sub')||['{sub} comes on for {P}.']), {sub:era.home.sub, P:offp, side:era.home.short})];
+    S.match.events.splice(S.match.events.length-1,0,ev);
+  }
+  updateTouch();
+}
+function boot(eraId, seed, force){
+  stopPlay();
+  hideMoment();
+  $('log').innerHTML='';
+  $('ftwrap').className=''; $('ftwrap').innerHTML='';
+  $('stage').innerHTML='<span class="pending">Press Play to kick off.</span>';
+  S.eraId=eraId;
+  S.seed=seed>>>0 || 1;
+  S.match=generateMatch(eraId, S.seed, force||{});
+  S.ev=0; S.st=0; S.shownHs=0; S.shownAs=0; S.shownMin=null;
+  S.shoutUsed=false; S.subUsed=false; S.revealedMom=0;
+  applySkin(S.match.era);
+  renderBoard();
+  updateTouch();
+  $('seed-label').textContent=String(S.seed);
+  $('btn-play').classList.remove('dead');
+  if(audio.on) startAmb(S.match.era);
+  else stopAmb();
+}
+function newSeed(){ return (Math.floor(Math.random()*0x7fffffff)+1)>>>0; }
+function eraFromHash(){
+  var h=(location.hash||'').replace(/^#/,'').split('&')[0];
+  return ERAS[h] ? h : '1946';
+}
+function seedFromQuery(){
+  var m=/[?&]seed=(\d+)/.exec(location.search||'');
+  return m ? (parseInt(m[1],10)>>>0) : null;
+}
+function writeHash(){
+  history.replaceState(null,'', location.pathname+'?seed='+S.seed+'#'+S.eraId);
+}
+function buildEraNav(){
+  var order=['1946','1950','1959','1966','1970','1986'];
+  var labels={ '1946':'1946 wireless','1950':'1950 wireless','1959':'1959 newsreel','1966':'1966 highlights','1970':'1970s Shoot!','1986':'1980s Match' };
+  $('eras').innerHTML=order.map(function(id,i){
+    return (i?' \u00b7 ':'')+'<a data-era="'+id+'">'+labels[id]+'</a>';
+  }).join('');
+  $('eras').addEventListener('click', function(e){
+    var a=e.target.closest('a[data-era]');
+    if(!a) return;
+    e.preventDefault();
+    S.eraId=a.getAttribute('data-era');
+    writeHash();
+    boot(S.eraId, S.seed);
+  });
+}
+function setSpeed(name){
+  S.speed=SPEEDS[name]||1;
+  ['slow','med','fast'].forEach(function(n){ $('spd-'+n).className = n===name?'dead':''; });
+}
+function bind(){
+  $('btn-play').onclick=function(e){ e.preventDefault(); startPlay(); };
+  $('btn-pause').onclick=function(e){ e.preventDefault(); stopPlay(); };
+  $('btn-next').onclick=function(e){ e.preventDefault(); nextOnce(); };
+  $('btn-skip').onclick=function(e){ e.preventDefault(); skipAll(); };
+  $('spd-slow').onclick=function(e){ e.preventDefault(); setSpeed('slow'); };
+  $('spd-med').onclick=function(e){ e.preventDefault(); setSpeed('med'); };
+  $('spd-fast').onclick=function(e){ e.preventDefault(); setSpeed('fast'); };
+  $('btn-replay').onclick=function(e){ e.preventDefault(); S.seed=newSeed(); writeHash(); boot(S.eraId, S.seed); };
+  $('btn-sound').onclick=function(e){
+    e.preventDefault();
+    audio.on=!audio.on;
+    $('btn-sound').textContent='Sound: '+(audio.on?'on':'off');
+    if(audio.on){ A(); startAmb(S.match?S.match.era:ERAS[S.eraId]); }
+    else stopAmb();
+  };
+  $('btn-shout').onclick=function(e){ e.preventDefault(); doShout(); };
+  $('btn-sub').onclick=function(e){ e.preventDefault(); doSub(); };
+  window.addEventListener('hashchange', function(){
+    var id=eraFromHash();
+    if(id!==S.eraId){ S.eraId=id; boot(S.eraId, S.seed); }
+  });
+}
+window.Preview = {
+  boot:boot, play:startPlay, pause:stopPlay, next:nextOnce, skip:skipAll,
+  generate:generateMatch, eras:ERAS,
+  state:function(){ return S; },
+  jumpTo:function(kind){
+    stopPlay();
+    var guard=0;
+    while(S.ev < S.match.events.length && guard++<400){
+      var ev=currentEvent();
+      var match = ev.type===kind || (kind==='goal' && ev.type==='penalty' && ev.scored) || ((kind==='report'||kind==='fulltime') && ev.type==='fulltime');
+      revealStage();
+      if(match && S.st===ev.lines.length-1){ return ev; }
+      S.st++;
+      if(S.st>=ev.lines.length){ S.ev++; S.st=0; hideMoment(); }
+    }
+    return null;
+  },
+  showcase:function(eraId, kind){
+    var seed=S.seed||1;
+    for(var i=0;i<80;i++){
+      var s=(seed+i*9973)>>>0 || 1;
+      var force={};
+      if(kind==='sendingoff'||kind==='off') force.sendingoff=true;
+      if(kind==='goal') force.goals=2;
+      if(kind==='penalty') force.penalty=true;
+      boot(eraId, s, force);
+      var ok=S.match.events.some(function(e){
+        if(kind==='goal') return e.type==='goal' || (e.type==='penalty'&&e.scored);
+        if(kind==='sendingoff'||kind==='off') return e.type==='sendingoff';
+        if(kind==='report'||kind==='fulltime') return e.type==='fulltime';
+        return e.type===kind;
+      });
+      if(ok){ writeHash(); return window.Preview.jumpTo(kind==='off'?'sendingoff':kind); }
+    }
+    boot(eraId, seed); return window.Preview.jumpTo(kind);
+  }
+};
+buildEraNav();
+setSpeed('med');
+bind();
+boot(eraFromHash(), seedFromQuery()||2046);
+writeHash();
+})();
 </script>
 </body>
 </html>
