@@ -450,6 +450,23 @@ body .scoreboard .side .scorers .sc-line{margin:3px 0; line-height:1.5;}
 .commentary .era-paper h4{margin:3px 0 4px; font-size:1.05em; letter-spacing:.04em; color:var(--ink);}
 .commentary .era-paper p{margin:0 0 4px; line-height:1.28; color:var(--ink);}
 .commentary .era-paper p.pp-stand{font-style:italic;}
+.era-mom{font-size:12px; margin-top:2px; color:var(--muted, inherit); opacity:.85; font-weight:normal;}
+.era-goal-card{display:none; margin:8px 0 6px; padding:8px 10px; border:2px solid var(--ink); background:var(--paper, #fff); max-width:22rem;}
+.era-goal-card.show{display:block;}
+.era-goal-card .eyebrow{font-size:10px; letter-spacing:.12em; text-transform:uppercase; opacity:.7;}
+.era-goal-card .who{font-size:1.2rem; font-weight:700; line-height:1.15; margin:2px 0;}
+.era-goal-card .how{font-size:13px; margin:2px 0;}
+.era-goal-card .flash{font-size:1.05rem; font-weight:700; margin:4px 0 0;}
+body.theme-pink .era-goal-card{background:#fbe4df; border-color:#17110f;}
+body.theme-turnstile .era-goal-card{background:#fff8e6; border-color:#b32323;}
+body.theme-programme .era-goal-card{background:#f7f0d8; border-color:#a82414;}
+body.theme-shoot .era-goal-card{background:#ffe14a; border-color:#e31c23;}
+body.theme-match .era-goal-card{background:#f5d76e; border-color:#c41230;}
+.era-ftwrap{border-top:1px solid var(--ink); margin:8px 0 4px; padding:6px 0 0;}
+.era-ftwrap .hed{font-weight:700; margin:0 0 4px; font-size:1.02em;}
+.era-ftwrap p{margin:0 0 4px;}
+#era-sound{font-size:13px; margin-left:8px; color:inherit; text-decoration:underline; cursor:pointer; align-self:center;}
+
 .matchctl{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;}
 button{font-family:var(--font-dos); background:var(--dos-blue); color:var(--ink); border:2px solid var(--ink); padding:6px 16px; font-size:19px; cursor:pointer;}
 button:hover:not(:disabled){background:var(--ink); color:var(--dos-white);}
@@ -2185,9 +2202,10 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
       <p class="sub" id="match-sub">SELECT YOUR ELEVEN FIRST (SEE LINEUP)</p>
       <div class="scoreboard">
         <div class="side"><div class="name" id="side-left-name">ALDERSHOT</div><div class="scorers" id="side-left-scorers" style="font-size:14px; color:var(--dos-cyan);"></div></div>
-        <div style="text-align:center;"><div class="score" id="score">0 - 0</div><div class="clock" id="clock">00:00</div></div>
+        <div style="text-align:center;"><div class="score" id="score">0 - 0</div><div class="clock" id="clock">00:00</div><div id="era-momentum" class="era-mom" hidden>Even</div></div>
         <div class="side"><div class="name" id="side-right-name">--</div><div class="scorers" id="side-right-scorers" style="font-size:14px; color:var(--dos-cyan);"></div></div>
       </div>
+      <div id="era-goal-card" class="era-goal-card" hidden></div>
       <div class="box" id="prematch-panel-match" style="display:none;"><div class="box-title">PRE-MATCH : THE TWO ELEVENS</div><div class="prematch-body"></div></div> <!-- v303 : shown once the eleven is confirmed, hidden at kick-off -->
       <div class="commentary" id="commentary-box"><p>PICK YOUR ELEVEN, THEN PRESS "KICK OFF". THE CLOCK RUNS ITSELF : PAUSE ANY TIME.</p></div>
       <div id="ft-block" style="display:none;">
@@ -2204,6 +2222,7 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
         <button id="speed-slow" data-speed="2200">SLOW</button>
         <button id="speed-medium" data-speed="850">MEDIUM</button>
         <button id="speed-fast" data-speed="400">FAST</button>
+        <a href="#" id="era-sound">Sound: off</a>
       </div>
       <div class="box" id="inmatch-box" style="display:none; margin-top:14px;">
         <div class="box-title">TOUCHLINE INSTRUCTIONS</div>
@@ -2514,7 +2533,7 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
   /* ======================================================================================== 1966 */
   var B66 = {
     kickoff: [
-      'Good afternoon. We are at {ground}: {weather}, and the pitch {pitch}. {ref} is the referee, and {A} start us off.',
+      'Good afternoon. We are at {ground}: {weather}, and the pitch {pitch}. {ref} is the referee, and {A} kick off.',
       'Welcome to {ground}. {weather}, the pitch {pitch}. {ref} has the whistle, and we are under way.',
       'Here at {ground}, {weather}, the pitch {pitch}. {A} kick off, with {ref} in charge.'
     ],
@@ -3088,12 +3107,79 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
     return { headline: headline, standfirst: standfirst, paragraphs: paras, facts: facts, dateline: dayName + ' ' + dateStr };
   }
 
+    /* v351 : 1970s Shoot! and 1980s Match banks, cloned from 1966 then overwritten in the new voices.
+     Same keys, so render() needs no new branches. Neutral kick-off: never "get the game going" / taking a side. */
+  function cloneEraBank(src){ return JSON.parse(JSON.stringify(src)); }
+  var B70 = cloneEraBank(B66);
+  var B81 = cloneEraBank(B66);
+  B70.kickoff = [
+    'Right then — {ground}. {weather}, the pitch {pitch}. {ref} has the whistle, and we are under way.',
+    'From {ground} this afternoon: {weather}, the pitch {pitch}. {ref} in the middle, and the ball is rolling.',
+    '{ground}, a Saturday. {weather}, the pitch {pitch}. {ref} has charge of it, and we are off.'
+  ];
+  B70.half = ['Half-time, and it is {sc}.', 'The whistle for the break. {sc}.', 'Half-time at {ground}: {sc}, and there has been plenty in it.'];
+  B70.full = ['And that is your lot from {ground}. {sc}.', 'Full time, and it is {sc}.', 'The whistle has gone. {sc}.'];
+  B70.chanceSaved = ['{P} has a go for {A}... and the keeper holds on.', '{P} lets fly... and {K} keeps it out.', '{P} is in... and {K} makes the save.'];
+  B70.chanceOff = ['{P} has a go for {A}... and it goes wide.', '{P} lets fly... over the bar.', '{P} is in... and it flashes past the post.'];
+  B70.chanceBlocked = ['{P}\'s shot is blocked, and the ball is scrambled clear.', '{P} hits it, and a body gets in the way.'];
+  B70.chanceGeneric = ['{P} has a chance for {A}, but nothing comes of it.', '{A} come close through {P}, and the moment goes.'];
+  B70.saveHold = ['{K} holds on to a hard shot from {P}.', 'Down low, {K} gathers {P}\'s shot.', '{K} gets a hand to it from {P} and holds on.'];
+  B70.saveDive = ['What a save! {K} keeps {P} out.', 'A great save by {K}, from {P}!', '{K} stretches and turns {P}\'s shot away.'];
+  B70.goalHeader = ['{P} rises highest and heads it in. {gp}.', '{P} plants a header past the keeper. {gp}.'];
+  B70.goalDrive = ['{P} buries a drive, and the keeper has no chance. {gp}.', 'A powerful shot from {P}, and it is in. {gp}.'];
+  B70.goalClose = ['{P} is on hand from close range. {gp}.', '{P} stabs it in from close in. {gp}.'];
+  B70.goalComposed = ['{P} keeps his composure and puts it away. {gp}.', '{P} finishes it, nice and calm. {gp}.'];
+  B70.goalAssist = ['{P2} to {P}, and he scores! {gp}.', '{P} finishes off {P2}\'s work. {gp}.'];
+  B70.goalStar = ['That is the quality of {P}. {gp}.', '{P} produces a finish. {gp}.'];
+  B70.penSet = ['Penalty! {ref} points to the spot, and {P} will take it for {A}.', 'It is a penalty to {A}. {P} stands over the ball.'];
+  B70.penGoal = ['In, from the spot, {P}. {gp}.', '{P} buries the penalty. {gp}.'];
+  B70.penSave = ['Saved! {K} keeps the penalty out from {P}!', '{K} saves {P}\'s penalty!'];
+  B70.nameTakenGeneric = ['Yellow card. {P}\'s name is in the book.', '{P} is shown the yellow card.'];
+  B70.nameTakenTackle = ['Yellow card — {P}, for a late tackle.', '{P} goes into the book for a late challenge.'];
+  B70.nameTakenDissent = ['Yellow card for {P}, for dissent.', '{P} is booked for dissent.'];
+  B70.orderedOff = ['He is off! {P} is sent off, and {A} are down to ten.', 'Red card. {ref} has gone to the pocket. {P} is gone, and {A} are down to ten men.'];
+  B70.hobble = ['{P} is hurt, but stays on, limping.', '{P} has taken a knock, and he is still on the field.'];
+  B70.goOff = ['{P} cannot continue, and has to go off.', '{P} is in some trouble, and he cannot go on.'];
+  B70.subOn = ['Here comes the substitute: {P2} on for {P}.', 'A change for {A} — {P2} replaces {P}.'];
+
+  B81.kickoff = [
+    'Afternoon from {ground}. {weather}, the pitch {pitch}. {ref} in charge, and we are under way.',
+    'From {ground}: {weather}, the pitch {pitch}. {ref} has today\'s whistle, and we are off.',
+    '{ground}, a First Division afternoon. {weather}, the pitch {pitch}. {ref} is the referee, and the ball is rolling.'
+  ];
+  B81.half = ['Half-time at {ground}, {sc}.', 'That is the break. {sc}, and there is more in this.', 'Half-time, and it is {sc}.'];
+  B81.full = ['Full time at {ground}, and that is {sc}.', 'The whistle has gone. {sc}.', 'Full time, {sc}.'];
+  B81.chanceSaved = ['{P} has a sight of goal... and {K} is equal to it.', '{P} lets fly... and {K} makes a proper stop.', '{P} is in here... and {K} keeps it out.'];
+  B81.chanceOff = ['{P} has a sight of goal... and it goes wide.', '{P} lets fly... just over.', '{P} is in here... and he drags it wide.'];
+  B81.chanceBlocked = ['{P}\'s shot is blocked and cleared.', '{P} hits it, and it comes off a defender.'];
+  B81.chanceGeneric = ['{P} has a chance for {A}, and nothing comes of it.', '{A} work it to {P}, and the moment passes.'];
+  B81.saveHold = ['Fine save, {K}, from {P}. He had to be sharp.', '{K} holds {P}\'s shot well.', '{K} gets down and gathers from {P}.'];
+  B81.saveDive = ['A proper stop from {K}, to deny {P}.', 'Fine diving save by {K}, from {P}!', '{K} palms {P}\'s shot away.'];
+  B81.goalHeader = ['{P} rises and heads it in. {gp}.', '{P} with a header, and it is in. {gp}.'];
+  B81.goalDrive = ['{P} finds the net with a drive. {gp}.', 'A powerful finish from {P}. {gp}.'];
+  B81.goalClose = ['{P} is there from close range. {gp}.', '{P} tucks it in from close in. {gp}.'];
+  B81.goalComposed = ['{P} keeps his composure and puts it away. {gp}.', '{P} finishes it. {gp}.'];
+  B81.goalAssist = ['Squared by {P2}, and {P} scores. {gp}.', '{P} finishes {P2}\'s pass. {gp}.'];
+  B81.goalStar = ['That is the quality of {P}. {gp}.', '{P} produces the finish. {gp}.'];
+  B81.penSet = ['Penalty to {A}. {ref} points straight to the spot, and {P} will take it.', 'A spot-kick to {A}. {P} places the ball.'];
+  B81.penGoal = ['In, from the spot, {P}. {gp}.', '{P} sends him the wrong way. {gp}.'];
+  B81.penSave = ['Saved by {K}! A huge stop from {P}\'s penalty.', '{K} saves the penalty from {P}!'];
+  B81.nameTakenGeneric = ['Yellow. {P} goes into the book.', 'That is a booking for {P}.'];
+  B81.nameTakenTackle = ['Yellow for {P}, a late tackle.', '{P} is booked for a late challenge.'];
+  B81.nameTakenDissent = ['Yellow for {P}, for dissent.', '{P} is booked for dissent.'];
+  B81.orderedOff = ['He is off! {P} is sent off. Ten men for {A}.', 'Red card. {ref} goes to the pocket. {P} is walking, and {A} are down to ten.'];
+  B81.hobble = ['{P} is down, and it looks a problem, but he stays on.', 'A knock for {P}. He is still on the field.'];
+  B81.goOff = ['{P} cannot continue, and has to go off.', '{P} has gone down and cannot go on.'];
+  B81.subOn = ['A change: {P2} on, {P} off. The one named substitute.', 'Here comes {P2}, replacing {P}.'];
+
   var ERAS = {
     '1946': { bank: B46L, name: 'forms46L' },
     '1950': { bank: B50L, name: 'forms50L' },
     '1946past': { bank: B46, name: 'forms46' },
     '1959': { bank: B59, name: 'forms59' },
-    '1966': { bank: B66, name: 'forms66' }
+    '1966': { bank: B66, name: 'forms66' },
+    '1970': { bank: B70, name: 'forms70' },
+    '1981': { bank: B81, name: 'forms81' }
   };
 
   /* ======================================================================================== engine */
@@ -3282,7 +3368,7 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
   }
   function cap1(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-  var api = { render: render, report: reportFor, normalise: normalise, SHORT: SHORT, shortOf: shortOf, BANKS: { '1946': B46L, '1950': B50L, '1946past': B46, '1959': B59, '1966': B66 }, words: words };
+  var api = { render: render, report: reportFor, normalise: normalise, SHORT: SHORT, shortOf: shortOf, BANKS: { '1946': B46L, '1950': B50L, '1946past': B46, '1959': B59, '1966': B66, '1970': B70, '1981': B81 }, words: words };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.RETRO_ERA_COMMENTARY = api;
 })(typeof window !== 'undefined' ? window : this);
 
@@ -35527,7 +35613,7 @@ if (imWrinkleSel) imWrinkleSel.addEventListener('change', function(){
   }
 });
 var matchSpeed = 850;
-function startTicking(){ if (tickTimer) clearInterval(tickTimer); tickTimer = setInterval(function(){ if (!simulateMinuteBlock()) stopTicking(); }, matchSpeed); }
+function startTicking(){ if (tickTimer) clearInterval(tickTimer); tickTimer = setInterval(function(){ eraMatchTick(); }, matchSpeed); }
 function stopTicking(){ if (tickTimer){ clearInterval(tickTimer); tickTimer = null; } }
 ['speed-slow','speed-medium','speed-fast'].forEach(function(id){
   document.getElementById(id).addEventListener('click', function(){
@@ -35538,10 +35624,11 @@ function stopTicking(){ if (tickTimer){ clearInterval(tickTimer); tickTimer = nu
   });
 });
 document.getElementById('speed-medium').classList.add('primary');
+(function(){ var a=document.getElementById('era-sound'); if (a) a.addEventListener('click', eraToggleSound); })();
 document.getElementById('btn-pause').addEventListener('click', function(){
   if (tickTimer){ stopTicking(); this.textContent='RESUME'; } else { startTicking(); this.textContent='PAUSE'; }
 });
-document.getElementById('btn-sim').addEventListener('click', function(){ stopTicking(); while (live && simulateMinuteBlock(true)) {} });
+document.getElementById('btn-sim').addEventListener('click', function(){ stopTicking(); eraReveal.instant = true; if (typeof eraRevealFlush === 'function') eraRevealFlush(); while (live && simulateMinuteBlock(true)) {} if (typeof eraRevealFlush === 'function') eraRevealFlush(); eraReveal.instant = false; });
 
 /* ---------- v326 ERA COMMENTARY : the live commentary and the full-time report now speak in the voice of the era (era1946/commentary-banks.js,
    embedded above as RETRO_ERA_COMMENTARY). 1946 / 1950: present-tense wireless, plus a past-tense newspaper report at full time. 1959: floodlit
@@ -35551,7 +35638,7 @@ document.getElementById('btn-sim').addEventListener('click', function(){ stopTic
    substitutes before 1965 (injury-only 1966-67), shoulder-charging the keeper is lawful in the 40s and 50s. If anything here throws, the old
    one-line-per-event commentary is used instead. */
 var eraCap = null, eraLastPick = null, eraLastFill = null;
-function eraVoiceKey(){ if (typeof RETRO_ERA_COMMENTARY === 'undefined') return null; var y = (typeof themeSeasonYear === 'function') ? themeSeasonYear() : (parseInt(gameEra,10)||1946); if (y >= 1966) return '1966'; if (y >= 1959) return '1959'; if (y >= 1950) return '1950'; return '1946'; }
+function eraVoiceKey(){ if (typeof RETRO_ERA_COMMENTARY === 'undefined') return null; var y = (typeof themeSeasonYear === 'function') ? themeSeasonYear() : (parseInt(gameEra,10)||1946); if (y >= 1981) return '1981'; if (y >= 1970) return '1970'; if (y >= 1966) return '1966'; if (y >= 1959) return '1959'; if (y >= 1949) return '1950'; return '1946'; }
 function eraEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function eraNotePick(pool, choice){
   var k = null, ks = Object.keys(bank);
@@ -35572,6 +35659,7 @@ function eraStart(f){
       kickoff:kickoffTimeFor(currentDate), fixtureIdx:fixtureIdx, division:currentDivisionLabel, subs:subsAllowed(), subAny:subAnyReasonAllowed(), cards:cardsInUseNow(), formation:tactics.formation, who:who, subPlayer:live.subPlayer?live.subPlayer.n:null};
     eraCap = {key:key, seed:fixtureIdx*7 + 3, liveRef:live, cap:{events:[], meta:meta, final:null}};
     var r = RETRO_ERA_COMMENTARY.render(eraCap.cap, key, {seed:eraCap.seed});
+    if (typeof eraResetReveal === 'function') eraResetReveal();
     var box = document.getElementById('commentary-box'); box.innerHTML = '';
     r.lines.forEach(function(l){ if (!l.ev) eraWrite(box, 'KO', '', l.text); });
     return true;
@@ -35602,22 +35690,447 @@ function eraEmit(cls, text){
     var idx = eraCap.cap.events.length - 1;
     var r = RETRO_ERA_COMMENTARY.render(eraCap.cap, eraCap.key, {seed:eraCap.seed});
     var lines = r.lines.filter(function(l){ return l.ev && l.ev.idx === idx; });
-    if (lines.length){ lines.forEach(function(l){ eraWrite(box, eraLabel(l.disp), (l.ev && l.ev.cls) || cls, l.text); }); }
-    else { var fb = eraFallback(ev); if (fb){ var ne = r.events[idx]; eraWrite(box, fb.label || eraLabel(ne ? ne.disp : Math.min(live.minute,90)), cls, fb.text); } }
+    if (lines.length){ lines.forEach(function(l){ eraQueueFromEmit((l.ev && l.ev.cls) || cls, l.ev, l.text, l.disp); }); }
+    else { var fb = eraFallback(ev); if (fb){ var ne = r.events[idx]; eraQueueFromEmit(cls, ne || ev, fb.text, fb.label || (ne ? ne.disp : Math.min(live.minute,90))); } }
     return true;
   } catch (e) { eraCap = null; return false; }
 }
 function eraFullTimeReport(){
-  if (!eraCap || eraCap.liveRef !== live || (eraCap.key !== '1946' && eraCap.key !== '1950')) return;
+  if (!eraCap || eraCap.liveRef !== live) return;
+  if (typeof eraRevealFlush === 'function') eraRevealFlush();
   try {
     var box = document.getElementById('commentary-box');
     eraCap.cap.final = {us:live.usScore, opp:live.oppScore, usGoals:live.usGoals.slice(), oppGoals:live.oppGoals.slice(), shotsUs:live.shotsUs, shotsOpp:live.shotsOpp};
+    if (eraCap.key === '1946' || eraCap.key === '1950') {
     var R = RETRO_ERA_COMMENTARY.report(eraCap.cap, eraCap.key, {seed:eraCap.seed});
     var d = document.createElement('div'); d.className = 'era-paper'; d.id = 'era-paper';
     d.innerHTML = '<div class="pp-dateline" data-nocase="1">'+eraEsc(R.dateline)+'</div><h4 data-nocase="1">'+eraEsc(String(R.headline).toUpperCase())+'</h4><p class="pp-stand">'+eraEsc(R.standfirst)+'</p>'+R.paragraphs.map(function(x){ return '<p>'+eraEsc(x)+'</p>'; }).join('');
     box.appendChild(d); box.scrollTop = d.offsetTop - box.offsetTop - 4;
+    } else {
+      var wrap = eraHighlightsWrap();
+      if (wrap){ box.appendChild(wrap); box.scrollTop = wrap.offsetTop - box.offsetTop - 4; }
+    }
   } catch (e) { /* the match result stands without the paper */ }
 }
+function eraHighlightsWrap(){
+  if (!eraCap || !live) return null;
+  var key = eraCap.key, meta = eraCap.cap.meta || {};
+  var homeClub = live.f.home ? ourClubName : live.f.opp;
+  var awayClub = live.f.home ? live.f.opp : ourClubName;
+  var hs = live.f.home ? live.usScore : live.oppScore;
+  var as = live.f.home ? live.oppScore : live.usScore;
+  var sc = homeClub + ' ' + hs + '\u2013' + as + ' ' + awayClub;
+  function allTally(){
+    var parts = [];
+    function add(arr, side){
+      (arr || []).forEach(function(g){
+        var n = g.scorer || g.n || g.name || 'A player';
+        var m = (g.min != null ? g.min : g.minute);
+        parts.push(n + ' (' + side + (m != null ? (', ' + m + '\u2032') : '') + ')');
+      });
+    }
+    add(live.usGoals, ourClubName);
+    add(live.oppGoals, live.f.opp);
+    return parts.length ? (parts.join('; ') + '.') : 'There was no scoring.';
+  }
+  var t = allTally();
+  var ground = meta.groundName || 'the ground';
+  var ref = live.refName || meta.ref || 'the referee';
+  var att = live.attendanceFigure ? String(live.attendanceFigure).replace(/(\d{2})(\d{3})/, '$1,$2') : '';
+  var hed, p1, p2;
+  if (key === '1959'){
+    hed = 'Newsreel sign-off';
+    p1 = 'And so the lights go down on a stirring afternoon at ' + ground + '. ' + sc + '. ' + t;
+    p2 = 'This is the newsreel, returning you to the programme. The referee was ' + ref + '.' + (att ? (' A crowd of ' + att + '.') : '');
+  } else if (key === '1970'){
+    hed = 'From the terraces';
+    p1 = 'And that is your lot from ' + ground + '. ' + sc + ', and the football has been worth a Saturday in the stands. ' + t;
+    p2 = ref + ' had charge of it.' + (att ? (' A gate of ' + att + '.') : '');
+  } else if (key === '1981'){
+    hed = 'Full time';
+    p1 = 'Full time at ' + ground + ', and that is a proper afternoon. ' + sc + '. ' + t;
+    p2 = 'Referee ' + ref + '.' + (att ? (' Attendance ' + att + '.') : '');
+  } else {
+    hed = 'Highlights summary';
+    p1 = 'That is the tale of ' + ground + ' this afternoon. ' + sc + '. ' + t;
+    p2 = 'Referee: ' + ref + '.' + (att ? (' Attendance ' + att + '.') : '');
+  }
+  var d = document.createElement('div');
+  d.className = 'era-ftwrap';
+  d.id = 'era-ftwrap';
+  d.innerHTML = '<div class="hed"></div><p></p><p></p>';
+  d.querySelector('.hed').textContent = hed;
+  d.querySelectorAll('p')[0].textContent = p1;
+  d.querySelectorAll('p')[1].textContent = p2;
+  return d;
+}
+
+/* v351 : staged reveal / tension layer. The sim still decides the outcome at once;
+   the display never shows it until the resolving line lands. Shared build-up for
+   goals, saves and misses so you cannot tell which is coming. Scoreboard, scorers,
+   momentum, the goal card and the event log wait for that resolving line. */
+var eraReveal = {
+  queue: [],
+  shownUs: 0,
+  shownOpp: 0,
+  shownGoalsUs: [],
+  shownGoalsOpp: [],
+  instant: false,
+  waitUntil: 0,
+  afterDrain: null,
+  soundOn: false,
+  mom: 0,
+  drainThenStop: false,
+  pauseAfterBuild: false,
+  pendingClock: null
+};
+var ERA_SPOILER_RE = /\b(goals|it is a goal|a goal|scores|scored|equalis(?:e|er|es)?|saves?|saved|a fine save|what a save|just wide|goes wide|over the bar|over the top|missed|the net|back of the net|it'?s there|it is a goal|sends the keeper|wrong way|hat-trick|off the (?:post|bar|woodwork)|pull one back|take the lead|in front now)\b/i;
+var ERA_SHARED_BUILD = {
+  '1946': [
+    '{P} has it, and comes forward for {A}.',
+    'A centre comes in, and {P} is up to meet it.',
+    '{P} takes it on, looking for an opening.',
+    '{A} come again. {P} has a sight of the goal.',
+    'A swift movement, and {P} is through the middle.',
+    '{P} and a colleague exchange passes just outside the area.'
+  ],
+  '1950': [
+    '{P} has it, and comes forward for {A}.',
+    'A centre comes in, and {P} is up to meet it.',
+    '{P} takes it on, looking for an opening.',
+    '{A} come again. {P} has a sight of the goal.',
+    '{P} beats his man and looks up.'
+  ],
+  '1959': [
+    'A lovely sweep out, and {P} is arriving for {A}.',
+    '{P} has it, and comes forward under the lamps.',
+    'Here come {A} again, {P} with the ball.',
+    'A sharp ball in, and {P} is taking it on.',
+    '{P} turns neatly and looks for a way through.'
+  ],
+  '1966': [
+    '{P} takes it on, and looks up.',
+    'A ball into the area, and {P} is arriving.',
+    '{A} build from midfield. {P} has a yard.',
+    '{P} turns and comes forward.',
+    'A centre, and {P} is attacking it.'
+  ],
+  '1970': [
+    'Here is {P}, coming forward for {A}.',
+    '{A} knock it about. {P} has a yard of space.',
+    'A ball in, and {P} is in the mixer.',
+    '{P} drives forward, numbers up with him.',
+    '{P} nicks it and comes on.'
+  ],
+  '1981': [
+    '{P} turns and comes forward for {A}.',
+    'Wide to {P}, and the ball is played in.',
+    '{A} keep it, then switch it to {P}.',
+    '{P} drives forward. They have numbers up.',
+    '{P} takes it on, looking for a way through.'
+  ]
+};
+var ERA_OFF_BUILD = {
+  '1946': ['The referee is coming across.', '{ref} has stopped play, and is having a word.'],
+  '1950': ['The referee is coming across.', '{ref} has stopped play, and is having a word.'],
+  '1959': ['The referee is coming across under the lights.', '{ref} has stopped play.'],
+  '1966': ['The referee is coming across.', '{ref} has a look at this.'],
+  '1970': ['The referee is coming across here.', '{ref} has stopped it, and he is coming over.'],
+  '1981': ['The referee is coming across.', '{ref} has stopped play, and he is reaching for a word.']
+};
+function eraIsShotType(t){
+  t = String(t||'');
+  if (/^(goal|save|chance|penGoal|penSave|penMiss|fkGoal|fkSave|fkOver|fkWall|cornerGoal|cornerOver|tbGoal|tbSave|tbOver|crGoal|crSave|crOver)/.test(t)) return true;
+  if (/Goal$/.test(t)) return true;
+  return false;
+}
+function eraIsSetType(t){
+  t = String(t||'');
+  return /^(cornerSet|fkSet|penSet|tbSet|crSet)$/.test(t);
+}
+function eraIsOffType(t){ return t === 'orderedOff' || t === 'nameTakenGeneric' || t === 'nameTakenTackle' || t === 'nameTakenDissent' || /^nameTaken/.test(t||''); }
+function eraDwellMs(text, extra){
+  var wc = String(text||'').trim().split(/\s+/).filter(Boolean).length;
+  var ms = Math.min(2200, 400 + wc * 70);
+  return Math.floor(ms + (extra||0));
+}
+function eraSuspenseMs(){ return 280 + Math.floor(Math.random() * 440); }
+function eraFillBuild(tpl, ev){
+  var meta = eraCap && eraCap.cap && eraCap.cap.meta;
+  var P = (ev && ev.P && ev.P.n) ? ev.P.n : ((ev && ev.P2 && ev.P2.n) ? ev.P2.n : 'a forward');
+  /* surname-style for earlier voices is applied in render; keep the full name here if needed, but prefer what fill already used — just the name */
+  if (P && /^[A-Z].*\s+[A-Z]/.test(P) && eraCap && (eraCap.key === '1946' || eraCap.key === '1950' || eraCap.key === '1959')){
+    P = P.split(/\s+/).pop();
+  }
+  var A = '';
+  try {
+    if (ev && ev.side && meta) A = (typeof RETRO_ERA_COMMENTARY !== 'undefined' && RETRO_ERA_COMMENTARY.shortOf) ? RETRO_ERA_COMMENTARY.shortOf(ev.side === 'us' ? meta.club : meta.opp, ev.side === 'us' ? meta.opp : meta.club) : (ev.side === 'us' ? meta.club : meta.opp);
+  } catch (e) { A = (ev && ev.side === 'us' && meta) ? meta.club : (meta ? meta.opp : ''); }
+  if (!A && meta) A = meta.club;
+  var ref = meta && meta.ref ? meta.ref : 'the referee';
+  var s = String(tpl).replace(/\{P\}/g, P).replace(/\{A\}/g, A).replace(/\{ref\}/g, ref);
+  s = s.replace(/([.!?]\s+)([a-z])/g, function(_,p,c){ return p + c.toUpperCase(); });
+  return s;
+}
+function eraPickBuild(pool){
+  var key = (eraCap && eraCap.key) || '1966';
+  var arr = pool[key] || pool['1966'];
+  var seed = ((eraCap && eraCap.seed) || 1) + eraReveal.queue.length * 17 + (live ? live.minute * 3 : 0);
+  var rng = ((seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  var tpl = arr[Math.floor(rng * arr.length)];
+  if (ERA_SPOILER_RE.test(tpl)) {
+    for (var i = 0; i < arr.length; i++){ if (!ERA_SPOILER_RE.test(arr[i])) { tpl = arr[i]; break; } }
+  }
+  return tpl;
+}
+function eraLastQueuedSet(){
+  for (var i = eraReveal.queue.length - 1; i >= 0; i--){
+    if (eraReveal.queue[i].stage === 'line' && eraIsSetType(eraReveal.queue[i].type)) return true;
+  }
+  return false;
+}
+function eraQueueFromEmit(cls, ev, text, disp){
+  var type = ev && ev.type;
+  var itemBase = {cls: cls, ev: ev, text: text, disp: disp, type: type, us: ev ? ev.us : (live && live.usScore), opp: ev ? ev.opp : (live && live.oppScore)};
+  if (eraReveal.instant) {
+    if (eraIsShotType(type) && !eraLastQueuedSet() && !eraIsSetType(type)) {
+      var b = eraFillBuild(eraPickBuild(ERA_SHARED_BUILD), ev);
+      eraReveal.queue.push(Object.assign({}, itemBase, {stage:'build', text:b, cls:''}));
+    }
+    eraReveal.queue.push(Object.assign({}, itemBase, {stage: eraIsShotType(type) ? 'resolve' : 'line'}));
+    eraRevealFlush();
+    return;
+  }
+  if (eraIsShotType(type) && !eraIsSetType(type)) {
+    if (!eraLastQueuedSet()) {
+      var b2 = eraFillBuild(eraPickBuild(ERA_SHARED_BUILD), ev);
+      eraReveal.queue.push(Object.assign({}, itemBase, {stage:'build', text:b2, cls:''}));
+    }
+    eraReveal.queue.push(Object.assign({}, itemBase, {stage:'resolve'}));
+    return;
+  }
+  if (type === 'orderedOff') {
+    var b3 = eraFillBuild(eraPickBuild(ERA_OFF_BUILD), ev);
+    eraReveal.queue.push(Object.assign({}, itemBase, {stage:'build', text:b3, cls:''}));
+    eraReveal.queue.push(Object.assign({}, itemBase, {stage:'resolve'}));
+    return;
+  }
+  eraReveal.queue.push(Object.assign({}, itemBase, {stage:'line'}));
+}
+function eraRevealFlush(){
+  while (eraReveal.queue.length) eraRevealShow(eraReveal.queue.shift(), true);
+  eraHideGoalCard();
+  eraPaintScoreboard(true);
+  eraPaintClock(true);
+  eraReveal.waitUntil = 0;
+}
+function eraHideGoalCard(){
+  var el = document.getElementById('era-goal-card');
+  if (el){ el.hidden = true; el.innerHTML = ''; el.className = 'era-goal-card'; }
+}
+function eraShowGoalCard(item){
+  var el = document.getElementById('era-goal-card');
+  if (!el || !item) return;
+  var ev = item.ev || {};
+  var scorer = ev.P2 && /^(tbGoal|crGoal)$/.test(ev.type) ? ev.P2 : ev.P;
+  var name = scorer && scorer.n ? scorer.n : 'Goal';
+  var how = item.text || '';
+  var assist = ev.P && ev.P2 && ev.type === 'goalAssist' ? ev.P2.n : (ev.type === 'tbGoal' || ev.type === 'crGoal' ? (ev.P && ev.P.n) : '');
+  var sc = eraScoreText(item.us, item.opp);
+  var min = (item.disp != null && item.disp !== 'FT' && item.disp !== 'HT' && item.disp !== 'KO') ? String(item.disp) : (live ? String(Math.min(live.minute,90)) : '');
+  el.innerHTML = '<div class="eyebrow">Goal</div><div class="who"></div><div class="how"></div><div class="flash"></div>';
+  el.querySelector('.who').textContent = name;
+  el.querySelector('.how').textContent = (min ? min + '\u2032 \u00b7 ' : '') + (assist ? assist : '').replace(/\s+$/,'');
+  /* how already in the stream; keep the card compact: scorer, minute, score */
+  if (!assist) el.querySelector('.how').textContent = (min ? min + '\u2032' : '');
+  else el.querySelector('.how').textContent = (min ? min + '\u2032 \u00b7 ' : '') + assist;
+  el.querySelector('.flash').textContent = sc;
+  el.hidden = false;
+  el.className = 'era-goal-card show';
+}
+function eraScoreText(us, opp){
+  if (!live || !live.f) return (us||0) + ' - ' + (opp||0);
+  return live.f.home ? (us + ' - ' + opp) : (opp + ' - ' + us);
+}
+function eraPaintScoreboard(force){
+  if (!live) return;
+  var us = (!force && eraReveal && !eraReveal.instant) ? eraReveal.shownUs : (force && !eraReveal.queue.length ? live.usScore : eraReveal.shownUs);
+  var opp = (!force && eraReveal && !eraReveal.instant) ? eraReveal.shownOpp : (force && !eraReveal.queue.length ? live.oppScore : eraReveal.shownOpp);
+  if (eraReveal.instant || force) { us = eraReveal.shownUs; opp = eraReveal.shownOpp; }
+  var el = document.getElementById('score');
+  if (el) el.textContent = eraScoreText(us, opp);
+  eraPaintScorers();
+  eraPaintMomentum();
+}
+function eraPaintScorers(){
+  if (!live || typeof scoreboardScorerLines !== 'function') return;
+  var usHtml = scoreboardScorerLines(eraReveal.shownGoalsUs);
+  var oppHtml = scoreboardScorerLines(eraReveal.shownGoalsOpp);
+  var left = document.getElementById(live.f.home ? 'side-left-scorers' : 'side-right-scorers');
+  var right = document.getElementById(live.f.home ? 'side-right-scorers' : 'side-left-scorers');
+  if (left) left.innerHTML = usHtml;
+  if (right) right.innerHTML = oppHtml;
+}
+function eraPaintMomentum(){
+  var el = document.getElementById('era-momentum');
+  if (!el || !live) return;
+  var mom = eraReveal.mom || 0;
+  var usN = ourClubName, oppN = live.f.opp;
+  var label = 'Even';
+  if (mom >= 2) label = usN + ' press';
+  else if (mom === 1) label = usN + ' have a spell';
+  else if (mom <= -2) label = oppN + ' come at them';
+  else if (mom === -1) label = oppN + ' have a spell';
+  el.textContent = label;
+  el.hidden = false;
+}
+function eraPaintClock(force){
+  if (!live) return;
+  var el = document.getElementById('clock');
+  if (!el) return;
+  if (!force && !eraReveal.instant && eraReveal.pendingClock != null && eraReveal.queue.length) {
+    /* hold the last painted clock until a line for the new minute is shown */
+    return;
+  }
+  var m = live.minute;
+  el.textContent = m > 90 ? ('90+' + (m - 90)) : (String(Math.max(0, Math.min(m, 90))).padStart(2,'0') + ':00');
+}
+function eraNotePendingClock(){
+  if (eraReveal.instant) { eraReveal.pendingClock = null; eraPaintClock(true); return; }
+  eraReveal.pendingClock = live ? live.minute : 0;
+}
+function eraResetReveal(){
+  eraReveal.queue = [];
+  eraReveal.shownUs = 0;
+  eraReveal.shownOpp = 0;
+  eraReveal.shownGoalsUs = [];
+  eraReveal.shownGoalsOpp = [];
+  eraReveal.mom = 0;
+  eraReveal.waitUntil = 0;
+  eraReveal.afterDrain = null;
+  eraReveal.drainThenStop = false;
+  eraReveal.pendingClock = null;
+  eraHideGoalCard();
+  var mom = document.getElementById('era-momentum');
+  if (mom){ mom.textContent = 'Even'; mom.hidden = false; }
+}
+function eraRevealShow(item, instant){
+  if (!item) return;
+  var isResolve = item.stage === 'resolve';
+  var isBuild = item.stage === 'build';
+  if (isBuild) eraHideGoalCard();
+  var cls = isBuild ? '' : (item.cls || (item.ev && item.ev.cls) || '');
+  var box = document.getElementById('commentary-box');
+  if (box) eraWrite(box, eraLabel(item.disp != null ? item.disp : (live ? Math.min(live.minute,90) : '')), cls, item.text);
+  if (isResolve || item.stage === 'line') {
+    if (item.us != null) eraReveal.shownUs = item.us;
+    if (item.opp != null) eraReveal.shownOpp = item.opp;
+    if (item.ev && item.ev.goal) {
+      var side = item.ev.scoredFor || item.ev.side;
+      var gList = (side === 'us') ? live.usGoals : live.oppGoals;
+      /* take the latest sim goal for that side that is not yet shown */
+      var shown = side === 'us' ? eraReveal.shownGoalsUs : eraReveal.shownGoalsOpp;
+      if (gList && gList.length > shown.length) {
+        var g = gList[shown.length];
+        if (side === 'us') eraReveal.shownGoalsUs = shown.concat([g]);
+        else eraReveal.shownGoalsOpp = shown.concat([g]);
+      }
+      eraReveal.mom = side === 'us' ? Math.min(2, eraReveal.mom + 1) : Math.max(-2, eraReveal.mom - 1);
+      eraShowGoalCard(item);
+      eraPlaySound('goal');
+    } else if (item.ev && eraIsShotType(item.ev.type) && !item.ev.goal) {
+      var atk = item.ev.side;
+      eraReveal.mom = atk === 'us' ? Math.min(2, eraReveal.mom + 1) : Math.max(-2, eraReveal.mom - 1);
+      eraPlaySound('gasp');
+    } else if (item.ev && item.ev.type === 'orderedOff') {
+      eraPlaySound('whistle');
+    }
+    eraPaintScoreboard(true);
+    eraReveal.pendingClock = null;
+    eraPaintClock(true);
+  } else {
+    /* build-up: clock may advance to this minute, but not the score, card, or momentum */
+    eraReveal.pendingClock = null;
+    eraPaintClock(true);
+    eraPlaySound(null);
+  }
+}
+function eraMatchTick(){
+  var now = Date.now();
+  if (eraReveal.waitUntil && now < eraReveal.waitUntil) return;
+  if (eraReveal.queue.length){
+    var item = eraReveal.queue.shift();
+    eraRevealShow(item, false);
+    if (eraReveal.pauseAfterBuild && item.stage === 'build') {
+      stopTicking();
+      eraReveal.pauseAfterBuild = false;
+      return;
+    }
+    var extra = (item.stage === 'build') ? eraSuspenseMs() : 0;
+    eraReveal.waitUntil = Date.now() + eraDwellMs(item.text, extra);
+    return;
+  }
+  if (eraReveal.afterDrain){ var fn = eraReveal.afterDrain; eraReveal.afterDrain = null; fn(); }
+  if (eraReveal.drainThenStop){ eraReveal.drainThenStop = false; stopTicking(); return; }
+  if (!simulateMinuteBlock()) {
+    if (eraReveal.queue.length){ eraReveal.drainThenStop = true; eraMatchTick(); return; }
+    stopTicking();
+    return;
+  }
+  if (eraReveal.queue.length){ eraMatchTick(); }
+}
+
+/* WebAudio: off by default, no external files. */
+var eraAudio = {ctx:null, amb:null};
+function eraAudioCtx(){
+  if (!eraAudio.ctx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    eraAudio.ctx = new AC();
+  }
+  if (eraAudio.ctx.state === 'suspended') eraAudio.ctx.resume();
+  return eraAudio.ctx;
+}
+function eraPlaySound(kind){
+  if (!eraReveal.soundOn || !kind) return;
+  var ctx = eraAudioCtx(); if (!ctx) return;
+  if (kind === 'whistle'){
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'square'; o.frequency.value = 1760;
+    g.gain.setValueAtTime(0.03, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.22);
+  } else if (kind === 'gasp' || kind === 'goal'){
+    var n = Math.floor(ctx.sampleRate * (kind === 'goal' ? 1.1 : 0.25));
+    var buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0), last = 0;
+    for (var i = 0; i < n; i++){ last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 6; }
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var f = ctx.createBiquadFilter(); f.type = kind === 'goal' ? 'bandpass' : 'lowpass'; f.frequency.value = kind === 'goal' ? 500 : 800;
+    var g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(kind === 'goal' ? 0.1 : 0.03, ctx.currentTime + 0.06);
+    g2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (kind === 'goal' ? 1.0 : 0.22));
+    src.connect(f); f.connect(g2); g2.connect(ctx.destination);
+    src.start(); src.stop(ctx.currentTime + (kind === 'goal' ? 1.1 : 0.25));
+  }
+}
+function eraToggleSound(e){
+  if (e) e.preventDefault();
+  eraReveal.soundOn = !eraReveal.soundOn;
+  var a = document.getElementById('era-sound');
+  if (a) a.textContent = 'Sound: ' + (eraReveal.soundOn ? 'on' : 'off');
+  if (eraReveal.soundOn) eraAudioCtx();
+}
+function eraBuildSpoilerFree(tpl){ return !ERA_SPOILER_RE.test(tpl); }
+
+/* test hooks */
+window.eraRevealAPI = eraReveal;
+window.ERA_SPOILER_RE = ERA_SPOILER_RE;
+window.ERA_SHARED_BUILD = ERA_SHARED_BUILD;
+window.eraRevealFlush = eraRevealFlush;
+window.eraResetReveal = eraResetReveal;
+window.eraIsShotType = eraIsShotType;
+
 var recentLines = []; /* fallback-only, pre-v170 list : see poolRecentMap below for the real per-category tracking now in use */
 /* ---------- v170 PER-CATEGORY REPEAT TRACKING, PER DIRECT REPORT ("needs more volume/variety"). Before this,
    EVERY bank pool shared one single global recentLines list capped at 8 entries -- so a 90-odd-minute match
@@ -36980,10 +37493,17 @@ function scoreboardScorerLines(goals){
 }
 function renderScoreboardScorers(){
   if (!live) return;
+  if (typeof eraPaintScorers === 'function' && eraCap){ eraPaintScorers(); return; }
   var usHtml = scoreboardScorerLines(live.usGoals);
   var oppHtml = scoreboardScorerLines(live.oppGoals);
   document.getElementById(live.f.home ? 'side-left-scorers' : 'side-right-scorers').innerHTML = usHtml;
   document.getElementById(live.f.home ? 'side-right-scorers' : 'side-left-scorers').innerHTML = oppHtml;
+}
+function eraHoldScoreFromSim(){
+  if (eraCap && typeof eraPaintScoreboard === 'function' && !(eraReveal && eraReveal.instant)) return;
+  if (!live) return;
+  document.getElementById('score').textContent = live.f.home ? (live.usScore + ' - ' + live.oppScore) : (live.oppScore + ' - ' + live.usScore);
+  renderScoreboardScorers();
 }
 function simulateMinuteBlock(skipHalfPause){
   if (!live) return false;
@@ -37026,14 +37546,14 @@ function simulateMinuteBlock(skipHalfPause){
       live.maxLeadOpp = Math.max(live.maxLeadOpp, live.oppScore-live.usScore);
       addLine('goal', fill(pickFresh(bank.penaltyGoal), pp.team, pp.taker.n));
       if (pp.team===ourClubName) checkGoalMilestones(pp.taker);
-      document.getElementById('score').textContent = live.f.home ? (live.usScore+' - '+live.oppScore) : (live.oppScore+' - '+live.usScore);
+      eraHoldScoreFromSim();
       renderScoreboardScorers();
     } else if (pRoll < 0.90){
       addLine('', fill(pickFresh(bank.penaltySave), pp.team, pp.taker.n, null, keeperFor(pp.team===ourClubName?live.f.opp:ourClubName)));
     } else {
       addLine('', fill(pickFresh(bank.penaltyMiss), pp.team, pp.taker.n));
     }
-    document.getElementById('clock').textContent = live.minute>90 ? ('90+'+(live.minute-90)) : (String(live.minute).padStart(2,'0')+':00');
+    if (typeof eraNotePendingClock === 'function') eraNotePendingClock(); else document.getElementById('clock').textContent = live.minute>90 ? ('90+'+(live.minute-90)) : (String(live.minute).padStart(2,'0')+':00');
     if (live.minute >= 90+live.stoppage2){ finishMatch(); return false; }
     return true;
   }
@@ -37136,7 +37656,7 @@ function simulateMinuteBlock(skipHalfPause){
         addLine('goal', fill(pickFresh(goalPoolFor(scorerObj)), team, scorerObj.n));
       }
     }
-    document.getElementById('score').textContent = live.f.home ? (live.usScore+' - '+live.oppScore) : (live.oppScore+' - '+live.usScore);
+    eraHoldScoreFromSim();
     renderScoreboardScorers();
   } else if (roll < 0.19){
     var side = Math.random()<0.5 ? ourClubName : live.f.opp;
@@ -37166,7 +37686,7 @@ function simulateMinuteBlock(skipHalfPause){
       live.maxLeadOpp = Math.max(live.maxLeadOpp, live.oppScore-live.usScore);
       addLine('goal', fill(pickFresh(bank.cornerGoal), cTeam, cTaker.n));
       if (cTeam===ourClubName) checkGoalMilestones(cTaker);
-      document.getElementById('score').textContent = live.f.home ? (live.usScore+' - '+live.oppScore) : (live.oppScore+' - '+live.usScore);
+      eraHoldScoreFromSim();
       renderScoreboardScorers();
     } else if (cRoll < 0.45){
       addLine('', fill(pickFresh(bank.cornerHeaderOver), cTeam, cTaker.n));
@@ -37354,7 +37874,7 @@ function simulateMinuteBlock(skipHalfPause){
       live.maxLeadOpp = Math.max(live.maxLeadOpp, live.oppScore-live.usScore);
       addLine('goal', fill(pickFresh(bank.freeKickGoal), fkTeam, taker.n));
       if (fkTeam===ourClubName) checkGoalMilestones(taker);
-      document.getElementById('score').textContent = live.f.home ? (live.usScore+' - '+live.oppScore) : (live.oppScore+' - '+live.usScore);
+      eraHoldScoreFromSim();
       renderScoreboardScorers();
     } else if (outcomeRoll < 0.45){
       addLine('', fill(pickFresh(bank.freeKickSave), fkTeam, taker.n));
@@ -37391,7 +37911,7 @@ function simulateMinuteBlock(skipHalfPause){
         live.maxLeadOpp = Math.max(live.maxLeadOpp, live.oppScore-live.usScore);
         addLine('goal', fill(pickFresh(bank.throughBallGoal), bTeam, tPair[0].n, tPair[1].n));
         if (bTeam===ourClubName) checkGoalMilestones(tPair[1]);
-        document.getElementById('score').textContent = live.f.home ? (live.usScore+' - '+live.oppScore) : (live.oppScore+' - '+live.usScore);
+        eraHoldScoreFromSim();
         renderScoreboardScorers();
       } else if (tbRoll < 0.75){
         addLine('', fill(pickFresh(bank.throughBallSave), bTeam, tPair[0].n, tPair[1].n));
@@ -37412,7 +37932,7 @@ function simulateMinuteBlock(skipHalfPause){
         live.maxLeadOpp = Math.max(live.maxLeadOpp, live.oppScore-live.usScore);
         addLine('goal', fill(pickFresh(bank.crossGoal), bTeam, cPair[0].n, cPair[1].n));
         if (bTeam===ourClubName) checkGoalMilestones(cPair[1]);
-        document.getElementById('score').textContent = live.f.home ? (live.usScore+' - '+live.oppScore) : (live.oppScore+' - '+live.usScore);
+        eraHoldScoreFromSim();
         renderScoreboardScorers();
       } else if (crRoll < 0.45){
         addLine('', fill(pickFresh(bank.crossOver), bTeam, cPair[0].n, cPair[1].n));
@@ -37437,7 +37957,7 @@ function simulateMinuteBlock(skipHalfPause){
       addLine('', fill(pickFresh(tacticalBuildupPool(bTeam)), bTeam, scorerFor(bTeam).n));
     }
   }
-  document.getElementById('clock').textContent = live.minute>90 ? ('90+'+(live.minute-90)) : (String(live.minute).padStart(2,'0')+':00');
+  if (typeof eraNotePendingClock === 'function') eraNotePendingClock(); else document.getElementById('clock').textContent = live.minute>90 ? ('90+'+(live.minute-90)) : (String(live.minute).padStart(2,'0')+':00');
   if (live.minute >= 90+live.stoppage2){ finishMatch(); return false; }
   return true;
 }
@@ -40756,7 +41276,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v350'; /* v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v351'; /* v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
