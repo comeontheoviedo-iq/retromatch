@@ -6393,12 +6393,17 @@ function rule(country, season, key){
 /* ===== v353 : SNAPSHOT LOADER =====
    Standard shape per country and era:
      {country, era, label, year, divisions:[{id,name,clubs:[{n,s,mgr,ground,cap}]}],
-      squads:{name:[...]}, referees:[], sources, flags, gaps}
+      squads:{name:[...]}, referees:[], refSource, sources, flags, gaps}
    buildSnapshotFromCurrentData() wraps the data already in the file (no rewrites).
    loadSnapshot(snap) runs gap checks (generated people, missing managers, missing
-   capacities or dates of birth, name-key mismatches). Existing starts still use
-   their current activators; after setup they go through the loader so a new era
-   can be dropped in by registering a snapshot on ERA_SNAPSHOTS[country][era].
+   capacities or dates of birth, name-key mismatches, referee-pool status).
+   Dates of birth are looked up in REAL_DOB_TABLE / REAL_DOB_BY_CLUB via realDobFor
+   (v354); nothing is written onto the squad objects. Referee lists come from
+   REFEREE_DATA (England/Scotland) or the era definition (continental); lists
+   marked "pool only" and pools under 20 names are flagged, not filled in.
+   Existing starts still use their current activators; after setup they go
+   through the loader so a new era can be dropped in by registering a snapshot
+   on ERA_SNAPSHOTS[country][era].
    To add an era: write a snapshot in that shape, ERA_SNAPSHOTS[cc][era] = snap,
    and hook the start picker to that era year. The loader's apply path will fill
    the same live lists the current stubs use; until that era's clubs exist as
@@ -6460,16 +6465,42 @@ function buildSnapshotFromCurrentData(country, era){
   }
   var squads = {}, clubs = [];
   divs.forEach(function(d){ d.clubs.forEach(function(c){ clubs.push(c); squads[c.n] = snapshotSquadFor(c.n); }); });
-  var refs = [];
-  if (typeof refereeSeasonKey === 'function' && typeof REFEREES !== 'undefined'){
-    try { var rk = refereeSeasonKey(); if (REFEREES[rk]) refs = REFEREES[rk].slice(); } catch(e){}
-  }
-  var snap = {country:country, era:String(era), label:label, year:ruleYear(label), divisions:divs, squads:squads, referees:refs, sources:'existing in-file data, wrapped unchanged for v353', flags:{}};
+  var liveRefs = snapshotRefereeInfoFromLive();
+  var snap = {country:country, era:String(era), label:label, year:ruleYear(label), divisions:divs, squads:squads, referees:liveRefs.refs, refSource:liveRefs.source, sources:'existing in-file data, wrapped unchanged', flags:{}};
   snap.gaps = snapshotGapChecks(snap);
   return snap;
 }
+function snapshotRefereeInfoFromLive(){
+  var info = {refs:[], source:''};
+  try {
+    if (typeof isCont === 'function' && isCont() && typeof scoEraDef === 'function' && scoEraDef() && scoEraDef().refs && scoEraDef().refs.length){
+      info.refs = scoEraDef().refs.slice();
+      info.source = scoEraDef().refSource || scoEraDef().refsSource || 'era definition (real named officials)';
+    } else if (typeof REFEREE_DATA === 'object' && REFEREE_DATA.lists && typeof refereeSeasonKey === 'function'){
+      var c = (typeof isScoOnly === 'function' && isScoOnly()) ? 'SCO' : 'ENG';
+      var k = refereeSeasonKey();
+      var rec = REFEREE_DATA.lists[c] && REFEREE_DATA.lists[c][k];
+      if (rec && rec.refs) info.refs = rec.refs.slice();
+      if (rec && rec.source) info.source = rec.source;
+    }
+  } catch(e){}
+  return info;
+}
+function snapshotRefereeStatus(snap){
+  var refs = (snap && snap.referees) || [];
+  var src = (snap && (snap.refSource || (snap.refInfo && snap.refInfo.source))) || '';
+  var poolOnly = /pool only/i.test(src);
+  var thin = refs.length > 0 && refs.length < 20;
+  var sourced = poolOnly ? 0 : refs.length;
+  var bits = [];
+  if (!refs.length) bits.push('missing');
+  else if (poolOnly) bits.push('pool only');
+  else bits.push('sourced');
+  if (thin) bits.push('thin pool');
+  return {poolSize:refs.length, sourced:sourced, poolOnly:poolOnly, thin:thin, source:src, status:bits.join(', ')};
+}
 function snapshotGapChecks(snap){
-  var gaps = {generatedPlayers:0, realPlayers:0, totalPlayers:0, missingManagers:[], generatedManagers:0, missingCaps:[], missingDobs:0, sourcedDobs:0, nameKeyMismatches:[], emptySquads:[]};
+  var gaps = {generatedPlayers:0, realPlayers:0, totalPlayers:0, missingManagers:[], generatedManagers:0, missingCaps:[], missingDobs:0, sourcedDobs:0, nameKeyMismatches:[], emptySquads:[], refPool:0, refSourced:0, refPoolOnly:false, refThin:false, refStatus:''};
   var squadKeys = Object.keys(snap.squads || {});
   (snap.divisions || []).forEach(function(d){
     d.clubs.forEach(function(c){
@@ -6484,11 +6515,24 @@ function snapshotGapChecks(snap){
       }
       sq.forEach(function(p){
         gaps.totalPlayers++;
-        if (p && p.gen) gaps.generatedPlayers++; else gaps.realPlayers++;
-        if (p && p.dob) gaps.sourcedDobs++; else gaps.missingDobs++;
+        if (p && p.gen) gaps.generatedPlayers++;
+        else {
+          gaps.realPlayers++;
+          var dob = (p && p.dob) || null;
+          if (!dob && typeof realDobFor === 'function' && p && p.n){
+            try { dob = realDobFor(p.n, c.n); } catch(e){ dob = null; }
+          }
+          if (dob) gaps.sourcedDobs++; else gaps.missingDobs++;
+        }
       });
     });
   });
+  var rs = snapshotRefereeStatus(snap);
+  gaps.refPool = rs.poolSize;
+  gaps.refSourced = rs.sourced;
+  gaps.refPoolOnly = rs.poolOnly;
+  gaps.refThin = rs.thin;
+  gaps.refStatus = rs.status;
   return gaps;
 }
 function loadSnapshot(snap){
@@ -6514,8 +6558,8 @@ function renderDataReportBox(){
   var clubs = 0; (snap.divisions||[]).forEach(function(d){ clubs += (d.clubs||[]).length; lines.push('<p class="sub" style="margin:0;">'+(d.name||d.id)+': '+(d.clubs||[]).length+' clubs</p>'); });
   lines.push('<p class="sub" style="margin:6px 0 0;">Players: '+g.realPlayers+' real / '+g.totalPlayers+' total ('+g.generatedPlayers+' generated)</p>');
   lines.push('<p class="sub" style="margin:0;">Managers missing: '+g.missingManagers.length+'; generated: '+g.generatedManagers+'</p>');
-  lines.push('<p class="sub" style="margin:0;">Capacities missing: '+g.missingCaps.length+'; dates of birth sourced: '+g.sourcedDobs+' / '+(g.sourcedDobs+g.missingDobs)+'</p>');
-  lines.push('<p class="sub" style="margin:0;">Referees: '+(snap.referees||[]).length+'; empty squads: '+g.emptySquads.length+'; name-key mismatches: '+g.nameKeyMismatches.length+'</p>');
+  lines.push('<p class="sub" style="margin:0;">Capacities missing: '+g.missingCaps.length+'; dates of birth sourced: '+g.sourcedDobs+' / '+g.realPlayers+' real players</p>');
+  lines.push('<p class="sub" style="margin:0;">Referees: '+(g.refSourced||0)+'/'+(g.refPool||(snap.referees||[]).length)+(g.refStatus ? ' ('+g.refStatus+')' : '')+'; empty squads: '+g.emptySquads.length+'; name-key mismatches: '+g.nameKeyMismatches.length+'</p>');
   if (g.nameKeyMismatches.length) lines.push('<p class="sub" style="margin:0;">Mismatches: '+g.nameKeyMismatches.map(function(x){ return x.club; }).join(', ')+'</p>');
   lines.push('<p class="sub" style="margin:6px 0 0;"><a href="#" id="data-report-close" style="font-size:12px;">close</a></p>');
   box.innerHTML = lines.join('');
@@ -41726,7 +41770,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v353'; /* v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v354'; /* v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
