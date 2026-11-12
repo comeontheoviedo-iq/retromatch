@@ -1860,7 +1860,9 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
       </div>
     </div>
     <a class="navlink" data-view="match"><span class="hot">M</span>ATCH DAY</a>
+    <a href="#" id="data-report-link" class="sub" style="font-size:11px; margin-left:10px; text-decoration:underline; color:inherit;">data</a>
   </div>
+  <div id="data-report-box" class="box" style="display:none; margin:8px 12px; font-size:13px;"></div>
 
   <div class="body">
     <div class="view active" id="v-week">
@@ -3715,10 +3717,12 @@ function retainAndTransferEnded(){
    this game's real research window. subsAllowed() gates a single nominated
    substitute, injury-only, from the real 1965-66 season on. */
 function subsAllowed(){
+  var v = (typeof rule === 'function') ? rule(null, null, 'subsAllowed') : undefined;
+  if (typeof v === 'boolean') return v;
   var y = (typeof seasonLabel === 'string') ? parseInt(seasonLabel.split('-')[0], 10) : NaN;
   if (isNaN(y)) y = 1946;
-  if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1966; /* Scotland: first senior substitute 13 Aug 1966 (1966-67) */
-  return y >= 1965; /* England from 1965-66; other countries keep this existing gate */
+  if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1966;
+  return y >= 1965;
 }
 /* v313 : ERA FLAG. Substitutes were INJURY-ONLY from 1965-66 (one named man, brought on only for a player unable to continue); the Football
    League let a side use him for ANY reason from 1967-68 (the season after the 1966-67 era this flag was added for). SUB_ANY_REASON_FROM is
@@ -3729,8 +3733,20 @@ var SUB_ANY_REASON_FROM = '1967-68';
 function subAnyReasonAllowed(){
   if (!subsAllowed()) return false;
   var y = (typeof seasonLabel === 'string') ? parseInt(seasonLabel.split('-')[0], 10) : NaN;
-  var from = isIta() ? 1968 : parseInt(String(SUB_ANY_REASON_FROM).split('-')[0], 10); /* v333 : Italy, the 'tredicesimo' from 1968-69 */
-  return !isNaN(y) && !isNaN(from) && y >= from;
+  if (isNaN(y)) return false;
+  /* The SUB_ANY_REASON_FROM flag still moves the rule (v313). Italy keeps the tredicesimo from 1968-69. Otherwise the calendar is the default. */
+  if (typeof isIta === 'function' && isIta()){
+    var vi = (typeof rule === 'function') ? rule(null, null, 'subAnyReason') : undefined;
+    if (typeof vi === 'boolean') return vi;
+    return y >= 1968;
+  }
+  if (typeof SUB_ANY_REASON_FROM !== 'undefined' && SUB_ANY_REASON_FROM){
+    var from = parseInt(String(SUB_ANY_REASON_FROM).split('-')[0], 10);
+    if (!isNaN(from)) return y >= from;
+  }
+  var v = (typeof rule === 'function') ? rule(null, null, 'subAnyReason') : undefined;
+  if (typeof v === 'boolean') return v;
+  return y >= 1967;
 }
 /* v170 : coloured yellow/red cards were first used in English football on 2 October 1976 (Leyton Orient v
    Blackburn Rovers and Fulham v Southampton, researched and sourced this session) -- before that a referee simply
@@ -6284,8 +6300,241 @@ var gameEra = '1946'; /* v132 : '1946' (1946-47 season, the original and only fu
    this fix -- it was built for the 1946-era save's own long march through the calendar and simply never wired up
    as a start point in its own right. */
 
+/* ===== v353 : SEASON RULES CALENDAR =====
+   One table, keyed by country, then season-start year. Each row is "from this
+   year onward" and later rows override only the keys they name. Look up with
+   rule(country, season, key). The wrappers below (pointsForWin, useGoalAverage,
+   subsAllowed, and the rest) keep their old names and read this table, so
+   behaviour stays the v352 one except where the calendar itself is the source.
+
+   To add a season of rules: push a {from:YEAR, ...keys} row for that country.
+   To add a country: add SEASON_RULES.XXX with a base row and any later changes.
+
+   Foreign-player ENFORCEMENT in the transfer market is not wired in v353.
+   The rule is available as rule(cc, season, 'foreignPlayers') and
+   rule(cc, season, 'foreignPlayerLimit'). To enforce it later you would need
+   to filter the transfer market and matchday eligibility by who counts as
+   foreign (nationality already on some player records; work-permit / quota
+   checks; a clear rule for Irish, Commonwealth and dual-national players). */
+var SEASON_RULES = {
+  ENG: [
+    {from:1946, pointsForWin:2, goalAverage:true, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'effectiveBan', foreignPlayerNote:"England had no official cap, but work-permit practice was an effective ban on overseas players until 1978-79.", europeBan:false, europeBanClubs:[], reconstruction:null},
+    {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
+    {from:1967, subAnyReason:true},
+    {from:1976, goalAverage:false},
+    {from:1978, foreignPlayers:'open', foreignPlayerNote:"Open from 1978-79."},
+    {from:1981, pointsForWin:3},
+    {from:1985, europeBan:true},
+    {from:1986, playOffs:true, subsNamed:2, subsUsedCup:2},
+    {from:1987, subsUsedLeague:2},
+    {from:1990, europeBan:false, europeBanClubs:['Liverpool']},
+    {from:1991, europeBanClubs:[]}
+  ],
+  SCO: [
+    {from:1946, pointsForWin:2, goalAverage:true, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, relPremier:2, promoFirst:2, relFirst:2, promoSecond:2, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null},
+    {from:1955, reconstruction:'enlarge18'},
+    {from:1956, reconstruction:null},
+    {from:1966, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
+    {from:1967, subAnyReason:true},
+    {from:1971, goalAverage:false},
+    {from:1973, subsNamed:2, subsUsedLeague:2, subsUsedCup:2},
+    {from:1974, reconstruction:'premier1975'},
+    {from:1975, reconstruction:null},
+    {from:1985, relPremier:1, promoFirst:3, relFirst:2, promoSecond:2, reconstruction:'premier12'},
+    {from:1986, relPremier:2, promoFirst:2, reconstruction:null},
+    {from:1994, pointsForWin:3}
+  ],
+  ITA: [
+    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:3, rel:3, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null},
+    {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
+    {from:1966, foreignPlayers:'closed', foreignPlayerNote:"Italy closed to new foreign signings from 1966-67 to 1979-80."},
+    {from:1968, subAnyReason:true},
+    {from:1980, foreignPlayers:'open', foreignPlayerNote:"Italy reopened to foreign signings from 1980-81."}
+  ],
+  ESP: [
+    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null},
+    {from:1962, foreignPlayers:'closed', foreignPlayerNote:"Spain closed its borders to foreign players from 1962-63 to 1972-73."},
+    {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
+    {from:1967, subAnyReason:true},
+    {from:1973, foreignPlayers:'open', foreignPlayerNote:"Spain reopened to foreign players from 1973-74."}
+  ],
+  DEU: [
+    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'limited', foreignPlayerLimit:2, foreignPlayerNote:"West German contract-player football, and then the Bundesliga, limited sides to two foreigners in the matchday squad (the long-standing DFB rule). Enforcement is not wired in v353.", europeBan:false, europeBanClubs:[], reconstruction:null},
+    {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
+    {from:1967, subAnyReason:true}
+  ]
+};
+function ruleCountry(country){
+  if (country) return country;
+  if (typeof gameCountry === 'string' && gameCountry) return gameCountry;
+  if (typeof isScoOnly === 'function' && isScoOnly()) return 'SCO';
+  if (typeof isIta === 'function' && isIta()) return 'ITA';
+  if (typeof isEsp === 'function' && isEsp()) return 'ESP';
+  if (typeof isDeu === 'function' && isDeu()) return 'DEU';
+  return 'ENG';
+}
+function ruleYear(season){
+  if (typeof season === 'number' && isFinite(season)) return season;
+  if (typeof season === 'string' && /^\d{4}/.test(season)) return parseInt(season, 10);
+  if (typeof seasonStartYear === 'function') return seasonStartYear();
+  if (typeof seasonLabel === 'string' && /^\d{4}/.test(seasonLabel)) return parseInt(seasonLabel, 10);
+  return 0;
+}
+function rule(country, season, key){
+  var cc = ruleCountry(country), y = ruleYear(season), rows = SEASON_RULES[cc];
+  if (!rows) return undefined;
+  var val, found = false;
+  for (var i = 0; i < rows.length; i++){
+    if (y >= rows[i].from && Object.prototype.hasOwnProperty.call(rows[i], key)){ val = rows[i][key]; found = true; }
+  }
+  return found ? val : undefined;
+}
+
+/* ===== v353 : SNAPSHOT LOADER =====
+   Standard shape per country and era:
+     {country, era, label, year, divisions:[{id,name,clubs:[{n,s,mgr,ground,cap}]}],
+      squads:{name:[...]}, referees:[], sources, flags, gaps}
+   buildSnapshotFromCurrentData() wraps the data already in the file (no rewrites).
+   loadSnapshot(snap) runs gap checks (generated people, missing managers, missing
+   capacities or dates of birth, name-key mismatches). Existing starts still use
+   their current activators; after setup they go through the loader so a new era
+   can be dropped in by registering a snapshot on ERA_SNAPSHOTS[country][era].
+   To add an era: write a snapshot in that shape, ERA_SNAPSHOTS[cc][era] = snap,
+   and hook the start picker to that era year. The loader's apply path will fill
+   the same live lists the current stubs use; until that era's clubs exist as
+   data, gap checks will list whatever is missing. */
+var ERA_SNAPSHOTS = {};
+var RM_LAST_SNAPSHOT = null, RM_LAST_GAPS = null;
+function snapshotDivisionName(id){
+  if (typeof isScoOnly === 'function' && isScoOnly() && typeof scoDivWordFor === 'function'){
+    return scoDivWordFor(null, id === 'D1' ? 1 : id === 'D2' ? 2 : 3, false);
+  }
+  return id === 'D1' ? 'First Division' : id === 'D2' ? 'Second Division' : id === 'D3' ? 'Third Division' : id === 'D4' ? 'Fourth Division' : id;
+}
+function snapshotCollectClubs(names, masters){
+  var out = [], seen = {};
+  (names || []).forEach(function(n, i){
+    if (!n || seen[n]) return;
+    seen[n] = true;
+    var m = (masters || []).filter(function(x){ return x && x.n === n; })[0] || (masters && masters[i] && masters[i].n === n ? masters[i] : null);
+    var cap = null;
+    if (typeof CLUB_GATE_1946 === 'object' && CLUB_GATE_1946[n] && CLUB_GATE_1946[n][1]) cap = CLUB_GATE_1946[n][1];
+    if (cap == null && typeof SCO_FACTS === 'object' && SCO_FACTS[n] && SCO_FACTS[n].cap) cap = SCO_FACTS[n].cap;
+    out.push({n:n, s:m && m.s, mgr:m && m.mgr, ground:m && m.ground, cap:cap, mgrGen:m && m.mgrGen});
+  });
+  return out;
+}
+function snapshotSquadFor(name){
+  var srcs = [];
+  if (typeof clubProfiles === 'object' && clubProfiles[name] && clubProfiles[name].rawSquad) srcs.push(clubProfiles[name].rawSquad);
+  ['clubProfiles1966_FIRST','clubProfiles1966_SECOND','clubProfiles1966_THIRD','clubProfiles1966_FOURTH',
+   'clubProfiles1959_FIRST','clubProfiles1959_SECOND','clubProfiles1959_THIRD','clubProfiles1959_FOURTH',
+   'clubProfilesSCO_D1','clubProfilesSCO_D2','clubProfilesSCO_POOL'].forEach(function(k){
+    var o = (typeof window !== 'undefined' ? window[k] : (typeof globalThis !== 'undefined' ? globalThis[k] : null));
+    if (o && o[name] && o[name].rawSquad) srcs.push(o[name].rawSquad);
+  });
+  if (typeof SCO_ERA_DEFS === 'object' && typeof scoEra === 'string' && SCO_ERA_DEFS[scoEra] && SCO_ERA_DEFS[scoEra].squads && SCO_ERA_DEFS[scoEra].squads[name]) srcs.push(SCO_ERA_DEFS[scoEra].squads[name]);
+  if (typeof FOR_ERA_DEFS === 'object' && typeof gameCountry === 'string' && FOR_ERA_DEFS[gameCountry]){
+    var fe = FOR_ERA_DEFS[gameCountry][typeof scoEra === 'string' ? scoEra : gameEra] || FOR_ERA_DEFS[gameCountry][gameEra];
+    if (fe && fe.squads && fe.squads[name]) srcs.push(fe.squads[name]);
+  }
+  return srcs[0] || [];
+}
+function buildSnapshotFromCurrentData(country, era){
+  country = country || (typeof gameCountry === 'string' ? gameCountry : 'ENG');
+  era = era || (typeof scoEra === 'string' && (country !== 'ENG') ? scoEra : (typeof gameEra === 'string' ? gameEra : '1946'));
+  var label = (typeof seasonLabel === 'string' && seasonLabel) ? seasonLabel : ((typeof seasonLabelForEra === 'function') ? seasonLabelForEra(era) : era);
+  var divs = [];
+  function addDiv(id, names, masters){
+    if (names && names.length) divs.push({id:id, name:snapshotDivisionName(id), clubs:snapshotCollectClubs(names, masters)});
+  }
+  if (country === 'ENG'){
+    addDiv('D1', (typeof CLUB_1966_FIRST_NAMES !== 'undefined' ? CLUB_1966_FIRST_NAMES : (typeof firstDivisionMasterClubs !== 'undefined' ? firstDivisionMasterClubs.map(function(c){return c.n;}) : [])), typeof firstDivisionMasterClubs1966_FIRST !== 'undefined' ? firstDivisionMasterClubs1966_FIRST : (typeof firstDivisionMasterClubs !== 'undefined' ? firstDivisionMasterClubs : []));
+    addDiv('D2', (typeof CLUB_1966_SECOND_NAMES !== 'undefined' ? CLUB_1966_SECOND_NAMES : []), typeof secondDivisionMasterClubs1966_SECOND !== 'undefined' ? secondDivisionMasterClubs1966_SECOND : []);
+    addDiv('D3', (typeof CLUB_1966_THIRD_NAMES !== 'undefined' ? CLUB_1966_THIRD_NAMES : []), typeof thirdDivisionMasterClubs1966_THIRD !== 'undefined' ? thirdDivisionMasterClubs1966_THIRD : []);
+    addDiv('D4', (typeof CLUB_1966_FOURTH_NAMES !== 'undefined' ? CLUB_1966_FOURTH_NAMES : []), typeof fourthDivisionMasterClubs1966_FOURTH !== 'undefined' ? fourthDivisionMasterClubs1966_FOURTH : []);
+  } else {
+    addDiv('D1', (typeof CLUB_SCO_D1_NAMES !== 'undefined' ? CLUB_SCO_D1_NAMES : (typeof CLUB_1966_FIRST_NAMES !== 'undefined' ? CLUB_1966_FIRST_NAMES : [])), typeof firstDivisionMasterClubsSCO_D1 !== 'undefined' ? firstDivisionMasterClubsSCO_D1 : (typeof firstDivisionMasterClubs1966_FIRST !== 'undefined' ? firstDivisionMasterClubs1966_FIRST : []));
+    addDiv('D2', (typeof CLUB_SCO_D2_NAMES !== 'undefined' ? CLUB_SCO_D2_NAMES : (typeof CLUB_1966_SECOND_NAMES !== 'undefined' ? CLUB_1966_SECOND_NAMES : [])), typeof secondDivisionMasterClubsSCO_D2 !== 'undefined' ? secondDivisionMasterClubsSCO_D2 : (typeof secondDivisionMasterClubs1966_SECOND !== 'undefined' ? secondDivisionMasterClubs1966_SECOND : []));
+    addDiv('D3', (typeof ESP_D3_NAMES !== 'undefined' ? ESP_D3_NAMES : (typeof CLUB_1966_THIRD_NAMES !== 'undefined' ? CLUB_1966_THIRD_NAMES : [])), typeof ESP_D3_MASTERS !== 'undefined' ? ESP_D3_MASTERS : []);
+  }
+  var squads = {}, clubs = [];
+  divs.forEach(function(d){ d.clubs.forEach(function(c){ clubs.push(c); squads[c.n] = snapshotSquadFor(c.n); }); });
+  var refs = [];
+  if (typeof refereeSeasonKey === 'function' && typeof REFEREES !== 'undefined'){
+    try { var rk = refereeSeasonKey(); if (REFEREES[rk]) refs = REFEREES[rk].slice(); } catch(e){}
+  }
+  var snap = {country:country, era:String(era), label:label, year:ruleYear(label), divisions:divs, squads:squads, referees:refs, sources:'existing in-file data, wrapped unchanged for v353', flags:{}};
+  snap.gaps = snapshotGapChecks(snap);
+  return snap;
+}
+function snapshotGapChecks(snap){
+  var gaps = {generatedPlayers:0, realPlayers:0, totalPlayers:0, missingManagers:[], generatedManagers:0, missingCaps:[], missingDobs:0, sourcedDobs:0, nameKeyMismatches:[], emptySquads:[]};
+  var squadKeys = Object.keys(snap.squads || {});
+  (snap.divisions || []).forEach(function(d){
+    d.clubs.forEach(function(c){
+      if (!c.mgr) gaps.missingManagers.push(c.n);
+      if (c.mgrGen) gaps.generatedManagers++;
+      if (c.cap == null || !(c.cap > 0)) gaps.missingCaps.push(c.n);
+      var sq = (snap.squads && snap.squads[c.n]) || [];
+      if (!sq.length){
+        gaps.emptySquads.push(c.n);
+        /* a listed club name with no squad under that exact key — the 1959 Bournemouth kind of mismatch */
+        if (squadKeys.indexOf(c.n) < 0) gaps.nameKeyMismatches.push({club:c.n, reason:'listed name has no squad key'});
+      }
+      sq.forEach(function(p){
+        gaps.totalPlayers++;
+        if (p && p.gen) gaps.generatedPlayers++; else gaps.realPlayers++;
+        if (p && p.dob) gaps.sourcedDobs++; else gaps.missingDobs++;
+      });
+    });
+  });
+  return gaps;
+}
+function loadSnapshot(snap){
+  if (!snap) return null;
+  snap.gaps = snapshotGapChecks(snap);
+  RM_LAST_SNAPSHOT = snap; RM_LAST_GAPS = snap.gaps;
+  if (!ERA_SNAPSHOTS[snap.country]) ERA_SNAPSHOTS[snap.country] = {};
+  ERA_SNAPSHOTS[snap.country][snap.era] = snap;
+  return snap;
+}
+function bootEraSnapshot(){
+  try {
+    return loadSnapshot(buildSnapshotFromCurrentData());
+  } catch(e){ return null; }
+}
+function renderDataReportBox(){
+  var box = document.getElementById('data-report-box');
+  if (!box) return;
+  var snap = RM_LAST_SNAPSHOT, g = RM_LAST_GAPS;
+  if (!snap || !g){ box.innerHTML = '<p class="sub">No snapshot yet. Start a game to run the loader\'s gap checks for that era.</p>'; box.style.display = 'block'; return; }
+  var lines = [];
+  lines.push('<p class="sub" style="margin:0 0 6px;"><b>'+(snap.country||'')+' '+(snap.label||snap.era)+'</b> — data report (read-only, no invented figures)</p>');
+  var clubs = 0; (snap.divisions||[]).forEach(function(d){ clubs += (d.clubs||[]).length; lines.push('<p class="sub" style="margin:0;">'+(d.name||d.id)+': '+(d.clubs||[]).length+' clubs</p>'); });
+  lines.push('<p class="sub" style="margin:6px 0 0;">Players: '+g.realPlayers+' real / '+g.totalPlayers+' total ('+g.generatedPlayers+' generated)</p>');
+  lines.push('<p class="sub" style="margin:0;">Managers missing: '+g.missingManagers.length+'; generated: '+g.generatedManagers+'</p>');
+  lines.push('<p class="sub" style="margin:0;">Capacities missing: '+g.missingCaps.length+'; dates of birth sourced: '+g.sourcedDobs+' / '+(g.sourcedDobs+g.missingDobs)+'</p>');
+  lines.push('<p class="sub" style="margin:0;">Referees: '+(snap.referees||[]).length+'; empty squads: '+g.emptySquads.length+'; name-key mismatches: '+g.nameKeyMismatches.length+'</p>');
+  if (g.nameKeyMismatches.length) lines.push('<p class="sub" style="margin:0;">Mismatches: '+g.nameKeyMismatches.map(function(x){ return x.club; }).join(', ')+'</p>');
+  lines.push('<p class="sub" style="margin:6px 0 0;"><a href="#" id="data-report-close" style="font-size:12px;">close</a></p>');
+  box.innerHTML = lines.join('');
+  box.style.display = 'block';
+  var cl = document.getElementById('data-report-close');
+  if (cl) cl.addEventListener('click', function(ev){ ev.preventDefault(); box.style.display = 'none'; });
+}
+function bindDataReportLink(){
+  var a = document.getElementById('data-report-link');
+  if (!a || a._bound) return;
+  a._bound = true;
+  a.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); renderDataReportBox(); });
+}
+
+
 function pointsForWin(){
-  /* England: 3pts from 1981-82. Scotland: still 2pts (3pts from 1994-95). Other playable countries stay on 2 for their seeded eras. */
+  /* v353 : from the season rules calendar. England: 3pts from 1981-82. Scotland: 2pts until 1994-95. Other playable countries stay on 2 for their seeded eras. */
+  var v = (typeof rule === 'function') ? rule(null, null, 'pointsForWin') : undefined;
+  if (typeof v === 'number') return v;
   if (typeof isSco === 'function' && isSco()) return 2;
   var y = (typeof seasonLabel === 'string' && /^\d{4}/.test(seasonLabel)) ? parseInt(seasonLabel, 10) : 0;
   return (y >= 1981) ? 3 : 2;
@@ -6293,14 +6542,16 @@ function pointsForWin(){
 
 /* ===== v348 : 1986-87 rules (season-based, so a long save crossing in also gets them) ===== */
 function seasonStartYear(){ return (typeof seasonLabel === 'string' && /^\d{4}/.test(seasonLabel)) ? parseInt(seasonLabel, 10) : 0; }
-function engPlayOffsOn(){ return !(typeof isSco === 'function' && isSco()) && !(typeof isCont === 'function' && isCont()) && seasonStartYear() >= 1986; }
+function engPlayOffsOn(){ var v = (typeof rule === 'function') ? rule(null, null, 'playOffs') : undefined; if (typeof v === 'boolean') return v; return !(typeof isSco === 'function' && isSco()) && !(typeof isCont === 'function' && isCont()) && seasonStartYear() >= 1986; }
 function engReElectionOn(){ return !engPlayOffsOn() && !!fourthDivisionCreated && !(typeof isSco === 'function' && isSco()) && !(typeof isCont === 'function' && isCont()); }
-function engEuropeBanOn(y){ y = (y == null) ? seasonStartYear() : +y; return (typeof gameCountry === 'string' ? gameCountry === 'ENG' : (typeof isSco === 'function' ? !isSco() : true)) && y >= 1985 && y <= 1989; } /* 1985-86 through 1989-90; English clubs only */
+function engEuropeBanOn(y){ y = (y == null) ? seasonStartYear() : +y; var v = (typeof rule === 'function') ? rule('ENG', y, 'europeBan') : undefined; if (typeof v === 'boolean') return (typeof gameCountry === 'string' ? gameCountry === 'ENG' : (typeof isSco === 'function' ? !isSco() : true)) && v; return (typeof gameCountry === 'string' ? gameCountry === 'ENG' : (typeof isSco === 'function' ? !isSco() : true)) && y >= 1985 && y <= 1989; } /* 1985-86 through 1989-90; English clubs only */
 function engClubEuropeBanned(club, y){
-  /* v352 : the Heysel ban lifts for English clubs in 1990-91, but Liverpool served one extra year and only returned in 1991-92. */
+  /* v353 : calendar. Heysel lifts in 1990-91; Liverpool served one extra year and returned in 1991-92. */
   y = (y == null) ? seasonStartYear() : +y;
   if (typeof gameCountry === 'string' && gameCountry !== 'ENG') return false;
   if (typeof engEuropeBanOn === 'function' && engEuropeBanOn(y)) return true;
+  var extra = (typeof rule === 'function') ? rule('ENG', y, 'europeBanClubs') : undefined;
+  if (Array.isArray(extra)) return extra.indexOf(club) >= 0;
   return y === 1990 && club === 'Liverpool';
 }
 function engLeagueCupName(){ var y = seasonStartYear(); if (y >= 1986 && y <= 1989) return 'Littlewoods Cup'; if (y >= 1982 && y <= 1985) return 'Milk Cup'; return 'League Cup'; }
@@ -6310,17 +6561,22 @@ function refreshLeagueCupName(){ try { LCUP_NAME = currentLeagueCupName(); } cat
 /* 1986-87 League: still one substitute. Two were allowed in the League Cup and FA Cup from 1986-87, and in League matches from 1987-88. */
 function subsAllowedCount(){
   if (typeof subsAllowed === 'function' && !subsAllowed()) return 0;
-  var y = seasonStartYear();
   var f = (typeof fixtures !== 'undefined' && typeof fixtureIdx === 'number') ? fixtures[fixtureIdx] : null;
   var isCup = !!(f && (f.isCup || f.isLCup || f.isPlayOff || f.isEuroCup || f.isCWC || f.isFairs));
-  if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1973 ? 2 : 1; /* Scotland: two named substitutes in all matches from 1973-74 */
-  if (isCup && y >= 1986) return 2; /* England: FA Cup, League Cup, play-offs and Europe from 1986-87 */
-  if (!isCup && y >= 1987) return 2; /* England: League from 1987-88 */
+  var key = isCup ? 'subsUsedCup' : 'subsUsedLeague';
+  var v = (typeof rule === 'function') ? rule(null, null, key) : undefined;
+  if (typeof v === 'number') return v;
+  var y = seasonStartYear();
+  if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1973 ? 2 : 1;
+  if (isCup && y >= 1986) return 2;
+  if (!isCup && y >= 1987) return 2;
   return (typeof subsAllowed === 'function' && subsAllowed()) ? 1 : 0;
 }
 /* v352 : how many substitutes you may NAME this season (the cups may allow two before the League does). */
 function subsNamedMax(){
   if (typeof subsAllowed === 'function' && !subsAllowed()) return 0;
+  var v = (typeof rule === 'function') ? rule(null, null, 'subsNamed') : undefined;
+  if (typeof v === 'number') return v;
   var y = seasonStartYear();
   if (typeof isScoOnly === 'function' && isScoOnly()) return y >= 1973 ? 2 : 1;
   if (y >= 1986) return 2;
@@ -6606,9 +6862,9 @@ function applyEngPlayOffMovements(mv){
 }
 
 function useGoalAverage(){
-  /* England used goal average until the end of 1975-76; goal difference from 1976-77.
-     Scotland used goal average until the end of 1970-71; goal difference from 1971-72.
-     Italy, Spain and West Germany stay on goal difference (do not use isSco(), which is "not England"). */
+  /* v353 : from the season rules calendar. England through 1975-76; Scotland through 1970-71; Italy, Spain and West Germany on goal difference. */
+  var v = (typeof rule === 'function') ? rule(null, null, 'goalAverage') : undefined;
+  if (typeof v === 'boolean') return v;
   var y = (typeof seasonLabel === 'string' && /^\d{4}/.test(seasonLabel)) ? parseInt(seasonLabel, 10) : 9999;
   if (typeof isScoOnly === 'function' && isScoOnly()) return y > 0 && y <= 1970;
   if (typeof isCont === 'function' && isCont()) return false;
@@ -11341,8 +11597,8 @@ function foreignCupName(){ var c = foreignCfg(); return c ? c.cup : 'FA Cup'; }
 function foreignCupBr(){ var c = foreignCfg(); return c ? c.cupBr : 'F.A.<br>Cup'; }
 function foreignLeagueName(){ var c = foreignCfg(); return c ? c.league : 'Football League'; }
 function foreignFinalGround(){ var c = foreignCfg(); return c ? c.finalGround : 'Wembley'; }
-function promoN(){ if (typeof isScoOnly === 'function' && isScoOnly()){ var _y = parseInt(String(seasonLabel||'').split('-')[0], 10); if (_y === 1985){ if (divisionTier === 2) return 3; if (divisionTier === 3) return 0; if (divisionTier === 1) return 2; } } if (isPyr()) return espRule(parseInt(seasonLabel,10)).up; var c = foreignCfg(); return c ? c.up : 2; }
-function relN(){ if (typeof isScoOnly === 'function' && isScoOnly()){ var _y = parseInt(String(seasonLabel||'').split('-')[0], 10); if (_y === 1985){ if (divisionTier === 3) return 1; if (divisionTier === 2) return 2; return 0; } } if (isPyr()) return espRule(parseInt(seasonLabel,10)).d1d; var c = foreignCfg(); return c ? c.down : 2; }
+function promoN(){ if (typeof isScoOnly === 'function' && isScoOnly()){ if (divisionTier === 3){ var p0 = (typeof rule==='function') ? rule('SCO', null, 'promo') : undefined; } if (divisionTier === 2){ var pf = (typeof rule==='function') ? rule('SCO', null, 'promoFirst') : undefined; if (typeof pf === 'number') return pf; } if (divisionTier === 3){ var pp = (typeof rule==='function') ? rule('SCO', null, 'relPremier') : undefined; /* premier does not promote */ if (typeof rule==='function' && rule('SCO', null, 'reconstruction') === 'premier12') return 0; } if (divisionTier === 1){ var ps = (typeof rule==='function') ? rule('SCO', null, 'promoSecond') : undefined; if (typeof ps === 'number') return ps; } var _y = parseInt(String(seasonLabel||'').split('-')[0], 10); if (_y === 1985){ if (divisionTier === 2) return 3; if (divisionTier === 3) return 0; if (divisionTier === 1) return 2; } } if (isPyr()) return espRule(parseInt(seasonLabel,10)).up; var c = foreignCfg(); return c ? c.up : 2; }
+function relN(){ if (typeof isScoOnly === 'function' && isScoOnly()){ if (divisionTier === 3){ var rp = (typeof rule==='function') ? rule('SCO', null, 'relPremier') : undefined; if (typeof rp === 'number') return rp; } if (divisionTier === 2){ var rf = (typeof rule==='function') ? rule('SCO', null, 'relFirst') : undefined; if (typeof rf === 'number') return rf; } var _y = parseInt(String(seasonLabel||'').split('-')[0], 10); if (_y === 1985){ if (divisionTier === 3) return 1; if (divisionTier === 2) return 2; return 0; } } if (isPyr()) return espRule(parseInt(seasonLabel,10)).d1d; var c = foreignCfg(); return c ? c.down : 2; }
 var espDropped = false, ESP_LOCK = null;
 function espWorldRegSet(cc){ cc = cc || 'ESP'; var R = espRule(parseInt(seasonLabel,10), cc); WORLD_REG[cc].tiers[0].down = R.d1d; WORLD_REG[cc].tiers[1].up = (cc === 'ITA' || cc === 'DEU' || R.mode === 'single') ? R.up : 2; }
 function espWorldAdjust(C, next, sorted, cc){ /* the other-country Spain : the same reforms as the live engine, in outline */
@@ -17898,6 +18154,7 @@ function applyEraTheme(){
 /*THEME-JS-END*/
 function renderStatus(){
   try{ applyEraTheme(); }catch(e){}
+  try{ bindDataReportLink(); }catch(e){}
   try{ worldNavRefresh(); }catch(e){} /* v330 */ /* v311 : era theme class follows gameEra on every status refresh, so a new game, a loaded save and a restored session all pick it up */
   var next = fixtures[fixtureIdx];
   var nextLabel = next ? ((next.isCup?'FA CUP V ':next.isLCup?String(typeof LCUP_NAME==='string' ? LCUP_NAME : 'League Cup').toUpperCase()+' V ':next.isFriendly?(next.isTrial?'TRIAL V ':'FRIENDLY V '):(next.home?'V ':'AT '))+next.opp.toUpperCase()) : 'SEASON COMPLETE';
@@ -24181,6 +24438,7 @@ function finishNewGameSetup(){
   gotoView('week');
   addNews('board', 'A new season begins : the '+seasonLabel+' campaign starts here.');
   showManagerSetup();
+  try{ bootEraSnapshot(); bindDataReportLink(); }catch(e){}
 }
 /* ---------- CLUB PICKER: shown at NEW GAME once more than one club has a
    profile in clubProfiles (see that object for what a club needs before it
@@ -39144,7 +39402,7 @@ function scoNextMembers(){
     return {D1:noUs(n1), D2:noUs(n2), D3:noUs(n3), D4:[], '3S':[], '3N':[], userKey:userKey};
   }
   /* v352 : 1974-75 -> 1975-76 reconstruction. Top 10 of Division One form the Premier; the rest of Division One plus the top 6 of Division Two form the First (14); the rest of Division Two form the Second (14). Meadowbank Thistle, already in the 1975 data, is added if the league is a club short. */
-  if (isScoOnly() && yFin === 1974 && s1.length >= 16){
+  if (isScoOnly() && s1.length >= 16 && (yFin === 1974 || (typeof rule === 'function' && rule('SCO', yFin, 'reconstruction') === 'premier1975'))){
     n1 = s1.slice(0, 10);
     n2 = s1.slice(10).concat(s2.slice(0, 6));
     n3 = s2.slice(6);
@@ -39155,7 +39413,7 @@ function scoNextMembers(){
     return pack();
   }
   /* v352 : 1985-86 -> 1986-87. Premier grows 10 to 12 by one down and three up; First and Second then exchange two. */
-  if (isScoOnly() && yFin === 1985 && s1.length <= 10){
+  if (isScoOnly() && s1.length <= 10 && (yFin === 1985 || (typeof rule === 'function' && rule('SCO', yFin, 'reconstruction') === 'premier12'))){
     var relP = s1.slice(-1), proF = s2.slice(0, 3);
     n1 = s1.filter(function(n){ return relP.indexOf(n) < 0; }).concat(proF);
     var relF = s2.slice(-2), proS = s3.slice(0, 2);
@@ -41468,7 +41726,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v352'; /* v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v353'; /* v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
   var hasSave = anySavedGame();
