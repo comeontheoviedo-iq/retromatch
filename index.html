@@ -17048,6 +17048,19 @@ function makeSchoolboyTarget(noteOverride){
     scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:'"'+(noteOverride||pick(schoolboyNoteTemplates))+'"'};
 }
 function generateInitialTargets(){
+  if (typeof scoutingFromSixties === 'function' && scoutingFromSixties()){
+    var counts = openingScoutMixCounts();
+    var outM = [];
+    var k;
+    for (k=0;k<counts.league;k++){
+      var gem = (typeof makeRealClubScoutTip === 'function') ? makeRealClubScoutTip() : null;
+      if (gem) outM.push(gem);
+      else outM.push(makeAmateurTarget()); /* no invented League name if the real pool is thin */
+    }
+    for (k=0;k<counts.nonleague;k++) outM.push(makeAmateurTarget());
+    for (k=0;k<counts.youth;k++) outM.push(makeSchoolboyTarget(typeof youthScoutNote==='function' ? youthScoutNote() : undefined));
+    return outM;
+  }
   var out = [];
   for (var i=0;i<4;i++) out.push(makeProTarget());
   for (var j=0;j<2;j++) out.push(makeAmateurTarget());
@@ -23836,16 +23849,298 @@ function checkRealSchoolboyLegends(){
    mechanism the club browser's own APPROACH/SCOUT buttons use, so buying him really does take him off
    that real club's real books. Falls back to the old fictional makeProTarget if no real candidate turns
    up (an early save where few clubs have been looked at yet, or bad luck finding an untargeted man). */
+/* v368 : from the 1960s, scouts mostly recommend real players at real
+   Football League (and Scottish League) clubs already in the save, scaled
+   to our own division. A First Division club is pointed at gems in
+   Divisions Two, Three and Four plus Scotland; lower clubs see more
+   non-league and youth. Non-league stays occasional for a higher club
+   even in the 1980s. Pre-1960 keeps the existing amateur/non-league-heavy
+   mix. Asking prices use the v359 era fee scale. Notes follow the season. */
+function scoutingFromSixties(){
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : 0;
+  return y >= 1960;
+}
+function scoEraKeyForScouting(){
+  if (typeof isScoOnly === 'function' && isScoOnly() && typeof scoEra === 'string' && scoEra) return scoEra;
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : 1946;
+  var keys = ['1946','1950','1959','1966','1970','1975','1981','1986'];
+  var best = null;
+  keys.forEach(function(k){
+    if (typeof SCO_ERA_DEFS === 'object' && SCO_ERA_DEFS[k] && typeof SCO_ERA_DEFS[k].year === 'number' && y >= SCO_ERA_DEFS[k].year) best = k;
+  });
+  if (best) return best;
+  if (y >= 1966) return '1966';
+  return (typeof scoEra === 'string' && scoEra) ? scoEra : '1966';
+}
+function scoDefForScouting(){
+  var k = scoEraKeyForScouting();
+  if (typeof SCO_ERA_DEFS === 'object' && SCO_ERA_DEFS[k]) return SCO_ERA_DEFS[k];
+  return null;
+}
+function engLiveClubNames(key){
+  try {
+    if (typeof aiLiveTierData !== 'function') return [];
+    var d = aiLiveTierData(key);
+    return (d && d.names) ? d.names.filter(function(n){ return n && n !== ourClubName; }) : [];
+  } catch (e) { return []; }
+}
+function scoClubsForScouting(){
+  var def = scoDefForScouting();
+  var out = [];
+  function add(list, band){
+    (list || []).forEach(function(n){ if (n && n !== ourClubName) out.push({n:n, band:band}); });
+  }
+  if (def){
+    add(def.d1, 'top');
+    add(def.d2, 'lower');
+    add(def.d2b, 'lower');
+    add(def.d3, 'lower');
+  } else {
+    add(typeof CLUB_SCO_D1_NAMES !== 'undefined' ? CLUB_SCO_D1_NAMES : [], 'top');
+    add(typeof CLUB_SCO_D2_NAMES !== 'undefined' ? CLUB_SCO_D2_NAMES : [], 'lower');
+  }
+  return out;
+}
+function rawSquadForScouting(clubName){
+  if (typeof clubProfiles === 'object' && clubProfiles[clubName] && clubProfiles[clubName].rawSquad && clubProfiles[clubName].rawSquad.length){
+    return clubProfiles[clubName].rawSquad;
+  }
+  var def = scoDefForScouting();
+  if (def && def.squads && def.squads[clubName] && def.squads[clubName].length) return def.squads[clubName];
+  if (typeof SQUADS_SCO_D1 === 'object' && SQUADS_SCO_D1[clubName]) return SQUADS_SCO_D1[clubName];
+  if (typeof SQUADS_SCO_D2 === 'object' && SQUADS_SCO_D2[clubName]) return SQUADS_SCO_D2[clubName];
+  return null;
+}
+function ensureScoutableSquad(clubName){
+  if (typeof clubSquads === 'undefined' || typeof scoutedPlayers === 'undefined') return [];
+  if (clubName === ourClubName) return [];
+  if (clubSquads[clubName] && clubSquads[clubName].length) return clubSquads[clubName];
+  if (typeof clubProfiles === 'object' && clubProfiles[clubName] && clubProfiles[clubName].rawSquad && clubProfiles[clubName].rawSquad.length){
+    var sq = (typeof ensureClubSquad === 'function') ? ensureClubSquad(clubName) : null;
+    return sq || [];
+  }
+  return [];
+}
+function scoutSellerTier(clubName){
+  if (typeof sellerFeeTier === 'function'){
+    var d = (typeof divisionMembersFor === 'function') ? divisionMembersFor(clubName) : null;
+    if (d && typeof d.tier === 'number') return d.tier;
+    if (typeof isNonLeagueSeller === 'function' && isNonLeagueSeller(clubName)) return -1;
+  }
+  var sco = scoClubsForScouting();
+  var hit = sco.filter(function(c){ return c.n === clubName; })[0];
+  if (hit) return hit.band === 'top' ? 2 : 1; /* Scottish top flight priced nearer English Second; lower Scottish nearer Third. A scale mapping, not a sourced Scottish fee table. */
+  if (typeof targetClubTier === 'function') return targetClubTier(clubName);
+  return 0;
+}
+function leagueScoutNote(p, clubName){
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : 1966;
+  var pos = (typeof displayPosOf === 'function') ? displayPosOf(p) : (p.pos || 'player');
+  var pool;
+  if (y >= 1980){
+    pool = [
+      'Seen him a couple of times for '+clubName+'. A '+pos.toLowerCase()+' who can play a bit — the sort that gets missed until a bigger club comes in.',
+      'Worth a look at '+clubName+'. Asking money looks about right for this level if you move before someone else does.',
+      'Not a headline name, which is rather the point. He would not look out of place a division higher.',
+      'A useful type, still with a few seasons in him. '+clubName+' will want a proper fee, but it is not silly money.'
+    ];
+  } else if (y >= 1970){
+    pool = [
+      'A tidy '+pos.toLowerCase()+' at '+clubName+'. I have seen enough to say he would not look out of place with us.',
+      'Well thought of in his own division. Whether he would fancy the step up, I could not yet swear to, but the ability is there.',
+      'Worth putting in a bid while he is still at '+clubName+' — once a bigger club comes calling the price will jump.',
+      'Does the simple things well and does not hide. The reports I have match what I saw myself.'
+    ];
+  } else {
+    pool = [
+      'A useful '+pos.toLowerCase()+' with '+clubName+'. I have seen him twice this season and would recommend a closer look.',
+      'Strong enough for our company, I think, and not yet priced as if the whole League has noticed him.',
+      'Reads the play well and is not afraid of the work. His own club will not want to lose him, mind.',
+      'A genuine prospect at this level. Fair to run the rule over him before we talk money.'
+    ];
+  }
+  return '"'+pick(pool)+'"';
+}
+function youthScoutNote(){
+  var path = (typeof youthPath === 'function') ? youthPath() : 'schoolboy';
+  if (path === 'yts'){
+    return pick([
+      'Still a boy, but the local sides cannot get the ball off him. Worth taking on under the Youth Training Scheme and seeing what he grows into.',
+      'Turns heads for his school and youth sides already. Far too early to say, but worth a place on the YTS intake.'
+    ]);
+  }
+  if (path === 'apprentice'){
+    return pick([
+      'Still at school, so this is a long way off paying dividends, but worth putting him on apprentice forms and seeing what he grows into.',
+      'The schoolboy sides cannot get the ball off him. Too early to say what he will become, but worth an apprenticeship.'
+    ]);
+  }
+  return pick(typeof schoolboyNoteTemplates !== 'undefined' ? schoolboyNoteTemplates : ['Worth keeping an eye on.']);
+}
+function gemScore(p){
+  var age = typeof p.age === 'number' ? p.age : 24;
+  var rep = typeof p.rep === 'number' ? p.rep : 2;
+  var s = 1;
+  if (age >= 18 && age <= 27) s += 1.4;
+  else if (age >= 28 && age <= 30) s += 0.4;
+  else if (age >= 32) s -= 0.6;
+  if (rep >= 2 && rep <= 4) s += 1.0;
+  else if (rep === 1) s += 0.2;
+  else if (rep >= 5) s -= 0.3; /* a known star is not really a scout's hidden gem */
+  if (p.gen) s -= 2;
+  return Math.max(0.1, s);
+}
+function weightedPickGem(list){
+  if (!list || !list.length) return null;
+  var total = 0, i, r, acc = 0;
+  for (i=0;i<list.length;i++) total += gemScore(list[i]);
+  r = Math.random() * total;
+  for (i=0;i<list.length;i++){ acc += gemScore(list[i]); if (r <= acc) return list[i]; }
+  return list[list.length-1];
+}
+function makeTargetFromSquadPlayer(clubName, p, scoutName){
+  if (!p) return null;
+  var year = (typeof seasonStartYear === 'function') ? seasonStartYear() : undefined;
+  var tier = scoutSellerTier(clubName);
+  var ca = (typeof p.ca === 'number') ? p.ca : ((typeof repCA !== 'undefined' && repCA[p.rep]) || 50);
+  var age = (typeof p.age === 'number') ? p.age : 24;
+  var priced = mispricedAsking(realisticTransferFee(ca, tier, age, year), tier <= 1);
+  var attrs = p.attrs ? Object.assign({}, p.attrs) : null;
+  return {
+    n:p.n, pos:p.pos, club:clubName, nation:(p.nation || ((typeof homeNation==='function')?homeNation():'England')),
+    contract:'pro', price:priced.price, _trueValueFee:priced.trueFee, rep:p.rep,
+    apps:p.apps || 0, goals:p.goalsSeason || p.goals || 0, age:age, ca:ca, attrs:attrs,
+    scout:scoutName || pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false,
+    note:leagueScoutNote(p, clubName),
+    _sourceClub:clubName, _sourceIsClubSquad:true, _scoutGem:true
+  };
+}
+function makeRealClubScoutTipFromPool(pool, wantPos){
+  if (typeof clubSquads === 'undefined' || typeof scoutedPlayers === 'undefined') return null;
+  if (!pool || !pool.length) return null;
+  var names = pool.map(function(x){ return x.n || x; });
+  var tries, i, clubName, sq, cands, man, t, raw, scoutName;
+  scoutName = pick(Object.keys(scouts||{}));
+  for (tries=0; tries<14; tries++){
+    clubName = pick(names);
+    if (!clubName || clubName === ourClubName) continue;
+    sq = ensureScoutableSquad(clubName);
+    if (sq && sq.length){
+      cands = sq.filter(function(p){
+        if (!p || !p.n || p.gen) return false;
+        if (typeof alreadyATarget === 'function' && alreadyATarget(clubName, p.n)) return false;
+        if (wantPos){
+          var sp = String(p.pos||'');
+          if (sp !== wantPos && (typeof slotFine === 'function' ? slotFine(sp) !== slotFine(wantPos) : true) && (typeof slotFor === 'function' ? slotFor(sp) !== slotFor(wantPos) : true)) return false;
+        }
+        return true;
+      });
+      man = weightedPickGem(cands);
+      if (!man) continue;
+      if (typeof createClubApproachTarget === 'function'){
+        t = createClubApproachTarget(clubName, man.n, 'scout');
+        if (!t) continue;
+        var ix = targets.indexOf(t);
+        if (ix >= 0) targets.splice(ix, 1);
+        t.scout = scoutName;
+        t.note = leagueScoutNote(man, clubName);
+        t._scoutGem = true;
+        var year = (typeof seasonStartYear === 'function') ? seasonStartYear() : undefined;
+        var priced = mispricedAsking(realisticTransferFee(t.ca, scoutSellerTier(clubName), t.age, year), scoutSellerTier(clubName) <= 1);
+        t.price = priced.price; t._trueValueFee = priced.trueFee;
+        return t;
+      }
+      t = makeTargetFromSquadPlayer(clubName, man, scoutName);
+      if (t) return t;
+    }
+    /* Scottish (or other) clubs that are in the era data but not live in this save: build a tip from the sourced raw squad, never invent a name. */
+    raw = rawSquadForScouting(clubName);
+    if (!raw || !raw.length) continue;
+    cands = raw.filter(function(p){
+      if (!p || !p.n || p.gen) return false;
+      if (typeof alreadyATarget === 'function' && alreadyATarget(clubName, p.n)) return false;
+      if (wantPos){
+        var sp2 = String(p.pos||'');
+        if (sp2 !== wantPos && (typeof slotFine === 'function' ? slotFine(sp2) !== slotFine(wantPos) : true)) return false;
+      }
+      return true;
+    });
+    man = weightedPickGem(cands);
+    if (!man) continue;
+    t = makeTargetFromSquadPlayer(clubName, man, scoutName);
+    if (t) return t;
+  }
+  return null;
+}
+function scoutLeaguePoolForUs(){
+  var tier = (typeof divisionTier === 'number') ? divisionTier : 3;
+  var sco = scoClubsForScouting();
+  var scoTop = sco.filter(function(c){ return c.band === 'top'; });
+  var scoLow = sco.filter(function(c){ return c.band === 'lower'; });
+  var d2 = engLiveClubNames('D2');
+  var d3 = engLiveClubNames(typeof fourthDivisionCreated !== 'undefined' && fourthDivisionCreated ? 'D3' : (typeof divisionRegion === 'string' && divisionRegion === 'N' ? '3N' : '3S'));
+  var d4 = (typeof fourthDivisionCreated !== 'undefined' && fourthDivisionCreated) ? engLiveClubNames('D4') : [];
+  /* When we are Scottish, "lower league gems" are the lower Scottish rungs plus the English Second, Third and Fourth. */
+  if (typeof isScoOnly === 'function' && isScoOnly()){
+    if (tier >= 3) return scoLow.concat(d2, d3, d4).map(function(x){ return x.n || x; }).filter(Boolean).map(function(n){ return {n:n}; });
+    if (tier === 2) return scoLow.concat(d3, d4).map(function(x){ return x.n || x; }).filter(Boolean).map(function(n){ return {n:n}; });
+    return d4.concat(scoLow.map(function(c){ return c.n; })).filter(Boolean).map(function(n){ return {n:n}; });
+  }
+  var pool = [];
+  function add(list, w){
+    (list||[]).forEach(function(n){ var name = n && (n.n||n); if (name) pool.push({n:name, w:w||1}); });
+  }
+  if (tier === 3){ add(d2, 4); add(d3, 3); add(d4, 2); add(scoTop, 0.8); add(scoLow, 1.4); }
+  else if (tier === 2){ add(d3, 4); add(d4, 3); add(scoLow, 1.2); add(scoTop, 0.4); add(d2, 0.6); }
+  else if (tier === 1){ add(d4, 4); add(d3, 1.2); add(scoLow, 0.8); }
+  else { add(d4, 3); add(scoLow, 0.5); }
+  /* weighted flatten */
+  var flat = [];
+  pool.forEach(function(row){
+    var n = Math.max(1, Math.round(row.w));
+    for (var i=0;i<n;i++) flat.push({n:row.n});
+  });
+  return flat.length ? flat : pool;
+}
+function scoutTipMixWeights(){
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : 1966;
+  var tier = (typeof divisionTier === 'number') ? divisionTier : 3;
+  var eighties = y >= 1980;
+  if (tier === 3) return {league:0.82, nonleague: eighties ? 0.10 : 0.08, youth: eighties ? 0.08 : 0.10};
+  if (tier === 2) return {league:0.62, nonleague:0.22, youth:0.16};
+  if (tier === 1) return {league:0.45, nonleague:0.32, youth:0.23};
+  return {league:0.32, nonleague:0.40, youth:0.28};
+}
+function pickScoutTipKind(){
+  var w = scoutTipMixWeights();
+  var r = Math.random();
+  if (r < w.league) return 'league';
+  if (r < w.league + w.nonleague) return 'nonleague';
+  return 'youth';
+}
+function openingScoutMixCounts(){
+  var tier = (typeof divisionTier === 'number') ? divisionTier : 3;
+  /* seven names, same length as the long-standing opening list, but the mix follows the club's rung. */
+  if (tier === 3) return {league:5, nonleague:1, youth:1};
+  if (tier === 2) return {league:4, nonleague:2, youth:1};
+  if (tier === 1) return {league:3, nonleague:2, youth:2};
+  return {league:2, nonleague:3, youth:2};
+}
+
 function researchedClubNamesForScouting(){
   return Object.keys(clubProfiles).filter(function(c){ return c!==ourClubName && clubProfiles[c] && clubProfiles[c].rawSquad && clubProfiles[c].rawSquad.length; });
 }
-function makeRealClubScoutTip(){
+function makeRealClubScoutTip(wantPos){
   /* v283 DEFENSIVE FIX, SAME ROOT CAUSE AS v159's identical guard on simulateRivalTransferMarket: clubSquads
      and scoutedPlayers (both declared much further down the file) don't exist yet the very first time
      generateWeeklyNews() ever runs -- the page's own startup sequence calls it unconditionally, once, before
      execution has reached either declaration. Confirmed by direct reproduction (a real crash on page load)
      before fixing it, not just read and patched. */
   if (typeof clubSquads === 'undefined' || typeof scoutedPlayers === 'undefined') return null;
+  if (typeof scoutingFromSixties === 'function' && scoutingFromSixties()){
+    var modern = makeRealClubScoutTipFromPool(scoutLeaguePoolForUs(), wantPos);
+    if (modern) return modern;
+  }
   var pool = researchedClubNamesForScouting();
   if (!pool.length) return null;
   for (var tries=0; tries<6; tries++){
@@ -23864,15 +24159,32 @@ function makeRealClubScoutTip(){
   }
   return null;
 }
-function pickScoutTip(){
-  if (Math.random() < 0.3){ var realT = makeRealClubScoutTip(); if (realT) return realT; }
+function pickScoutTip(wantPos){
+  /* v368 : from the 1960s the mix is league-gems first, then non-league, then youth, scaled to our division. */
+  if (typeof scoutingFromSixties === 'function' && scoutingFromSixties()){
+    var kind = pickScoutTipKind();
+    if (kind === 'league'){
+      var realT = makeRealClubScoutTip(wantPos);
+      if (realT) return realT;
+    }
+    if (kind === 'youth') return makeSchoolboyTarget(youthScoutNote());
+    var nl = makeAmateurTarget();
+    if (wantPos) nl.pos = wantPos;
+    return nl;
+  }
+  if (Math.random() < 0.3){ var realOld = makeRealClubScoutTip(wantPos); if (realOld) return realOld; }
   var roll = Math.random();
-  return roll < 0.55 ? makeProTarget() : roll < 0.9 ? makeAmateurTarget() : makeSchoolboyTarget();
+  return roll < 0.55 ? makeProTarget(wantPos) : roll < 0.9 ? makeAmateurTarget() : makeSchoolboyTarget();
 }
 function maybeGenerateFreshScoutTip(){
   if (targets.length >= 9) return;
   if (scoutBrief && Math.random() < 0.45){
-    var briefTarget = makeProTarget(scoutBrief.pos, scoutBrief);
+    var briefTarget = null;
+    if (typeof scoutingFromSixties === 'function' && scoutingFromSixties()){
+      briefTarget = makeRealClubScoutTip(scoutBrief.pos);
+    }
+    if (!briefTarget) briefTarget = makeProTarget(scoutBrief.pos, scoutBrief);
+    else if (scoutBrief.attr) briefTarget.briefAttr = scoutBrief.attr;
     targets.push(briefTarget);
     addNews('board', briefTarget.scout+' reports back on the instruction: '+briefTarget.n+' ('+briefTarget.pos.toUpperCase()+', '+briefTarget.club.toUpperCase()+') fits the bill.');
   }
@@ -43307,7 +43619,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v367'; /* v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v368'; /* v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
