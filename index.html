@@ -2286,6 +2286,7 @@ html body .rmx .ttl{ }
           <p><span class="field">BOARD TARGET THIS SEASON</span><br><span class="val" id="club-board-target">--</span></p>
           <p><span class="field" id="club-trainer-title">TRAINER</span><br><span class="val" id="club-trainer">Bert Symons</span><span class="val" id="club-trainer-duty"> : handles fitness &amp; injuries</span></p>
           <p><span class="field" id="club-secretary-title">CLUB SECRETARY</span><br><span class="val" id="club-secretary">W. H. Cobbett</span><span class="val" id="club-secretary-duty"> : books, correspondence, gate takings</span></p>
+          <p id="club-assistant-row" style="display:none;"><span class="field" id="club-assistant-title">ASSISTANT MANAGER</span><br><span class="val" id="club-assistant">In post</span><span class="val" id="club-assistant-duty"> : helps with training, coaching and matchdays</span></p>
           <p><span class="field">TEAM CAPTAIN</span><br><select id="captain-select" style="width:100%; margin-top:2px;"></select></p>
           <p><span class="field">PENALTY TAKER</span><br><select id="penalty-taker-select" style="width:100%; margin-top:2px;"></select></p>
         </div>
@@ -6751,6 +6752,7 @@ var SEASON_RULES = {
     {from:1946, pointsForWin:2, goalAverage:true, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'effectiveBan', foreignPlayerNote:"England had no official cap, but work-permit practice was an effective ban on overseas players until 1978-79.", europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager', staffTrainerTitle:'trainer', staffTrainerThe:'the trainer', staffTrainerDuty:'handles fitness & injuries', staffSecretaryTitle:'club secretary', staffSecretaryDuty:'books, correspondence, gate takings'},
     {from:1959, jobTitle:'manager'},
     {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
+    {from:1966, staffAssistant:true, staffAssistantTitle:'assistant manager', staffAssistantThe:'the assistant manager', staffAssistantDuty:'helps with training, coaching and matchdays'},
     {from:1967, subAnyReason:true},
     {from:1970, staffTrainerTitle:'physiotherapist', staffTrainerThe:'the physiotherapist', staffTrainerDuty:'fitness and treatment'},
     {from:1976, goalAverage:false},
@@ -6769,7 +6771,7 @@ var SEASON_RULES = {
     {from:1955, reconstruction:'enlarge18'},
     {from:1956, reconstruction:null},
     {from:1959, jobTitle:'manager'},
-    {from:1966, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
+    {from:1966, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1, staffAssistant:true, staffAssistantTitle:'assistant manager', staffAssistantThe:'the assistant manager', staffAssistantDuty:'helps with training, coaching and matchdays'},
     {from:1967, subAnyReason:true},
     {from:1970, staffTrainerTitle:'physiotherapist', staffTrainerThe:'the physiotherapist', staffTrainerDuty:'fitness and treatment'},
     {from:1971, goalAverage:false},
@@ -6893,6 +6895,57 @@ function staffTrainerThe(season, country){ return staffTitle('staffTrainerThe', 
 function staffTrainerDuty(season, country){ return staffTitle('staffTrainerDuty', season, country) || 'handles fitness & injuries'; }
 function staffSecretaryTitle(season, country){ return staffTitle('staffSecretaryTitle', season, country) || 'club secretary'; }
 function staffSecretaryDuty(season, country){ return staffTitle('staffSecretaryDuty', season, country) || 'books, correspondence, gate takings'; }
+function staffAssistantOn(season, country){ return !!staffTitle('staffAssistant', season, country); }
+function staffAssistantTitle(season, country){ return staffTitle('staffAssistantTitle', season, country) || 'assistant manager'; }
+function staffAssistantThe(season, country){ return staffTitle('staffAssistantThe', season, country) || ('the ' + staffAssistantTitle(season, country)); }
+function staffAssistantDuty(season, country){ return staffTitle('staffAssistantDuty', season, country) || 'helps with training, coaching and matchdays'; }
+function staffAssistantTitleLabel(form, season, country){
+  var title = staffAssistantTitle(season, country);
+  if (form === 'upper') return String(title).toUpperCase();
+  if (form === 'title') return String(title).replace(/(^|-)([a-z])/g, function(_, a, b){ return a + b.toUpperCase(); });
+  return title;
+}
+/* v366 : real named assistants only where sourced. A formal assistant-manager post was still unusual
+   at most Football League clubs before the mid-1960s (Matt Busby appointing one at Manchester United
+   in the post-war years is documented as an unusual step — Doras / Grant & Robertson). The row is
+   offered from 1966-67 in England and Scotland. Unsourced clubs get a generic unnamed post, never
+   an invented person. Liverpool: Ronnie Moran joined the coaching staff full-time in 1968-69
+   (Wikipedia, Coaching career); Roy Evans became reserve-team coach in 1974 (Wikipedia). Sources
+   describe them as Boot Room coaches rather than a formal "assistant manager" appointment in 1981-86;
+   they are shown here as the club's sourced coaching staff in this post. Archie Knox was Ferguson's
+   assistant at Aberdeen from 18 Aug 1980 until Dundee appointed him manager on 15 Dec 1983
+   (aberdeen-fc.com Family/DNA; scottishfootballhistory.scot). He returned to Aberdeen as co-manager
+   on 9 Aug 1986 and left after 18 Nov 1986, then followed Ferguson to Manchester United. A 1986-87
+   English opening still has Ron Atkinson as United manager, so Knox is not placed at Old Trafford
+   from August 1986 (the game has no mid-season Ferguson appointment yet). */
+function staffDateISO(){
+  if (typeof currentDate !== 'undefined' && currentDate && currentDate.getFullYear){
+    var y = currentDate.getFullYear(), m = currentDate.getMonth()+1, d = currentDate.getDate();
+    return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  }
+  var y = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  return y+'-08-01';
+}
+var SOURCED_ASSISTANTS = [
+  {club:'Liverpool', from:'1968-08-01', to:'1974-06-30', name:'Ronnie Moran', duty:'first-team coaching'},
+  {club:'Liverpool', from:'1974-07-01', to:'1998-06-30', name:'Ronnie Moran and Roy Evans', duty:'first-team and reserve coaching'},
+  {club:'Aberdeen', from:'1980-08-18', to:'1983-12-15', name:'Archie Knox', duty:'assistant manager'},
+  {club:'Aberdeen', from:'1986-08-09', to:'1986-11-18', name:'Archie Knox', duty:'co-manager'}
+];
+function sourcedAssistant(club, when){
+  club = club || (typeof ourClubName==='undefined' ? '' : ourClubName);
+  when = when || staffDateISO();
+  var hit = null;
+  SOURCED_ASSISTANTS.forEach(function(row){
+    if (row.club===club && when>=row.from && when<=row.to) hit = row;
+  });
+  return hit;
+}
+function assistantManagerDisplay(club, when){
+  var row = sourcedAssistant(club, when);
+  if (row) return {name:row.name, duty:row.duty, sourced:true};
+  return {name:'In post', duty:staffAssistantDuty(), sourced:false};
+}
 function staffTrainerTitleLabel(form, season, country){
   var t = staffTrainerTitle(season, country);
   if (form === 'upper') return String(t).toUpperCase();
@@ -6917,6 +6970,20 @@ function updateStaffPanelTitles(){
   if (sr) sr.textContent = staffSecretaryTitleLabel('upper');
   var sd = document.getElementById('club-secretary-duty');
   if (sd) sd.textContent = ' : ' + staffSecretaryDuty();
+  var row = document.getElementById('club-assistant-row');
+  if (row){
+    var on = (typeof staffAssistantOn==='function') && staffAssistantOn();
+    row.style.display = on ? '' : 'none';
+    if (on){
+      var at = document.getElementById('club-assistant-title');
+      if (at) at.textContent = staffAssistantTitleLabel('upper');
+      var info = assistantManagerDisplay();
+      var an = document.getElementById('club-assistant');
+      if (an) an.textContent = info.name;
+      var ad = document.getElementById('club-assistant-duty');
+      if (ad) ad.textContent = info.duty ? (' : ' + info.duty) : '';
+    }
+  }
 }
 
 /* v363 : British Home Championship last real season was 1983-84. */
@@ -43057,7 +43124,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v365'; /* v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v366'; /* v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
