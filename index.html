@@ -2857,7 +2857,8 @@ body.theme-shoot .clock, body.theme-shoot #match-clock{
       </div>
       <div class="box" id="inmatch-box" style="display:none; margin-top:14px;">
         <div class="box-title">TOUCHLINE INSTRUCTIONS</div>
-        <p class="sub">No substitutes in this era, but a word can still reach the captain between passages of play : a shout, a wave, a runner sent from the bench.</p>
+        <p class="sub" id="im-sub-note">No substitutes in this era, but a word can still reach the captain between passages of play : a shout, a wave, a runner sent from the bench.</p>
+        <div id="im-sub-controls" class="sub" style="margin:6px 0;"></div>
         <p class="sub" style="margin:6px 0 4px;">APPROACH: <span id="im-approach-current" class="val"></span></p>
         <div class="matchctl">
           <button id="im-attacking">PUSH FOR IT</button>
@@ -4609,6 +4610,11 @@ function judgeBoardTarget(position, fieldSize, promoted, relegated){
    genuine request to be moved on -- but REFUSING it outright is a completely
    safe, period-accurate answer, not a gamble against some hidden meter. */
 var pendingUnhappyPlayerId = null;
+function signingWageFor(rep, clubName){
+  /* v374 : every trialist, free, youth or generated signing wage goes through ERA_ECONOMICS (typicalWageForTier via wageForRep), scaled by division / club. No hardcoded 1946-era £4. */
+  if (typeof wageForRep === 'function') return Math.max(1, wageForRep(rep, clubName));
+  return 4;
+}
 function expectedWageFor(p){ return wageForRep(p.rep); }
 function updatePlayerDiscontent(){
   squad.forEach(function(p){
@@ -4705,7 +4711,7 @@ var squad = rawSquad.map(function(p, i){
   var age = p.rep>=3 ? (24 + Math.round(seededRand(i*4.4)*7)) :
             (seededRand(i*5.6) < 0.5 ? (18 + Math.round(seededRand(i*6.7)*5)) : (31 + Math.round(seededRand(i*7.8)*6)));
   var attrs = buildAttributes(ca, slot, i*11);
-  return Object.assign({id:i, n:p.n, pos:p.pos, rep:p.rep, slot:slot, ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, wage:wageForRep(p.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:foreignNation(p), gen:(p.gen ? true : undefined), nat:null, injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false}, attrs);
+  return Object.assign({id:i, n:p.n, pos:p.pos, rep:p.rep, slot:slot, ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, wage:signingWageFor(p.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:foreignNation(p), gen:(p.gen ? true : undefined), nat:null, injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false}, attrs);
 });
 function effectiveCA(p){
   var hobblePenalty = (typeof live!=='undefined' && live && live.hobbledIds && p && live.hobbledIds.indexOf(p.id)>=0) ? 18 : 0; /* v169 : a man carrying a knock with no substitute to cover him, shifted out wide -- see the injury branch of simulateMinuteBlock */
@@ -4851,12 +4857,94 @@ var firstNamePool = ["Bill","Fred","Stan","Reg","Wilf","Cyril","Norman","Leonard
   "Walter","Edward","Charlie","Clifford","Dennis","Donald","Douglas","Edwin","Gordon","Henry","Hubert","Ivor","Kenneth",
   "Maurice","Neville","Ronald","Roy","Stanley","Sydney","Wilfred","Cecil","Clarence","Colin","Derek","Geoffrey","Gerald",
   "Godfrey","Hector","Ivan","Keith","Lionel","Malcolm","Reggie","Sydney","Wally","Wilf"];
+/* v374 : generated-person forenames by decade. The 1940s/50s pool above stays the default (and the Italy/Spain/Germany country swap still uses firstNamePool). 1980s names follow Chris's list plus other common period forenames. Generated people stay gen:true and are shown with a dagger; they never take a real player's name. */
+var FIRST_NAMES_BY_DECADE = {
+  1946: null,
+  1960: ["Bobby","Jimmy","Terry","Alan","Geoff","Roger","Brian","Peter","John","David","Tony","Mike","Chris","Keith","Colin","Barry","Graham","Ian","Michael","Raymond","Trevor","Ron","Derek","Kenny","Billy","Eddie","Johnny","Tommy","George","Frank"],
+  1970: ["Kevin","Steve","Paul","Mick","Trevor","Kenny","Alan","Dave","Tony","Peter","Bob","Ian","John","Mike","Brian","Chris","Gordon","Terry","Gary","Andy","Neil","Phil","Martin","David"],
+  1980: ["Gary","Steve","Paul","Mark","Darren","Lee","Kevin","Andy","Neil","Tony","Ian","Chris","John","David","Peter","Michael","Wayne","Craig","Scott","Jason","Dean","Ricky","Nigel","Adrian","Shaun"]
+};
+var SCO_FIRST_NAMES_BY_DECADE = {
+  1960: ["Willie","Jimmy","Davie","Bobby","Billy","Alec","Ian","Kenny","John","Tommy","Gordon","Eddie","Andy","Peter","Jim","Hugh","Drew","Bertie","Stevie","Alan"],
+  1970: ["Davie","Stevie","Kenny","Gordon","Andy","Paul","Alan","Jim","John","Ian","Billy","Willie","Derek","Kevin","Gary","Peter","Dave","Tommy","Brian","Mike"],
+  1980: ["Gary","Steve","Paul","Mark","Darren","Lee","Kevin","Andy","Davie","Stevie","Gordon","Kenny","Neil","Ian","John","David","Craig","Scott","Derek","Alan","Billy","Tony","Chris"]
+};
+function eraNameDecade(year){
+  var y = (typeof year==='number' && !isNaN(year)) ? year : ((typeof seasonStartYear==='function') ? seasonStartYear() : 1946);
+  if (y >= 1980) return 1980;
+  if (y >= 1970) return 1970;
+  if (y >= 1960) return 1960;
+  return 1946;
+}
+function eraFirstNamePool(nation, year){
+  var dec = eraNameDecade(year);
+  var nat = nation || ((typeof isScoOnly==='function' && isScoOnly()) ? 'Scotland' : 'England');
+  if (nat==='Scotland') return SCO_FIRST_NAMES_BY_DECADE[dec] || scottishFirstNamePool;
+  if (nat==='Wales') return welshFirstNamePool;
+  if (nat==='Northern Ireland') return niFirstNamePool;
+  if (nat==='Ireland') return irishFirstNamePool;
+  if (nat==='England') {
+    if (FIRST_NAMES_BY_DECADE[dec]) return FIRST_NAMES_BY_DECADE[dec];
+    return firstNamePool;
+  }
+  /* Italy / Spain / West Germany (and any other) keep their own country pools; never English 1980s names. */
+  return firstNamePool;
+}
+var _realNameSetCache = null, _realNameSetKey = "";
+function realPersonNameSet(){
+  var key = String(typeof gameCountry==="string"?gameCountry:"ENG")+"|"+String(typeof seasonStartYear==="function"?seasonStartYear():"");
+  if (_realNameSetCache && _realNameSetKey===key) return _realNameSetCache;
+  var set = {}, add = function(n){ if (n) set[String(n).toLowerCase().replace(/\s+/g," ").trim()] = 1; };
+  function walkSquads(obj){
+    if (!obj) return;
+    Object.keys(obj).forEach(function(c){
+      (obj[c]||[]).forEach(function(p){ if (p && p.n && !p.gen) add(p.n); });
+    });
+  }
+  var tables = [typeof SQUADS==='object'&&SQUADS, typeof SQUADS_1981==='object'&&SQUADS_1981, typeof SQUADS_1986==='object'&&SQUADS_1986, typeof SQUADS_1975==='object'&&SQUADS_1975, typeof SQUADS_1970==='object'&&SQUADS_1970, typeof SQUADS_1966_FIRST==='object'&&SQUADS_1966_FIRST, typeof SQUADS_1966_SECOND==='object'&&SQUADS_1966_SECOND, typeof SQUADS_1966_THIRD==='object'&&SQUADS_1966_THIRD, typeof SQUADS_1966_FOURTH==='object'&&SQUADS_1966_FOURTH, typeof SQUADS_1959_FIRST==='object'&&SQUADS_1959_FIRST, typeof SQUADS_1959_SECOND==='object'&&SQUADS_1959_SECOND, typeof SQUADS_1959_THIRD==='object'&&SQUADS_1959_THIRD, typeof SQUADS_1959_FOURTH==='object'&&SQUADS_1959_FOURTH, typeof SQUADS_1950_FIRST==='object'&&SQUADS_1950_FIRST, typeof SQUADS_1950_SECOND==='object'&&SQUADS_1950_SECOND, typeof SQUADS_1950_THIRDNORTH==='object'&&SQUADS_1950_THIRDNORTH, typeof SQUADS_1950_THIRDSOUTH==='object'&&SQUADS_1950_THIRDSOUTH, typeof SQUADS_SCO_D1==='object'&&SQUADS_SCO_D1, typeof SQUADS_SCO_D2==='object'&&SQUADS_SCO_D2];
+  tables.forEach(function(obj){ if (obj) walkSquads(obj); });
+  if (typeof clubProfiles==='object' && clubProfiles){
+    Object.keys(clubProfiles).forEach(function(c){
+      var raw = clubProfiles[c] && clubProfiles[c].rawSquad;
+      if (raw) raw.forEach(function(p){ if (p && p.n && !p.gen) add(p.n); });
+    });
+  }
+  if (typeof SCO_ERA_DEFS==="object"){
+    Object.keys(SCO_ERA_DEFS).forEach(function(er){
+      var d = SCO_ERA_DEFS[er];
+      if (d && d.squads) walkSquads(d.squads);
+      if (d && d.masters) Object.keys(d.masters).forEach(function(c){ if (d.masters[c] && d.masters[c].mgr) add(String(d.masters[c].mgr).replace(/\u2020/g,"").trim()); });
+    });
+  }
+  if (typeof squad==="object" && squad && squad.length) squad.forEach(function(p){ if (p && p.n && !p.gen) add(p.n); });
+  _realNameSetCache = set; _realNameSetKey = key;
+  return set;
+}
+function pickGeneratedName(nation, seed){
+  if (!nation){
+    if (typeof isScoOnly==='function' && isScoOnly()) nation = 'Scotland';
+    else if (typeof homeNation==='function') nation = homeNation();
+    else nation = 'England';
+  }
+  var pools = (typeof namePoolsFor==="function") ? namePoolsFor(nation) : {first:firstNamePool, sur:surnamePool};
+  var firsts = (typeof eraFirstNamePool==="function") ? eraFirstNamePool(nation) : pools.first;
+  var surs = pools.sur || surnamePool;
+  var real = realPersonNameSet();
+  var n, i, guard=40;
+  for (i=0;i<guard;i++){
+    var fn = (typeof seed==="number" && typeof pick2==="function") ? pick2(firsts, seed*1.9+i) : pick(firsts);
+    var sn = (typeof seed==="number" && typeof pick2==="function") ? pick2(surs, seed*2.4+i*1.7) : pick(surs);
+    n = fn + " " + sn;
+    if (!real[n.toLowerCase()]) return n;
+  }
+  return n;
+}
 function namePoolsFor(nation){
-  if (nation==='Scotland') return {first:scottishFirstNamePool, sur:scottishSurnamePool};
-  if (nation==='Wales') return {first:welshFirstNamePool, sur:welshSurnamePool};
-  if (nation==='Northern Ireland') return {first:niFirstNamePool, sur:niSurnamePool};
-  if (nation==='Ireland') return {first:irishFirstNamePool, sur:irishSurnamePool};
-  return {first:firstNamePool, sur:surnamePool};
+  if (nation==="Scotland") return {first:eraFirstNamePool("Scotland"), sur:scottishSurnamePool};
+  if (nation==='Wales') return {first:eraFirstNamePool('Wales'), sur:welshSurnamePool};
+  if (nation==='Northern Ireland') return {first:eraFirstNamePool('Northern Ireland'), sur:niSurnamePool};
+  if (nation==='Ireland') return {first:eraFirstNamePool('Ireland'), sur:irishSurnamePool};
+  return {first:eraFirstNamePool(nation||'England'), sur:surnamePool};
 }
 /* An opponent with a real, sourced clubProfiles entry (i.e. one that's also
    selectable at NEW GAME) now actually turns out its real 1946-47 players
@@ -5428,13 +5516,13 @@ function genOppSquad(clubStrength, seedBase, oppName){
       var ca = (real && euStar) ? clamp(clubStrength - 9 + (real.rep-3)*5 + (seededRand(seed)-0.5)*8, 15, 95) : real ? (target!==null ? aiScaledCA(real.rep, target, seed, centre) : clamp(repCA[real.rep] + (seededRand(seed)-0.5)*10, 15, 95))
                     : (target!==null ? clamp(target + (seededRand(seed)-0.5)*14, 15, 95) : clamp(clubStrength - 10 + (seededRand(seed)-0.5)*24, 15, 95));
       var attrs = buildAttributes(ca, grp.slot, seed);
-      var name = real ? real.n : ((!profile && oppName && typeof euFillerName==='function' && euFillerName(oppName)) || (pick(firstNamePool) + ' ' + pick(surnamePool))); /* v319 : a foreign club's unnamed men carry names of their own country */
+      var name = real ? real.n : ((!profile && oppName && typeof euFillerName==='function' && euFillerName(oppName)) || (pickGeneratedName())); /* v319 : a foreign club's unnamed men carry names of their own country */
       /* v218: carry the real researched position string through (e.g. "Outside-Right",
          "Centre-Half") so a shirt-number lineup built from this squad can match each man
          to his own real position via autoAssignSlotsForPlayers, same as our own squad --
          a generated filler (no real pos) still gets his broad slot, which the scorer
          functions below fall back on. */
-      players.push(Object.assign({n:name, pos:real ? real.pos : null, slot:grp.slot, ca:Math.round(ca)}, attrs));
+      players.push(Object.assign({n:name, pos:real ? real.pos : null, slot:grp.slot, ca:Math.round(ca), gen: real ? !!real.gen : true}, attrs));
       counter++;
     }
   });
@@ -5686,11 +5774,13 @@ function generateStaffNames(){
     usedSurnames.push(s);
     return s;
   }
-  trainerName = pick(firstNamePool)+' '+freshSurname();
-  clubSecretaryName = pick(firstNamePool).charAt(0)+'. '+pick(firstNamePool).charAt(0)+'. '+freshSurname();
+  var staffNat = (typeof isScoOnly==='function' && isScoOnly()) ? 'Scotland' : 'England';
+  var firsts = (typeof eraFirstNamePool==='function') ? eraFirstNamePool(staffNat) : firstNamePool;
+  trainerName = pick(firsts)+' '+freshSurname();
+  clubSecretaryName = pick(firsts).charAt(0)+'. '+pick(firsts).charAt(0)+'. '+freshSurname();
   scouts = {};
-  var scout1Name = pick(firstNamePool).charAt(0)+'. '+freshSurname();
-  var scout2Name = pick(firstNamePool).charAt(0)+'. '+freshSurname();
+  var scout1Name = pick(firsts).charAt(0)+'. '+freshSurname();
+  var scout2Name = pick(firsts).charAt(0)+'. '+freshSurname();
   scouts[scout1Name] = {rep:30, wage:(typeof eraScoutWage==='function'?eraScoutWage(2):2), specialty:null};
   scouts[scout2Name] = {rep:70, wage:(typeof eraScoutWage==='function'?eraScoutWage(3):3), specialty:null};
 }
@@ -6798,7 +6888,7 @@ function buildFreshSquadForClub(clubName){
     applyRawTalentSpikes(attrs); /* same fix as initClubSquad -- see its note */
     var realCaps = realStartingCapsFor(p.n, clubName); /* v162 : see REAL_ENGLAND_CAPS above -- real, sourced caps if this is a real capped international at the right club for this era, else null */
     var nat = natForPlayer(p.n, clubName) || p.nat || null; /* v356 : raw-squad nat if natForPlayer has no 1946/1950 club-keyed hit */
-    return Object.assign({id:i, n:p.n, pos:p.pos, rep:p.rep, slot:slot, ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, wage:wageForRep(p.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:foreignNation(p), gen:(p.gen ? true : undefined), nat:nat, injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false, caps:realCaps||0, intlCallUps:0}, attrs);
+    return Object.assign({id:i, n:p.n, pos:p.pos, rep:p.rep, slot:slot, ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, wage:signingWageFor(p.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:foreignNation(p), gen:(p.gen ? true : undefined), nat:nat, injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false, caps:realCaps||0, intlCallUps:0}, attrs);
   });
 }
 /* ---------- ACCEPTING A JOB OFFER, FOR REAL: previously an "approach from
@@ -6981,7 +7071,7 @@ function performClubMoveMidSeason(move){
   var master = newTier===3 ? firstDivisionMasterClubs : newTier===2 ? secondDivisionMasterClubs : thirdMasterFor(newRegion);
   rivals = newDiv.clubs.filter(function(c){ return c.n!==newClub; }).map(function(c){
     var m = master.find(function(x){ return x.n===c.n; });
-    return {n:c.n, s:c.s, mgr: m ? m.mgr : pick(firstNamePool)+' '+pick(surnamePool), ground: m ? m.ground : c.n+' Ground'};
+    return {n:c.n, s:c.s, mgr: m ? m.mgr : pickGeneratedName(), ground: m ? m.ground : c.n+' Ground'};
   });
   table = {};
   newDiv.clubs.forEach(function(c){ var t = newDiv.table[c.n] || {p:0,w:0,d:0,l:0,f:0,a:0,pts:0}; table[c.n] = {p:t.p,w:t.w,d:t.d,l:t.l,f:t.f,a:t.a,pts:t.pts}; });
@@ -8015,6 +8105,60 @@ function takeLiveSub(){
   live.subsUsed = (live.subsUsed || 0) + 1;
   live.subUsed = live.subsUsed >= live.subPlayers.length;
   return p;
+}
+
+/* v374 : era wording for substitutes, driven by SEASON_RULES (subsAllowed / subsNamed / subsUsedLeague / subsUsedCup / subAnyReason).
+   England: Football League one substitute from 1965-66, injury only for the first two seasons (Keith Peacock, 21 Aug 1965); any reason from 1967-68 (soccerhistory.co.uk; LFChistory; IFAB 1967/68 Laws). Chris recalled any-reason from 1966-67; the sourced date is 1967-68, which this game already used and keeps. Two named in the cups from 1986-87, two in League matches from 1987-88 (existing comment and LFChistory).
+   Scotland: one substitute from 1966-67 (Archie Gemmill for St Mirren v Clyde, League Cup, 13 Aug 1966 — Glasgow Times / The Courier; Celtic Star notes the 1966-67 rule was for an injured player). Two substitutes from the start of 1973-74 (Dundee FC official history: "From the start of the 1973/74 season, two substitutes were to be allowed for the first time"). */
+function subTouchlineNote(){
+  if (typeof subsAllowed === 'function' && !subsAllowed()){
+    return 'No substitutes in this era, but a word can still reach the captain between passages of play : a shout, a wave, a runner sent from the bench.';
+  }
+  var used = (typeof subsAllowedCount === 'function') ? subsAllowedCount() : 1;
+  var named = (typeof subsNamedMax === 'function') ? subsNamedMax() : used;
+  var any = (typeof subAnyReasonAllowed === 'function') && subAnyReasonAllowed();
+  var reason = any ? 'for injury or a tactical change' : 'for injury only — not a tactical change';
+  if (named >= 2 && used === 1){
+    return 'Name two substitutes. Two may be used in the cups; League matches still allow one, ' + reason + '.';
+  }
+  if (used >= 2){
+    return (any ? 'Two named substitutes. Either may be used for injury or a tactical change.' : 'Two named substitutes, injury only.');
+  }
+  return (any
+    ? 'One named substitute, who may come on for injury or a tactical change.'
+    : 'One named substitute, who may come on for injury only — not a tactical change.');
+}
+function subLineupBlurbSuffix(){
+  if (typeof subsAllowed === 'function' && subsAllowed()){
+    return 'CLICK A NAME TO PICK HIM, CLICK HIS ROW\'S FILE LINK TO CHECK HIM FIRST.';
+  }
+  var y = 1965;
+  if (typeof isScoOnly === 'function' && isScoOnly()) y = 1966;
+  return 'NO SUBSTITUTES PERMITTED UNTIL THE REAL ' + y + '-' + String(y+1).slice(-2) + ' SEASON (SEE BELOW ONCE YOU REACH IT). CLICK A NAME TO PICK HIM, CLICK HIS ROW\'S FILE LINK TO CHECK HIM FIRST.';
+}
+function liveUnusedSubs(){
+  if (!live || typeof subsAllowed !== 'function' || !subsAllowed()) return [];
+  var used = live.subsUsed || 0;
+  var list = live.subPlayers || (live.subPlayer ? [live.subPlayer] : []);
+  return list.slice(used);
+}
+function liveSendOnSubstitute(offId){
+  if (!live || !live.ourXI) return false;
+  if (typeof subAnyReasonAllowed === 'function' && !subAnyReasonAllowed()) return false;
+  var left = liveUnusedSubs();
+  if (!left.length) return false;
+  var offP = live.ourXI.filter(function(x){ return x && x.id === offId; })[0];
+  if (!offP) return false;
+  if (/goalkeeper/i.test(offP.pos) && !/goalkeeper/i.test(left[0].pos)) return false;
+  var onP = (typeof takeLiveSub === 'function') ? takeLiveSub() : left[0];
+  if (!onP) return false;
+  var ix = live.ourXI.indexOf(offP);
+  if (ix < 0) return false;
+  live.ourXI[ix] = onP;
+  if (!live.subPlayers) live.subUsed = true;
+  if (typeof addLine === 'function') addLine('card', 'A CHANGE FROM THE BENCH : ' + onP.n.toUpperCase() + ' COMES ON FOR ' + offP.n.toUpperCase() + '.');
+  if (typeof renderInMatchBox === 'function') renderInMatchBox();
+  return true;
 }
 
 /* --- 1986-87 / 1987-88 inter-divisional play-off shape (one club from the division above + three from below). From 1988-89 the higher-division club drops out. */
@@ -16680,9 +16824,9 @@ function updateLineupEraBlurb(){
   var el = document.getElementById('lineup-era-blurb'); if (!el) return;
   var f = tactics && tactics.formation;
   var name = (typeof ERA_SHAPE_NAME!=='undefined' && typeof eraPitchShapeKey==='function' && ERA_SHAPE_NAME[eraPitchShapeKey()]) || formationSheetLabel(f||'235');
-  var sub = (typeof subsAllowed==='function' && subsAllowed())
+  var sub = (typeof subLineupBlurbSuffix==='function') ? subLineupBlurbSuffix() : ((typeof subsAllowed==='function' && subsAllowed())
     ? 'CLICK A NAME TO PICK HIM, CLICK HIS ROW\'S FILE LINK TO CHECK HIM FIRST.'
-    : 'NO SUBSTITUTES PERMITTED UNTIL THE REAL 1965-66 SEASON (SEE BELOW ONCE YOU REACH IT). CLICK A NAME TO PICK HIM, CLICK HIS ROW\'S FILE LINK TO CHECK HIM FIRST.';
+    : 'NO SUBSTITUTES PERMITTED UNTIL THE REAL 1965-66 SEASON (SEE BELOW ONCE YOU REACH IT). CLICK A NAME TO PICK HIM, CLICK HIS ROW\'S FILE LINK TO CHECK HIM FIRST.');
   el.textContent = name + ' : ' + sub;
 }
 
@@ -17184,7 +17328,7 @@ var dangerManThreats = {
 function dangerManFor(oppName){
   var seed = 0; for (var i=0;i<oppName.length;i++) seed += oppName.charCodeAt(i)*1.3;
   var pos = oppPositionPool[Math.floor(seededRand(seed)*oppPositionPool.length)];
-  var name = pick2(firstNamePool, seed*1.9)+' '+pick2(surnamePool, seed*2.4);
+  var name = pickGeneratedName(null, seed);
   var threat = dangerManThreats[pos][Math.floor(seededRand(seed*3.1)*dangerManThreats[pos].length)];
   return {name:name, pos:pos, threat:threat};
 }
@@ -17394,7 +17538,7 @@ function updateScoutReputations(){
    is randomised fresh each new game, so you won't see the same eight men
    every time you start over. */
 var transferMarketPositions = ["Goalkeeper","Full-Back","Centre-Half","Wing-Half","Inside-Forward","Outside-Right","Outside-Left","Centre-Forward"];
-function genMarketPlayerName(nation){ var pools = namePoolsFor(nation); return pick(pools.first)+' '+pick(pools.sur); }
+function genMarketPlayerName(nation){ return (typeof pickGeneratedName==='function') ? pickGeneratedName(nation) : (function(){ var pools = namePoolsFor(nation); return pick(pools.first)+' '+pick(pools.sur); })(); }
 /* FIXED A REAL BUG HERE, per direct report: scouting only ever turned up
    England/Wales/Scotland non-league names, with nothing at all from
    Northern Ireland or Ireland (the Republic) despite both being genuine,
@@ -17546,7 +17690,7 @@ function makeProTarget(forcedPos, brief){
   var prof = rollTargetProfile(rep, pos);
   var priced = mispricedAsking(realisticTransferFee(prof.ca, (typeof sellerFeeTier==='function' ? sellerFeeTier(src.club) : 1), age), true); /* v359 : English non-league (Chelmsford, Guildford, etc.) uses the non-league cap; Scottish/Irish league sides stay on a lower-League scale */
   return {n:genMarketPlayerName(src.nation), pos:pos, club:src.club, nation:src.nation, contract:'pro', price:priced.price, _trueValueFee:priced.trueFee, rep:rep, apps:apps, goals:goals, age:age, ca:prof.ca, attrs:prof.attrs,
-    scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:note, briefAttr:(brief?brief.attr:null)};
+    scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:note, briefAttr:(brief?brief.attr:null), gen:true};
 }
 /* ---------- RAW TALENT SPIKES: a real gap fixed here, per direct report.
    A schoolboy or amateur is always low-rep (his overall game is unrefined,
@@ -17573,14 +17717,14 @@ function makeAmateurTarget(){
   var repA = 1+Math.floor(Math.random()*3), profA = rollTargetProfile(repA, pos);
   applyRawTalentSpikes(profA.attrs);
   return {n:genMarketPlayerName(), pos:pos, club:pick(isIta() ? ITA_AMATEUR_SOURCES : isEsp() ? ESP_AMATEUR_SOURCES : isDeu() ? DEU_AMATEUR_SOURCES : amateurSourceClubs)+(typeof amateurClubSuffix==='function' ? amateurClubSuffix() : ' (Amateur)'), nation:homeNation(), contract:'amateur', price:0, rep:repA, apps:0, goals:0, age:18+Math.floor(Math.random()*7), ca:profA.ca, attrs:profA.attrs,
-    scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:'"'+pick((typeof amateurNotesForSeason==='function'?amateurNotesForSeason():amateurNoteTemplates))+'"'};
+    scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:'"'+pick((typeof amateurNotesForSeason==='function'?amateurNotesForSeason():amateurNoteTemplates))+'"', gen:true};
 }
 function makeSchoolboyTarget(noteOverride){
   var posSb = pick(["Inside-Forward","Centre-Forward","Wing-Half"]);
   var profSb = rollTargetProfile(1, posSb);
   applyRawTalentSpikes(profSb.attrs);
   return {n:genMarketPlayerName(), pos:posSb, club:ourClubName+" Schoolboys", nation:homeNation(), contract:'schoolboy', price:0, rep:1, apps:0, goals:0, age:14+Math.floor(Math.random()*2), ca:profSb.ca, attrs:profSb.attrs,
-    scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:'"'+(noteOverride||pick(schoolboyNoteTemplates))+'"'};
+    scout:pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false, note:'"'+(noteOverride||pick(schoolboyNoteTemplates))+'"', gen:true};
 }
 function generateInitialTargets(){
   if (typeof scoutingFromSixties === 'function' && scoutingFromSixties()){
@@ -17757,7 +17901,7 @@ function renderTargets(){
     var tr = document.createElement('tr');
     var recordLine = t.contract==='schoolboy' ? 'SCHOOLBOY, UNCAPPED' : t.contract==='amateur' ? ((typeof amateurRecordLine==='function') ? amateurRecordLine() : 'AMATEUR, UNCAPPED') : (t.apps+' APPS, '+t.goals+' GOALS');
     var priceLine = t.contract!=='pro' ? 'TRIAL ONLY' : ('£'+t.price+' ASKING');
-    tr.innerHTML = '<td>'+t.n.toUpperCase()+'</td><td class="pos">'+t.pos.toUpperCase()+'</td><td>'+t.club.toUpperCase()+'</td><td class="num">'+t.age+'</td><td class="num">'+recordLine+'</td><td class="num">'+priceLine+'</td><td></td>';
+    tr.innerHTML = '<td>'+t.n.toUpperCase()+(t.gen?'†':'')+'</td><td class="pos">'+t.pos.toUpperCase()+'</td><td>'+t.club.toUpperCase()+'</td><td class="num">'+t.age+'</td><td class="num">'+recordLine+'</td><td class="num">'+priceLine+'</td><td></td>';
     if (t.awaitingTrialDecision){
       var signBtn = document.createElement('button'); signBtn.textContent = 'SIGN HIM'; signBtn.style.padding='2px 10px'; signBtn.style.fontSize='15px'; signBtn.style.marginRight='6px';
       signBtn.addEventListener('click', function(){ decideTrial(i, true); });
@@ -17927,7 +18071,7 @@ function signTarget(t, wage, deferPlay){
      turn out that same season under the rules of the day -- registered:false
      keeps him off the first-team lineup AND the reserves (see unavailableReason
      and simulateReserves) until startNewSeason clears the flag for everyone. */
-  squad.push(Object.assign({id:nextId, n:t.n, pos:t.pos, rep:t.rep, slot:slot, ca:Math.round(ca), pa:rollPotential(Math.round(ca), t.age), age:t.age, wage:wage, form:0, listed:false, goalsSeason:0, apps:0, nation:t.nation||'England', discontent:0, retained:false, registered: !deferPlay, sourceScout: (t.scout && scouts[t.scout]) ? t.scout : null}, attrs)); /* v142 : tags who found him, so updateScoutReputations() can judge that scout by how this man actually does at the club */
+  squad.push(Object.assign({id:nextId, n:t.n, pos:t.pos, rep:t.rep, slot:slot, ca:Math.round(ca), pa:rollPotential(Math.round(ca), t.age), age:t.age, wage:wage, form:0, listed:false, goalsSeason:0, apps:0, nation:t.nation||'England', discontent:0, retained:false, registered: !deferPlay, sourceScout: (t.scout && scouts[t.scout]) ? t.scout : null, gen: t.gen ? true : undefined}, attrs)); /* v142 : tags who found him, so updateScoutReputations() can judge that scout by how this man actually does at the club */
   nextId++;
   /* STAGE 3: a player bought via approachClubPlayer() came out of a real club's
      persistent squad (clubSquads) -- he needs to actually leave it, or he'd
@@ -18010,7 +18154,7 @@ function decideYouthPro(id, signPro){
   if (!p) return;
   youthProspects = youthProspects.filter(function(x){ return x.id !== id; });
   if (signPro){
-    squad.push(Object.assign({id:p.id, n:p.n, pos:p.pos, rep:p.rep, slot:p.slot, ca:p.ca, pa:p.pa, age:p.age, wage:wageForRep(p.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:p.nation, discontent:0, retained:false, registered:true, sourceScout:p.sourceScout}, p.attrs));
+    squad.push(Object.assign({id:p.id, n:p.n, pos:p.pos, rep:p.rep, slot:p.slot, ca:p.ca, pa:p.pa, age:p.age, wage:signingWageFor(p.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:p.nation, discontent:0, retained:false, registered:true, sourceScout:p.sourceScout}, p.attrs));
     addNews('board', p.n+' has signed professional forms on his 17th birthday year and joins the senior ranks : one from our own ground-staff, brought through properly.');
   } else {
     addNews('board', p.n+' has been released from the ground-staff without being offered professional forms : not one who\'s made the grade with us.');
@@ -18041,7 +18185,7 @@ function callUpYouthEarly(id){
     p.attrs = buildAttributes(newCa, p.slot, p.id*11);
     if (oldPermBonus){ p.attrs._permBonus = oldPermBonus; reapplyPermanentBonusAfterRebuild(p.attrs); }
   }
-  squad.push(Object.assign({id:p.id, n:p.n, pos:p.pos, rep:repForCA(newCa), slot:p.slot, ca:newCa, pa:Math.max(p.pa, newCa), age:p.age, wage:wageForRep(repForCA(newCa)), form:0, listed:false, goalsSeason:0, apps:0, nation:p.nation, discontent:0, retained:false, registered:true, sourceScout:p.sourceScout}, p.attrs));
+  squad.push(Object.assign({id:p.id, n:p.n, pos:p.pos, rep:repForCA(newCa), slot:p.slot, ca:newCa, pa:Math.max(p.pa, newCa), age:p.age, wage:signingWageFor(repForCA(newCa)), form:0, listed:false, goalsSeason:0, apps:0, nation:p.nation, discontent:0, retained:false, registered:true, sourceScout:p.sourceScout}, p.attrs));
   addNews('board', thrived
     ? (p.n+' has been called up to the first team well ahead of schedule, at just '+p.age+' -- the same gamble Manchester United took on a 16-year-old Duncan Edwards in April 1953. Early signs are he can handle the step up.')
     : (p.n+' has been called up to the first team well ahead of schedule, at just '+p.age+' -- a real gamble, in the mould of United fast-tracking Duncan Edwards at 16 in 1953. Early impressions are the step up has found him out a little : he may need time to settle.'));
@@ -18063,7 +18207,8 @@ function decideTrial(i, sign){
        and the old behaviour still applies, honestly, because that's the one
        case it was actually true for. */
     var deferHisPlay = pastTransferDeadline();
-    signTarget(t, 4, deferHisPlay);
+    var trialWage = (typeof signingWageFor === 'function') ? signingWageFor(t.rep, ourClubName) : ((typeof wageForRep === 'function') ? wageForRep(t.rep) : 4);
+    signTarget(t, trialWage, deferHisPlay);
     if (deferHisPlay) addNews('board', 'SIGNED: '+t.n+' has been taken on after his trial, but he\'s not registered with the League in time to play a competitive match for us this season : he\'ll be eligible from the start of next season.');
     else addNews('board', 'SIGNED: '+t.n+' has been taken on after his trial and is registered with the League : available for selection straight away.');
   } else {
@@ -18095,7 +18240,7 @@ function resolvePendingNegotiations(){
       finances.bank -= SIGNING_ON_FEE;
       aiAdjustBalance(neg.club, neg.fee); /* v118 : the selling club banks the fee */
       t._feePaid = neg.fee;
-      signTarget(t, wageForRep(t.rep));
+      signTarget(t, signingWageFor(t.rep));
       addNews('board', 'ACCEPTED: '+neg.club+' have accepted £'+neg.fee+' for '+t.n+'. He signs this week, plus the customary £'+SIGNING_ON_FEE+' signing-on fee.');
     } else {
       t.pending = false;
@@ -18299,7 +18444,7 @@ function renderOffers(){
       var soldNote = 'SOLD: '+p.n+' to '+o.buyer+' for £'+finalFee;
       if (o.swap){
         var s = o.swap;
-        squad.push(Object.assign({id:nextId, n:s.n, pos:s.pos, rep:s.rep, slot:s.slot, ca:s.ca, pa:rollPotential(s.ca, s.age), age:s.age, wage:wageForRep(s.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:s.nation, injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false},
+        squad.push(Object.assign({id:nextId, n:s.n, pos:s.pos, rep:s.rep, slot:s.slot, ca:s.ca, pa:rollPotential(s.ca, s.age), age:s.age, wage:signingWageFor(s.rep), form:0, listed:false, goalsSeason:0, apps:0, nation:s.nation, injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false},
           {handling:s.handling, shooting:s.shooting, passing:s.passing, tackling:s.tackling, heading:s.heading, pace:s.pace, stamina:s.stamina}));
         nextId++;
         soldNote += ', with '+s.n+' arriving the other way as part of the deal';
@@ -18688,7 +18833,7 @@ function renderSquad(){
   });
   ordered.forEach(function(p){
     var tr = document.createElement('tr'); tr.className='selrow';
-    tr.innerHTML = '<td>'+p.n.toUpperCase()+(p.isManagerPlayer?' <span class="sub" style="display:inline;">(P-M)</span>':'')+'</td><td class="pos">'+displayPosUpper(p)+'</td><td>'+stars(p.rep)+'</td><td>'+formTag(p.form)+'</td>';
+    tr.innerHTML = '<td>'+p.n.toUpperCase()+(p.gen?'†':'')+(p.isManagerPlayer?' <span class="sub" style="display:inline;">(P-M)</span>':'')+'</td><td class="pos">'+displayPosUpper(p)+'</td><td>'+stars(p.rep)+'</td><td>'+formTag(p.form)+'</td>';
     tr.addEventListener('click', function(){ showProfile(p.id, 'profile-content'); });
     body.appendChild(tr);
   });
@@ -18850,7 +18995,7 @@ function pcardHtml(p){
   if (era === '46') ['tl','tr','bl','br'].forEach(function(k){ corners += '<i class="pc-corner pc-'+k+'" aria-hidden="true">'+PCARD_CORNER+'</i>'; });
   var sil = pcardSil(p, kit, goalie, hairHex, style);
   var front, headBack, bfootTxt = series + ' ' + seasonTxt + ' &middot; No. ' + idx + ' of ' + total;
-  var nameBig = pcardEsc(p.n);
+  var nameBig = pcardEsc(p.n)+(p.gen?'†':'');
   if (era === '46'){
     front = corners + '<div class="pc-series">' + series + '<b>' + seasonTxt + '</b></div><div class="pc-portrait">' + sil + '</div>'
       + '<div class="pc-nameplate"><h3 style="font-size:'+fit(8.4,15)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + clubTxt + sw + '</div><div class="pc-pos">' + posTxt + '</div></div>'
@@ -19797,7 +19942,7 @@ function renderTable(){
 }
 function rivalMarksmanName(rivalName){
   var seed = 0; for (var i=0;i<rivalName.length;i++) seed += rivalName.charCodeAt(i);
-  return pick2(firstNamePool, seed) + ' ' + pick2(surnamePool, seed*1.7);
+  return pickGeneratedName(null, seed);
 }
 function pick2(arr, seed){ return arr[Math.floor(seededRand(seed) * arr.length)]; }
 function renderTopScorers(){
@@ -24397,7 +24542,7 @@ function realDebutantFire(e){
     var prof = rollTargetProfile(e.rep, e.pos);
     applyRawTalentSpikes(prof.attrs);
     guaranteedSpikes(prof.attrs, e.spikeAttrs);
-    signTarget({n:e.name, pos:e.pos, rep:e.rep, age:e.age, ca:prof.ca, attrs:prof.attrs, nation:e.nation||'England'}, wageForRep(e.rep), false);
+    signTarget({n:e.name, pos:e.pos, rep:e.rep, age:e.age, ca:prof.ca, attrs:prof.attrs, nation:e.nation||'England'}, signingWageFor(e.rep), false);
     var added = squad.find(function(p){ return p.n===e.name; }); if (added) added._realLegend = true;
     addNews('board', 'FIRST-TEAM DEBUT: '+e.note+' He\'s one of ours : a young professional already on the staff, now pushing for a regular place.');
   } else {
@@ -27317,11 +27462,11 @@ function generateFictionalRawSquad(baseRawSquad){
   return (baseRawSquad || []).map(function(p){
     var name, tries = 0;
     do {
-      name = pick(firstNamePool)+' '+pick(surnamePool);
+      name = pickGeneratedName();
       tries++;
     } while (tries < 50 && (used[name] || (typeof realSchoolboyLegends !== 'undefined' && realSchoolboyLegends.some(function(e){ return e.name === name; }))));
     used[name] = true;
-    return {n:name, pos:p.pos, rep:p.rep};
+    return {n:name, pos:p.pos, rep:p.rep, gen:true};
   });
 }
 /* the actual vanish-and-replace : oldName's clubProfiles entry is deleted outright (never kept, benched or
@@ -27335,7 +27480,7 @@ function replaceClubWithFictionalClub(oldName, data){
   var oldEntry = regions.reduce(function(acc, rg){ return acc || rg.pristine.find(function(c){ return c.n === oldName; }); }, null);
   var abilityS = oldEntry ? oldEntry.s : 50;
   var regionInfo = createClubEligibleCandidates().find(function(c){ return c.n === oldName; });
-  var newMgrName = pick(firstNamePool)+' '+pick(surnamePool);
+  var newMgrName = pickGeneratedName();
   renameInThirdDivisionMasterLists(oldName, newName, abilityS, newMgrName, data.ground, gameEra);
   var rawSquad = generateFictionalRawSquad(oldProfile.rawSquad);
   clubProfiles[newName] = {
@@ -38025,7 +38170,7 @@ function buildOppMatchXI(oppName, clubStrength, seedBase){
       var fSlot = pick(['GK','FB','HB','FWD']);
       var fCa = target0!==null ? clamp(target0 + centre0 + (seededRand(fseed)-0.5)*10, 15, 95) : clamp((clubStrength||50) - 10 + (seededRand(fseed)-0.5)*24, 15, 95);
       var fAttrs = buildAttributes(Math.round(fCa), fSlot, fseed*3.1);
-      liveSquad.push({n:(pick(firstNamePool)+' '+pick(surnamePool)), pos:null, slot:fSlot, rep:repNearestCA(fCa), ca:Math.round(fCa), age:18+Math.floor(seededRand(fseed+1)*10), apps:0, goalsSeason:0, attrs:fAttrs});
+      liveSquad.push({n:(pickGeneratedName()), pos:null, slot:fSlot, rep:repNearestCA(fCa), ca:Math.round(fCa), age:18+Math.floor(seededRand(fseed+1)*10), apps:0, goalsSeason:0, attrs:fAttrs, gen:true});
       fillerIdx++;
     }
   }
@@ -38042,7 +38187,7 @@ function buildOppMatchXI(oppName, clubStrength, seedBase){
         /* genuinely short in this slot -- the same generated-filler fallback genOppSquad always used, never a reused man */
         var ca2 = clubStrength!==null ? clamp(clubStrength - 10 + (seededRand(seed)-0.5)*24, 15, 95) : 50;
         var attrs2 = buildAttributes(ca2, grp.slot, seed);
-        players.push(Object.assign({n:(pick(firstNamePool)+' '+pick(surnamePool)), pos:null, slot:grp.slot, ca:Math.round(ca2)}, attrs2));
+        players.push(Object.assign({n:(pickGeneratedName()), pos:null, slot:grp.slot, ca:Math.round(ca2), gen:true}, attrs2));
       } else {
         var attrsFlat = Object.assign({}, real.attrs);
         players.push(Object.assign({n:real.n, pos:real.pos, slot:grp.slot, ca:real.ca, rep:real.rep, age:real.age}, attrsFlat));
@@ -38126,7 +38271,7 @@ function buildGenericRawSquad(strength){
   var out = [];
   for (var cycle=0; cycle<2; cycle++){
     shape.forEach(function(pair){
-      out.push({n: pick(firstNamePool)+' '+pick(surnamePool), pos: pair[0], rep: clamp(rep + (Math.random()<0.15?1:0) - (Math.random()<0.1?1:0), 1, 4)});
+      out.push({n: pickGeneratedName(), pos: pair[0], rep: clamp(rep + (Math.random()<0.15?1:0) - (Math.random()<0.1?1:0), 1, 4), gen:true});
     });
   }
   return out;
@@ -38174,7 +38319,7 @@ function runReElection(members, table, feederPools, divLabel){
   var chosen = forced ? (allFeederEntries.find(function(c){ return c.n === forced.in; }) || {n:forced.in, s:60}) : candidates[Math.floor(Math.random()*candidates.length)];
   feederPools.forEach(function(fp){ if (!fp) return; var idx = fp.indexOf(chosen); if (idx>=0) fp.splice(idx,1); });
   var outIdx = members.indexOf(bottom.ref); if (outIdx>=0) members.splice(outIdx,1);
-  members.push({n:chosen.n, s:chosen.s, mgr:pick(firstNamePool)+' '+pick(surnamePool), ground:chosen.n+' Ground'});
+  members.push({n:chosen.n, s:chosen.s, mgr:pickGeneratedName(), ground:chosen.n+' Ground'});
   if (!clubProfiles[chosen.n]){
     clubProfiles[chosen.n] = {
       ground: chosen.n+' Ground (ground unconfirmed)', capacity: Math.round(4000 + Math.max(chosen.s,0)/100*10000),
@@ -38526,6 +38671,34 @@ document.getElementById('btn-kickoff').addEventListener('click', function(){
    change made here takes effect from the very next passage of play, not
    just from the next match. */
 function renderInMatchBox(){
+  var note = document.getElementById('im-sub-note');
+  if (note && typeof subTouchlineNote === 'function') note.textContent = subTouchlineNote();
+  var hold = document.getElementById('im-sub-controls');
+  if (hold){
+    var html = '';
+    if (live && typeof liveUnusedSubs === 'function'){
+      var left = liveUnusedSubs();
+      if (left.length && typeof subAnyReasonAllowed === 'function' && subAnyReasonAllowed()){
+        var offOpts = (live.ourXI||[]).filter(function(x){ return x && left.indexOf(x)<0 && !/goalkeeper/i.test(x.pos); }).map(function(x){
+          return '<option value="'+x.id+'">'+x.n+'</option>';
+        }).join('');
+        html += '<p class="sub" style="margin:0 0 4px;">Named substitute'+(left.length>1?'s':'')+' : '+left.map(function(p){return p.n;}).join(', ')+'. A change may be made for any reason.</p>';
+        html += '<p class="sub" style="margin:0;">Send '+left[0].n+' on for <select id="im-sub-off" style="font-size:13px;">'+offOpts+'</select> <a href="#" id="im-sub-send" class="sub">send him on</a></p>';
+      } else if (left.length){
+        html += '<p class="sub" style="margin:0;">Named substitute : '+left.map(function(p){return p.n;}).join(', ')+' (injury only — the referee will allow the change if a man cannot continue).</p>';
+      } else if (typeof subsAllowed==='function' && subsAllowed()){
+        html += '<p class="sub" style="margin:0;">The named substitute'+(typeof subsAllowedCount==='function' && subsAllowedCount()>=2?'s have':' has')+' already been used, or none was named.</p>';
+      }
+    }
+    hold.innerHTML = html;
+    var send = document.getElementById('im-sub-send');
+    if (send) send.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var selOff = document.getElementById('im-sub-off');
+      var oid = selOff && selOff.value ? parseInt(selOff.value,10) : null;
+      if (oid && typeof liveSendOnSubstitute === 'function') liveSendOnSubstitute(oid);
+    });
+  }
   var cur = document.getElementById('im-approach-current'); if (cur) cur.textContent = tactics.approach.toUpperCase();
   var sel = document.getElementById('im-wrinkle'); if (!sel) return;
   var opts = '<option value="">NONE : PLAY IT STRAIGHT</option>' + wrinkleSlotOptions.map(function(o){
@@ -41140,7 +41313,7 @@ function resolveVacancyForClub(clubName){
     r.mgr = cand.n;
     addNews('rivals', 'VACANCY FILLED: '+r.n+' have ended their search. '+cand.n+(cand.wasOurs ? (', once on our own books at '+ourClubName+', ') : (', the former '+cand.formerClub+' man, '))+'takes over as manager.');
   } else {
-    r.mgr = pick(firstNamePool)+' '+pick(surnamePool);
+    r.mgr = pickGeneratedName();
     addNews('rivals', 'VACANCY FILLED: '+r.n+' have ended their search. '+r.mgr+' takes over.');
   }
 }
@@ -42070,7 +42243,7 @@ function scoProfileFor(name, key){
   else if (t0 === tDest) s = m.s;
   else if (tDest === 3) s = clamp(63 + (m.s-59)*0.55, 63, 84);
   else s = clamp(75 + (m.s-63)*0.6, 75, 95);
-  return {n:name, s:Math.round(s), mgr:(m && m.mgr) ? m.mgr : (pick(firstNamePool)+' '+pick(surnamePool)), ground:(clubProfiles[name] ? clubProfiles[name].ground : name+' Ground')};
+  return {n:name, s:Math.round(s), mgr:(m && m.mgr) ? m.mgr : (pickGeneratedName()), ground:(clubProfiles[name] ? clubProfiles[name].ground : name+' Ground')};
 }
 /* Scottish wording : the engine's English wording is rewritten for display and for stored news, nothing else */
 function scoCaseLike(m, up, low){ return (m === m.toUpperCase()) ? up : low; }
@@ -42473,7 +42646,7 @@ function worldCrossBorderMove(move){
   currentDivisionLabel = words[ti]; currentDivisionShort = isSco() ? scoDivShortFor(ti + 1) : 'DIV ' + (ti + 1);
   rivals = clubsOf[ti].filter(function(x){ return x.n !== newClub; }).map(function(x){
     var inf = worldInfoFor(E, target, x.n) || {};
-    return {n:x.n, s:x.s, mgr:inf.mgr || (pick(firstNamePool) + ' ' + pick(surnamePool)), ground:inf.ground || (clubProfiles[x.n] ? clubProfiles[x.n].ground : x.n + ' Ground')};
+    return {n:x.n, s:x.s, mgr:inf.mgr || (pickGeneratedName()), ground:inf.ground || (clubProfiles[x.n] ? clubProfiles[x.n].ground : x.n + ' Ground')};
   });
   ourClubName = newClub;
   scoAdoptClub(newClub);
@@ -42934,7 +43107,7 @@ function aiRealProfile(name, key){
   var existingS = null;
   if (ourDivisionKey()===key){ var rr = rivals.find(function(r){ return r.n===name; }); if (rr) existingS = rr.s; }
   else { var cc = aiBgDivFor(key).clubs.find(function(c){ return c.n===name; }); if (cc) existingS = cc.s; }
-  return {n:name, s: existingS!==null ? existingS : (45+Math.floor(seededRand(name.length*7.3)*45)), mgr:pick(firstNamePool)+' '+pick(surnamePool), ground:(clubProfiles[name] ? clubProfiles[name].ground : name+' Ground')};
+  return {n:name, s: existingS!==null ? existingS : (45+Math.floor(seededRand(name.length*7.3)*45)), mgr:pickGeneratedName(), ground:(clubProfiles[name] ? clubProfiles[name].ground : name+' Ground')};
 }
 /* v204 REAL BUG CAUGHT DURING VERIFICATION OF THE 1950 EXPANSION, direct reproduction not a code read: a
    60+ save x 25-season randomized stress run (crossing both 1950 and 1958) turned up a genuine same-name
@@ -43338,7 +43511,7 @@ function runFourthDivisionRestructuring(){
     if (found) return {n:name, s:found.s, mgr:found.mgr, ground:found.ground};
     var m = thirdDivisionSouthMasterClubs.concat(thirdDivisionNorthMasterClubs).find(function(c){return c.n===name;});
     if (m) return {n:name, s:m.s, mgr:m.mgr, ground:m.ground};
-    return {n:name, s:50, mgr:pick(firstNamePool)+' '+pick(surnamePool), ground:name+' Ground'};
+    return {n:name, s:50, mgr:pickGeneratedName(), ground:name+' Ground'};
   }
   var southOrder = regionOrder('S'), northOrder = regionOrder('N');
   var southRest = southOrder.slice(1), northRest = northOrder.slice(1); /* real rule : drop each region's champion -- already promoted straight to Second Division by the ordinary promotion logic, untouched here */
@@ -43583,7 +43756,7 @@ function startNewSeason(outcome){
       var age = 18 + Math.floor(Math.random()*4);
       var ca = 25 + Math.floor(Math.random()*20);
       var attrs = buildAttributes(ca, 'FWD', nextId*3.3);
-      squad.push(Object.assign({id:nextId, n:genMarketPlayerName(), pos:'Centre-Forward', rep:1, slot:'FWD', ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, wage:wageForRep(1), form:0, listed:false, goalsSeason:0, apps:0, nation:'England', injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false}, attrs));
+      squad.push(Object.assign({id:nextId, n:genMarketPlayerName(), pos:'Centre-Forward', rep:1, slot:'FWD', ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, wage:signingWageFor(1), form:0, listed:false, goalsSeason:0, apps:0, nation:'England', injuredWeeks:0, suspendedMatches:0, discontent:0, retained:false}, attrs));
       nextId++;
     }
   }
@@ -44335,7 +44508,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v373'; /* v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v374'; /* v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
