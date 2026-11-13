@@ -2191,7 +2191,7 @@ html body .rmx .ttl{ }
 
     <div class="view" id="v-lineup">
       <h1>Team Selection</h1>
-      <p class="sub">2-3-5 PYRAMID : NO SUBSTITUTES PERMITTED UNTIL THE REAL 1965-66 SEASON (SEE BELOW ONCE YOU REACH IT). CLICK A NAME TO PICK HIM, CLICK HIS ROW'S FILE LINK TO CHECK HIM FIRST.</p>
+      <p class="sub" id="lineup-era-blurb">2-3-5 PYRAMID : NO SUBSTITUTES PERMITTED UNTIL THE REAL 1965-66 SEASON (SEE BELOW ONCE YOU REACH IT). CLICK A NAME TO PICK HIM, CLICK HIS ROW'S FILE LINK TO CHECK HIM FIRST.</p>
       <div class="lineup-count" id="lineup-count"></div>
       <div class="grid2">
         <div class="scroll-box"><table><thead><tr><th></th><th>Player</th><th>Pos</th><th>Form</th><th>File</th></tr></thead><tbody id="lineup-body"></tbody></table></div>
@@ -2212,9 +2212,11 @@ html body .rmx .ttl{ }
       <div class="grid2">
         <div class="box">
           <div class="box-title">FORMATION</div>
-          <p class="sub">Herbert Chapman's WM system has been standard at the biggest clubs since the late 1920s. Plenty of smaller sides still play the older Pyramid. Which will you trust?</p>
+          <p class="sub" id="formation-intro">Herbert Chapman's WM system has been standard at the biggest clubs since the late 1920s. Plenty of smaller sides still play the older Pyramid. Which will you trust?</p>
+          <div id="formation-options">
           <p style="margin-top:10px;"><label><input type="radio" name="formation" value="235" id="f-235" checked> 2-3-5 PYRAMID : the old, familiar shape</label></p>
           <p><label><input type="radio" name="formation" value="wm" id="f-wm"> WM SYSTEM (3-2-2-3) : Chapman's modern method</label></p>
+          </div>
           <div id="unlocked-formations"></div>
           <div id="method-options"></div>
         </div>
@@ -15908,10 +15910,187 @@ var styleOptions = {
      desc:"The defensive stopper principle without Arsenal's polish : still a centre-half marking their man, but both wingers held to the old-fashioned touchline job of reaching the line and crossing, no Bastin-style cutting inside. A plausible fit for a side like ours, not a documented club system."}
   ]
 };
-var styleDefaults = {'235':'direct', 'wm':'arsenal'};
+var styleDefaults = {'235':'direct', 'wm':'arsenal', winglesswonders:'longball', brazil424:'longball', '433':'pressing', catenaccio:'manmark', '442diamond':'longball', '352':'pressing'};
 var tactics = {formation:'235', approach:'balanced', style:'direct'};
+
+/* ============================================================================================
+   v365 : ERA TACTICS. Which formations and styles are offered in which season, which is the
+   default, and which 1940s style labels are withdrawn. Old shapes stay on the sheet in later
+   eras but are not the default. Dates follow the brief and the existing FORMATION_TIMELINE
+   sources (Brazil 1958, Ramsey 1966, Herrera's sweeper early 60s). 3-5-2 and the 4-4-2 diamond
+   are offered from 1984-85 as mid-1980s shapes, not back-dated. Pressing is offered from
+   1970-71; zonal marking from 1984-85. No invented club systems.
+   ============================================================================================ */
+var ERA_FORMATION_CATALOGUE = [
+  {key:'235', label:'2-3-5 PYRAMID : the old, familiar shape', from:1946},
+  {key:'wm', label:'WM SYSTEM (3-2-2-3) : Chapman\'s method', from:1946},
+  {key:'brazil424', label:'4-2-4 : four at the back, four up front', from:1958},
+  {key:'catenaccio', label:'SWEEPER : a libero behind the defence', from:1962},
+  {key:'winglesswonders', label:'4-4-2 : two banks of four', from:1966},
+  {key:'433', label:'4-3-3 : a back four, three in midfield, three up front', from:1966},
+  {key:'442diamond', label:'4-4-2 DIAMOND : a narrow midfield, no natural wide men', from:1984},
+  {key:'352', label:'3-5-2 : three at the back, wing-backs pushed on', from:1984}
+];
+var ERA_MODERN_STYLES = [
+  {key:'longball', from:1966, label:'LONG BALL / DIRECT : early, long, into the channels or up to the target man',
+   desc:"The English direct game as it was still talked about in the 1960s and 80s : the ball goes early and long, into the channels or onto a target man, rather than being played through midfield in tight spaces."},
+  {key:'manmark', from:1966, label:'MAN-MARKING : pick up your man and stay with him',
+   desc:"The traditional English defensive method : each man is given an opponent to pick up and stays with him. Simple to brief, and the way most League sides still organised a defence well into the 1980s."},
+  {key:'offsidetrap', from:1966, label:'OFFSIDE TRAP : the back line steps up together',
+   desc:"The back line steps up as a unit to catch opposing forwards offside. A known device by the mid-1960s, and a regular talking point later : it tightens the space in front of goal when it comes off, and looks amateurish when it does not."},
+  {key:'pressing', from:1970, label:'PRESSING : close them down quickly, do not let them settle',
+   desc:"Close the man on the ball down quickly and in numbers, so the other side cannot settle and play. Systematic pressing becomes a serious talking point in the 1970s; it asks more of the side's legs than a deeper, waiting defence."},
+  {key:'zonal', from:1984, label:'ZONAL MARKING : hold a zone of the pitch rather than a man',
+   desc:"Defenders hold a zone of the pitch rather than tracking one nominated man all over it. More discussed in England by the mid-1980s as a contrast to strict man-marking, and still a minority habit in the Football League."}
+];
+function eraTacticsYear(){
+  if (typeof seasonStartYear==='function') try { var y = seasonStartYear(); if (y) return y; } catch(e){}
+  if (typeof themeSeasonYear==='function') try { var z = themeSeasonYear(); if (z) return z; } catch(e){}
+  return 1946;
+}
+function eraOfferedFormations(year){
+  year = year || eraTacticsYear();
+  return ERA_FORMATION_CATALOGUE.filter(function(f){ return year >= f.from; });
+}
+function defaultFormationForYear(year){
+  year = year || eraTacticsYear();
+  if (year >= 1966) return 'winglesswonders';
+  if (year >= 1958) return 'wm';
+  return '235';
+}
+function defaultStyleForYear(year, formation){
+  year = year || eraTacticsYear();
+  if (year >= 1966) return 'longball';
+  if (formation==='wm') return 'arsenal';
+  return 'direct';
+}
+function eraTacticsDefaults(year){
+  year = year || eraTacticsYear();
+  var f = defaultFormationForYear(year);
+  return {formation:f, approach:'balanced', style:defaultStyleForYear(year, f)};
+}
+function formationIsEveryday(key, year){
+  /* "Everyday" means the shape is already the usual way in English football, so there is no novelty tax.
+     Offer dates are earlier (4-4-2 is on the 1966 sheet; 3-5-2 from 1984-85). A brand-new 1966 save still
+     pays the early-adopter cost if the manager switches to 4-4-2 before it has spread, unless we seed
+     familiarity for the era default on a new game (see seedDefaultFormationFamiliarity). */
+  year = year || eraTacticsYear();
+  if (!key) return false;
+  if (key==='235' || key==='wm') return true;
+  if (key==='winglesswonders' && year>=1968) return true;
+  if (key==='433' && year>=1973) return true;
+  if (key==='brazil424' && year>=1970) return true;
+  if (key==='catenaccio' && year>=1970) return true;
+  if ((key==='442diamond' || key==='352') && year>=1986) return true;
+  return false;
+}
+function seedDefaultFormationFamiliarity(){
+  if (typeof formationFamiliarity==='undefined' || !tactics || !tactics.formation) return;
+  var f = tactics.formation;
+  if (typeof FOREIGN_SYSTEMS==='undefined' || !FOREIGN_SYSTEMS[f]) return;
+  if (f !== defaultFormationForYear()) return;
+  var cap = (FOREIGN_SYSTEMS[f].learn || 10) * 2;
+  formationFamiliarity[f] = Math.max(formationFamiliarity[f]||0, cap);
+}
+function eraStyleOptions(year, formation){
+  year = year || eraTacticsYear();
+  formation = formation || (tactics && tactics.formation);
+  if (year >= 1966) return ERA_MODERN_STYLES.filter(function(s){ return year >= s.from; });
+  if (formation && styleOptions[formation]) return styleOptions[formation];
+  return [
+    {key:'longball', label:'DIRECT : early ball, get it forward', desc:"Play early and directly, rather than walking the ball through midfield."},
+    {key:'manmark', label:'MAN-MARKING : pick up your man and stay with him', desc:"Each man is given an opponent to pick up."}
+  ];
+}
+function ensureEraStyle(){
+  var opts = eraStyleOptions();
+  if (!opts || !opts.length){ tactics.style = tactics.style || null; return; }
+  if (!opts.some(function(o){ return o.key===tactics.style; })){
+    tactics.style = defaultStyleForYear(eraTacticsYear(), tactics.formation);
+    if (!opts.some(function(o){ return o.key===tactics.style; })) tactics.style = opts[0].key;
+  }
+}
+function styleGoalRates(){
+  /* Early-era keys (direct / combination / arsenal / traditional) stay at 1 : their effect already lives in wmShapeEdge and the existing synergy multipliers. */
+  var s = tactics && tactics.style;
+  var M = {
+    longball:{gf:1.04, ga:1.03},
+    pressing:{gf:1.02, ga:0.98},
+    offsidetrap:{gf:1.00, ga:0.96},
+    manmark:{gf:0.99, ga:0.98},
+    zonal:{gf:1.00, ga:0.98}
+  };
+  return M[s] || {gf:1, ga:1};
+}
+function eraLineupSuggest(){
+  var f = tactics && tactics.formation;
+  var modern = (typeof posVocabModern==='function') ? posVocabModern() : false;
+  if (!modern){
+    return f==='wm' ? 'WM SUGGESTS 1 GK, 2 FB, 3 HB (INCLUDING THE STOPPER), 5 FWD' : '2-3-5 SUGGESTS 1 GK, 2 FB, 3 HB, 5 FWD';
+  }
+  if (f==='433') return '4-3-3 SUGGESTS 1 GK, 2 FB, 2 CB, 3 MF, 3 FW';
+  if (f==='brazil424') return '4-2-4 SUGGESTS 1 GK, 2 FB, 2 CB, 2 MF, 4 FW';
+  if (f==='catenaccio') return 'SWEEPER SUGGESTS 1 GK, 2 FB, 2 CB, 1 SWEEPER, 3 MF, 2 FW';
+  if (f==='352') return '3-5-2 SUGGESTS 1 GK, 3 CB, 5 MF (INCLUDING WING-BACKS), 2 FW';
+  if (f==='442diamond') return '4-4-2 DIAMOND SUGGESTS 1 GK, 2 FB, 2 CB, 4 MF, 2 FW';
+  if (f==='235' || f==='wm') return '4-4-2 SUGGESTS 1 GK, 2 FB, 2 CB, 4 MF, 2 FW';
+  return '4-4-2 SUGGESTS 1 GK, 2 FB, 2 CB, 4 MF, 2 FW';
+}
+function formationIntroCopy(year){
+  year = year || eraTacticsYear();
+  if (year >= 1984) return 'The mid-1980s English game is mostly 4-4-2, with 4-3-3, a sweeper, a diamond midfield or 3-5-2 also in use. Older shapes are still here if you want them.';
+  if (year >= 1966) return 'Since England\'s 1966 side, 4-4-2 has become the everyday English shape, with 4-3-3 also spreading. The older Pyramid and WM are still available.';
+  if (year >= 1958) return 'Brazil\'s 4-2-4 at the 1958 World Cup has given English clubs a new shape to try. Most sides still trust the WM, and some the older Pyramid.';
+  return 'Herbert Chapman\'s WM system has been standard at the biggest clubs since the late 1920s. Plenty of smaller sides still play the older Pyramid. Which will you trust?';
+}
+function formationSheetLabel(key){
+  var cat = ERA_FORMATION_CATALOGUE.find(function(f){ return f.key===key; });
+  if (cat) return cat.label.toUpperCase();
+  var d = (typeof studyDestinations!=='undefined') ? studyDestinations.find(function(x){ return (x.unlockFormation||x.key)===key; }) : null;
+  if (d && d.formationLabel) return d.formationLabel.toUpperCase();
+  return String(key).toUpperCase();
+}
+function renderFormationSheet(){
+  var box = document.getElementById('formation-options'); if (!box) return;
+  var year = eraTacticsYear();
+  var intro = document.getElementById('formation-intro');
+  if (intro) intro.textContent = formationIntroCopy(year);
+  var offered = eraOfferedFormations(year);
+  var keys = offered.map(function(f){ return f.key; });
+  /* Trip unlocks are drawn only in #unlocked-formations, so they are not added here (that doubled the radio).
+     Keep a currently selected shape visible only if it will not be drawn in either list. */
+  var unlockKeys = [];
+  if (typeof unlockedFormations!=='undefined' && unlockedFormations){
+    unlockedFormations.forEach(function(k){
+      var dest = (typeof studyDestinations!=='undefined') ? studyDestinations.find(function(x){ return x.key===k; }) : null;
+      var formKey = dest && dest.unlockFormation ? dest.unlockFormation : k;
+      if (formKey && formKey!=='pushrun') unlockKeys.push(formKey);
+    });
+  }
+  if (tactics && tactics.formation && keys.indexOf(tactics.formation)<0 && unlockKeys.indexOf(tactics.formation)<0) keys.push(tactics.formation);
+  box.innerHTML = keys.map(function(key, i){
+    var checked = (tactics && tactics.formation===key) ? ' checked' : '';
+    var id = (key==='235'?'f-235': key==='wm'?'f-wm': 'f-'+key);
+    return '<p'+(i===0?' style="margin-top:10px;"':'')+'><label><input type="radio" name="formation" value="'+key+'" id="'+id+'"'+checked+'> '+formationSheetLabel(key)+'</label></p>';
+  }).join('');
+  box.querySelectorAll('input[name="formation"]').forEach(function(r){
+    r.addEventListener('change', function(){ onFormationPicked(this.value); });
+  });
+  if (typeof updateLineupEraBlurb==='function') updateLineupEraBlurb();
+}
+function updateLineupEraBlurb(){
+  var el = document.getElementById('lineup-era-blurb'); if (!el) return;
+  var f = tactics && tactics.formation;
+  var name = (typeof ERA_SHAPE_NAME!=='undefined' && typeof eraPitchShapeKey==='function' && ERA_SHAPE_NAME[eraPitchShapeKey()]) || formationSheetLabel(f||'235');
+  var sub = (typeof subsAllowed==='function' && subsAllowed())
+    ? 'CLICK A NAME TO PICK HIM, CLICK HIS ROW\'S FILE LINK TO CHECK HIM FIRST.'
+    : 'NO SUBSTITUTES PERMITTED UNTIL THE REAL 1965-66 SEASON (SEE BELOW ONCE YOU REACH IT). CLICK A NAME TO PICK HIM, CLICK HIS ROW\'S FILE LINK TO CHECK HIM FIRST.';
+  el.textContent = name + ' : ' + sub;
+}
+
+
 function styleTacticsNote(){
-  var opts = styleOptions[tactics.formation];
+  var opts = (typeof eraStyleOptions==='function') ? eraStyleOptions() : styleOptions[tactics.formation];
   var styleDesc = opts ? (opts.find(function(o){return o.key===tactics.style;}) || opts[0]).desc : null;
   var formDesc = tactics.formation==='wm' ?
     "Switching to the WM system : more solid at the back, but it asks more of players used to the old game." :
@@ -15925,8 +16104,9 @@ function styleTacticsNote(){
 }
 function renderStyleOptions(){
   var box = document.getElementById('style-options'); if (!box) return;
-  var opts = styleOptions[tactics.formation];
-  if (!opts){ box.innerHTML = '<p class="sub">This system has its own settled identity already : no further style choice here.</p>'; return; }
+  var opts = (typeof eraStyleOptions==='function') ? eraStyleOptions() : styleOptions[tactics.formation];
+  if (!opts || !opts.length){ box.innerHTML = '<p class="sub">This system has its own settled identity already : no further style choice here.</p>'; return; }
+  if (typeof ensureEraStyle==='function') ensureEraStyle();
   box.innerHTML = opts.map(function(o){
     var checked = tactics.style===o.key ? ' checked' : '';
     return '<p style="margin-top:8px;"><label><input type="radio" name="style" value="'+o.key+'"'+checked+'> '+o.label+'</label><br><span class="sub">'+o.desc+'</span></p>';
@@ -15935,10 +16115,11 @@ function renderStyleOptions(){
     r.addEventListener('change', function(){ tactics.style = this.value; styleTacticsNote(); if (typeof refreshTrainingSynergyNote==='function') refreshTrainingSynergyNote(); });
   });
 }
-document.querySelectorAll('input[name="formation"]').forEach(function(r){ r.addEventListener('change', function(){
-  tactics.formation = this.value;
-  if (styleOptions[this.value]){
-    if (!styleOptions[this.value].some(function(o){return o.key===tactics.style;})) tactics.style = styleDefaults[this.value];
+function onFormationPicked(key){
+  tactics.formation = key;
+  if (typeof ensureEraStyle==='function') ensureEraStyle();
+  else if (styleOptions[key]){
+    if (!styleOptions[key].some(function(o){return o.key===tactics.style;})) tactics.style = styleDefaults[key];
   } else {
     tactics.style = null;
   }
@@ -15946,8 +16127,11 @@ document.querySelectorAll('input[name="formation"]').forEach(function(r){ r.addE
   styleTacticsNote();
   if (typeof renderMethodOptions==='function') renderMethodOptions();
   if (typeof refreshTrainingSynergyNote==='function') refreshTrainingSynergyNote();
-  try{ eraPitchRender(); }catch(e){} /* v316 */
-});});
+  try{ eraPitchRender(); }catch(e){}
+  if (typeof updateLineupEraBlurb==='function') updateLineupEraBlurb();
+  if (typeof renderLineupCount==='function') renderLineupCount();
+}
+document.querySelectorAll('input[name="formation"]').forEach(function(r){ r.addEventListener('change', function(){ onFormationPicked(this.value); });});
 document.querySelectorAll('input[name="approach"]').forEach(function(r){ r.addEventListener('change', function(){ tactics.approach = this.value; });});
 
 /* ---------- TACTICAL WRINKLE: shirt numbers weren't just a squad-sheet
@@ -16249,6 +16433,7 @@ function renderUnlockedFormations(){
      formation the manager had actually chosen could visually appear to
      un-select itself the next time this list got rebuilt. */
   var box = document.getElementById('unlocked-formations'); box.innerHTML='';
+  var eraKeys = (typeof eraOfferedFormations==='function') ? eraOfferedFormations().map(function(f){return f.key;}) : [];
   sheetFormationKeys().forEach(function(destKey){
     var d = studyDestinations.find(function(x){return x.key===destKey;}); if (!d) return;
     /* v108 WIRING FIX (same bug as the training one above): the radio used the DESTINATION key, so picking
@@ -16256,9 +16441,10 @@ function renderUnlockedFormations(){
        on 'lamaquina') : the formation silently played as a plain 2-3-5 with none of its effects. The
        formation id is the destination's own unlockFormation. */
     var key = d.unlockFormation || destKey;
+    if (eraKeys.indexOf(key)>=0 || eraKeys.indexOf(destKey)>=0) return;
     var p = document.createElement('p');
     p.innerHTML = '<label><input type="radio" name="formation" value="'+key+'"'+(tactics.formation===key?' checked':'')+'> '+d.formationLabel.toUpperCase()+'</label>'+formationAdoptionTag(key);
-    p.querySelector('input').addEventListener('change', function(){ tactics.formation = key; tactics.style = null; renderStyleOptions(); styleTacticsNote(); renderMethodOptions(); if (typeof refreshTrainingSynergyNote==='function') refreshTrainingSynergyNote(); try{ eraPitchRender(); }catch(e){} });
+    p.querySelector('input').addEventListener('change', function(){ if (typeof onFormationPicked==='function') onFormationPicked(key); else { tactics.formation = key; tactics.style = null; renderStyleOptions(); styleTacticsNote(); renderMethodOptions(); if (typeof refreshTrainingSynergyNote==='function') refreshTrainingSynergyNote(); try{ eraPitchRender(); }catch(e){} } });
     box.appendChild(p);
   });
   renderMethodOptions();
@@ -16272,7 +16458,7 @@ function renderMethodOptions(){
   var cb = document.getElementById('pushrun-check');
   if (cb) cb.addEventListener('change', function(){ tactics.method = this.checked ? 'pushrun' : null; styleTacticsNote(); });
 }
-renderTripOptions(); renderUnlockedFormations(); renderUnlockedTrainingOptions(); renderStyleOptions(); styleTacticsNote(); renderWrinkleBox();
+renderTripOptions(); if (typeof renderFormationSheet==="function") renderFormationSheet(); renderUnlockedFormations(); renderUnlockedTrainingOptions(); renderStyleOptions(); styleTacticsNote(); renderWrinkleBox(); if (typeof updateLineupEraBlurb==="function") updateLineupEraBlurb();
 
 /* ---------- TRAINING ---------- */
 var training = {focus:'stamina', continentalWeeks:0, ballWeeks:0, methodWeeks:0};
@@ -18188,10 +18374,10 @@ function renderLineupCount(){
   var bits, suggest;
   if (modern){
     bits = 'GK:'+counts.GK+' FB:'+counts.FB+' CB:'+counts.CB+' MF:'+counts.MF+' FW:'+counts.FW;
-    suggest = '4-4-2 SUGGESTS 1 GK, 2 FB, 2 CB, 4 MF, 2 FW';
+    suggest = (typeof eraLineupSuggest==='function') ? eraLineupSuggest() : '4-4-2 SUGGESTS 1 GK, 2 FB, 2 CB, 4 MF, 2 FW';
   } else {
     bits = 'GK:'+counts.GK+' FB:'+counts.FB+' HB:'+counts.HB+' FWD:'+counts.FWD;
-    suggest = '2-3-5 SUGGESTS 1 GK, 2 FB, 3 HB, 5 FWD';
+    suggest = (typeof eraLineupSuggest==='function' && tactics && tactics.formation==='wm') ? eraLineupSuggest() : '2-3-5 SUGGESTS 1 GK, 2 FB, 3 HB, 5 FWD';
   }
   document.getElementById('lineup-count').innerHTML = 'SELECTED: <span class="'+(ok?'ok':'bad')+'">'+lineup.length+' / 11</span> &nbsp; '+bits+' &nbsp; <span class="sub" style="display:inline;">('+suggest+')</span>';
   document.getElementById('btn-confirm-lineup').disabled = !ok;
@@ -19067,16 +19253,21 @@ var ERA_PITCH = {
   '442':    [[50,91],[84,74],[16,74],[62,52],[62,78],[38,78],[88,48],[38,52],[58,22],[42,22],[12,48]],
   '424':    [[50,91],[84,74],[16,74],[60,54],[62,78],[38,78],[88,24],[40,54],[58,20],[42,20],[12,24]],
   '433':    [[50,91],[84,74],[16,74],[70,56],[62,78],[38,78],[86,24],[30,56],[50,20],[50,46],[14,24]],
-  sweeper:  [[50,91],[80,66],[20,66],[50,64],[50,81],[72,46],[84,24],[50,48],[50,18],[28,46],[16,24]]
+  sweeper:  [[50,91],[80,66],[20,66],[50,64],[50,81],[72,46],[84,24],[50,48],[50,18],[28,46],[16,24]],
+  /* v365 : mid-80s shapes. Same 11-slot order [GK,RB,LB,RH,CH,LH,OR,IR,CF,IL,OL]. */
+  diamond:  [[50,91],[84,74],[16,74],[70,50],[62,78],[38,78],[50,60],[50,38],[58,20],[42,20],[30,50]],
+  '352':    [[50,91],[88,58],[12,58],[70,78],[50,80],[30,78],[68,48],[50,50],[58,20],[42,20],[32,48]]
 };
 var ERA_PITCH_LBL = ['GK','RB','LB','RH','CH','LH','OR','IR','CF','IL','OL'];
 var ERA_PITCH_LBLS = {
   '442':['GK','RB','LB','CM','CB','CB','RM','CM','ST','ST','LM'],
   '424':['GK','RB','LB','CM','CB','CB','RW','CM','ST','ST','LW'],
   '433':['GK','RB','LB','CM','CB','CB','RW','CM','ST','CM','LW'],
-  sweeper:['GK','RB','LB','CB','SW','CM','RW','CM','ST','CM','LW']
+  sweeper:['GK','RB','LB','CB','SW','CM','RW','CM','ST','CM','LW'],
+  diamond:['GK','RB','LB','CM','CB','CB','DM','AM','ST','ST','CM'],
+  '352':['GK','RWB','LWB','CB','CB','CB','CM','CM','ST','ST','CM']
 };
-var ERA_SHAPE_NAME = {pyr:'2-3-5', wm:'W-M', '442':'4-4-2', '424':'4-2-4', '433':'4-3-3', sweeper:'SWEEPER'};
+var ERA_SHAPE_NAME = {pyr:'2-3-5', wm:'W-M', '442':'4-4-2', '424':'4-2-4', '433':'4-3-3', sweeper:'SWEEPER', diamond:'4-4-2 DIAMOND', '352':'3-5-2'};
 function eraPitchShapeKey(){
   var f = (typeof tactics !== 'undefined' && tactics) ? tactics.formation : '235';
   if (typeof FORMATION_TIMELINE !== 'undefined' && FORMATION_TIMELINE && FORMATION_TIMELINE[f]) return FORMATION_TIMELINE[f].shape;
@@ -24216,6 +24407,8 @@ function gotoView(name){
   if (name==='honours') renderHonours();
   if (name==='abroad') renderAbroad(); /* v330 */
   if (name==='europe') renderEurope();
+  if (name==='tactics'){ try{ lastSheetSig=''; if (typeof renderFormationSheet==='function') renderFormationSheet(); renderUnlockedFormations(); renderStyleOptions(); styleTacticsNote(); }catch(e){} }
+  if (name==='lineup'){ try{ if (typeof updateLineupEraBlurb==='function') updateLineupEraBlurb(); if (typeof eraPitchRender==='function') eraPitchRender(); }catch(e){} }
   if (typeof refreshMenuGroupActiveState === 'function') refreshMenuGroupActiveState();
 }
 document.querySelectorAll('.navlink').forEach(function(a){ a.addEventListener('click', function(){ gotoView(a.dataset.view); }); });
@@ -25303,8 +25496,9 @@ function initGameStateFresh(){
   });
   midlandLeague = makeDivision("Midland League", gameEra==="1950" ? midlandLeagueClubs1950 : midlandLeagueClubs, 44); /* v309 */
   northEasternLeague = makeDivision("North Eastern League", gameEra==="1950" ? northEasternLeagueClubs1950 : northEasternLeagueClubs, 55);
-  tactics = {formation:'235', approach:'balanced', style:'direct'};
-  unlockedFormations = []; /* v316 : no formation is on the sheet by default beyond the Pyramid and the WM. 4-4-2 / 4-2-4 / sweeper / 4-3-3 arrive by DATE (FORMATION_TIMELINE) or earlier by study trip */
+  tactics = (typeof eraTacticsDefaults==='function') ? eraTacticsDefaults() : {formation:'235', approach:'balanced', style:'direct'};
+  if (typeof seedDefaultFormationFamiliarity==='function') seedDefaultFormationFamiliarity();
+  unlockedFormations = []; /* v365 : everyday era shapes sit on the sheet via eraOfferedFormations(), not this unlock list. Study-trip systems still arrive here. */
   activeTrip = null;
   unlockedTrainingMethods = [];
   activeTrainerTrip = null;
@@ -25344,12 +25538,15 @@ function initGameStateFresh(){
   leagueCup = {active:false}; if (isScoOnly()) lcSetup(seasonStartYear(), seasonLabel); else if (!isCont()) elcSetup(seasonStartYear(), seasonLabel); /* v318 / v320 */
 }
 function resetTacticsAndTrainingUI(){
-  var f235 = document.getElementById('f-235'); if (f235) f235.checked = true;
+  if (typeof lastSheetSig!=='undefined') lastSheetSig = '';
+  if (typeof renderFormationSheet==='function') renderFormationSheet();
   var aBal = document.getElementById('a-bal'); if (aBal) aBal.checked = true;
   var trStamina = document.getElementById('tr-stamina'); if (trStamina) trStamina.checked = true;
   renderWrinkleBox();
   renderUnlockedFormations();
   renderStyleOptions(); styleTacticsNote();
+  if (typeof updateLineupEraBlurb==='function') updateLineupEraBlurb();
+  try{ eraPitchRender(); }catch(e){}
   document.getElementById('training-note').innerHTML = '<p class="sub">Back to the standard English method : fitness and discipline, the way it\'s always been done here.</p>';
 }
 
@@ -38672,7 +38869,9 @@ var FOREIGN_SYSTEMS = {
   brazil424:  {learn:16, unfam:0.10}, /* v193 : see studyDestinations for sourcing */
   catenaccio: {learn:14, unfam:0.07},
   '433':      {learn:12, unfam:0.07}, /* v316 */
-  totalfootball: {learn:20, unfam:0.12} /* v316 */
+  totalfootball: {learn:20, unfam:0.12}, /* v316 */
+  '442diamond': {learn:12, unfam:0.07}, /* v365 */
+  '352':        {learn:14, unfam:0.08}  /* v365 */
 };
 var formationFamiliarity = {}; /* system key -> matches played in it */
 /* ============================================================================================
@@ -38697,7 +38896,10 @@ var FORMATION_TIMELINE = {
   catenaccio:      {name:'Sweeper / catenaccio', shape:'sweeper', intro:1961.6, spread:6, peak:0.08},
   winglesswonders: {name:'4-4-2', shape:'442', intro:1966.6, spread:2.5, peak:0.85},
   '433':           {name:'4-3-3', shape:'433', intro:1968.6, spread:4,   peak:0.50},
-  totalfootball:   {name:'Total Football', shape:'433', intro:1972.0, spread:3, peak:0.20}
+  totalfootball:   {name:'Total Football', shape:'433', intro:1972.0, spread:3, peak:0.20},
+  /* v365 : mid-80s shapes, offered on the sheet from 1984-85. Peak kept below the 0.30 mainstream line so they stay a minority of AI clubs. */
+  '442diamond':    {name:'4-4-2 diamond', shape:'diamond', intro:1984.6, spread:4, peak:0.12},
+  '352':           {name:'3-5-2', shape:'352', intro:1984.6, spread:5, peak:0.10}
 };
 var FORMATION_LEGACY = {'235':{name:'the Pyramid (2-3-5)', shape:'pyr'}, wm:{name:'the WM', shape:'wm'}};
 var FORMATION_MAINSTREAM = 0.30;
@@ -38729,6 +38931,7 @@ function formationIsMainstream(key){
 }
 /* 0 = everyone plays it, 1 = nobody has tried it yet */
 function formationNovelty(key){
+  if (typeof formationIsEveryday==='function' && formationIsEveryday(key)) return 0;
   if (!FORMATION_TIMELINE_READY() || !FORMATION_TIMELINE[key]) return 0;
   return clamp(1 - formationShare(key)/FORMATION_MAINSTREAM, 0, 1);
 }
@@ -38746,11 +38949,10 @@ function sheetFormationKeys(){
 }
 var lastSheetSig = '';
 function refreshFormationSheet(){
-  if (!FORMATION_TIMELINE_READY()) return;
-  var sig = sheetFormationKeys().join(',') + '|' + seasonStartYear();
+  var sig = (typeof eraOfferedFormations==='function' ? eraOfferedFormations().map(function(f){return f.key;}).join(',') : '') + '|' + (typeof sheetFormationKeys==='function' ? sheetFormationKeys().join(',') : '') + '|' + (typeof seasonStartYear==='function' ? seasonStartYear() : '') + '|' + ((tactics&&tactics.formation)||'');
   if (sig === lastSheetSig) return;
   lastSheetSig = sig;
-  try{ renderUnlockedFormations(); renderTripOptions(); styleTacticsNote(); }catch(e){}
+  try{ if (typeof renderFormationSheet==='function') renderFormationSheet(); renderUnlockedFormations(); renderTripOptions(); renderStyleOptions(); styleTacticsNote(); }catch(e){}
 }
 function fmHash(str){ /* FNV-1a -> [0,1) */
   var h = 2166136261; str = String(str);
@@ -38796,7 +38998,7 @@ function formationNoveltyNote(key){
 }
 function seasonStartYear(){ var y = parseInt(seasonLabel, 10); return isNaN(y) ? 1946 : y; }
 function continentalEraFactor(){ var y = seasonStartYear(); return y >= 1953 ? 1 : y >= 1949 ? 0.75 : 0.5; }
-function systemAdapt(key){ var F = FOREIGN_SYSTEMS[key]; return F ? clamp((formationFamiliarity[key]||0)/systemLearn(key), 0, 1) : 1; } /* v316 : learn time follows novelty */
+function systemAdapt(key){ var F = FOREIGN_SYSTEMS[key]; return F ? clamp((formationFamiliarity[key]||0)/systemLearn(key), 0, 1) : 1; } /* v316 : learn time follows novelty. v365 : everyday shapes have novelty 0 (plain learn time); a new game seeds familiarity for the era default so that shape starts learned. */
 function pushRunAvailable(){ return seasonStartYear() >= 1949; }
 function xiTechIndex(xi){
   var out = (xi||[]).filter(function(p){ return p && p.slot && p.slot!=='GK' && roleWeights[p.slot]; });
@@ -38875,6 +39077,14 @@ function formationEffects(xi){
        side with real technique and real fitness gets anything from it. */
     e.skill = clamp(((tech + xiStaminaIndex(xi))/2 - 74)/12, 0, 1); e.u = e.skill*a;
     e.gf = 1 + 0.22*e.u; e.ga = 1.04 - 0.12*e.u;
+  } else if (key==='442diamond'){
+    /* v365 : a 4-4-2 with the midfield tucked inside, no natural wide men. Work-rate and passing both matter; a modest midfield-control edge rather than a new scoring machine. */
+    e.skill = clamp(((tech + xiStaminaIndex(xi))/2 - 66)/16, 0, 1); e.u = e.skill*a;
+    e.gf = 1 + 0.08*e.u; e.ga = 1 - 0.10*e.u;
+  } else if (key==='352'){
+    /* v365 : three at the back, wing-backs pushed on, a packed midfield. Needs legs. A shade more control than a flat 4-4-2, slightly more exposed if the wing-backs are caught upfield. */
+    e.skill = clamp((xiStaminaIndex(xi)-65)/18, 0, 1); e.u = e.skill*a;
+    e.gf = 1 + 0.07*e.u; e.ga = 1 - 0.09*e.u;
   }
   return e;
 }
@@ -38956,7 +39166,8 @@ function blockGoalRates(){
   var ours = approachGoalRates(tactics.approach), theirs = approachGoalRates(live.oppApproach);
   var T = 0.13 * engineGoalScale() * (live.pitchMod || 1);
   var fe = formationEffects(live.ourXI);
-  var fGf = fe.gf * (live.usScore < live.oppScore ? fe.trailGf : 1), fGa = fe.ga; /* v110 : see formationEffects */
+  var se = (typeof styleGoalRates==='function') ? styleGoalRates() : {gf:1,ga:1};
+  var fGf = fe.gf * se.gf * (live.usScore < live.oppScore ? fe.trailGf : 1), fGa = fe.ga * se.ga; /* v110 : see formationEffects ; v365 styleGoalRates is 1 for the old 1940s style keys */
   var usRate = T*usOdds*ours.gf*theirs.ga*fGf, oppRate = T*(1-usOdds)*ours.ga*theirs.gf*fGa;
   return {usOdds:usOdds, usRate:usRate, oppRate:oppRate, total:usRate+oppRate, usMult:ours.gf*theirs.ga*fGf, oppMult:ours.ga*theirs.gf*fGa};
 }
@@ -42846,7 +43057,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v364'; /* v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v365'; /* v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
