@@ -500,6 +500,8 @@ body{margin:0; background:var(--dos-black); color:var(--ink); font-family:var(--
 .menubar a.active{background:var(--ink); color:var(--dos-white);}
 .menubar a.active .hot{color:var(--dos-white);}
 .menubar a:hover:not(.active){background:var(--dos-blue-dark);}
+/* v363 : the nav "data" link uses the same menubar typeface, colour and no-underline treatment as the other compact text links (.menubar a / .navlink), at a slightly smaller 16px so it stays a text link rather than a control. Do not set font-family:inherit here — that would pick up the menubar container's body font instead of the condensed nav font. */
+.menubar #data-report-link{font-size:16px;text-decoration:none;padding:6px 13px;margin-left:0;}
 /* v239 : TOP-BAR TIDY-UP, PER DIRECT REQUEST ("top bar is now too crammed"). The menubar had grown to 13 flat,
    same-level links (WEEK/SQUAD/TRAINING/TACTICS/LINEUP/CLUB/RESERVES/TRANSFERS/FIXTURES/TABLE/FA CUP/INT'L/
    HONOURS/MATCH DAY) with more competitions (Cup Winners' Cup, Fairs Cup) still queued to land inside INT'L.
@@ -1963,6 +1965,105 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
 .pc-e66 .pc-sumrow .pc-stars{color:var(--red)}
 .pc-e66 .pc-bfoot{margin:auto 0 2.4cqw;text-align:center;font:700 2.7cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:#7b7f90}
 
+
+/* ============ 1970-81  COLOUR ACTION CARD ============ */
+.pc-e70 .pc-face{background:#f4ecd4;border-radius:1.2cqw;box-shadow:0 0 0 1.2cqw #111,0 10px 22px #0008;padding:0;--ink:#161616;--yellow:#ffe200;--red:#e0002a;--navy:#0b1c4a}
+.pc-e70 .pc-face::after{content:"";position:absolute;inset:0;border:.9cqw solid #111;pointer-events:none}
+.pc-e70 .pc-corner{display:none}
+.pc-e70 .pc-ribbon{background:var(--yellow);color:#111;display:flex;justify-content:space-between;align-items:center;padding:2.2cqw 3.2cqw 1.8cqw;font:800 5.2cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;border-bottom:1.1cqw solid #111}
+.pc-e70 .pc-ribbon small{font:700 3.4cqw var(--f-barlow);letter-spacing:.14em;color:#111}
+.pc-e70 .pc-portrait{flex:1;min-height:0;position:relative;margin:0;background:var(--tint70);overflow:hidden;border-bottom:1.1cqw solid #111}
+.pc-e70 .pc-portrait::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-18deg,transparent 0 7cqw,#00000018 7cqw 8cqw);pointer-events:none}
+.pc-e70 .pc-portrait svg{position:relative;filter:saturate(1.15) contrast(1.05)}
+.pc-e70 .pc-badge{position:absolute;left:0;bottom:0;z-index:3;background:#111;color:var(--yellow);font:800 8.4cqw/1 var(--f-barlow);padding:1.4cqw 3cqw 1.2cqw;letter-spacing:.02em}
+.pc-e70 .pc-badge span{font-size:2.8cqw;font-weight:700;letter-spacing:.16em;display:block;color:#fff;text-transform:uppercase;line-height:1;margin-bottom:.3cqw}
+.pc-e70 .pc-flash{display:none}
+.pc-e70 .pc-nameplate{margin:0;background:var(--red);color:#fff;text-align:left;padding:2cqw 3.2cqw 1.7cqw;transform:skewX(-6deg);border-bottom:1.1cqw solid #111}
+.pc-e70 .pc-nameplate h3{margin:0;font:800 8.8cqw/.95 var(--f-barlow);transform:skewX(6deg);text-transform:uppercase;letter-spacing:.01em;text-shadow:.35cqw .35cqw 0 #00000055}
+.pc-e70 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin:2cqw 3.2cqw 0;gap:2cqw}
+.pc-e70 .pc-club{font:700 3.8cqw/1.1 var(--f-barlow);letter-spacing:.06em;text-transform:uppercase;color:#111;display:flex;align-items:center;gap:1.4cqw}
+.pc-e70 .pc-sw{display:inline-flex;border:.45cqw solid #111}.pc-e70 .pc-sw i{display:block;width:3cqw;height:3cqw}
+.pc-e70 .pc-pos{font:800 3.2cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:#111;background:var(--yellow);padding:1.2cqw 2.4cqw;border:.4cqw solid #111}
+.pc-e70 .pc-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:2cqw 0 0;border-top:1.1cqw solid #111}
+.pc-e70 .pc-tiles div{text-align:center;padding:1.4cqw 0 1.1cqw;border-left:.5cqw solid #111;background:#fff8dc}
+.pc-e70 .pc-tiles div:first-child{border-left:0}
+.pc-e70 .pc-tiles b{display:block;font:800 5.4cqw/1 var(--f-barlow);color:#111}
+.pc-e70 .pc-tiles span{font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.pc-e70 .pc-foot{margin:0;text-align:center;font:800 2.8cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:#111;background:var(--yellow);padding:1.6cqw 2cqw;border-top:1.1cqw solid #111}
+.pc-e70 .pc-back{background:#f4ecd4;padding:0}
+.pc-e70 .pc-back .pc-bhead{background:#111;color:var(--yellow);padding:2.4cqw 3.2cqw 2cqw;border-bottom:1.1cqw solid var(--yellow)}
+.pc-e70 .pc-back .pc-bhead small{display:block;font:800 3cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:#fff}
+.pc-e70 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:800 7.2cqw/.95 var(--f-barlow);text-transform:uppercase;color:#fff}
+.pc-e70 .pc-back .pc-bhead p{margin:.5cqw 0 0;font:700 3.4cqw/1.1 var(--f-barlow);letter-spacing:.06em;text-transform:uppercase;color:var(--yellow)}
+.pc-e70 .pc-bodyb{padding:2.4cqw 3.2cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
+.pc-e70 .pc-bio{margin:0;font:400 3.5cqw/1.4 var(--f-zilla);color:#161616;background:#fff8dc;padding:2cqw;border-left:1.2cqw solid var(--red);min-height:28cqw}
+.pc-e70 .pc-bio::before{content:"FACT FILE";display:block;font:800 3.2cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:1cqw}
+.pc-e70 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);margin:2.2cqw 0 1.4cqw;border:.5cqw solid #111}
+.pc-e70 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;border-left:.5cqw solid #111;background:#fff}
+.pc-e70 .pc-rec div:first-child{border-left:0}
+.pc-e70 .pc-rec b{display:block;font:800 5cqw/1 var(--f-barlow);color:#111}
+.pc-e70 .pc-rec span{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.pc-e70 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.2cqw;row-gap:1.6cqw;align-items:center;margin-top:1.6cqw}
+.pc-e70 .pc-stats dt{font:800 3.1cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:#111}
+.pc-e70 .pc-stats dd{margin:0;display:contents}
+.pc-e70 .pc-stats em{font:800 3.6cqw/1 var(--f-barlow);font-style:normal;color:var(--red);min-width:4cqw;text-align:right}
+.pc-e70 .pc-pips{gap:.55cqw}
+.pc-e70 .pc-pips i{width:3cqw;height:3cqw;background:#ddd4b0;border:.3cqw solid #111}
+.pc-e70 .pc-pips i.pc-on{background:var(--yellow)}
+.pc-e70 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--yellow) 50%,#ddd4b0 50%)}
+.pc-e70 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:800 2.9cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:#111;gap:1cqw;border-top:.5cqw solid #111;padding-top:1.6cqw}
+.pc-e70 .pc-sumrow b{font:800 3.6cqw var(--f-barlow);color:var(--red);letter-spacing:0}
+.pc-e70 .pc-sumrow .pc-stars{color:var(--red)}
+.pc-e70 .pc-bfoot{margin:auto 0 0;text-align:center;font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:#111;background:var(--yellow);padding:1.5cqw 2cqw;border-top:1.1cqw solid #111}
+
+/* ============ 1981-87  ACTION FILE / TV-SPORT CARD ============ */
+.pc-e81 .pc-face{background:#071428;border-radius:1.6cqw;box-shadow:0 0 0 .6cqw #7ee0ff,0 10px 24px #000a;padding:0;--ink:#071428;--cyan:#7ee0ff;--mag:#ff3d7a;--yellow:#ffe200}
+.pc-e81 .pc-face::after{content:"";position:absolute;inset:1.1cqw;border:.45cqw solid var(--cyan);pointer-events:none;border-radius:.8cqw}
+.pc-e81 .pc-corner{display:none}
+.pc-e81 .pc-ribbon{background:transparent;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;padding:2.6cqw 3.6cqw 1.6cqw;font:800 5cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase}
+.pc-e81 .pc-ribbon small{font:700 3.2cqw var(--f-barlow);letter-spacing:.16em;color:#fff}
+.pc-e81 .pc-portrait{flex:1;min-height:0;position:relative;margin:0 3.2cqw;background:var(--tint81);overflow:hidden;border:.45cqw solid #fff;clip-path:polygon(0 0,100% 0,100% 86%,0 100%)}
+.pc-e81 .pc-portrait::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 3cqw,#00000022 3cqw 3.4cqw);pointer-events:none}
+.pc-e81 .pc-portrait svg{position:relative;filter:saturate(1.2) contrast(1.08)}
+.pc-e81 .pc-badge{position:absolute;right:0;top:0;z-index:3;background:var(--mag);color:#fff;font:800 8cqw/1 var(--f-barlow);padding:1.4cqw 2.8cqw 1.2cqw;letter-spacing:.02em;clip-path:polygon(12% 0,100% 0,100% 100%,0 100%)}
+.pc-e81 .pc-badge span{font-size:2.6cqw;font-weight:700;letter-spacing:.16em;display:block;color:var(--yellow);text-transform:uppercase;line-height:1;margin-bottom:.3cqw}
+.pc-e81 .pc-flash{display:none}
+.pc-e81 .pc-nameplate{margin:1.6cqw 3.2cqw 0;background:transparent;color:#fff;text-align:left;padding:0}
+.pc-e81 .pc-nameplate h3{margin:0;font:800 9.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;letter-spacing:-.02em;color:#fff;text-shadow:.4cqw .4cqw 0 var(--mag)}
+.pc-e81 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin:1.4cqw 3.2cqw 0;gap:2cqw}
+.pc-e81 .pc-club{font:700 3.6cqw/1.1 var(--f-barlow);letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:1.4cqw}
+.pc-e81 .pc-sw{display:inline-flex;border:.35cqw solid #fff;border-radius:.3cqw;overflow:hidden}.pc-e81 .pc-sw i{display:block;width:2.8cqw;height:2.8cqw}
+.pc-e81 .pc-pos{font:800 3cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:#071428;background:var(--cyan);padding:1.1cqw 2.2cqw}
+.pc-e81 .pc-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.6cqw;margin:2cqw 3.2cqw 0}
+.pc-e81 .pc-tiles div{text-align:center;padding:1.2cqw 0 1cqw;background:#0c1f3d;border-bottom:.45cqw solid var(--cyan)}
+.pc-e81 .pc-tiles b{display:block;font:800 5.2cqw/1 var(--f-barlow);color:#fff}
+.pc-e81 .pc-tiles span{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-foot{margin:1.8cqw 0 0;text-align:center;font:800 2.7cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);padding:1.6cqw 2cqw 2.2cqw}
+.pc-e81 .pc-back{background:#071428;padding:0;color:#fff}
+.pc-e81 .pc-back .pc-bhead{background:#0c1f3d;color:#fff;padding:2.6cqw 3.4cqw 2.2cqw;border-bottom:.5cqw solid var(--cyan)}
+.pc-e81 .pc-back .pc-bhead small{display:block;font:800 3cqw/1 var(--f-barlow);letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:800 7.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;color:#fff}
+.pc-e81 .pc-back .pc-bhead p{margin:.5cqw 0 0;font:700 3.3cqw/1.1 var(--f-barlow);letter-spacing:.08em;text-transform:uppercase;color:var(--mag)}
+.pc-e81 .pc-bodyb{padding:2.4cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
+.pc-e81 .pc-bio{margin:0;font:400 3.45cqw/1.4 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:2cqw;border-left:.7cqw solid var(--mag);min-height:26cqw}
+.pc-e81 .pc-bio::before{content:"ACTION FILE";display:block;font:800 3.1cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:1cqw}
+.pc-e81 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);gap:.5cqw;margin:2.2cqw 0 1.4cqw}
+.pc-e81 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;background:#0c1f3d}
+.pc-e81 .pc-rec b{display:block;font:800 5cqw/1 var(--f-barlow);color:#fff}
+.pc-e81 .pc-rec span{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.2cqw;row-gap:1.5cqw;align-items:center;margin-top:1.4cqw}
+.pc-e81 .pc-stats dt{font:800 3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-stats dd{margin:0;display:contents}
+.pc-e81 .pc-stats em{font:800 3.6cqw/1 var(--f-barlow);font-style:normal;color:var(--yellow);min-width:4cqw;text-align:right}
+.pc-e81 .pc-pips{gap:.5cqw}
+.pc-e81 .pc-pips i{width:2.8cqw;height:2.8cqw;background:#1a335c;border-radius:0}
+.pc-e81 .pc-pips i.pc-on{background:var(--cyan)}
+.pc-e81 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--cyan) 50%,#1a335c 50%)}
+.pc-e81 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:800 2.8cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:#fff;gap:1cqw;border-top:.4cqw solid var(--cyan);padding-top:1.5cqw}
+.pc-e81 .pc-sumrow b{font:800 3.5cqw var(--f-barlow);color:var(--yellow);letter-spacing:0}
+.pc-e81 .pc-sumrow .pc-stars{color:var(--yellow)}
+.pc-e81 .pc-bfoot{margin:auto 0 0;text-align:center;font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);padding:1.8cqw 2cqw 2.2cqw}
+
 /*PCARD-CSS-END*/
 </style>
 <!--THEME-CSS-END-->
@@ -2055,7 +2156,7 @@ html body .rmx .ttl{ }
       </div>
     </div>
     <a class="navlink" data-view="match"><span class="hot">M</span>ATCH DAY</a>
-    <a href="#" id="data-report-link" class="sub" style="font-size:11px; margin-left:10px; text-decoration:underline; color:inherit;">data</a>
+    <a href="#" id="data-report-link" class="navlink">Data</a>
   </div>
   <div id="data-report-box" class="box" style="display:none; margin:8px 12px; font-size:13px;"></div>
 
@@ -2181,8 +2282,8 @@ html body .rmx .ttl{ }
           <p><span class="field" id="club-manager-title">SECRETARY-MANAGER</span><br><span class="val" id="club-manager">You</span></p>
           <p><span class="field">MANAGER REPUTATION</span><br><span class="val" id="club-manager-rep">--</span></p>
           <p><span class="field">BOARD TARGET THIS SEASON</span><br><span class="val" id="club-board-target">--</span></p>
-          <p><span class="field">TRAINER</span><br><span class="val" id="club-trainer">Bert Symons</span><span class="val"> : handles fitness &amp; injuries</span></p>
-          <p><span class="field">CLUB SECRETARY</span><br><span class="val" id="club-secretary">W. H. Cobbett</span><span class="val"> : books, correspondence, gate takings</span></p>
+          <p><span class="field" id="club-trainer-title">TRAINER</span><br><span class="val" id="club-trainer">Bert Symons</span><span class="val" id="club-trainer-duty"> : handles fitness &amp; injuries</span></p>
+          <p><span class="field" id="club-secretary-title">CLUB SECRETARY</span><br><span class="val" id="club-secretary">W. H. Cobbett</span><span class="val" id="club-secretary-duty"> : books, correspondence, gate takings</span></p>
           <p><span class="field">TEAM CAPTAIN</span><br><select id="captain-select" style="width:100%; margin-top:2px;"></select></p>
           <p><span class="field">PENALTY TAKER</span><br><select id="penalty-taker-select" style="width:100%; margin-top:2px;"></select></p>
         </div>
@@ -6551,11 +6652,14 @@ var gameEra = '1946'; /* v132 : '1946' (1946-47 season, the original and only fu
    checks; a clear rule for Irish, Commonwealth and dual-national players). */
 var SEASON_RULES = {
   ENG: [
-    {from:1946, pointsForWin:2, goalAverage:true, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'effectiveBan', foreignPlayerNote:"England had no official cap, but work-permit practice was an effective ban on overseas players until 1978-79.", europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager'},
+    {from:1946, pointsForWin:2, goalAverage:true, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'effectiveBan', foreignPlayerNote:"England had no official cap, but work-permit practice was an effective ban on overseas players until 1978-79.", europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager', staffTrainerTitle:'trainer', staffTrainerThe:'the trainer', staffTrainerDuty:'handles fitness & injuries', staffSecretaryTitle:'club secretary', staffSecretaryDuty:'books, correspondence, gate takings'},
     {from:1959, jobTitle:'manager'},
     {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
     {from:1967, subAnyReason:true},
+    {from:1970, staffTrainerTitle:'physiotherapist', staffTrainerThe:'the physiotherapist', staffTrainerDuty:'fitness and treatment'},
     {from:1976, goalAverage:false},
+    {from:1977, staffSecretaryDuty:'books, correspondence, commercial affairs'},
+    {from:1980, staffTrainerTitle:'physio', staffTrainerThe:'the physio', staffTrainerDuty:'treatment and fitness', staffSecretaryTitle:'secretary', staffSecretaryDuty:'administration and commercial affairs'},
     {from:1978, foreignPlayers:'open', foreignPlayerNote:"Open from 1978-79."},
     {from:1981, pointsForWin:3},
     {from:1985, europeBan:true},
@@ -6565,41 +6669,53 @@ var SEASON_RULES = {
     {from:1991, europeBanClubs:[]}
   ],
   SCO: [
-    {from:1946, pointsForWin:2, goalAverage:true, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, relPremier:2, promoFirst:2, relFirst:2, promoSecond:2, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager'},
+    {from:1946, pointsForWin:2, goalAverage:true, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, relPremier:2, promoFirst:2, relFirst:2, promoSecond:2, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager', staffTrainerTitle:'trainer', staffTrainerThe:'the trainer', staffTrainerDuty:'handles fitness & injuries', staffSecretaryTitle:'club secretary', staffSecretaryDuty:'books, correspondence, gate takings'},
     {from:1955, reconstruction:'enlarge18'},
     {from:1956, reconstruction:null},
     {from:1959, jobTitle:'manager'},
     {from:1966, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
     {from:1967, subAnyReason:true},
+    {from:1970, staffTrainerTitle:'physiotherapist', staffTrainerThe:'the physiotherapist', staffTrainerDuty:'fitness and treatment'},
     {from:1971, goalAverage:false},
     {from:1973, subsNamed:2, subsUsedLeague:2, subsUsedCup:2},
     {from:1974, reconstruction:'premier1975'},
     {from:1975, reconstruction:null},
+    {from:1977, staffSecretaryDuty:'books, correspondence, commercial affairs'},
+    {from:1980, staffTrainerTitle:'physio', staffTrainerThe:'the physio', staffTrainerDuty:'treatment and fitness', staffSecretaryTitle:'secretary', staffSecretaryDuty:'administration and commercial affairs'},
     {from:1985, relPremier:1, promoFirst:3, relFirst:2, promoSecond:2, reconstruction:'premier12'},
     {from:1986, relPremier:2, promoFirst:2, reconstruction:null},
     {from:1994, pointsForWin:3}
   ],
   ITA: [
-    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:3, rel:3, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager'},
+    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:3, rel:3, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager', staffTrainerTitle:'trainer', staffTrainerThe:'the trainer', staffTrainerDuty:'handles fitness & injuries', staffSecretaryTitle:'club secretary', staffSecretaryDuty:'books, correspondence, gate takings'},
     {from:1959, jobTitle:'manager'},
     {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
     {from:1966, foreignPlayers:'closed', foreignPlayerNote:"Italy closed to new foreign signings from 1966-67 to 1979-80."},
     {from:1968, subAnyReason:true},
+    {from:1970, staffTrainerTitle:'physiotherapist', staffTrainerThe:'the physiotherapist', staffTrainerDuty:'fitness and treatment'},
+    {from:1977, staffSecretaryDuty:'books, correspondence, commercial affairs'},
+    {from:1980, staffTrainerTitle:'physio', staffTrainerThe:'the physio', staffTrainerDuty:'treatment and fitness', staffSecretaryTitle:'secretary', staffSecretaryDuty:'administration and commercial affairs'},
     {from:1980, foreignPlayers:'open', foreignPlayerNote:"Italy reopened to foreign signings from 1980-81."}
   ],
   ESP: [
-    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager'},
+    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'open', europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager', staffTrainerTitle:'trainer', staffTrainerThe:'the trainer', staffTrainerDuty:'handles fitness & injuries', staffSecretaryTitle:'club secretary', staffSecretaryDuty:'books, correspondence, gate takings'},
     {from:1959, jobTitle:'manager'},
     {from:1962, foreignPlayers:'closed', foreignPlayerNote:"Spain closed its borders to foreign players from 1962-63 to 1972-73."},
     {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
     {from:1967, subAnyReason:true},
-    {from:1973, foreignPlayers:'open', foreignPlayerNote:"Spain reopened to foreign players from 1973-74."}
+    {from:1970, staffTrainerTitle:'physiotherapist', staffTrainerThe:'the physiotherapist', staffTrainerDuty:'fitness and treatment'},
+    {from:1973, foreignPlayers:'open', foreignPlayerNote:"Spain reopened to foreign players from 1973-74."},
+    {from:1977, staffSecretaryDuty:'books, correspondence, commercial affairs'},
+    {from:1980, staffTrainerTitle:'physio', staffTrainerThe:'the physio', staffTrainerDuty:'treatment and fitness', staffSecretaryTitle:'secretary', staffSecretaryDuty:'administration and commercial affairs'}
   ],
   DEU: [
-    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'limited', foreignPlayerLimit:2, foreignPlayerNote:"West German contract-player football, and then the Bundesliga, limited sides to two foreigners in the matchday squad (the long-standing DFB rule). Enforcement is not wired in v353.", europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager'},
+    {from:1946, pointsForWin:2, goalAverage:false, subsAllowed:false, subsNamed:0, subsUsedLeague:0, subsUsedCup:0, subAnyReason:false, playOffs:false, promo:2, rel:2, foreignPlayers:'limited', foreignPlayerLimit:2, foreignPlayerNote:"West German contract-player football, and then the Bundesliga, limited sides to two foreigners in the matchday squad (the long-standing DFB rule). Enforcement is not wired in v353.", europeBan:false, europeBanClubs:[], reconstruction:null, jobTitle:'secretary-manager', staffTrainerTitle:'trainer', staffTrainerThe:'the trainer', staffTrainerDuty:'handles fitness & injuries', staffSecretaryTitle:'club secretary', staffSecretaryDuty:'books, correspondence, gate takings'},
     {from:1959, jobTitle:'manager'},
     {from:1965, subsAllowed:true, subsNamed:1, subsUsedLeague:1, subsUsedCup:1},
-    {from:1967, subAnyReason:true}
+    {from:1967, subAnyReason:true},
+    {from:1970, staffTrainerTitle:'physiotherapist', staffTrainerThe:'the physiotherapist', staffTrainerDuty:'fitness and treatment'},
+    {from:1977, staffSecretaryDuty:'books, correspondence, commercial affairs'},
+    {from:1980, staffTrainerTitle:'physio', staffTrainerThe:'the physio', staffTrainerDuty:'treatment and fitness', staffSecretaryTitle:'secretary', staffSecretaryDuty:'administration and commercial affairs'}
   ]
 };
 function ruleCountry(country){
@@ -6646,6 +6762,85 @@ function managerJobTitleLabel(form, season, country){
   if (form === 'title') return String(t).replace(/(^|-)([a-z])/g, function(_, a, b){ return a + b.toUpperCase(); });
   return t;
 }
+
+/* v363 : staff titles on the two existing Club Office chairs, driven by the
+   CURRENT season like managerJobTitle. Researched dates (English Football
+   League practice; the same steps are used for the other playable countries
+   unless a later pass finds a clearly different national custom):
+
+   TRAINER — the usual programme/handbook title for the fitness and treatment
+   man through the 1950s and 1960s. Qualified physiotherapists were already
+   on the staff at some clubs by the mid-1960s (Bertie Mee was Arsenal's
+   physiotherapist before he became manager in 1966). The treatment chair is
+   labelled Physiotherapist from 1970-71, when that professional title had
+   become the typical Football League wording, and the shorter everyday
+   "physio" from 1980-81. This chair is fitness and injuries, so it becomes
+   physio rather than "coach" (a coach is a separate, later staff chair and
+   is not added in this slice).
+
+   CLUB SECRETARY — the standard administrative title in Football League
+   directories throughout this period, including 1986-87. Shirt sponsorship
+   was permitted by the League from 1977 and commercial work is added to the
+   duty line from 1977-78; the everyday short form "secretary" is used from
+   1980-81. "Chief executive" / "managing director" appeared at some bigger
+   clubs in the mid-to-late 1980s but was not the typical League title, and
+   would be wrong on a Fourth Division club in 1986, so it is not applied
+   here. It belongs to a later (early-1990s) pass.
+
+   ASK THE TRAINER / "the trainer is on" / injury news use the same labels. */
+function staffTitle(key, season, country){
+  var t = (typeof rule === 'function') ? rule(country || null, season, key) : undefined;
+  return t;
+}
+function staffTrainerTitle(season, country){ return staffTitle('staffTrainerTitle', season, country) || 'trainer'; }
+function staffTrainerThe(season, country){ return staffTitle('staffTrainerThe', season, country) || ('the ' + staffTrainerTitle(season, country)); }
+function staffTrainerDuty(season, country){ return staffTitle('staffTrainerDuty', season, country) || 'handles fitness & injuries'; }
+function staffSecretaryTitle(season, country){ return staffTitle('staffSecretaryTitle', season, country) || 'club secretary'; }
+function staffSecretaryDuty(season, country){ return staffTitle('staffSecretaryDuty', season, country) || 'books, correspondence, gate takings'; }
+function staffTrainerTitleLabel(form, season, country){
+  var t = staffTrainerTitle(season, country);
+  if (form === 'upper') return String(t).toUpperCase();
+  if (form === 'title') return String(t).replace(/(^|-)([a-z])/g, function(_, a, b){ return a + b.toUpperCase(); });
+  return t;
+}
+function staffSecretaryTitleLabel(form, season, country){
+  var t = staffSecretaryTitle(season, country);
+  if (form === 'upper') return String(t).toUpperCase();
+  if (form === 'title') return String(t).replace(/(^|-)([a-z])/g, function(_, a, b){ return a + b.toUpperCase(); });
+  return t;
+}
+function staffAskTrainerLabel(season, country){
+  return 'ASK ' + String(staffTrainerThe(season, country)).toUpperCase();
+}
+function updateStaffPanelTitles(){
+  var tr = document.getElementById('club-trainer-title');
+  if (tr) tr.textContent = staffTrainerTitleLabel('upper');
+  var td = document.getElementById('club-trainer-duty');
+  if (td) td.textContent = ' : ' + staffTrainerDuty();
+  var sr = document.getElementById('club-secretary-title');
+  if (sr) sr.textContent = staffSecretaryTitleLabel('upper');
+  var sd = document.getElementById('club-secretary-duty');
+  if (sd) sd.textContent = ' : ' + staffSecretaryDuty();
+}
+
+/* v363 : British Home Championship last real season was 1983-84. */
+function homeChampionshipLastStartYear(){ return 1983; }
+function homeChampionshipOn(season){
+  var y = (typeof ruleYear === 'function') ? ruleYear(season) : 0;
+  if (!y && typeof seasonStartYear === 'function') y = seasonStartYear();
+  return y <= homeChampionshipLastStartYear();
+}
+function updateHomeChampionshipNav(){
+  var a = document.querySelector('.navlink[data-view="intl"]');
+  if (!a) return;
+  var on = homeChampionshipOn();
+  a.style.display = on ? '' : 'none';
+  a.setAttribute('aria-hidden', on ? 'false' : 'true');
+  if (!on && a.classList.contains('active') && typeof gotoView === 'function'){
+    /* leave the page available for a historical read, but do not keep it highlighted as a live competition */
+  }
+}
+
 
 /* ===== v359 : ERA ECONOMICS =====
    Data-only table, stepped by season-start year and looked up like SEASON_RULES
@@ -15856,7 +16051,7 @@ function renderTripOptions(){
   });
   var statusParts = [];
   if (activeTrip) statusParts.push('YOU ARE AWAY UNTIL '+fmtDateShort(activeTrip.returnDate)+' : REPORT ON RETURN.');
-  if (activeTrainerTrip) statusParts.push('THE TRAINER IS AWAY UNTIL '+fmtDateShort(activeTrainerTrip.returnDate)+' : REPORT ON RETURN.');
+  if (activeTrainerTrip) statusParts.push(staffTrainerThe().toUpperCase()+' IS AWAY UNTIL '+fmtDateShort(activeTrainerTrip.returnDate)+' : REPORT ON RETURN.');
   document.getElementById('trip-status').textContent = statusParts.join(' ');
 }
 function arrangeStudyTrip(d){
@@ -17169,10 +17364,10 @@ function renderOffers(){
 
       var verdictWrap = document.createElement('div'); verdictWrap.style.margin = '0 0 6px';
       if (o.swap.trainerVerdict){
-        var tvP = document.createElement('p'); tvP.className='sub'; tvP.style.margin='0 0 2px'; tvP.innerHTML = trainerName.toUpperCase()+' (TRAINER): '+o.swap.trainerVerdict;
+        var tvP = document.createElement('p'); tvP.className='sub'; tvP.style.margin='0 0 2px'; tvP.innerHTML = trainerName.toUpperCase()+' ('+staffTrainerTitleLabel('upper')+'): '+o.swap.trainerVerdict;
         verdictWrap.appendChild(tvP);
       } else {
-        var askTrainer = document.createElement('button'); askTrainer.textContent = 'ASK THE TRAINER'; askTrainer.style.padding='2px 10px'; askTrainer.style.fontSize='15px'; askTrainer.style.marginRight='6px';
+        var askTrainer = document.createElement('button'); askTrainer.textContent = staffAskTrainerLabel(); askTrainer.style.padding='2px 10px'; askTrainer.style.fontSize='15px'; askTrainer.style.marginRight='6px';
         askTrainer.addEventListener('click', function(){
           o.swap.trainerVerdict = quickVerdictText(trainerName, true, o.swap.rep);
           addNews('board', trainerName+' gives you a quick word on '+o.swap.n+' before you have to decide.');
@@ -17608,7 +17803,9 @@ function bar(val){ var v=Math.round(val); var filled=Math.round(v/20*16); return
 var PCARD_SERIES = {
   '46': {eng:'Association Footballers', sco:'Scottish Footballers', ita:'Italian Footballers', esp:'Spanish Footballers', deu:'German Footballers'},
   '59': {eng:'Soccer Stars', sco:'Scottish Soccer Stars', ita:'Italian Soccer Stars', esp:'Spanish Soccer Stars', deu:'German Soccer Stars'},
-  '66': {eng:'Football Stars', sco:'Scottish Football Stars', ita:'Italian Football Stars', esp:'Spanish Football Stars', deu:'German Football Stars'}
+  '66': {eng:'Football Stars', sco:'Scottish Football Stars', ita:'Italian Football Stars', esp:'Spanish Football Stars', deu:'German Football Stars'},
+  '70': {eng:'Colour Footballers', sco:'Scottish Colour Footballers', ita:'Italian Colour Footballers', esp:'Spanish Colour Footballers', deu:'German Colour Footballers'},
+  '81': {eng:'Action File', sco:'Scottish Action File', ita:'Italian Action File', esp:'Spanish Action File', deu:'German Action File'}
 };
 var PCARD_COLOURS = [ /* longest names first */
   ['GARIBALDI RED','#c1272d'],['ROYAL BLUE','#2457a6'],['SKY BLUE','#7fb7e0'],['LIGHT BLUE','#7fb7e0'],['DARK BLUE','#1b2f5a'],['DARK GREEN','#1f4d2b'],
@@ -17669,8 +17866,21 @@ function pcardPips(v){ v = pcardInt(v); var h = '', f = Math.floor(v/2), hf = v 
 function pcardStars(n){ n = pcardInt(n); var h = ''; for (var i=0; i<5; i++) h += '<i class="'+(i<n ? '' : 'pc-off')+'"></i>'; return '<span class="pc-stars" role="img" aria-label="Reputation '+n+' of 5">'+h+'</span>'; }
 var PCARD_CORNER = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 22V6C2 3.8 3.8 2 6 2H22"/><path d="M6 18V9C6 7.3 7.3 6 9 6H18"/><circle cx="11.5" cy="11.5" r="2" fill="currentColor"/><path d="M14 11.5H19M11.5 14V19"/></svg>';
 function pcardEra(){
-  var e = (typeof isSco === 'function' && isSco() && typeof scoEra !== 'undefined') ? scoEra : gameEra;
-  return e === '1959' ? '59' : (e === '1966' ? '66' : '46');
+  /* v363 : follow the CURRENT season, so a long 1946 save is not stuck on a cigarette card.
+     Skins: 1946-58 cigarette ('46'), 1959-65 gum ('59'), 1966-69 sticker ('66'),
+     1970-80 colour action card ('70'), 1981+ TV-sport action file ('81'). */
+  var y = 0;
+  if (typeof seasonStartYear === 'function') y = seasonStartYear() || 0;
+  if (!y && typeof seasonLabel === 'string' && /^\d{4}/.test(seasonLabel)) y = parseInt(seasonLabel, 10);
+  if (!y){
+    var e = (typeof isSco === 'function' && isSco() && typeof scoEra !== 'undefined') ? scoEra : (typeof gameEra !== 'undefined' ? gameEra : '');
+    y = parseInt(e, 10) || 0;
+  }
+  if (y >= 1981) return '81';
+  if (y >= 1970) return '70';
+  if (y >= 1966) return '66';
+  if (y >= 1959) return '59';
+  return '46';
 }
 function pcardFormWord(f){ return f >= 4 ? 'Excellent' : f > 1 ? 'Good' : f >= -1 ? 'Fair' : f > -4 ? 'Poor' : 'Awful'; }
 var PCARD_NUM = ['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
@@ -17725,6 +17935,8 @@ function pcardHtml(p){
   var style = ['slick','side','wave'][(h >>> 3) % 3];
   var t59 = [['#f2b632','#e08a1e'],['#ff8a3d','#e2552b'],['#8fc7e6','#4f93bd'],['#9ad08a','#4f9a5a'],['#e8a0b4','#c4607f']][(h >>> 5) % 5];
   var t66 = [['#d9a441','#efc76d'],['#e4b7a3','#f1d1c2'],['#9fc3d6','#c3dbe7'],['#b7d3a0','#d6e8c6'],['#cdb3d6','#e3d2ea']][(h >>> 7) % 5];
+  var t70 = [['#e0002a','#7a1020'],['#1650d0','#0b1c4a'],['#2f6b3a','#14331c'],['#f0a81c','#8a5a08'],['#7e1f3a','#3a0e1c']][(h >>> 9) % 5];
+  var t81 = [['#1650d0','#071428'],['#e0002a','#3a0010'],['#0b6b5a','#042824'],['#5b2a7a','#1c0a28'],['#c9a227','#3a2c08']][(h >>> 11) % 5];
   var attrs = []; if (p.handling) attrs.push(['Handling', pcardInt(p.handling)]);
   attrs.push(['Shooting', pcardInt(p.shooting)],['Passing', pcardInt(p.passing)],['Tackling', pcardInt(p.tackling)],['Heading', pcardInt(p.heading)],['Pace', pcardInt(p.pace)],['Stamina', pcardInt(p.stamina)]);
   var best = attrs.slice().sort(function(a,b){ return b[1] - a[1]; })[0];
@@ -17747,14 +17959,25 @@ function pcardHtml(p){
     front = '<div class="pc-ribbon"><span>' + series + '</span><small>' + seasonTxt + '</small></div><div class="pc-portrait"><div class="pc-badge"><div>No.<span>' + idx + '</span></div></div>' + sil + (flash ? '<div class="pc-flash">' + pcardEsc(flash) + '</div>' : '') + '</div>'
       + '<div class="pc-nameplate"><h3 style="font-size:'+fit(7.4,17)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + clubTxt + sw + '</div><div class="pc-pos">' + posTxt + '</div></div>'
       + '<div class="pc-foot">Card ' + idx + ' of ' + total + ' &middot; Collect the set</div>';
+  } else if (era === '70'){
+    front = '<div class="pc-ribbon"><span>' + series + '</span><small>' + seasonTxt + '</small></div><div class="pc-portrait"><div class="pc-badge"><span>No.</span>' + idx + '</div>' + sil + '</div>'
+      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(8.8,16)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + clubTxt + sw + '</div><div class="pc-pos">' + posTxt + '</div></div>'
+      + '<div class="pc-tiles"><div><b>' + p.age + '</b><span>Age</span></div><div><b>' + (p.apps || 0) + '</b><span>Apps</span></div><div><b>' + goalsTxt + '</b><span>Goals</span></div></div>'
+      + '<div class="pc-foot">Card ' + idx + ' of ' + total + '</div>';
+  } else if (era === '81'){
+    front = '<div class="pc-ribbon"><span>' + series + '</span><small>' + seasonTxt + '</small></div><div class="pc-portrait"><div class="pc-badge"><span>No.</span>' + idx + '</div>' + sil + '</div>'
+      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(9.4,15)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + sw + clubTxt + '</div><div class="pc-pos">' + posTxt + '</div></div>'
+      + '<div class="pc-tiles"><div><b>' + p.age + '</b><span>Age</span></div><div><b>' + (p.apps || 0) + '</b><span>Apps</span></div><div><b>' + goalsTxt + '</b><span>Goals</span></div></div>'
+      + '<div class="pc-foot">File ' + idx + ' of ' + total + '</div>';
   } else {
     front = '<div class="pc-ribbon"><span>' + series + '</span><small>' + seasonTxt + '</small></div><div class="pc-portrait"><div class="pc-badge"><span>No.</span>' + idx + '</div>' + sil + '</div>'
       + '<div class="pc-nameplate"><h3 style="font-size:'+fit(10,15)+'cqw">' + nameBig + '</h3></div><div class="pc-meta"><div class="pc-club">' + sw + clubTxt + '</div><div class="pc-pos">' + posTxt + '</div></div>'
       + '<div class="pc-tiles"><div><b>' + p.age + '</b><span>Age</span></div><div><b>' + (p.apps || 0) + '</b><span>Apps</span></div><div><b>' + goalsTxt + '</b><span>Goals</span></div></div>'
       + '<div class="pc-foot">Sticker ' + idx + ' of ' + total + '</div>';
   }
-  var kick = era === '46' ? 'The Player\u2019s Record' : era === '59' ? 'Player File' : 'Player Profile';
-  var bhead = '<div class="pc-bhead"><small>' + kick + '</small><h3 style="font-size:'+fit(era==='46'?6.8:era==='59'?6.6:8.4, 17)+'cqw">' + nameBig + '</h3><p>' + clubTxt + ', ' + posTxt.toLowerCase() + (p.isManagerPlayer ? ' (player-manager)' : '') + '</p></div>';
+  var kick = era === '46' ? 'The Player\u2019s Record' : era === '59' ? 'Player File' : era === '70' ? 'Fact File' : era === '81' ? 'Action File' : 'Player Profile';
+  var nameFit = era==='46'?6.8:era==='59'?6.6:era==='70'?7.2:era==='81'?7.4:8.4;
+  var bhead = '<div class="pc-bhead"><small>' + kick + '</small><h3 style="font-size:'+fit(nameFit, 17)+'cqw">' + nameBig + '</h3><p>' + clubTxt + ', ' + posTxt.toLowerCase() + (p.isManagerPlayer ? ' (player-manager)' : '') + '</p></div>';
   var rec = '<div class="pc-rec"><div><b>' + p.age + '</b><span>Age</span></div><div><b>' + (p.apps || 0) + '</b><span>Apps</span></div><div><b>' + goalsTxt + '</b><span>Goals</span></div><div><b>' + wage + '</b><span>A week</span></div></div>';
   var stats = '<dl class="pc-stats">' + attrs.map(function(a){ return '<dt>' + a[0] + '</dt><dd>' + pcardPips(a[1]) + '<em>' + a[1] + '</em></dd>'; }).join('') + '</dl>';
   var sum = '<div class="pc-sumrow"><span>Ability <b>' + pcardInt(p.ca) + '/100</b></span><span>Rep ' + pcardStars(p.rep) + '</span><span>Form <b>' + pcardFormWord(p.form) + '</b></span></div>';
@@ -17762,7 +17985,7 @@ function pcardHtml(p){
   var back = (era === '46')
     ? corners + bhead + '<div class="pc-rule"></div>' + bio + rec + stats + sum + '<div class="pc-bfoot">' + bfootTxt + '</div>'
     : bhead + '<div class="pc-bodyb">' + bio + rec + stats + sum + '<div class="pc-bfoot">' + bfootTxt + '</div></div>';
-  var style_ = '--c1:'+kit.c1+';--c1b:'+club.c1+';--tint:'+t59[0]+';--tint2:'+t59[1]+';--tint66:'+t66[0]+';--tint66b:'+t66[1];
+  var style_ = '--c1:'+kit.c1+';--c1b:'+club.c1+';--tint:'+t59[0]+';--tint2:'+t59[1]+';--tint66:'+t66[0]+';--tint66b:'+t66[1]+';--tint70:'+t70[0]+';--tint70b:'+t70[1]+';--tint81:'+t81[0]+';--tint81b:'+t81[1];
   return '<div class="pc-stage pc-e' + era + '" data-nocase="1" data-era="' + era + '"><div class="pc-card" role="button" tabindex="0" aria-pressed="false" aria-label="' + pcardEsc(p.n + ', ' + p.pos + ', ' + ourClubName + '. Card ' + idx + ' of ' + total + '. Press to turn over.') + '" style="' + style_ + '">'
     + '<div class="pc-inner"><div class="pc-face pc-front">' + front + '</div><div class="pc-face pc-back">' + back + '</div></div></div>'
     + '<div class="pc-hint">Click the card to turn it over</div></div>';
@@ -17783,7 +18006,7 @@ function showProfile(id, targetId){
   if (p.intlCallUps) notes.push('Trial / squad call-ups: ' + p.intlCallUps);
   if (p.bookingsSeason) notes.push('Cautions this season: ' + p.bookingsSeason);
   if (p.awayOnDuty) notes.push('Away on international duty');
-  if (p.caps) notes.push('Home championship caps: ' + p.caps);
+  if (p.caps) notes.push((homeChampionshipOn() ? 'Home championship caps: ' : 'International caps: ') + p.caps);
   if (p.motmCount) notes.push('Man of the match: ' + p.motmCount);
   if (notes.length) html += '<p class="sub pc-notes" style="margin:6px 0 0;font-size:11px;">' + notes.join(' &nbsp; &middot; &nbsp; ').toUpperCase() + '</p>';
   /* v237 : SEASON-BY-SEASON CAREER RECORD (p.seasonHistory is archived once per closed season, never overwritten) */
@@ -18256,6 +18479,7 @@ function renderClub(){
   var secretaryEl = document.getElementById('club-secretary'); if (secretaryEl) secretaryEl.textContent = clubSecretaryName;
   var mgrTitleEl = document.getElementById('club-manager-title');
   if (mgrTitleEl && typeof managerJobTitleLabel === 'function') mgrTitleEl.textContent = managerJobTitleLabel('upper');
+  if (typeof updateStaffPanelTitles === 'function') updateStaffPanelTitles();
   var mgrEl = document.getElementById('club-manager');
   if (mgrEl) mgrEl.textContent = (manager && manager.name) ? (manager.name+', '+manager.age+(playerManagerId!==null?' (PLAYER-MANAGER)':'')) : 'You';
   var repEl = document.getElementById('club-manager-rep');
@@ -18843,6 +19067,8 @@ function applyEraTheme(){
     else m.innerHTML = d ? ('<span class="the">'+d.the+'</span><span class="mast-h">'+d.main+' <span>'+d.accent+'</span></span><div class="mast-ed"><span>'+d.left+'</span><b>'+d.badge+'</b><span>'+d.right+'</span></div><p class="mast-note">'+d.note+'</p>') : '';
   }
   try{ eraCaseEnable(!!(t && t.sentenceCase)); }catch(e){}
+  try{ if (typeof updateHomeChampionshipNav === 'function') updateHomeChampionshipNav(); }catch(e){}
+  try{ if (typeof updateStaffPanelTitles === 'function') updateStaffPanelTitles(); }catch(e){}
   return want;
 }
 /*THEME-JS-END*/
@@ -19204,6 +19430,7 @@ function intlMatchWithManagerBoost(home, away){
 }
 function generateHomeChampionshipSeason(label){
   var y = parseInt(label, 10);
+  if (!y || y > homeChampionshipLastStartYear()) return [];
   /* six fixtures, each of the four home nations playing each other once -- a full round robin, home/away
      flipped by year parity for a little variety rather than the exact same nation always hosting the exact
      same opponent */
@@ -19224,11 +19451,20 @@ function generateHomeChampionshipSeason(label){
 function extendIntlCalendarIfNeeded(yearsAhead){
   yearsAhead = yearsAhead || 8;
   var curYear = seasonStartYear();
+  var lastAllowed = homeChampionshipLastStartYear();
   var guard = 0;
   while (guard++ < 200){ /* a hard cap, not a real limit -- this loop only ever runs a handful of times per call in practice */
-    var latest = intlFixtures.reduce(function(m, f){ var fy = f.season ? parseInt(f.season, 10) : parseInt(f.date.slice(0,4), 10); return Math.max(m, fy); }, curYear);
-    if (latest >= curYear + yearsAhead) break;
-    var nextLabel = (latest+1) + '-' + String(latest+2).slice(-2);
+    var latest = intlFixtures.reduce(function(m, f){
+      if (f.comp && f.comp !== 'BHC' && f.comp !== 'WCQ') return m;
+      var fy = f.season ? parseInt(f.season, 10) : parseInt((f.date||'').slice(0,4), 10);
+      return Math.max(m, fy || 0);
+    }, 0);
+    var target = Math.min(curYear + yearsAhead, lastAllowed);
+    if (latest >= target) break;
+    if (latest >= lastAllowed) break;
+    var nextY = (latest || (curYear - 1)) + 1;
+    if (nextY > lastAllowed) break;
+    var nextLabel = nextY + '-' + String(nextY+2).slice(-2);
     generateHomeChampionshipSeason(nextLabel).forEach(function(r){ intlFixtures.push(r); });
   }
 }
@@ -19879,7 +20115,9 @@ function renderInternationals(){
       t.map(function(r){ return '<tr><td>'+r.n.toUpperCase()+'</td><td class="num">'+r.p+'</td><td class="num">'+r.w+'</td><td class="num">'+r.d+'</td><td class="num">'+r.l+'</td><td class="num">'+r.f+'</td><td class="num">'+r.a+'</td><td class="num">'+r.pts+'</td></tr>'; }).join('')+'</tbody></table>'+
       (season==='1949-50' ? '<p class="sub">THIS SEASON\'S CHAMPIONSHIP IS ALSO WORLD CUP QUALIFYING GROUP 1 : THE TOP TWO QUALIFY FOR BRAZIL.</p>' : '');
   } else {
-    tableHtml = '<p class="sub">NO HOME CHAMPIONSHIP ON THE RESEARCHED CALENDAR FOR THIS SEASON.</p>';
+    tableHtml = homeChampionshipOn()
+      ? '<p class="sub">NO HOME CHAMPIONSHIP ON THE RESEARCHED CALENDAR FOR THIS SEASON.</p>'
+      : '<p class="sub">THE BRITISH HOME CHAMPIONSHIP ENDED IN 1983-84 AND IS NOT PLAYED IN THIS SEASON.</p>';
   }
   /* v248 : the World Cup now has its own dedicated page (see renderWorldCup / the WORLD CUP nav
      link under OTHER) -- it used to be a box bolted onto the bottom of this Home Championship
@@ -23848,10 +24086,13 @@ generateWeeklyNews(); renderWeek();
 /* ---------- NAV ---------- */
 var currentView = 'week';
 function gotoView(name){
+  if (typeof updateHomeChampionshipNav === 'function') updateHomeChampionshipNav();
   document.querySelectorAll('.navlink').forEach(function(x){x.classList.remove('active');});
   document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');});
-  document.querySelector('.navlink[data-view="'+name+'"]').classList.add('active');
-  document.getElementById('v-'+name).classList.add('active');
+  var navEl = document.querySelector('.navlink[data-view="'+name+'"]');
+  if (navEl) navEl.classList.add('active');
+  var viewEl = document.getElementById('v-'+name);
+  if (viewEl) viewEl.classList.add('active');
   currentView = name;
   if (name==='intl') renderInternationals();
   if (name==='worldcup') renderWorldCup();
@@ -38961,7 +39202,7 @@ function simulateMinuteBlock(skipHalfPause){
         if (realInjured && Math.random() < 0.55){
           var weeksOutA = 1 + Math.floor(Math.random()*3);
           realInjured.injuredWeeks = Math.max(realInjured.injuredWeeks||0, weeksOutA);
-          addNews('injury', realInjured.n+' had to be helped off against '+live.f.opp+' : the trainer reckons on '+weeksText(weeksOutA)+' on the sidelines.');
+          addNews('injury', realInjured.n+' had to be helped off against '+live.f.opp+' : '+staffTrainerThe()+' reckons on '+weeksText(weeksOutA)+' on the sidelines.');
         }
       } else {
         addLine('card', pickFresh(bank.injury).replace('{P}', injured.n.toUpperCase())+' HE TRIES TO CARRY ON, SHIFTED OUT WIDE WHERE HE CAN DO LEAST HARM -- LITTLE MORE THAN A PASSENGER FOR THE REST OF THE AFTERNOON.');
@@ -38970,7 +39211,7 @@ function simulateMinuteBlock(skipHalfPause){
         if (realInjured && Math.random() < 0.20){
           var weeksOutB = 1 + Math.floor(Math.random()*2);
           realInjured.injuredWeeks = Math.max(realInjured.injuredWeeks||0, weeksOutB);
-          addNews('injury', realInjured.n+' was carrying a knock from today\'s game : the trainer reckons on '+weeksText(weeksOutB)+' on the sidelines.');
+          addNews('injury', realInjured.n+' was carrying a knock from today\'s game : '+staffTrainerThe()+' reckons on '+weeksText(weeksOutB)+' on the sidelines.');
         }
       }
     }
@@ -42489,7 +42730,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v362'; /* v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v363'; /* v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
