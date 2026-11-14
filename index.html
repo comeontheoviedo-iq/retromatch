@@ -7880,7 +7880,7 @@ var SEASON_RULES = {
     {from:1976, goalAverage:false},
     {from:1977, staffSecretaryDuty:'books, correspondence, commercial affairs'},
     {from:1980, staffTrainerTitle:'physio', staffTrainerThe:'the physio', staffTrainerDuty:'treatment and fitness', staffSecretaryTitle:'secretary', staffSecretaryDuty:'administration and commercial affairs'},
-    {from:1978, foreignPlayers:'open', foreignPlayerNote:"Open from 1978-79."},
+    {from:1978, foreignPlayers:'open', foreignPlayerLimit:2, foreignPlayerNote:"Open from 1978-79, after the Football League AGM lifted the 1931 two-year residency rule following the February 1978 EEC freedom-of-movement ruling. From 28 September 1978, Department of Employment work permits for overseas professionals were limited to two established foreign players per club (Hansard, 13 Dec 1978). Home Nations, Ireland and the Commonwealth remain exempt."},
     {from:1960, leagueCupName:'Football League Cup'},
     {from:1981, pointsForWin:3, leagueCupName:'Milk Cup'},
     {from:1985, europeBan:true},
@@ -18723,6 +18723,17 @@ function hasValidAttrs(attrs){
 }
 function signTarget(t, wage, deferPlay){
   if (t.contract === 'schoolboy'){ signSchoolboyToYouth(t); return; } /* NEW PIPELINE: a schoolboy signs schoolboy forms onto the ground-staff, not straight into the first-team squad -- see youthProspects above for why */
+  /* v377 : enforce the English foreign-player rule (pre-1978 ban; two-permit cap once open).
+     Scripted historical arrivals (realDebutantFire etc.) set _scriptedReal and are not blocked. */
+  if (typeof gameCountry !== 'undefined' && gameCountry === 'ENG' && typeof canEnglishClubSignForeign === 'function' && !(t && t._scriptedReal)){
+    var __fnat = t.nation || t.nat || '';
+    var __fok = canEnglishClubSignForeign(__fnat);
+    if (!__fok.ok){
+      if (__fok.reason === 'ban') addNews('board', (t.n||'That player')+' cannot be signed : until 1978-79 the Football League two-year residency rule is an effective ban on non-exempt overseas professionals. Home Nations, Ireland and the Commonwealth are exempt.');
+      else if (__fok.reason === 'quota') addNews('board', (t.n||'That player')+' cannot be signed : this club already has the two permitted established foreign players (the work-permit cap from September 1978). Home Nations, Ireland and the Commonwealth do not count toward it.');
+      return;
+    }
+  }
   var slot = slotFor(t.pos);
   /* uses the target's own rolled profile (see rollTargetProfile) rather than a fresh, unrelated roll,
      so the man who joins the club is provably the same man you scouted, not just the same star rating */
@@ -19608,6 +19619,7 @@ function pcardBio(p, era, best, attrsAll){
   var s = [];
   var youth = p.age <= 19, vet = p.age >= 33;
   s.push(p.n + ' is a ' + (youth ? 'young ' : vet ? 'veteran ' : '') + pos + ', ' + p.age + ' years old, ' + (p.isManagerPlayer ? 'and the club\u2019s player-manager at ' : 'on the books at ') + club + '.');
+  if (p.nation && (typeof homeNation !== 'function' || p.nation !== homeNation()) && p.nation !== 'England') s.push('Nationality : ' + p.nation + '.');
   if (car.seasons > 0) s.push('He has played ' + num(car.apps) + ' time' + (car.apps === 1 ? '' : 's') + ' for the club' + (car.goals ? ' and scored ' + num(car.goals) : '') + ', over ' + num(car.seasons + 1) + ' seasons.');
   else if (apps) s.push('This season he has played ' + num(apps) + ' time' + (apps === 1 ? '' : 's') + (g ? ' and scored ' + num(g) : '') + '.');
   else s.push('He has yet to play for the first team this season.');
@@ -21088,6 +21100,19 @@ function eraHelpTexts(view){
     var out = base.slice();
     /* the third paragraph still talks as if shirt numbers are always goalkeeper-through-outside-left; leave the sourced substitute history intact */
     return out;
+  }
+  if (view === 'club'){
+    var outC = base.slice();
+    var fi = -1, iC;
+    for (iC=0;iC<outC.length;iC++){ if (/Foreign players:/.test(outC[iC])) { fi = iC; break; } }
+    if (fi >= 0){
+      if (y >= 1978){
+        outC[fi] = "Foreign players: the 1931 two-year residency rule was an effective ban until 1978. After a February 1978 European Community ruling on freedom of movement, the Football League lifted the ban at its summer 1978 AGM. From late September 1978, work permits for overseas professionals are limited to two established foreign players per club. Home Nations, Ireland and the Commonwealth are exempt. Real continental and South American players may be offered to you by an agent, a club scout or a tip-off before their real moves; if you sign them first, those dated transfers are skipped. Once a man has made his real move, he can be bought from his English club in the ordinary way. Italy, Spain and West Germany keep their own later-pass market rules (Spain's 1973 note, that this game does not yet put foreign players on the Spanish market, remains accurate for Spain).";
+      } else {
+        outC[fi] = "Foreign players: a real 1931 Football League ruling required two years' residency before a non-British-born professional was eligible, an effective ban that held until 1978 and is now enforced in the transfer market. Home Nations, Ireland and the Commonwealth are exempt. The market opens in 1978-79.";
+      }
+    }
+    return outC;
   }
   return base;
 }
@@ -25162,6 +25187,43 @@ var realSchoolboyLegends = [
     note:"Fulham have paid Manchester United £22,000 for outside-left Charlie Mitten in December 1951, after his year in Colombia. (VERIFIED : Wikipedia.)"},
   {id:'franklin_hull_1951', name:"Neil Franklin", pos:"Centre-Half", club:"Hull City", fromClub:"Stoke City", fee:22500, triggerYear:1951, triggerMonth:1, kind:'signing', age:28, rep:4, spikeAttrs:['heading','tackling'], fired:false,
     note:"Hull City of the Second Division have signed England centre-half Neil Franklin from Stoke City for £22,500 this month, after his return from Colombia and a long suspension. (VERIFIED : Wikipedia.)"},
+  /* ---- v377 : dated real FOREIGN arrivals into English league clubs, 1978-79 to 1989-90.
+     Sourced names, clubs, dates; fees only where a firm sterling figure was found (never invented).
+     These go through realSigningFire, so a user who already signed the man first keeps him,
+     a user managing the destination club is offered the real move, and otherwise the AI club signs him.
+     Pre-emption offers (agent / scout / tip-off) in a window before the real date are handled by checkForeignOffers. ---- */
+  {id:"ardiles_spurs_1978", name:"Ossie Ardiles", pos:"Centre Midfielder", club:"Tottenham Hotspur", fromClub:"Huracan", fee:325000, triggerYear:1978, triggerMonth:6, triggerDay:10, kind:'signing', age:25, rep:5, nation:"Argentina", dob:19520803, spikeAttrs:['passing','stamina'], fired:false, offered:false,
+    note:"Tottenham Hotspur have signed Argentina midfielder Osvaldo 'Ossie' Ardiles from Huracan for £325,000, announced 10 July 1978, one of the first wave after the Football League lifted its foreign-player restriction. (VERIFIED : The 1888 Letter, South Americans appendix; FourFourTwo.)"},
+  {id:"villa_spurs_1978", name:"Ricky Villa", pos:"Centre Midfielder", club:"Tottenham Hotspur", fromClub:"Racing Club", fee:375000, triggerYear:1978, triggerMonth:6, triggerDay:10, kind:'signing', age:25, rep:4, nation:"Argentina", dob:19520818, spikeAttrs:['passing','shooting'], fired:false, offered:false,
+    note:"Tottenham Hotspur have signed Argentina midfielder Ricardo 'Ricky' Villa from Racing Club for £375,000, announced 10 July 1978 alongside Ardiles. (VERIFIED : The 1888 Letter, South Americans appendix; FourFourTwo.)"},
+  {id:"sabella_sheffutd_1978", name:"Alex Sabella", pos:"Inside-Forward", club:"Sheffield United", fromClub:"River Plate", fee:160000, triggerYear:1978, triggerMonth:7, kind:'signing', age:23, rep:4, nation:"Argentina", dob:19541105, spikeAttrs:['passing','pace'], fired:false, offered:false,
+    note:"Sheffield United of the Second Division have signed Argentina midfielder Alejandro 'Alex' Sabella from River Plate for £160,000, in August 1978. (VERIFIED : The 1888 Letter, South Americans appendix.)"},
+  {id:"tarantini_birmingham_1978", name:"Alberto Tarantini", pos:"Left-Back", club:"Birmingham City", fromClub:"Boca Juniors", fee:259000, triggerYear:1978, triggerMonth:9, kind:'signing', age:22, rep:4, nation:"Argentina", dob:19551203, spikeAttrs:['tackling','pace'], fired:false, offered:false,
+    note:"Birmingham City have signed Argentina left-back Alberto Tarantini from Boca Juniors for £259,000, in October 1978. (VERIFIED : The 1888 Letter, South Americans appendix.)"},
+  {id:"golac_southampton_1978", name:"Ivan Golac", pos:"Right-Back", club:"Southampton", fromClub:"Partizan Belgrade", triggerYear:1978, triggerMonth:6, triggerDay:29, kind:'signing', age:28, rep:3, nation:"Yugoslavia", dob:19500615, spikeAttrs:['tackling','stamina'], fired:false, offered:false,
+    note:"Southampton have signed Yugoslavia right-back Ivan Golac from Partizan Belgrade, 29 July 1978. (VERIFIED : FourFourTwo interview, date of joining; no firm sterling fee found, so none is stated.)"},
+  {id:"muhren_ipswich_1978", name:"Arnold Muhren", pos:"Centre Midfielder", club:"Ipswich Town", fromClub:"FC Twente", fee:150000, triggerYear:1978, triggerMonth:7, kind:'signing', age:27, rep:4, nation:"Netherlands", dob:19510602, spikeAttrs:['passing','stamina'], fired:false, offered:false,
+    note:"Ipswich Town have signed Dutch midfielder Arnold Muhren from FC Twente for £150,000, in August 1978. (VERIFIED : Pride of Anglia club record; contemporary accounts.)"},
+  {id:"thijssen_ipswich_1979", name:"Frans Thijssen", pos:"Centre Midfielder", club:"Ipswich Town", fromClub:"FC Twente", triggerYear:1979, triggerMonth:1, kind:'signing', age:27, rep:4, nation:"Netherlands", dob:19520123, spikeAttrs:['passing','pace'], fired:false, offered:false,
+    note:"Ipswich Town have signed Dutch midfielder Frans Thijssen from FC Twente, in February 1979. (VERIFIED : Pride of Anglia, debut 28 February 1979; published sterling fees disagree, so none is stated.)"},
+  {id:"deyna_mancity_1978", name:"Kazimierz Deyna", pos:"Inside-Forward", club:"Manchester City", fromClub:"Legia Warsaw", fee:100000, triggerYear:1978, triggerMonth:10, triggerDay:22, kind:'signing', age:31, rep:5, nation:"Poland", dob:19470923, spikeAttrs:['passing','shooting'], fired:false, offered:false,
+    note:"Manchester City have signed Poland midfielder Kazimierz Deyna from Legia Warsaw, 22 November 1978, for a reported £100,000 (the deal also involved equipment and friendlies, per Legia and Manchester City accounts). (VERIFIED : Legia official history; Manchester City.)"},
+  {id:"jankovic_boro_1979", name:"Bosco Jankovic", pos:"Centre-Forward", club:"Middlesbrough", fromClub:"Zeljeznicar", triggerYear:1979, triggerMonth:1, kind:'signing', age:27, rep:3, nation:"Yugoslavia", dob:19510522, spikeAttrs:['shooting','heading'], fired:false, offered:false,
+    note:"Middlesbrough have signed Yugoslavia forward Bosco Jankovic (Bozo / Bozidar Jankovic) from Zeljeznicar, in February 1979. (VERIFIED : Sporting Heroes, transferred February 1979; Teesside Live, known at Ayresome Park as Bosco. No firm sterling fee found, so none is stated.)"},
+  {id:"marangoni_sunderland_1979", name:"Claudio Marangoni", pos:"Centre Midfielder", club:"Sunderland", fromClub:"San Lorenzo", fee:320000, triggerYear:1979, triggerMonth:11, kind:'signing', age:25, rep:3, nation:"Argentina", dob:19541117, spikeAttrs:['passing','stamina'], fired:false, offered:false,
+    note:"Sunderland of the Second Division have signed Argentina midfielder Claudio Marangoni from San Lorenzo for £320,000, a club record, in December 1979. (VERIFIED : The 1888 Letter, South Americans appendix.)"},
+  {id:"verde_sheffutd_1979", name:"Pedro Verde", pos:"Inside-Forward", club:"Sheffield United", fromClub:"Hercules Alicante", triggerYear:1979, triggerMonth:7, kind:'signing', age:30, rep:2, nation:"Argentina", dob:19490312, spikeAttrs:['shooting','pace'], fired:false, offered:false,
+    note:"Sheffield United have signed Argentina forward Pedro Verde from Hercules Alicante, in August 1979. (VERIFIED : The 1888 Letter, South Americans appendix; no fee was given there, so none is stated.)"},
+  {id:"villazan_wolves_1980", name:"Rafael Villazan", pos:"Centre-Half", club:"Wolverhampton Wanderers", fromClub:"Recreativo Huelva", fee:140000, triggerYear:1980, triggerMonth:4, kind:'signing', age:23, rep:3, nation:"Uruguay", dob:19560719, spikeAttrs:['tackling','heading'], fired:false, offered:false,
+    note:"Wolverhampton Wanderers have signed Uruguay defender Rafael Villazan from Recreativo Huelva for £140,000, in May 1980. (VERIFIED : The 1888 Letter, South Americans appendix.)"},
+  {id:"simonsen_charlton_1982", name:"Allan Simonsen", pos:"Inside-Forward", club:"Charlton Athletic", fromClub:"Barcelona", triggerYear:1982, triggerMonth:9, kind:'signing', age:29, rep:5, nation:"Denmark", dob:19521215, spikeAttrs:['shooting','passing'], fired:false, offered:false,
+    note:"Charlton Athletic of the Second Division have signed Denmark forward Allan Simonsen, the former European Footballer of the Year, from Barcelona, in October 1982. (VERIFIED : FourFourTwo, October 1982; published sterling fees disagree, so none is stated.)"},
+  {id:"vanbreukelen_forest_1982", name:"Hans van Breukelen", pos:"Goalkeeper", club:"Nottingham Forest", fromClub:"FC Utrecht", triggerYear:1982, triggerMonth:7, triggerDay:26, kind:'signing', age:25, rep:4, nation:"Netherlands", dob:19561004, spikeAttrs:['handling'], fired:false, offered:false,
+    note:"Nottingham Forest have signed Dutch goalkeeper Hans van Breukelen from FC Utrecht, 26 August 1982, after Peter Shilton's departure. (VERIFIED : Transfer date widely given as late August 1982, Sporting Heroes photograph 4 September 1982; no firm sterling fee found, so none is stated.)"},
+  {id:"metgod_forest_1984", name:"Johnny Metgod", pos:"Centre-Back", club:"Nottingham Forest", fromClub:"Real Madrid", triggerYear:1984, triggerMonth:6, kind:'signing', age:26, rep:4, nation:"Netherlands", dob:19580227, spikeAttrs:['passing','heading'], fired:false, offered:false,
+    note:"Nottingham Forest have signed Dutch defender Johnny Metgod from Real Madrid, in July 1984. (VERIFIED : Forest career mid-1980s; date given as the 1984 close season. No firm sterling fee found, so none is stated.)"},
+  {id:"mirandinha_newcastle_1987", name:"Mirandinha", pos:"Centre-Forward", club:"Newcastle United", fromClub:"Palmeiras", fee:570000, triggerYear:1987, triggerMonth:7, kind:'signing', age:28, rep:4, nation:"Brazil", dob:19590702, spikeAttrs:['shooting','pace'], fired:false, offered:false,
+    note:"Newcastle United have signed Brazil forward Mirandinha from Palmeiras for £570,000, in August 1987. (VERIFIED : The 1888 Letter, South Americans appendix.)"},
 ];
 /* pristine copy, so a save from before v115 can pick up entries added since it was made (see applyLoadedState) */
 var realSchoolboyLegendsDefault = JSON.parse(JSON.stringify(realSchoolboyLegends));
@@ -25209,7 +25271,7 @@ function realDebutantFire(e){
     var prof = rollTargetProfile(e.rep, e.pos);
     applyRawTalentSpikes(prof.attrs);
     guaranteedSpikes(prof.attrs, e.spikeAttrs);
-    signTarget({n:e.name, pos:e.pos, rep:e.rep, age:e.age, ca:prof.ca, attrs:prof.attrs, nation:e.nation||'England'}, signingWageFor(e.rep), false);
+    signTarget({n:e.name, pos:e.pos, rep:e.rep, age:e.age, ca:prof.ca, attrs:prof.attrs, nation:e.nation||'England', _scriptedReal:true}, signingWageFor(e.rep), false);
     var added = squad.find(function(p){ return p.n===e.name; }); if (added) added._realLegend = true;
     addNews('board', 'FIRST-TEAM DEBUT: '+e.note+' He\'s one of ours : a young professional already on the staff, now pushing for a regular place.');
   } else {
@@ -25343,6 +25405,288 @@ function checkRealSchoolboyLegends(){
     }
   });
 }
+
+/* v377 : ENGLISH FOREIGN-PLAYER MARKET, first delivery of DEV_PLAN phase 8.
+   Sources for the rule: 1931 FA/FL two-year residency (effective ban); EC ruling
+   23 February 1978; Football League AGM summer 1978 lifts the ban; first wave
+   announced 10 July 1978 (Ardiles & Villa); temporary PFA/DoE pause late July;
+   work-permit compromise announced 28 September 1978, two established overseas
+   professionals per club (Hansard 13 Dec 1978; The 1888 Letter). Home Nations,
+   Ireland and the Commonwealth are exempt (the game's established reading of
+   "British-born subject" practice). South Africa left the Commonwealth in 1961
+   but is kept in the exemption list so already-modelled pre-1978 professionals
+   such as Albert Johanneson remain consistent.
+   Scotland: the 1931 residency rule was a Football League/FA matter. Scottish
+   clubs were somewhat more open to Scandinavians in the 1960s, but work permits
+   still applied in 1978 (Hansard, Hibernian's Norwegian Izak Refvik was refused).
+   No full sourced list of Scottish-league foreign arrivals 1978-89 was built in
+   this pass, and checkRealSchoolboyLegends still does not fire English events
+   in a Scottish save. Documented as a later gap. Italy / Spain / Germany market
+   rules are unchanged (Spain's 1973 help line remains accurate for Spain). */
+var ENGLISH_FOREIGN_UNLOCK = {y:1978, m:6, d:1}; /* 1 July 1978 : market treated as open from the summer AGM / first-wave month */
+var ENGLISH_FOREIGN_QUOTA_FROM = {y:1978, m:8, d:28}; /* 28 Sep 1978 DoE criteria */
+var COMMONWEALTH_EXEMPT_NATIONS = {
+  'Australia':1,'New Zealand':1,'Canada':1,'South Africa':1,'India':1,'Pakistan':1,'Sri Lanka':1,'Bangladesh':1,
+  'Jamaica':1,'Trinidad and Tobago':1,'Barbados':1,'Guyana':1,'Bahamas':1,'Cyprus':1,'Malta':1,'Malaysia':1,
+  'Singapore':1,'Nigeria':1,'Ghana':1,'Kenya':1,'Uganda':1,'Tanzania':1,'Zambia':1,'Malawi':1,'Fiji':1,
+  'Papua New Guinea':1,'Sierra Leone':1,'Gambia':1,'Bermuda':1,'Hong Kong':1
+};
+function isHomeNationsOrIreland(nation){
+  var n = String(nation||'');
+  return n==='England' || n==='Scotland' || n==='Wales' || n==='Northern Ireland' || n==='Ireland' || n==='Republic of Ireland' || n==='Eire';
+}
+function isCommonwealthExemptNation(nation){
+  var n = String(nation||'');
+  if (COMMONWEALTH_EXEMPT_NATIONS[n]) return true;
+  if (n==='Zimbabwe' || n==='Rhodesia'){
+    /* Zimbabwe joined the Commonwealth on independence, 18 April 1980. Before that, treat Grobbelaar-style
+       Rhodesian/Zimbabwean professionals as exempt only from that date (document: 1971 Immigration Act
+       nuance not modelled further). */
+    var d = (typeof currentDate !== 'undefined' && currentDate) ? currentDate : null;
+    if (!d) return false;
+    return d.getFullYear() > 1980 || (d.getFullYear()===1980 && (d.getMonth()>3 || (d.getMonth()===3 && d.getDate()>=18)));
+  }
+  return false;
+}
+function isExemptFromEnglishForeignRule(nation){
+  return isHomeNationsOrIreland(nation) || isCommonwealthExemptNation(nation);
+}
+function countsAgainstEnglishForeignQuota(nation){
+  return !isExemptFromEnglishForeignRule(nation);
+}
+function englishForeignMarketIsOpen(date){
+  var d = date || (typeof currentDate !== 'undefined' ? currentDate : null);
+  if (!d || typeof d.getFullYear !== 'function'){
+    return (typeof seasonStartYear === 'function' ? seasonStartYear() : 0) >= 1978;
+  }
+  var y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+  var U = ENGLISH_FOREIGN_UNLOCK;
+  return y > U.y || (y===U.y && (m > U.m || (m===U.m && day >= U.d)));
+}
+function englishForeignQuotaApplies(date){
+  if (!englishForeignMarketIsOpen(date)) return false;
+  var d = date || currentDate;
+  if (!d || typeof d.getFullYear !== 'function') return true;
+  var Q = ENGLISH_FOREIGN_QUOTA_FROM;
+  var y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+  return y > Q.y || (y===Q.y && (m > Q.m || (m===Q.m && day >= Q.d)));
+}
+function englishForeignQuotaLimit(){
+  if (typeof rule === 'function' && typeof gameCountry !== 'undefined' && gameCountry === 'ENG'){
+    var lim = rule('ENG', null, 'foreignPlayerLimit');
+    if (typeof lim === 'number') return lim;
+  }
+  return 2;
+}
+function squadForeignQuotaUsed(list){
+  var n = 0;
+  (list||[]).forEach(function(p){
+    if (!p) return;
+    if (countsAgainstEnglishForeignQuota(p.nation || p.nat || '')) n++;
+  });
+  return n;
+}
+function canEnglishClubSignForeign(nation, list){
+  /* Returns {ok, reason}. Exempt players are always allowed. Used only for English clubs.
+     A missing nationality is treated as domestic (do not block ordinary scouted signings).
+     Scripted historical arrivals pass _scriptedReal on the target and bypass this check
+     (Bert Trautmann and similar residency exceptions already in the data). */
+  if (typeof gameCountry !== 'undefined' && gameCountry !== 'ENG') return {ok:true};
+  var nat = String(nation||'').trim();
+  if (!nat) return {ok:true};
+  if (isExemptFromEnglishForeignRule(nat)) return {ok:true};
+  if (!englishForeignMarketIsOpen()) return {ok:false, reason:'ban'};
+  if (englishForeignQuotaApplies() && squadForeignQuotaUsed(list || (typeof squad !== 'undefined' ? squad : [])) >= englishForeignQuotaLimit())
+    return {ok:false, reason:'quota'};
+  return {ok:true};
+}
+/* Offer windows and division gates for pre-emption. existing:true means the dated move
+   is already in realSchoolboyLegends (do not add a second entry). minTier is the lowest
+   divisionTier that may receive an offer (3=First, 2=Second, 1=Third, 0=Fourth). */
+var FOREIGN_OFFER_SPEC = [
+  {id:'ardiles_spurs_1978', name:'Ossie Ardiles', minTier:3, windowMonths:2, channels:['agent','tip']},
+  {id:'villa_spurs_1978', name:'Ricky Villa', minTier:3, windowMonths:2, channels:['agent','tip']},
+  {id:'sabella_sheffutd_1978', name:'Alex Sabella', minTier:1, windowMonths:3, channels:['agent','scout']},
+  {id:'tarantini_birmingham_1978', name:'Alberto Tarantini', minTier:2, windowMonths:3, channels:['agent','tip']},
+  {id:'golac_southampton_1978', name:'Ivan Golac', minTier:2, windowMonths:3, channels:['scout','tip']},
+  {id:'muhren_ipswich_1978', name:'Arnold Muhren', minTier:2, windowMonths:3, channels:['scout','agent']},
+  {id:'thijssen_ipswich_1979', name:'Frans Thijssen', minTier:2, windowMonths:4, channels:['scout','agent']},
+  {id:'deyna_mancity_1978', name:'Kazimierz Deyna', minTier:3, windowMonths:4, channels:['agent','tip']},
+  {id:'jankovic_boro_1979', name:'Bosco Jankovic', minTier:2, windowMonths:4, channels:['scout','tip']},
+  {id:'marangoni_sunderland_1979', name:'Claudio Marangoni', minTier:1, windowMonths:4, channels:['agent','scout']},
+  {id:'verde_sheffutd_1979', name:'Pedro Verde', minTier:0, windowMonths:4, channels:['scout','tip']},
+  {id:'villazan_wolves_1980', name:'Rafael Villazan', minTier:2, windowMonths:4, channels:['agent','scout']},
+  {id:'simonsen_charlton_1982', name:'Allan Simonsen', minTier:2, windowMonths:4, channels:['agent','tip']},
+  {id:'vanbreukelen_forest_1982', name:'Hans van Breukelen', minTier:2, windowMonths:4, channels:['scout','agent']},
+  {id:'metgod_forest_1984', name:'Johnny Metgod', minTier:2, windowMonths:5, channels:['agent','scout']},
+  {id:'mirandinha_newcastle_1987', name:'Mirandinha', minTier:2, windowMonths:4, channels:['agent','tip']},
+  /* already-scripted dated moves : pre-emption only */
+  {id:null, name:'Petar Borota', minTier:2, windowMonths:4, channels:['scout','tip'], existing:true, nation:'Yugoslavia'},
+  {id:null, name:'Jan Molby', aliases:['Jan Mølby'], minTier:2, windowMonths:6, channels:['agent','scout'], existing:true, nation:'Denmark'},
+  {id:null, name:'Jesper Olsen', minTier:3, windowMonths:5, channels:['agent','scout'], existing:true, nation:'Denmark'},
+  {id:null, name:'Bruce Grobbelaar', minTier:2, windowMonths:5, channels:['scout','tip'], existing:true, nation:'Zimbabwe', commonwealthExempt:true},
+  {id:null, name:'Ken Monkou', minTier:2, windowMonths:4, channels:['scout','agent'], existing:true, nation:'Netherlands'},
+  {id:null, name:'Erland Johnsen', minTier:2, windowMonths:4, channels:['agent','scout'], existing:true, nation:'Norway'}
+];
+function foreignLegendNameMatch(e, spec){
+  if (!e || !spec) return false;
+  if (spec.id && e.id === spec.id) return true;
+  if (e.name === spec.name) return true;
+  if (spec.aliases && spec.aliases.indexOf(e.name) >= 0) return true;
+  return false;
+}
+function findForeignLegend(spec){
+  if (typeof realSchoolboyLegends === 'undefined' || !realSchoolboyLegends) return null;
+  for (var i=0;i<realSchoolboyLegends.length;i++){
+    if (foreignLegendNameMatch(realSchoolboyLegends[i], spec)) return realSchoolboyLegends[i];
+  }
+  return null;
+}
+function foreignTriggerDate(e){
+  var y = e.triggerYear, m = (e.triggerMonth !== undefined) ? e.triggerMonth : 0, d = (e.triggerDay !== undefined) ? e.triggerDay : 1;
+  return new Date(y, m, d);
+}
+function foreignOfferOpens(e, spec){
+  var trig = foreignTriggerDate(e);
+  var months = (spec && spec.windowMonths) || 4;
+  var open = new Date(trig.getFullYear(), trig.getMonth() - months, trig.getDate());
+  /* never offer before the English market itself is open */
+  var unlock = new Date(ENGLISH_FOREIGN_UNLOCK.y, ENGLISH_FOREIGN_UNLOCK.m, ENGLISH_FOREIGN_UNLOCK.d);
+  return open < unlock ? unlock : open;
+}
+function foreignWeHavePlayer(name, aliases){
+  var names = [name].concat(aliases || []);
+  if (typeof squad !== 'undefined' && squad.some(function(p){ return p && names.indexOf(p.n) >= 0; })) return true;
+  return false;
+}
+function foreignAlreadyAtDest(e){
+  if (!e || !e.club || typeof clubSquads === 'undefined') return false;
+  var sq = clubSquads[e.club];
+  return !!(sq && sq.some(function(p){ return p && p.n === e.name; }));
+}
+function foreignOfferChannelWording(spec, e, channel, price){
+  var who = e.name, from = e.fromClub || 'his club', dest = e.club, nat = e.nation || spec.nation || '';
+  var feeBit = (typeof price === 'number' && price > 0) ? (' The asking figure is £'+price+'.') : '';
+  var see = ' See Transfers if you want to talk.';
+  if (channel === 'agent'){
+    return 'An agent has been on the telephone : '+who+(nat?(' of '+nat):'')+(from?(' , of '+from):'')+' could be available.'+feeBit+' In real life he would later join '+dest+', but that move has not happened yet.'+see;
+  }
+  if (channel === 'scout'){
+    var scoutName = (typeof scouts === 'object' && scouts && Object.keys(scouts).length) ? Object.keys(scouts)[0] : 'The chief scout';
+    return (scoutName ? (scoutName[0].toUpperCase()===scoutName[0] && scoutName.indexOf(' ')<0 ? 'Our scout ' : '') : '')+'A club scout has a name for us : '+who+(nat?(' ('+nat+')'):'')+(from?(' of '+from):'')+'. He thinks the man would do a job here.'+feeBit+' History has him later at '+dest+', if nobody moves first.'+see;
+  }
+  return 'A tip-off from a contact : word is '+who+(nat?(' ('+nat+')'):'')+' may be ready to leave '+(from||'his present club')+'.'+feeBit+' The real-life move to '+dest+' has not happened yet.'+see;
+}
+function offerForeignPlayerToUser(spec, e, channel){
+  if (typeof targets === 'undefined') return false;
+  var names = [e.name].concat(spec.aliases || []);
+  if (targets.some(function(t){ return t && names.indexOf(t.n) >= 0; })){ e.offered = true; return false; }
+  var pos = e.pos;
+  var prof = (typeof rollTargetProfile === 'function') ? rollTargetProfile(e.rep, pos) : {ca:(typeof repCA!=='undefined' && repCA[e.rep])||50, attrs:null};
+  if (typeof applyRawTalentSpikes === 'function' && prof.attrs) applyRawTalentSpikes(prof.attrs);
+  if (typeof guaranteedSpikes === 'function' && prof.attrs) guaranteedSpikes(prof.attrs, e.spikeAttrs);
+  var age = e.age;
+  if (e.dob && typeof realAgeOnDate === 'function' && currentDate){
+    age = realAgeOnDate(e.dob, currentDate.getFullYear(), (currentDate.getMonth()+1)*100 + currentDate.getDate());
+  }
+  var year = (typeof seasonStartYear === 'function') ? seasonStartYear() : undefined;
+  var price = (typeof e.fee === 'number' && e.fee > 0) ? e.fee : ((typeof realisticTransferFee === 'function') ? realisticTransferFee(prof.ca, 2, age, year) : 0);
+  var nation = e.nation || spec.nation || 'England';
+  targets.push({
+    n:e.name, pos:pos, club:e.fromClub||'abroad', nation:nation, contract:'pro', price:price, rep:e.rep,
+    apps:0, goals:0, age:age, ca:prof.ca, attrs:prof.attrs,
+    scout:pick(Object.keys(scouts||{Scout:1})), timesWatched:1, personallyWatched:false, trueSeen:false,
+    note:'"A real overseas professional, offered to us before his real move to '+e.club+'."',
+    isRealGem:true, realGemId:'foreign_'+((e.id||e.name).replace(/\s+/g,'_').toLowerCase()),
+    _foreignPreemptId: e.id || e.name, dob:e.dob || null
+  });
+  e.offered = true;
+  addNews('board', foreignOfferChannelWording(spec, e, channel, price));
+  if (typeof renderTargets === 'function') renderTargets();
+  return true;
+}
+function checkForeignOffers(){
+  if (typeof gameCountry !== 'undefined' && gameCountry !== 'ENG') return;
+  if (typeof isSco === 'function' && isSco()) return;
+  if (!englishForeignMarketIsOpen()) return;
+  if (typeof currentDate === 'undefined' || !currentDate) return;
+  if (typeof realSchoolboyLegends === 'undefined') return;
+  var tier = (typeof divisionTier === 'number') ? divisionTier : 3;
+  var pool = [];
+  FOREIGN_OFFER_SPEC.forEach(function(spec){
+    var e = findForeignLegend(spec);
+    if (!e) return;
+    if (e.fired || e.offered) return;
+    if (foreignWeHavePlayer(e.name, spec.aliases)){ e.offered = true; return; }
+    if (foreignAlreadyAtDest(e)){ e.offered = true; return; }
+    var trig = foreignTriggerDate(e);
+    if (currentDate >= trig) return; /* real event will fire through realSigningFire */
+    if (currentDate < foreignOfferOpens(e, spec)) return;
+    if (tier < (spec.minTier||0)) return;
+    /* a Fourth Division club should not get a First Division star even if minTier were mis-set */
+    if ((e.rep||0) >= 5 && tier < 2) return;
+    pool.push({spec:spec, e:e});
+  });
+  if (!pool.length) return;
+  /* at most one offer most weeks; never a flood. ~45% when a window is open. */
+  if (Math.random() > 0.45) return;
+  /* prefer windows that are close to closing */
+  pool.sort(function(a,b){ return foreignTriggerDate(a.e) - foreignTriggerDate(b.e); });
+  var pickOne = pool[0];
+  var channels = pickOne.spec.channels || ['agent','scout','tip'];
+  var channel = channels[Math.floor(Math.random()*channels.length)];
+  offerForeignPlayerToUser(pickOne.spec, pickOne.e, channel);
+}
+function v377EnrichExistingForeignSignings(){
+  var patches = {
+    'Bruce Grobbelaar': {nation:'Zimbabwe'},
+    'Jan Molby': {nation:'Denmark'},
+    'Jesper Olsen': {nation:'Denmark'},
+    'Petar Borota': {nation:'Yugoslavia'},
+    'Ken Monkou': {nation:'Netherlands'},
+    'Erland Johnsen': {nation:'Norway'}
+  };
+  function enrich(list){
+    if (!list) return;
+    list.forEach(function(e){
+      var p = patches[e.name];
+      if (p && !e.nation) e.nation = p.nation;
+    });
+  }
+  enrich(typeof realSchoolboyLegends !== 'undefined' ? realSchoolboyLegends : null);
+  enrich(typeof realSchoolboyLegendsDefault !== 'undefined' ? realSchoolboyLegendsDefault : null);
+  /* sourced DOBs for the new arrivals (and a few existing) so ages stay honest */
+  if (typeof REAL_DOB_TABLE === 'object' && REAL_DOB_TABLE){
+    var dobs = {
+      'Ossie Ardiles':19520803,'Ricky Villa':19520818,'Alex Sabella':19541105,'Alberto Tarantini':19551203,
+      'Ivan Golac':19500615,'Arnold Muhren':19510602,'Frans Thijssen':19520123,'Kazimierz Deyna':19470923,
+      'Bosco Jankovic':19510522,'Claudio Marangoni':19541117,'Pedro Verde':19490312,'Rafael Villazan':19560719,
+      'Allan Simonsen':19521215,'Hans van Breukelen':19561004,'Johnny Metgod':19580227,'Mirandinha':19590702,
+      'Jan Molby':19630704,'Bruce Grobbelaar':19571006,'Petar Borota':19520305
+    };
+    Object.keys(dobs).forEach(function(n){ if (REAL_DOB_TABLE[n] === undefined) REAL_DOB_TABLE[n] = dobs[n]; });
+  }
+}
+function silenceNewlyMergedLegendsAlreadyPast(savedList, now){
+  /* v377 : mergeRealLegendDefaults adds new entries as unfired. A 1981 save must not
+     suddenly fire 1978 Ardiles news (or offer him from Huracan) when he is already on
+     a later-era opening squad. Only NEWLY merged entries whose trigger is already past
+     are marked fired. */
+  var saved = Array.isArray(savedList) ? savedList : [];
+  var d = now || (typeof currentDate !== 'undefined' ? currentDate : null);
+  if (!d || typeof realSchoolboyLegends === 'undefined') return 0;
+  var y = d.getFullYear(), m = d.getMonth(), day = d.getDate(), n = 0;
+  realSchoolboyLegends.forEach(function(e){
+    var key = e.id || e.name;
+    var was = saved.some(function(x){ return (x.id||x.name)===key; });
+    if (was) return;
+    var past = y > e.triggerYear || (y === e.triggerYear && (e.triggerMonth===undefined || m > e.triggerMonth || (m===e.triggerMonth && (e.triggerDay===undefined || day >= e.triggerDay))));
+    if (past && !e.fired){ e.fired = true; e.offered = true; n++; }
+  });
+  return n;
+}
+v377EnrichExistingForeignSignings();
+
 /* ---------- TRANSFER MARKET: OTHER CLUBS' BUSINESS (flavour only, no real
    1946-47 transfer records exist for this level : names, fees and positions
    below are generated, not sourced). A small chance each week that a
@@ -26342,6 +26686,7 @@ function generateWeeklyNews(){
   checkRealRetirements(); /* v249 */
   if (typeof announceCupWinnerIfDue==='function') announceCupWinnerIfDue(); /* v127 */
   checkRealSchoolboyLegends();
+  if (typeof checkForeignOffers === 'function') checkForeignOffers();
   simulateRivalTransferMarket();
   simulateRivalInterestInHumanTargets();
   maybeGenerateFreshScoutTip();
@@ -26538,7 +26883,7 @@ var helpTexts = {
   lineup: ["No substitutes existed until the real 1965-66 season (Keith Peacock, Charlton Athletic away at Bolton, 21 August 1965, genuinely was the first man in Football League history to come off the bench) : before that season, if a man goes down injured mid-match it isn't modelled kick by kick, and you simply carry a knock or finish with ten if one happened. From 1965-66 on, a SUBSTITUTE box appears on this screen : name one man from outside your eleven, and he can be sent on, but only if a named player is actually forced off by injury mid-match, not as a tactical change -- the real first-season rule, not the freer any-reason substitution that only arrived in 1967-68.", "A player away on international duty for the Home Championship can't be selected that week. The same goes for a man with real weeks of injury left, or matches of a suspension left to serve : shown in red with how long he's out for, and automatically dropped from your eleven the moment news rules him out, even if he was already picked. Most knocks are a week or two, longer ones rarer, and sendings-off (no cards existed yet : the referee simply ordered a man off) are meant to be rare, notable events with a short ban, not a routine occurrence.", "You now set a shirt-number 1-11 formation order in the box below team selection, the same convention (goalkeeper through outside-left) held under WM and every other system of the day even as the actual on-field roles changed : it feeds the matchday programme and gives a modest scoring edge to whoever you've put at centre-forward specifically. Swapping players within the SAME line (a second good forward playing inside-forward instead of centre-forward, say) is free : it was always fluid in this era, and fitting more of your genuinely better men into the eleven, whatever shirt they wear, already strengthens the side on its own. Moving a man OUT of his natural line entirely (a half-back sent into the forward line, a forward dropped into defence, anyone but a keeper put in goal) is a real gamble now : it costs something in general play, more specifically at the back, matching how a real manager would only try it in a genuine pinch. A bold selection like that gets its own line in the Friday team news, too.", "TACTICAL WRINKLE: markers in this era were briefed on numbers, not men : send one number out to do a different job to what it implies and the man supposed to pick him up can end up marking nobody. Hidegkuti's deep-lying No.9 doing exactly that to England at Wembley in 1953 is the famous real case. It's worth most the first time a given opponent meets it and fades as the division works it out, so it's not something to leave switched on and forgotten."],
   tactics: ["Formation and approach both feed directly into the match engine's strength calculation : they aren't cosmetic. WM asks more of players unfamiliar with it; an attacking approach boosts your scoring but weakens your defence, and vice versa for defensive.", "2-3-5 and WM each come with a genuine style-of-play choice underneath them, not one fixed way of playing the shape. For 2-3-5: English Direct (the ball goes early and directly out to the winger, who crosses with little buildup) versus Scottish Combination (the ball is worked through the inside-forwards first, and the winger's cross is the end of that combination, not the start of the move) : both real and well-documented. For WM: the Arsenal Model versus a looser WM. Wing play specifically is part of that WM split : Chapman genuinely ran his two Highbury wingers differently, Joe Hulme an orthodox touchline crosser on the right, Cliff Bastin cutting inside onto his stronger foot to shoot on the left (he's Arsenal's record scorer largely because of it) : that's a real, documented Chapman wrinkle, not my invention. The looser-WM option (both wingers kept out wide, no Bastin-style cutting inside) is my own plausible extrapolation for a less well-drilled lower-division side, not a documented club system, and the help text says so because it should.", "One honest limit: there's no separate winger position modelled here, so a specific player can't literally 'be your Bastin' : the wing-play difference between styles shows up in the flavour text and in a small shift to the strength/defence numbers, not as an individual player role.", "A Study Trip Abroad can unlock a real historical tactical system (Danubian, Metodo, La Maquina) as a further formation option. Since v110 these are NOT free upgrades: in 1946-50 they were older ideas than the WM, and England beat nearly every continental side it met. Each costs the side while it is learned (10 matches, 18 for La Maquina), each has a real trade-off (Danubian concedes more, Metodo scores less and struggles to chase a game, La Maquina leaks goals and needs several elite forwards), and any upside depends on how well your XI passes. With an ordinary English squad they lose you points; with a very technical one they are roughly break-even, with a small edge from 1949-50. The Tactics screen shows the learning progress and your XI's passing figure.", "PUSH-AND-RUN (from 1949-50): a week watching Arthur Rowe's Tottenham unlocks a way of playing the WM with short, quick passing and movement. It is not a formation: it only works under WM, and it pays off in proportion to your players' passing.", "These aren't just strength modifiers : Danubian and Metodo pull a wing-half into the scoring more often (the real deep-lying-forward idea of the day), so does Scottish Combination and the looser WM (half-backs joining the attack), and La Maquina's constant rotation means almost anyone outfield can turn up with a goal, not just your forward line.", "The scouting report box names the opposition's danger man for the coming match. Spending the week working on him gives a small edge against them specifically : generated, not from any real scouting record."],
   training: ["Training nudges attributes slowly over the season, not overnight. The Continental approach draws board scepticism at first but pays off in passing ability if you stick with it.", "Since v109 those training gains count on a Saturday: each player gets a small match bonus from what training has added to the attributes that matter in his position, up to +5 ability. Half of it wears off each summer, so a method keeps paying only while you stick with it.", "TACTICAL FIT: a passing-and-shape method (Continental training, or the River Plate Tempo brought back from Uruguay) is only as good as what your TACTICS actually let the side do with it on a Saturday. A side playing English Direct under the Pyramid, or the tightly-drilled Arsenal Model, works against this kind of training; Scottish Combination, Danubian, Metodo and La Maquina all reward it properly. Individual technique (the Brazilian trip) is far less formation-dependent, since ball skill helps whatever you ask a man to do with it, though it still suffers a little under the most rigid, least individual-minded system.", "A STUDY TRIP ABROAD sends you, the manager, personally : Austria, Italy and Argentina unlock a genuine new FORMATION for TACTICS. Brazil and Uruguay are different : Bert Symons, the trainer, goes instead, so it doesn't take you away from the club, and what comes back is a new TRAINING method, not a formation.", "FA COACHING BADGES (from 1946-47, Walter Winterbottom's new FA scheme): a summer residential course, bookable May to August under STUDY TRIP, with an exam at the end. Preliminary first, then the Full badge. You go yourself, so it uses the same slot as your own study trips. A pass lifts your MANAGER REPUTATION and makes every week's training gains a little bigger (about 8% with the Preliminary, 15% with the Full). The course length, fee, pass rate and effects are the game's own numbers : the real ones aren't on record."],
-  club: ["Finances (v116): the crowd for a League match starts from the HOME club's real 1946-47 average gate (all 88 clubs, from one secondary source: Liverpool 45,732, Newcastle 49,379, Cardiff 28,604, Aldershot 4,677, Accrington 3,976), adjusted if that club has since gone up or down a division, then moved by the visitors' size, your RECENT FORM at home, a LOCAL DERBY (+20%), a marquee signing's first home games, and a little day-to-day variation : those adjustments are the game's own figures, not sourced. The ground's era capacity only caps the crowd (Cup ties can pack a ground out); those capacities are estimates from record crowds, not documented figures (v121: 26 of them now checked against a sourced record crowd, the rest still estimates). Admission is the real 1946 minimum of 1s3d, averaged up to about 1s6d a head for seats. Gate money is effectively your only regular income, as it nearly was for real clubs of the day, so a big club's gates make it far richer. Entertainments Duty (v117): 27% of every gross gate goes to the Treasury before the gate is split. That is an interpolated figure (about 29% in 1945, a quarter to a fifth by 1956, from Hansard), not the real banded rate schedule. League gates are split from one pot (v119): after duty the visitors take 20% of the net gate and the home club keeps the other 80%, so at home you now keep 80%, not all of it. That 20% is the game's own figure, not a sourced League rule. Manchester United play at Maine Road (as Manchester City's tenants) until August 1949, then back at Old Trafford. Wages are capped at the real maximum wage (v117): £12/week in-season from 1947-48 after the 1947 National Arbitration Tribunal award; for 1946-47 the cap is taken as £10, an estimate, not sourced. Transfer fees (v117) follow the real 1946-50 levels and rise each season with the real British record (£14,000 in 1946, £20,000 for Lawton in Nov 1947, £26,500 for Quigley in Dec 1949): a star First Division man costs £10,000-20,000 or more, a good Third Division player £1,000-3,000, a fringe or ageing man a few hundred. Those bands are an inference from about ten sourced fees. Starting bank balances (v117) depend on the club's division and size (a big First Division club £20,000-50,000, a Third Division club £500-4,000). No real 1946-50 club balance was found, so these are the game's own calibration. Ground upkeep (a flat £18/week) and away travel (scaled loosely by opponent) are new costs on top of wages, both illustrative estimates, not sourced period figures for this specific club. Other clubs' money (v118): every League club now has its own bank balance on the same starting scale as yours, earns gates on the same crowd model less the same duty, pays an estimated weekly wage bill (their players have no individual wages, so it is a season figure from the research, about £3,500 in the Third Division to £9,000 at the top), and pays or receives real transfer fees. A club that can't afford a fee won't bid for it. Click a club to see its estimated finances.", "Staff: a dedicated chief scout was rare at this level in 1946 : most Third Division managers scouted personally.", "Foreign players: a real 1931 Football League ruling required two years' residency before a non-British-born professional was eligible, an effective ban that held until 1978. Home Nations, Ireland and the Commonwealth are exempt.", "RESERVES (v146): a genuine regional competition, not a flat aggregate line -- the real Football Combination (South/Midlands/Wales, Arsenal and Portsmouth won its two 1946-47 sections) or the real Central League (North/Midlands, reserve-teams-only, Manchester United's 1946-47 title), whichever your own club's real region plays, complete with a real table (LEAGUE TABLE tab) and a scheduled fixture list. RESERVE XI PREFERENCES (on the Club screen) lets you tick a fringe man or a ground-staff boy to make him a standing pick, ahead of the automatic priority list -- the actual decision this used to lack. A good showing still nudges a man's form, and a ground-staff boy who plays develops faster (see GROUND-STAFF). Run-outs go first to your own starred picks, then younger reserves and anyone working back from injury, excluding anyone genuinely unavailable (injured, suspended, on international duty).", "A GROUND-STAFF pipeline is modelled from v144 on (see the GROUND-STAFF note below) : there was no formal ACADEMY-style youth setup at this level in 1946 (the FA Youth Cup didn't launch until the 1952-53 season), but the real schoolboy-forms/ground-staff system this game does model long predates it.", "The Secretary-Manager's name and age are whatever you set at the start (or after NEW GAME) : purely a profile. Manager Reputation is a real stat now, rising with good results (promotion, a strong cup run) and falling with a bad run, but sackings mid-season were genuinely rare in this era (unlike the modern game) : the board's patience runs deep, and only a truly dire, sustained collapse carries any real risk, which is deliberately tuned to be very hard to trigger.", "JOB OFFERS: a strong reputation and a good run of form can draw a genuine approach from a higher division (Second Division or First Division), following the real period convention of asking your own board's permission first rather than approaching you directly. This models the approach and how you handle it with your own board, not an actual move to manage a different club : Aldershot's ground, colours and history here are all specifically built for Aldershot, and an honest \"you now manage Cardiff City\" would be a much bigger rebuild than a single pass.", "Club History and Season Record below are real for the founding/League-entry facts (1926, 1932) and for anything you've actually played; season summaries accumulate as you complete each campaign."],
+  club: ["Finances (v116): the crowd for a League match starts from the HOME club's real 1946-47 average gate (all 88 clubs, from one secondary source: Liverpool 45,732, Newcastle 49,379, Cardiff 28,604, Aldershot 4,677, Accrington 3,976), adjusted if that club has since gone up or down a division, then moved by the visitors' size, your RECENT FORM at home, a LOCAL DERBY (+20%), a marquee signing's first home games, and a little day-to-day variation : those adjustments are the game's own figures, not sourced. The ground's era capacity only caps the crowd (Cup ties can pack a ground out); those capacities are estimates from record crowds, not documented figures (v121: 26 of them now checked against a sourced record crowd, the rest still estimates). Admission is the real 1946 minimum of 1s3d, averaged up to about 1s6d a head for seats. Gate money is effectively your only regular income, as it nearly was for real clubs of the day, so a big club's gates make it far richer. Entertainments Duty (v117): 27% of every gross gate goes to the Treasury before the gate is split. That is an interpolated figure (about 29% in 1945, a quarter to a fifth by 1956, from Hansard), not the real banded rate schedule. League gates are split from one pot (v119): after duty the visitors take 20% of the net gate and the home club keeps the other 80%, so at home you now keep 80%, not all of it. That 20% is the game's own figure, not a sourced League rule. Manchester United play at Maine Road (as Manchester City's tenants) until August 1949, then back at Old Trafford. Wages are capped at the real maximum wage (v117): £12/week in-season from 1947-48 after the 1947 National Arbitration Tribunal award; for 1946-47 the cap is taken as £10, an estimate, not sourced. Transfer fees (v117) follow the real 1946-50 levels and rise each season with the real British record (£14,000 in 1946, £20,000 for Lawton in Nov 1947, £26,500 for Quigley in Dec 1949): a star First Division man costs £10,000-20,000 or more, a good Third Division player £1,000-3,000, a fringe or ageing man a few hundred. Those bands are an inference from about ten sourced fees. Starting bank balances (v117) depend on the club's division and size (a big First Division club £20,000-50,000, a Third Division club £500-4,000). No real 1946-50 club balance was found, so these are the game's own calibration. Ground upkeep (a flat £18/week) and away travel (scaled loosely by opponent) are new costs on top of wages, both illustrative estimates, not sourced period figures for this specific club. Other clubs' money (v118): every League club now has its own bank balance on the same starting scale as yours, earns gates on the same crowd model less the same duty, pays an estimated weekly wage bill (their players have no individual wages, so it is a season figure from the research, about £3,500 in the Third Division to £9,000 at the top), and pays or receives real transfer fees. A club that can't afford a fee won't bid for it. Click a club to see its estimated finances.", "Staff: a dedicated chief scout was rare at this level in 1946 : most Third Division managers scouted personally.", "Foreign players: a real 1931 Football League ruling required two years' residency before a non-British-born professional was eligible, an effective ban that held until 1978. Home Nations, Ireland and the Commonwealth are exempt. The transfer market now enforces that ban in England until the 1978-79 unlock (v377). From 1978-79 the League is open, with a two-foreign-player work-permit cap, and real overseas players can be offered to you before their real moves.", "RESERVES (v146): a genuine regional competition, not a flat aggregate line -- the real Football Combination (South/Midlands/Wales, Arsenal and Portsmouth won its two 1946-47 sections) or the real Central League (North/Midlands, reserve-teams-only, Manchester United's 1946-47 title), whichever your own club's real region plays, complete with a real table (LEAGUE TABLE tab) and a scheduled fixture list. RESERVE XI PREFERENCES (on the Club screen) lets you tick a fringe man or a ground-staff boy to make him a standing pick, ahead of the automatic priority list -- the actual decision this used to lack. A good showing still nudges a man's form, and a ground-staff boy who plays develops faster (see GROUND-STAFF). Run-outs go first to your own starred picks, then younger reserves and anyone working back from injury, excluding anyone genuinely unavailable (injured, suspended, on international duty).", "A GROUND-STAFF pipeline is modelled from v144 on (see the GROUND-STAFF note below) : there was no formal ACADEMY-style youth setup at this level in 1946 (the FA Youth Cup didn't launch until the 1952-53 season), but the real schoolboy-forms/ground-staff system this game does model long predates it.", "The Secretary-Manager's name and age are whatever you set at the start (or after NEW GAME) : purely a profile. Manager Reputation is a real stat now, rising with good results (promotion, a strong cup run) and falling with a bad run, but sackings mid-season were genuinely rare in this era (unlike the modern game) : the board's patience runs deep, and only a truly dire, sustained collapse carries any real risk, which is deliberately tuned to be very hard to trigger.", "JOB OFFERS: a strong reputation and a good run of form can draw a genuine approach from a higher division (Second Division or First Division), following the real period convention of asking your own board's permission first rather than approaching you directly. This models the approach and how you handle it with your own board, not an actual move to manage a different club : Aldershot's ground, colours and history here are all specifically built for Aldershot, and an honest \"you now manage Cardiff City\" would be a much bigger rebuild than a single pass.", "Club History and Season Record below are real for the founding/League-entry facts (1926, 1932) and for anything you've actually played; season summaries accumulate as you complete each campaign."],
   transfers: ["No attribute sheets exist in 1946 : just a public playing record and a scout's own prose opinion. His word is only as good as his trust rating.", "Pro targets are negotiated with a transfer fee. Amateur and schoolboy targets are signed by invitation to a trial instead : no club to buy them out from.", "Listing a player tells the division he's available: rivals are more likely to come in for him, though possibly below his true worth.", "Rivals buy and sell among themselves too, for real (v159) : the man named in that news genuinely leaves one club's actual squad and joins the other's, not just a cash adjustment with an invented name stuck on the headline. That news, and any transfer-listed player worth a look, appears in your weekly board news and can turn up here as a target. Names, fees and records are generated, not real transfer history.", "Scouted targets aren't a one-off list : your scouts keep bringing fresh names in over the season, on top of anything spotted through the transfer market. This first batch, and every later tip, is randomised : a new game won't hand you the same men to sign.", "INSTRUCT THE SCOUTS lets you put out a standing brief for a position, optionally with a trait you want him strong in : it raises the odds your scouts turn up the right sort of man (not a guarantee, they still work off what they actually see), and a signing that matches the brief really does come out a little stronger in that trait, not just in the write-up.", "THE BLACK BOOK is for a man you rate but aren't ready to move for : filing him there gets him out of your active list (and its nine-name cap) without losing the file on him for good. Bring him back into play any time.", "SCOUTING NETWORK (v142): each contact costs a modest weekly retainer, deducted like any other wage (an honest estimate -- no period wage figure for an informal contact at this level survives anywhere findable, though the SHAPE of it is real : Manchester United's own scouts of this era, Louis Rocca and Joe Armstrong, worked through informal, part-paid networks of contacts rather than a formal salaried department, and this game's own club-staff text already says a dedicated chief scout was rare below the top two divisions). A specialist contact raises the odds of a tip from his own country, on top of the real historical skew already built into the pool (English football recruited far more heavily from Scotland than Wales, N. Ireland or Ireland put together, which the odds now reflect). A scout's STANDING moves at the end of each season based on how the men he's actually found have gone on at the club -- rot in some ground, and it shows.", "A HANDFUL OF REAL SCOTTISH/WELSH/N.IRISH/IRISH PLAYERS can turn up as a scout's tip, same as any other target, never as a browsable squad (no such squad is simulated for these clubs). These are specific, sourced, real cases, not a general real roster : most Scottish/Irish names in the market are still generated, since no rosters for these clubs survive online the way the English/Welsh League ones do via 11v11.com.", "GROUND-STAFF (v144): signing a schoolboy no longer puts him straight in the squad. He joins the ground-staff on schoolboy forms instead -- too young to be picked, developing quietly on a modest weekly wage (an honest estimate, not a sourced figure) -- and only becomes a full professional, added to the squad proper, when you choose SIGN PROFESSIONAL FORMS once he turns 17. You can release him instead if he hasn't come on : not every boy on the books made the grade, then or now."],
   fixtures: ["The 42 league matchdays are the real 1946-47 Football League calendar : Saturdays throughout, with the genuine Christmas fixture pile-up (25/26/28 Dec) and Easter pile-up (4/5/7 Apr) reproduced. Which opponent falls on which date is a plausible reconstruction, not Aldershot's own verified historical fixture list, which I don't have. Beyond this first season, there's no real calendar left to draw on : later seasons use a generated one (Saturdays from mid-August, with an invented but plausible Christmas and Easter pile-up), clearly a different kind of thing from the sourced 1946-47 one.", "FA Cup ties are pencilled in on the real 1946-47 round dates and bump the following league game back a week : which is genuinely why English football that season dragged on so long. The draw itself now happens as its own event roughly a week and a half before the round is played (the FA's general custom of the day), read out over the wireless rather than the opponent simply appearing the week of the match : that ~11-day gap is a reasonable derived approximation, not a sourced exact date for this specific season's draws. Cup opponents themselves are generated, not the real 1946-47 draw. A level scoreline after 90 minutes gets a genuine replay (the away side hosts it, midweek, per the real rule of the day); a drawn replay means a further replay, as many as it takes, each on its own later midweek date.", "The three fixtures ahead of the season opener are pre-season : a Public Trial Match (Probables v Possibles, near-universal at every level of English football into the 1950s-60s) and two friendlies, including a nod to Aldershot's real identity as the home of the British Army. Training genuinely began 3-4 weeks before the opener in this era, so the calendar now starts there rather than cold on 31 August. None of these three affect the league table, the Cup, or goal tallies, and the specific opponents/results are invented : Aldershot's own actual 1946 pre-season fixtures aren't a record I could find.", "KICKOFF TIMES: 3pm was the standard Saturday kickoff throughout this era. Nobody in the Football League had floodlights as a matter of course yet (competitive floodlit fixtures weren't officially permitted until 1956), so a genuine midweek match — an FA Cup replay, say — still kicked off, and finished, in daylight, not in the evening the way a modern midweek fixture would. Both Saturday and midweek kickoffs were pulled forward to 2.15pm in deep midwinter (Nov-Feb), when the light goes by mid-afternoon : a real, documented period practice."],
   table: ["Aldershot's goal tally is real and tracked match by match. Rivals' leading scorers are real players from each club's own squad, with goals credited to named men from every real result they play (a statistical share-out of the scoreline, not a kick-by-kick simulation of their matches). Managers are the real man in post at the start of the season where I could verify one; some changed mid-season, which isn't simulated; four could not be confirmed.", "PROMOTION/RELEGATION now differs correctly by division, and the table marks the zones with a coloured edge plus a one-line legend for whichever division you're in. The Third Division, in two separate sections, South and North (the bottom tier), promotes only each section's champion, no play-offs and no top-3/4 promotion (a much later invention), and has no relegation out of it at all : the bottom club or two instead face a re-election vote from the rest of the League at the summer AGM, which real history shows was almost always a formality (genuine unseatings, like Gateshead in 1960, were rare and later than this era). There was no movement between the North and South sections; the two clubs relegated from the Second Division were placed in one or the other by location (for example Nottingham Forest went South in 1949, Lincoln City North), and the game does the same. Second Division and First Division both ran the real \"2 up, 2 down\" system already standard by this era, except First Division has nobody above it to be promoted to. Each time you go up or down a division the fixture list and rivals regenerate with a newly drawn set of opponents from that division's real member clubs, since I don't have a real season-by-season 1947-48-onward fixture list to draw on."],
@@ -26962,7 +27307,7 @@ function applyLoadedState(s, silent){
     if (s.isthmianLastLines) isthmianLastLines = s.isthmianLastLines;
     if (s.isthmianLeague) isthmianLeague = s.isthmianLeague;
     /* v127 : a save made before the Lawton entry existed carried only the older entries, so that headline (and now the move itself) could never fire */
-    if (!futureLegends.some(isLawtonLegend)) futureLegends.push({year:1947, month:10, fired:false, id:'lawton', text:"BRITISH RECORD: Notts County have paid Chelsea a British record £20,000 for Tommy Lawton."}); realSchoolboyLegends = mergeRealLegendDefaults(s.realSchoolboyLegends || realSchoolboyLegends); scoutingPrep = s.scoutingPrep || null; markCloselyThisMatch = s.markCloselyThisMatch || false;
+    if (!futureLegends.some(isLawtonLegend)) futureLegends.push({year:1947, month:10, fired:false, id:'lawton', text:"BRITISH RECORD: Notts County have paid Chelsea a British record £20,000 for Tommy Lawton."}); realSchoolboyLegends = mergeRealLegendDefaults(s.realSchoolboyLegends || realSchoolboyLegends); if (typeof silenceNewlyMergedLegendsAlreadyPast === 'function') silenceNewlyMergedLegendsAlreadyPast(s.realSchoolboyLegends, (typeof currentDate !== 'undefined' && currentDate) ? currentDate : (s.currentDate ? new Date(s.currentDate) : null)); if (typeof v377EnrichExistingForeignSignings === 'function') v377EnrichExistingForeignSignings(); scoutingPrep = s.scoutingPrep || null; markCloselyThisMatch = s.markCloselyThisMatch || false;
     /* v137 : a save made before this pass has no historicalOneOffs at all, or an older subset
        of it -- merge by id so a pre-v137 save doesn't lose the fired/unfired state of items it
        already knew about, while still picking up any new entries this pass added (defaulted to
@@ -27594,7 +27939,7 @@ function initGameStateFresh(){
   news = [];
   futureLegends.forEach(function(e){ e.fired = false; });
   historicalOneOffs.forEach(function(e){ e.fired = false; });
-  realSchoolboyLegends.forEach(function(e){ e.fired = false; });
+  realSchoolboyLegends.forEach(function(e){ e.fired = false; e.offered = false; });
   historicalOneOffsPost1949.forEach(function(e){ e.fired = false; }); /* v308 : this list was never reset between games in one page session */
   silenceHistoryBeforeStart(); /* v308 */
   weekPhase = 'build-up';
@@ -44331,6 +44676,7 @@ function startNewSeason(outcome){
     if (finishedSeasonLabel === '1985-86') addNews('board', 'The Scottish Premier Division is enlarged to 12 clubs for 1986-87. One club goes down and three come up from the First Division.');
   }
   if (isEsp()){ var __ey = parseInt(seasonLabel,10); if (__ey === 1962) addNews('board', 'THE BORDERS CLOSE: after the failure of the national side at the World Cup in Chile, Spanish clubs may no longer sign foreign players, bar the oriundos of Spanish descent. Every signing you scout will be Spanish, and the ban is set to last until 1973.'); else if (__ey === 1973) addNews('board', 'THE BORDERS REOPEN: from this season each Primera and Segunda club may register up to two non-Spanish players. (This game does not yet put foreign players on the market.)'); }
+  if (typeof gameCountry !== 'undefined' && gameCountry === 'ENG' && parseInt(seasonLabel,10) === 1978) addNews('board', 'FOREIGN PLAYERS: after a February 1978 European Community ruling on freedom of movement, the Football League has lifted its 1931 two-year residency rule. Overseas professionals may now be signed; from late September work permits are limited to two established foreign players per club. Home Nations, Ireland and the Commonwealth remain exempt.');
   if (isSco() && scoEraDef() && (divisionTier===3 || divisionTier===2 || divisionTier===1) && (isDeu() || /^(DIVISION (A|B|ONE|TWO)|PREMIER DIVISION|FIRST DIVISION|SECOND DIVISION|SERIE [AB]|.* \u00b7 GRUPO II?)$/.test(currentDivisionLabel))){ currentDivisionLabel = scoDivWordFor(null, divisionTier===3 ? 1 : divisionTier===2 ? 2 : 3, true); currentDivisionShort = scoDivShortFor(divisionTier===3 ? 1 : divisionTier===2 ? 2 : 3); } /* v322/v352 : A/B -> One/Two in 1955-56; One/Two -> Premier/First/Second in 1975-76 */
   initEuropeanCupForSeason(); /* v233 : reads divisionChampions.D1 as just recorded by processSeasonEnd's recordDivisionChampions() for the season just finished; gated to never fire before the real 1955-56 European Cup -- see euroCupGateYearOk */
   initCupWinnersCupForSeason(); /* v236 : reads lastFaCupWinnerName as just recorded by processSeasonEnd's recordFaCupWinner() for the season just finished; gated to never fire before the real 1960-61 Cup Winners' Cup -- see cwcGateYearOk */
@@ -45175,7 +45521,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v376'; /* v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v377'; /* v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
