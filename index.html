@@ -3572,6 +3572,228 @@ p.era{
 }
 </style>
 
+<style id="v385-ui">
+/* v385 : primary next-step links as prominent as the v384 match-day bar, every skin. */
+.matchctl button.primary,
+.matchctl button.primary:hover,
+#btn-goto-lineup,
+#btn-confirm-lineup,
+#btn-continue,
+#btn-goto-lineup:hover,
+#btn-confirm-lineup:hover,
+#btn-continue:hover{
+  font-family: var(--t-cond, var(--font-dos), sans-serif) !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  padding: 2px 1px !important;
+  color: var(--red, #c41230) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  cursor: pointer;
+  opacity: 1 !important;
+}
+.matchctl button.primary:disabled,
+.matchctl button.primary:disabled:hover,
+#btn-confirm-lineup:disabled,
+#btn-goto-lineup:disabled,
+#btn-continue:disabled{
+  opacity: 1 !important;
+  color: #2a3142 !important;
+  text-decoration: none !important;
+  cursor: default;
+}
+body.theme-match .matchctl button.primary,
+body.theme-shoot .matchctl button.primary,
+body.theme-turnstile .matchctl button.primary,
+body.theme-programme .matchctl button.primary,
+body.theme-pink .matchctl button.primary{
+  color: var(--red, #c41230) !important;
+}
+body.theme-turnstile .matchctl button.primary:disabled{ color: #2a2430 !important; }
+
+/* v385 : Vidiprinter / Around the Grounds — classic yellow teleprinter on navy, every skin. */
+.vidi, #vidi-box,
+body.theme-match .vidi, body.theme-match #vidi-box,
+body.theme-shoot .vidi, body.theme-shoot #vidi-box,
+body.theme-pink .vidi, body.theme-pink #vidi-box,
+body.theme-turnstile .vidi, body.theme-turnstile #vidi-box,
+body.theme-programme .vidi, body.theme-programme #vidi-box{
+  background: #0a1630 !important;
+  color: #ffe66a !important;
+}
+.vidi p, #vidi-box p, .vidi .header, #vidi-box .header,
+body.theme-match .vidi p, body.theme-match .vidi .header,
+body.theme-shoot .vidi p, body.theme-shoot .vidi .header,
+body.theme-pink .vidi p, body.theme-pink .vidi .header,
+body.theme-turnstile .vidi p, body.theme-turnstile .vidi .header,
+body.theme-programme .vidi p, body.theme-programme .vidi .header{
+  color: #ffe66a !important;
+}
+
+/* v385 : injured / unavailable tag in team selection — small inline, same row height. */
+td .inj-tag, .inj-tag{
+  display: inline-block;
+  font-family: var(--t-cond, var(--font-dos), sans-serif);
+  font-size: 11px !important;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: lowercase;
+  line-height: 1.2;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 1px solid var(--dos-red, #c41230);
+  color: var(--dos-red, #c41230);
+  background: transparent;
+  white-space: nowrap;
+}
+body.theme-match td .inj-tag, body.theme-match .inj-tag,
+body.theme-shoot td .inj-tag, body.theme-shoot .inj-tag{
+  font-family: var(--t-cond, sans-serif);
+  font-size: 11px !important;
+  font-weight: 700;
+  color: var(--red, #c41230);
+  border-color: var(--red, #c41230);
+}
+#lineup-body td, #lineup-body td.val, #lineup-body td.val.warn{
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
+/* v385 : match-day yellow chips — same style for every selectable option on the touchline and half-time panels. Labels stay plain text. Compact spacing, no duplicate rules, no blank gap. */
+#inmatch-box #im-sub-note,
+#inmatch-box #im-sub-controls{margin:0;}
+#inmatch-box #im-sub-note:empty,
+#inmatch-box #im-sub-controls:empty{display:none;}
+#inmatch-box .im-row,
+#halftime-talk-box .im-row{
+  margin: 6px 0 0;
+  line-height: 1.45;
+  color: var(--ink, #1a1a1a);
+}
+#inmatch-box #im-approach-current{display:none;}
+#inmatch-box .im-approach-ctl,
+#inmatch-box .matchctl.im-approach-ctl,
+#halftime-talk-box .matchctl{
+  display: inline;
+  margin: 0;
+  gap: 0;
+  vertical-align: baseline;
+}
+#inmatch-box button.im-chip,
+#inmatch-box .im-chip,
+#inmatch-box select.im-chip,
+#inmatch-box #im-wrinkle,
+#inmatch-box #im-sub-off,
+#inmatch-box #im-sub-on,
+#inmatch-box #im-sub-send,
+#inmatch-box #im-injury-send,
+#inmatch-box #im-injury-ten,
+#inmatch-box .im-approach-ctl button,
+#halftime-talk-box button.im-chip,
+#halftime-talk-box .matchctl button,
+body.theme-match #inmatch-box button.im-chip,
+body.theme-match #inmatch-box select.im-chip,
+body.theme-match #inmatch-box #im-wrinkle,
+body.theme-match #inmatch-box #im-sub-off,
+body.theme-match #inmatch-box #im-sub-on,
+body.theme-match #inmatch-box .im-approach-ctl button,
+body.theme-match #halftime-talk-box .matchctl button,
+body.theme-shoot #inmatch-box button.im-chip,
+body.theme-shoot #inmatch-box select.im-chip,
+body.theme-shoot #inmatch-box #im-wrinkle,
+body.theme-shoot #halftime-talk-box .matchctl button,
+body.theme-programme #inmatch-box button.im-chip,
+body.theme-programme #inmatch-box select.im-chip,
+body.theme-programme #halftime-talk-box .matchctl button,
+body.theme-pink #inmatch-box button.im-chip,
+body.theme-pink #inmatch-box select.im-chip,
+body.theme-pink #halftime-talk-box .matchctl button,
+body.theme-turnstile #inmatch-box button.im-chip,
+body.theme-turnstile #inmatch-box select.im-chip,
+body.theme-turnstile #halftime-talk-box .matchctl button{
+  display: inline-block !important;
+  width: auto !important;
+  max-width: 22em;
+  height: auto !important;
+  min-height: 0 !important;
+  font-family: var(--t-cond, var(--font-dos), sans-serif) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: .06em !important;
+  line-height: 1.2 !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+  color: var(--ink, #1a1a1a) !important;
+  background: var(--yellow, #f5d76e) !important;
+  border: 2px solid var(--ink, #1a1a1a) !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 var(--ink, #1a1a1a) !important;
+  padding: 3px 9px !important;
+  margin: 0 6px 4px 0 !important;
+  vertical-align: middle;
+  appearance: auto;
+  -webkit-appearance: menulist;
+  cursor: pointer;
+}
+#inmatch-box button.im-chip:hover:not(:disabled),
+#inmatch-box .im-approach-ctl button:hover:not(:disabled),
+#inmatch-box #im-sub-send:hover:not(:disabled),
+#halftime-talk-box .matchctl button:hover:not(:disabled),
+body.theme-match #inmatch-box button.im-chip:hover:not(:disabled),
+body.theme-match #halftime-talk-box .matchctl button:hover:not(:disabled){
+  background: var(--red, #c41230) !important;
+  color: #fff !important;
+  border-color: var(--ink, #1a1a1a) !important;
+  text-decoration: none !important;
+}
+#inmatch-box button.im-chip.primary,
+#inmatch-box .im-approach-ctl button.primary,
+#inmatch-box select.im-chip.primary,
+#halftime-talk-box .matchctl button.primary,
+#inmatch-box .matchctl button.primary,
+#halftime-talk-box .matchctl button.primary:hover,
+body.theme-match #inmatch-box .matchctl button.primary,
+body.theme-match #halftime-talk-box .matchctl button.primary,
+body.theme-shoot #inmatch-box .matchctl button.primary,
+body.theme-shoot #halftime-talk-box .matchctl button.primary,
+body.theme-programme #inmatch-box .matchctl button.primary,
+body.theme-programme #halftime-talk-box .matchctl button.primary,
+body.theme-pink #inmatch-box .matchctl button.primary,
+body.theme-pink #halftime-talk-box .matchctl button.primary,
+body.theme-turnstile #inmatch-box .matchctl button.primary,
+body.theme-turnstile #halftime-talk-box .matchctl button.primary{
+  background: var(--red, #c41230) !important;
+  color: #fff !important;
+  border-color: var(--ink, #1a1a1a) !important;
+  box-shadow: 2px 2px 0 var(--ink, #1a1a1a) !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: .06em !important;
+  padding: 3px 9px !important;
+  min-height: 0 !important;
+}
+#inmatch-box button.im-chip:disabled,
+#halftime-talk-box .matchctl button:disabled{
+  opacity: .55;
+  cursor: default;
+}
+</style>
+
+
 
 
 
@@ -3656,7 +3878,7 @@ p.era{
         <div class="box" id="lineup-profile-box"><div class="box-title">PLAYER FILE</div><div id="lineup-profile-content"><p class="sub">CLICK "VIEW" NEXT TO ANY PLAYER TO SEE HIS FILE HERE.</p></div></div>
       </div>
       <div class="box"><div class="box-title">FORMATION ORDER : SHIRT NUMBERS 1-11</div>
-        <p class="sub" style="margin-bottom:10px;">1 GOAL &nbsp;2 R.BACK &nbsp;3 L.BACK &nbsp;4 R.HALF &nbsp;5 C.HALF &nbsp;6 L.HALF &nbsp;7 O.RIGHT &nbsp;8 I.RIGHT &nbsp;9 C.FWD &nbsp;10 I.LEFT &nbsp;11 O.LEFT</p>
+        <p class="sub" id="formation-order-legend" style="margin-bottom:10px;">1 GOAL &nbsp;2 R.BACK &nbsp;3 L.BACK &nbsp;4 R.HALF &nbsp;5 C.HALF &nbsp;6 L.HALF &nbsp;7 O.RIGHT &nbsp;8 I.RIGHT &nbsp;9 C.FWD &nbsp;10 I.LEFT &nbsp;11 O.LEFT</p>
         <div class="box" id="wrinkle-box" style="margin-bottom:10px;"></div>
         <div class="box" id="substitute-box" style="margin-bottom:10px; display:none;"></div>
         <div id="lineup-slots-box"><p class="sub">SELECT YOUR ELEVEN ABOVE FIRST.</p></div></div>
@@ -3988,23 +4210,23 @@ p.era{
       <div class="box" id="inmatch-box" style="display:none; margin-top:14px;">
         <div class="box-title">TOUCHLINE INSTRUCTIONS</div>
         <p class="sub" id="im-sub-note">No substitutes in this era, but a word can still reach the captain between passages of play : a shout, a wave, a runner sent from the bench.</p>
-        <div id="im-sub-controls" class="sub" style="margin:6px 0;"></div>
-        <p class="sub" style="margin:6px 0 4px;">APPROACH: <span id="im-approach-current" class="val"></span></p>
-        <div class="matchctl">
-          <button id="im-attacking">PUSH FOR IT</button>
-          <button id="im-balanced">STEADY AS SHE GOES</button>
-          <button id="im-defensive">SHUT UP SHOP</button>
-        </div>
-        <p class="sub" style="margin:10px 0 4px;">TACTICAL WRINKLE:</p>
-        <select id="im-wrinkle" style="font-size:15px;"></select>
+        <div id="im-sub-controls" class="sub"></div>
+        <p class="sub im-row" id="im-approach-row">Approach:
+          <span class="matchctl im-approach-ctl">
+            <button type="button" class="im-chip" id="im-attacking">Push for it</button>
+            <button type="button" class="im-chip" id="im-balanced">Steady as she goes</button>
+            <button type="button" class="im-chip" id="im-defensive">Shut up shop</button>
+          </span>
+        </p>
+        <p class="sub im-row" id="im-wrinkle-row">Tactical wrinkle: <select id="im-wrinkle" class="im-chip"></select></p>
       </div>
       <div class="box" id="halftime-talk-box" style="display:none; margin-top:14px;">
         <div class="box-title">THE HALF-TIME TALK</div>
         <p class="sub">A few words in the dressing-room before the second half. Nothing is guaranteed.</p>
         <div class="matchctl">
-          <button id="ht-rally">RALLY THEM</button>
-          <button id="ht-calm">STEADY THEM DOWN</button>
-          <button id="ht-none">SAY NOTHING NEW</button>
+          <button type="button" class="im-chip" id="ht-rally">Rally them</button>
+          <button type="button" class="im-chip" id="ht-calm">Steady them down</button>
+          <button type="button" class="im-chip" id="ht-none">Say nothing new</button>
         </div>
         <p class="sub" id="ht-chosen" style="margin-top:6px;"></p>
       </div>
@@ -4130,15 +4352,15 @@ p.era{
     chanceLosing: ['{A}, behind now, throw everything forward, but {P} cannot make the chance count.', 'With {A} chasing the game, {P} tries a shot, and it goes begging.'],
     /* ---- saves (inline events, keeper named) ---- */
     saveHold: ['{K} held a hard shot from {P} well.', '{K}, in the {O} goal, gathered {P}\'s shot at the second attempt, with forwards crowding in.', '{K} came out bravely and claimed the ball from {P}\'s toe.', '{K} held the ball well, in a crowd of players.'],
-    saveHoldCharge: ['{K} gathered {P}\'s shot, and {P} came in shoulder-first, as the law then allowed, but {K} kept hold of the ball.'],
+    saveHoldCharge: ['{K} gathered {P}\'s shot, and {P} came in shoulder-first, but {K} kept hold of the ball.'],
     savePunch: ['{K} punched clear under pressure from {P}.', '{K} got a fist to {P}\'s effort and the ball was cleared.', '{K} punched clear under real pressure.'],
     saveDive: ['{K} flung himself across his goal to keep out {P}\'s shot.', 'A brilliant stop by {K}, who dived at the feet of {P}.', '{K} made a fine reflex save from {P}\'s close-range effort.', '{K} made a fine save, keeping out what looked a certain goal.', '{K} saved brilliantly at close quarters.'],
     saveCorner: ['{K} turned {P}\'s header round for a corner.', '{K} tipped {P}\'s effort behind for a corner-kick.'],
     saveLevel: ['{K}\'s save from {P} keeps the score level.'],
     /* ---- corners ---- */
     cornerSet: ['{A} won a corner and {P} took it.', '{P} placed the ball for a corner-kick for {A}.', 'A corner to {A}, and {P} stood over the flag.'],
-    cornerGoal: ['{P}\'s corner brought a goal for {A}: a header, a scramble, and the ball was in the net, {gp}.', 'From {P}\'s corner-kick the ball ended in the net, and {gp}.'],
-    cornerOver: ['The corner-kick from {P} found a head, but the ball flew over the bar.', '{P}\'s corner was met at the near post, but the header drifted wide.'],
+    cornerGoal: ['{P2}\'s corner brought a goal for {A}: a header, a scramble, and the ball was in the net, and {P} has scored, {gp}.', 'From {P2}\'s corner-kick the ball ended in the net, and {P} has scored, {gp}.'],
+    cornerOver: ['The corner-kick from {P2} found a head from {P}, but the ball flew over the bar.', '{P2}\'s corner was met at the near post by {P}, but the header drifted wide.'],
     cornerClear: ['{P}\'s corner was cleared by the defence.', 'Nothing came of {P}\'s corner-kick: it was cleared to the edge of the box.', 'The goalkeeper punched out {P}\'s corner.'],
     /* ---- free kicks ---- */
     fkSet: ['A free-kick in a promising position to {A}, and {P} took charge of it.', '{P} stepped up to take a free-kick for {A} from just outside the box.', 'A foul gave {A} a free-kick at the edge of the area, with {P} to take it.'],
@@ -4236,14 +4458,14 @@ p.era{
     chanceGeneric: ['{P} has a chance for {A}, and it comes to nothing.', 'A chance for {P}, the {A} {pos}, and he can\'t make anything of it.'],
     chanceLosing: ['{A} are chasing the game now, and {P} tries his luck, but no joy.', '{A}, a goal down, are throwing everyone forward: {P} has a go, and it\'s not enough.'],
     saveHold: ['{K} holds on to a fierce one from {P}!', '{K} comes out and claims it off {P}\'s toe, in a ruck of players.', 'Oh, well held by {K}, from {P}!', '{K} holds on, in the middle of a ruck of players!'],
-    saveHoldCharge: ['{K} gathers {P}\'s shot, and {P} goes in with the shoulder, as was then allowed, but {K} holds on!'],
+    saveHoldCharge: ['{K} gathers {P}\'s shot, and {P} goes in with the shoulder, but {K} holds on!'],
     savePunch: ['{K} punches it clear under pressure from {P}!', '{K} gets a fist to {P}\'s effort.', '{K} punches clear under real pressure!'],
     saveDive: ['A flying save by {K}! {P} thought he\'d scored!', 'What a stop by {K}! That was a goal, surely, from {P}.', '{K} dives at the feet of {P} and smothers it!', 'A flying stop by {K}, and a goal is denied!', '{K} makes a smart reaction save at close range.'],
     saveCorner: ['{K} turns {P}\'s header behind for a corner!', '{K} tips {P}\'s effort round the post.'],
     saveLevel: ['A fine save by {K}, from {P}, and it\'s still all square.'],
     cornerSet: ['A corner to {A}: {P} to take it.', '{P} stands over the flag for {A}, sizing it up.', 'And {A} have a corner, {P} to place it.'],
-    cornerGoal: ['{P}\'s corner... and it\'s in! {gp}!', 'Chaos from {P}\'s corner, and the ball ends up in the net! {gp}!'],
-    cornerOver: ['{P}\'s corner finds a head, but over the bar it goes.', 'A good near-post flick from {P}\'s corner, but it\'s just wide.'],
+    cornerGoal: ['From {P2}\'s corner... and it\'s in! {P} has scored! {gp}!', 'Chaos from {P2}\'s corner, and {P} forces the ball into the net! {gp}!'],
+    cornerOver: ['{P2}\'s corner finds {P}\'s head, but over the bar it goes.', 'A good near-post flick from {P} off {P2}\'s corner, but it\'s just wide.'],
     cornerClear: ['{P}\'s corner is cleared.', 'Nothing comes of {P}\'s corner: out it goes to the edge of the box.', 'The keeper punches out {P}\'s corner.'],
     fkSet: ['A free-kick to {A} in a good position: {P} stands over it.', 'There\'s a foul on the edge of the box, and {P} will take it for {A}.', 'A set piece for {A}, and {P} is the man.'],
     fkGoal: ['{P} bends it over the wall and in! {gp}!', 'The free-kick from {P} takes a deflection and beats the keeper! {gp}!', 'A beauty from {P}, into the top corner! {gp}!'],
@@ -4331,14 +4553,13 @@ p.era{
     chanceGeneric: ['{P} has a chance for {A}, but nothing comes of it.', 'A chance for {P}, and he cannot make it count.'],
     chanceLosing: ['{A} are behind now, and pushing forward. {P} has a shot, and it is not enough.', '{A} throw men forward, and {P} tries his luck, without success.'],
     saveHold: ['{K} holds on to a hard shot from {P}.', '{K} claims it, with {P} crowding in.', 'Safe hands from {K}, who holds {P}\'s shot.', '{K} holds on, with players crowding in.'],
-    saveHoldCharge: ['{K} gathers {P}\'s shot, and {P} goes in with the shoulder, which is still allowed, but {K} holds on.'],
     savePunch: ['{K} punches it clear, with {P} pressing.', '{K} gets a fist to {P}\'s effort.', '{K} punches clear under pressure.'],
     saveDive: ['A great save by {K}, from {P}!', '{K} dives at {P}\'s feet and stops it.', 'A reflex stop from {K} to deny {P}.', 'A flying save by {K} denies what looked a certain goal.', '{K} makes a good reflex save at close range.'],
     saveCorner: ['{K} turns {P}\'s header behind for a corner.', '{K} tips {P}\'s shot round the post.'],
     saveLevel: ['A good save by {K}, from {P}, to keep it level.'],
     cornerSet: ['A corner for {A}, and {P} will take it.', '{P} places the ball for the corner.', '{P} stands over the corner flag for {A}.'],
-    cornerGoal: ['From {P}\'s corner... it is a goal! {gp}.', '{P} swings the corner in, and it ends up in the net. {gp}.'],
-    cornerOver: ['{P}\'s corner finds a head, but it goes over the bar.', 'A good flick from {P}\'s corner, but just wide.'],
+    cornerGoal: ['From {P2}\'s corner... it is a goal! {P} has scored! {gp}.', '{P2} swings the corner in, and {P} puts it in the net. {gp}.'],
+    cornerOver: ['{P2}\'s corner finds {P}\'s head, but it goes over the bar.', 'A good flick from {P} off {P2}\'s corner, but just wide.'],
     cornerClear: ['The corner from {P} is cleared.', 'Nothing comes of {P}\'s corner.', 'The keeper punches out {P}\'s corner.'],
     fkSet: ['A free-kick to {A} in a useful spot, and {P} will take it.', '{P} stands over the free-kick for {A}.', 'A foul on the edge of the box, and {P} is going to have a go.'],
     fkGoal: ['{P} bends it over the wall and in! {gp}.', 'The free-kick from {P} takes a deflection and beats the goalkeeper. {gp}.', 'A fine free-kick from {P}, in off the post. {gp}.'],
@@ -4391,11 +4612,11 @@ p.era{
      over the bar or wide), and the era line must say the same thing. Lookup: bank[type + '_' + kind], else bank[type]. ---- */
   Object.assign(B46, {
     cornerSet: ['{A} won a corner, and {P} took it.', '{P} placed the ball for a corner-kick for {A}.', 'A corner to {A}, with {P} standing over the flag.'],
-    cornerGoal: ['A corner by {P} brought a goal for {A}: the ball finished in the net, and {gp}.', 'Out of {P}\'s corner-kick came a goal, and {gp}.'],
-    cornerGoal_header: ['{P}\'s corner was met by a firm header and the ball went in, and {gp}.'],
-    cornerOver_Over: ['{P}\'s corner was headed, but the ball flew over the bar.'],
-    cornerOver_Wide: ['{P}\'s corner was flicked on at the near post, but the ball drifted wide.'],
-    cornerOver_Weak: ['{P}\'s corner was dangerous, but the header at the far post lacked power to trouble the goalkeeper.'],
+    cornerGoal: ['A corner by {P2} brought a goal for {A}: the ball finished in the net, and {P} has scored, {gp}.', 'Out of {P2}\'s corner-kick came a goal, and {P} has scored, {gp}.'],
+    cornerGoal_header: ['{P2}\'s corner was met by a firm header from {P} and the ball went in, and {gp}.'],
+    cornerOver_Over: ['{P2}\'s corner was headed by {P}, but the ball flew over the bar.'],
+    cornerOver_Wide: ['{P2}\'s corner was flicked on at the near post by {P}, but the ball drifted wide.'],
+    cornerOver_Weak: ['{P2}\'s corner was dangerous, but {P}\'s header at the far post lacked power to trouble the goalkeeper.'],
     cornerClear_edge: ['Nothing came of {P}\'s corner-kick: it was cleared to the edge of the box.'],
     cornerClear_punch: ['The goalkeeper punched out {P}\'s corner under pressure.'],
     cornerClear_def: ['The defence dealt comfortably with {P}\'s corner.'],
@@ -4442,11 +4663,11 @@ p.era{
   });
   Object.assign(B59, {
     cornerSet: ['A corner to {A}: {P} to take it.', '{P} stands over the flag for {A}, sizing it up.', 'And {A} have a corner. {P} places the ball.'],
-    cornerGoal: ['{P}\'s corner... and there is a goal from it! {gp}!', 'Out of {P}\'s corner, a goal! {gp}!'],
-    cornerGoal_header: ['{P} swings the corner over, and a header goes in! {gp}!'],
-    cornerOver_Over: ['{P}\'s corner finds a head, but over the bar it goes.'],
-    cornerOver_Wide: ['A good near-post flick from {P}\'s corner, but it drifts wide.'],
-    cornerOver_Weak: ['{P}\'s corner is dangerous, but the header at the far post has no power in it.'],
+    cornerGoal: ['{P2}\'s corner... and there is a goal from it! {P} has scored! {gp}!', 'Out of {P2}\'s corner, a goal by {P}! {gp}!'],
+    cornerGoal_header: ['{P2} swings the corner over, and a header goes in! {P} has scored, {gp}!'],
+    cornerOver_Over: ['{P2}\'s corner finds {P}\'s head, but over the bar it goes.'],
+    cornerOver_Wide: ['A good near-post flick from {P} off {P2}\'s corner, but it drifts wide.'],
+    cornerOver_Weak: ['{P2}\'s corner is dangerous, but {P}\'s header at the far post has no power in it.'],
     cornerClear_edge: ['Nothing comes of {P}\'s corner: out it goes to the edge of the box.'],
     cornerClear_punch: ['The keeper punches out {P}\'s corner under pressure.'],
     cornerClear_def: ['The defence deals with {P}\'s corner, no trouble at all.'],
@@ -4492,11 +4713,11 @@ p.era{
   });
   Object.assign(B66, {
     cornerSet: ['A corner for {A}, and {P} will take it.', '{P} places the ball for the corner.', '{P} stands over the corner flag for {A}.'],
-    cornerGoal: ['From {P}\'s corner... it is a goal. {gp}.', 'Out of {P}\'s corner comes a goal. {gp}.'],
-    cornerGoal_header: ['{P} swings the corner in, a header goes in. {gp}.'],
-    cornerOver_Over: ['{P}\'s corner finds a head, but it goes over the bar.'],
-    cornerOver_Wide: ['A good flick from {P}\'s corner, but just wide.'],
-    cornerOver_Weak: ['{P}\'s corner is dangerous, but the header has no power in it.'],
+    cornerGoal: ['From {P2}\'s corner... it is a goal. {P} has scored. {gp}.', 'Out of {P2}\'s corner comes a goal by {P}. {gp}.'],
+    cornerGoal_header: ['{P2} swings the corner in, a header goes in. {P} has scored, {gp}.'],
+    cornerOver_Over: ['{P2}\'s corner finds {P}\'s head, but it goes over the bar.'],
+    cornerOver_Wide: ['A good flick from {P} off {P2}\'s corner, but just wide.'],
+    cornerOver_Weak: ['{P2}\'s corner is dangerous, but {P}\'s header has no power in it.'],
     cornerClear_edge: ['Nothing comes of {P}\'s corner: cleared to the edge of the box.'],
     cornerClear_punch: ['The keeper punches out {P}\'s corner.'],
     cornerClear_def: ['The defence deals with {P}\'s corner comfortably.'],
@@ -4633,7 +4854,7 @@ p.era{
     chanceGeneric: ['{P} has a chance for {A}... but nothing comes of it.', 'The {A} {pos}, {P}, is in the picture... and the chance is wasted.'],
     chanceLosing: ['{A}, behind now, are throwing everything forward, but {P} cannot make the chance count.', 'With {A} chasing the game, {P} tries a shot... and it goes begging.'],
     saveHold: ['{P} shoots... and {K} holds it well.', '{K}, in the {O} goal, gathers {P}\'s shot at the second attempt, with forwards crowding in.', '{K} comes out bravely and claims the ball from {P}\'s toe.', '{K} holds the ball well, in a crowd.'],
-    saveHoldCharge: ['{K} gathers {P}\'s shot... and {P} comes in shoulder-first, as the law allows, but {K} keeps hold of the ball.'],
+    saveHoldCharge: ['{K} gathers {P}\'s shot... and {P} comes in shoulder-first, but {K} keeps hold of the ball.'],
     savePunch: ['{P} presses, and {K} punches clear under pressure.', '{K} gets a fist to {P}\'s effort, and the ball is cleared.', '{K} punches clear, under real pressure.'],
     saveDive: ['{P} shoots... {K} flings himself across the goal and keeps it out!', 'A brilliant stop by {K}, diving at the feet of {P}!', '{K} makes a fine reflex save from {P}\'s close-range effort.', '{K} dives, and keeps out what looked a certain goal.', 'A flying save by {K}, from {P}.'],
     saveCorner: ['{P}\'s header... and {K} turns it round for a corner.', '{K} tips {P}\'s effort behind for a corner-kick.'],
@@ -4642,8 +4863,8 @@ p.era{
     cornerGoal: ['A corner for {A}... it comes over... and it is in! {P} has scored. {gp}.', 'From the corner-kick... the ball is in the net! {P} scores for {A}. {gp}.'],
     cornerGoal_header: ['The corner comes over... {P} meets it with a firm header... and the ball is in! {gp}.'],
     cornerOver_Over: ['The corner is swung over, and it is headed... high over the bar.'],
-    cornerOver_Wide: ['{P}\'s corner is flicked on at the near post... and it drifts wide.'],
-    cornerOver_Weak: ['{P}\'s corner is dangerous, but the header at the far post lacks the power to trouble the goalkeeper.'],
+    cornerOver_Wide: ['{P2}\'s corner is flicked on at the near post by {P}... and it drifts wide.'],
+    cornerOver_Weak: ['{P2}\'s corner is dangerous, but {P}\'s header at the far post lacks the power to trouble the goalkeeper.'],
     cornerClear_edge: ['Nothing comes of {P}\'s corner: it is cleared to the edge of the box.'],
     cornerClear_punch: ['The goalkeeper punches out {P}\'s corner, under pressure.'],
     cornerClear_def: ['The defence deals comfortably with {P}\'s corner.'],
@@ -4938,6 +5159,9 @@ p.era{
   B70.halfBack = ['{P} is the dominant figure in midfield for {A}, setting the tempo.', 'In midfield, {P} is winning the tackles and starting most of the {A} moves.', 'Much of {A}\'s best work begins with {P}.'];
   B81.halfBack = B70.halfBack;
 
+  /* v385 : legal AND common in the 1940s and 1950s only (see saveHoldCharge swap). */
+  var CHARGE_KEEPER_ERAS = { '1946':1, '1950':1, '1946past':1, '1959':1 };
+  var RARE_FLAVOUR = { saveHoldCharge: 1 };
   var ERAS = {
     '1946': { bank: B46L, name: 'forms46L' },
     '1950': { bank: B50L, name: 'forms50L' },
@@ -5074,8 +5298,8 @@ p.era{
     opts = opts || {};
     var evs = normalise(cap), meta = cap.meta, E = ERAS[era].bank, rng = mkRng((opts.seed || 1) * 7919 + parseInt(era, 10));
     var dupSn = {}; (function () { var c = {}; meta.who.forEach(function (p) { var q = surname(p.n); c[q] = (c[q] || 0) + 1; }); Object.keys(c).forEach(function (q) { if (c[q] > 1) dupSn[q] = true; }); })();
-    var used = {}, seen = {}, formSeen = {}, goalsBy = {}, lines = [], homeName = meta.home ? shortOf(meta.club, meta.opp) : shortOf(meta.opp, meta.club), awayName = meta.home ? shortOf(meta.opp, meta.club) : shortOf(meta.club, meta.opp);
-    function pick(key, ev) { var arr = E[key]; if (ev && ev.kind) { var kk = key.replace(/^buildupP$/, 'bp').replace(/^buildupTeam$/, 'bt') + '_' + ev.kind; if (E[kk]) { arr = E[kk]; key = kk; } } if (!arr || !arr.length) return null; if (ev) { var ok = arr.filter(function (x) { return !((/\{P\}/.test(x) && !ev.P) || (/\{P2\}/.test(x) && !ev.P2) || (/\{K\}/.test(x) && !ev.K)); }); if (ok.length) arr = ok; } var u = used[key] || (used[key] = []); var cand = arr.filter(function (_, i) { return u.indexOf(i) < 0; }); if (!cand.length) { u.length = 0; cand = arr.slice(); } var i = arr.indexOf(cand[Math.floor(rng() * cand.length)]); u.push(i); return arr[i]; }
+    var used = {}, rareUsed = {}, seen = {}, formSeen = {}, goalsBy = {}, lines = [], homeName = meta.home ? shortOf(meta.club, meta.opp) : shortOf(meta.opp, meta.club), awayName = meta.home ? shortOf(meta.opp, meta.club) : shortOf(meta.club, meta.opp);
+    function pick(key, ev) { var arr = E[key]; if (ev && ev.kind) { var kk = key.replace(/^buildupP$/, 'bp').replace(/^buildupTeam$/, 'bt') + '_' + ev.kind; if (E[kk]) { arr = E[kk]; key = kk; } } if (!arr || !arr.length) return null; if (ev) { var ok = arr.filter(function (x) { return !((/\{P\}/.test(x) && !ev.P) || (/\{P2\}/.test(x) && !ev.P2) || (/\{K\}/.test(x) && !ev.K)); }); if (ok.length) arr = ok; } var u = used[key] || (used[key] = []); var cand = arr.filter(function (_, i) { return u.indexOf(i) < 0; }); if (!cand.length) { if (RARE_FLAVOUR[key]) return null; u.length = 0; cand = arr.slice(); } var i = arr.indexOf(cand[Math.floor(rng() * cand.length)]); u.push(i); return arr[i]; }
     function clubName(side) { return side === 'us' ? shortOf(meta.club, meta.opp) : shortOf(meta.opp, meta.club); }
     var homeShort = meta.home ? shortOf(meta.club, meta.opp) : shortOf(meta.opp, meta.club), awayShort = meta.home ? shortOf(meta.opp, meta.club) : shortOf(meta.club, meta.opp);
     function nm(p) { if (!p) return 'the goalkeeper'; var key = p.n; var first = !seen[key]; seen[key] = true; if (era === '1946past') return first ? initials(p.n) : surname(p.n); if (era === '1946' || era === '1950') return dupSn[surname(p.n)] ? initials(p.n) : surname(p.n); if (era === '1959') return surname(p.n); return first && rng() < 0.4 ? p.n : surname(p.n); }
@@ -5122,7 +5346,16 @@ p.era{
       }
       if (text === null) {
         var key = type;
-        if (key === 'saveHold' && E.saveHoldCharge && rng() < 0.45) { key = 'saveHoldCharge'; tags.push('rule flavour: charging the keeper was then lawful. The sim records only the save'); }
+        /* v385 : charging a keeper who had the ball was still in Law 12 into the 1960s (IFAB 1963-64 still allowed it when he was holding the ball) but had ceased to be common in English football after the late 1950s — the last famous top-level case is Lofthouse on Gregg in the 1958 FA Cup Final. Keep the line in 1946 / 1950 / 1959 only, at most once a match, and only in some fixtures. Never a fourth-wall aside. */
+        if (key === 'saveHold' && E.saveHoldCharge && CHARGE_KEEPER_ERAS[era] && !rareUsed.saveHoldCharge) {
+          var fx = (meta && meta.fixtureIdx != null) ? meta.fixtureIdx : 0;
+          var matchRoll = mkRng((fx * 7919) + 4001)();
+          if (matchRoll < 0.4 && rng() < 0.2) {
+            key = 'saveHoldCharge';
+            rareUsed.saveHoldCharge = true;
+            tags.push('rule flavour: charging the keeper was then lawful. The sim records only the save');
+          }
+        }
         if (key === 'goOff' && e.side === 'opp') { /* uses {A} for the side the man plays for */ }
         if (/^buildupFormation/.test(key)) { var fk = key + ':' + (e.side || '?'); if (formSeen[fk]) return; formSeen[fk] = true; }
         var tp = pick(key, e); if (!tp) return;
@@ -5495,12 +5728,12 @@ function runPromotionWageReview(){
    separate division multiplier, since repWage has none either. Rounded to
    the nearest shilling (1/20 of a pound) : a whole pound is too coarse a
    unit for a modest per-man bonus. */
-var LEAGUE_WIN_BONUS_TOP = 2; /* £2 : the Spartacus "win bonus" figure, paid in full at rep 5 (repWage's own ceiling) */
+var LEAGUE_WIN_BONUS_TOP = 2; /* £2 : the Spartacus "win bonus" figure, paid in full at rep 5 (repWage's own ceiling). v385 : this remains the 1946-60 anchor; later seasons use ERA_ECONOMICS.winBonusTop / drawBonusTop and, from 1961, leagueBonusDivMult. */
 var LEAGUE_DRAW_BONUS_TOP = 1; /* £1 : the same source's "draw bonus" figure */
 function repBonusRatio(rep){ return (repWage[rep] || repWage[1]) / repWage[5]; }
 function leaguePlayerBonus(rep, isWin){
-  var top = isWin ? LEAGUE_WIN_BONUS_TOP : LEAGUE_DRAW_BONUS_TOP;
-  return Math.round(top * repBonusRatio(rep) * 20) / 20; /* nearest shilling */
+  var top = isWin ? eraLeagueWinBonusTop() : eraLeagueDrawBonusTop();
+  return roundBonusMoney(top * repBonusRatio(rep) * leagueBonusDivMult());
 }
 
 /* FA CUP bonuses: bigger than a league bonus, escalating by round, anchored
@@ -5538,7 +5771,7 @@ var CUP_ROUND_BONUS = [
 ];
 function cupRoundBonus(roundIdx, won){
   var row = CUP_ROUND_BONUS[clamp(roundIdx, 0, CUP_ROUND_BONUS.length-1)];
-  return won ? row.win : row.loss;
+  return roundBonusMoney((won ? row.win : row.loss) * eraCupBonusScale());
 }
 /* ---------- SIGNING-ON FEE: a flat £10 paid to the player himself on any
    fee-paying transfer, regardless of the fee or the division -- confirmed
@@ -6003,7 +6236,7 @@ var FIRST_NAMES_BY_DECADE = {
   1946: null,
   1960: ["Bobby","Jimmy","Terry","Alan","Geoff","Roger","Brian","Peter","John","David","Tony","Mike","Chris","Keith","Colin","Barry","Graham","Ian","Michael","Raymond","Trevor","Ron","Derek","Kenny","Billy","Eddie","Johnny","Tommy","George","Frank"],
   1970: ["Kevin","Steve","Paul","Mick","Trevor","Kenny","Alan","Dave","Tony","Peter","Bob","Ian","John","Mike","Brian","Chris","Gordon","Terry","Gary","Andy","Neil","Phil","Martin","David"],
-  1980: ["Gary","Steve","Paul","Mark","Darren","Lee","Kevin","Andy","Neil","Tony","Ian","Chris","John","David","Peter","Michael","Wayne","Craig","Scott","Jason","Dean","Ricky","Nigel","Adrian","Shaun"]
+  1980: ["Gary","Steve","Paul","Mark","Darren","Lee","Kevin","Andy","Neil","Tony","Ian","Chris","John","David","Peter","Michael","Wayne","Craig","Scott","Jason","Dean","Ricky","Nigel","Adrian","Shaun","Dave","Mick"]
 };
 var SCO_FIRST_NAMES_BY_DECADE = {
   1960: ["Willie","Jimmy","Davie","Bobby","Billy","Alec","Ian","Kenny","John","Tommy","Gordon","Eddie","Andy","Peter","Jim","Hugh","Drew","Bertie","Stevie","Alan"],
@@ -6078,6 +6311,45 @@ function pickGeneratedName(nation, seed){
     n = fn + " " + sn;
     if (!real[n.toLowerCase()]) return n;
   }
+  return n;
+}
+function eraStaffUsesInitials(kind, year){
+  /* v385 : trainers, physios, coaches and assistant applicants are full first-name in every era (Bert Symons, Mick Brown). Scouts, club secretaries, correspondents, agents and any generated referee use the period initial style ("T. Ansell", "W. H. Cobbett") through the 1960s, and full first names from 1970 (Steve, Gary, Kevin, Dave, Mick and the rest of the era pool). */
+  var y = (typeof year==='number' && !isNaN(year)) ? year : ((typeof seasonStartYear==='function') ? seasonStartYear() : 1946);
+  if (kind==='trainer' || kind==='physio' || kind==='coach' || kind==='assistant') return false;
+  return y < 1970;
+}
+function pickGeneratedStaffName(nation, seed, kind, usedSurnames){
+  kind = kind || 'staff';
+  if (!nation){
+    if (typeof isScoOnly==='function' && isScoOnly()) nation = 'Scotland';
+    else if (typeof homeNation==='function') nation = homeNation();
+    else nation = 'England';
+  }
+  var pools = (typeof namePoolsFor==='function') ? namePoolsFor(nation) : {first:firstNamePool, sur:surnamePool};
+  var firsts = (typeof eraFirstNamePool==='function') ? eraFirstNamePool(nation) : (pools.first || firstNamePool);
+  var surs = pools.sur || surnamePool;
+  var real = (typeof realPersonNameSet==='function') ? realPersonNameSet() : {};
+  var year = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  var n, sn, i, guard=50;
+  for (i=0;i<guard;i++){
+    var fn = (typeof seed==='number' && typeof pick2==='function') ? pick2(firsts, seed*1.9+i) : pick(firsts);
+    sn = (typeof seed==='number' && typeof pick2==='function') ? pick2(surs, seed*2.4+i*1.7) : pick(surs);
+    if (usedSurnames && usedSurnames.indexOf(sn)>=0) continue;
+    if (eraStaffUsesInitials(kind, year) && kind==='secretary'){
+      var mid = (typeof seed==='number' && typeof pick2==='function') ? pick2(firsts, seed*3.1+i) : pick(firsts);
+      n = fn.charAt(0)+'. '+mid.charAt(0)+'. '+sn;
+    } else if (eraStaffUsesInitials(kind, year)){
+      n = fn.charAt(0)+'. '+sn;
+    } else {
+      n = fn+' '+sn;
+    }
+    if (!real[String(n).toLowerCase()]) {
+      if (usedSurnames) usedSurnames.push(sn);
+      return n;
+    }
+  }
+  if (usedSurnames && sn && usedSurnames.indexOf(sn)<0) usedSurnames.push(sn);
   return n;
 }
 function namePoolsFor(nation){
@@ -6529,7 +6801,7 @@ function aiClubWageRatio(name){
 }
 function aiLeagueMatchBonus(name, isWin, isDraw){
   if (!isWin && !isDraw) return 0;
-  var top = isWin ? LEAGUE_WIN_BONUS_TOP : LEAGUE_DRAW_BONUS_TOP;
+  var top = isWin ? eraLeagueWinBonusTop() : eraLeagueDrawBonusTop();
   return Math.round(top * aiClubWageRatio(name) * 11);
 }
 function aiCupMatchBonus(name, roundIdx, won){
@@ -6537,14 +6809,15 @@ function aiCupMatchBonus(name, roundIdx, won){
 }
 function aiLeagueAttendance(hostName, visitorName){
   /* the same v116 League crowd model as computeAttendanceFigure, minus the terms that only exist for your own club
-     (your recent form, your derbies, your marquee signing) */
-  var hostKey = clubCurrentDivKey(hostName) || ourDivisionKey();
+     (your recent form, your derbies, your marquee signing). v385 : 1981-82 sourced bases via leagueHostCrowdBase. */
   var cap = groundCapacityFor(hostName, 50);
-  var visitorPull = clamp(Math.pow(clubBaseGate(visitorName) / DIV_MEAN_GATE_1946[hostKey], 0.15), 0.85, 1.2);
   var noise = 1 + (Math.random()-0.5)*0.16;
-  return Math.round(clamp(clubBaseGate(hostName) * currentGateSeasonMult() * visitorPull * noise, 800, cap)); /* v122 season curve, same as computeAttendanceFigure */
+  var baseCrowd = (typeof leagueHostCrowdBase === 'function')
+    ? leagueHostCrowdBase(hostName, visitorName)
+    : (clubBaseGate(hostName) * currentGateSeasonMult() * clamp(Math.pow(clubBaseGate(visitorName) / DIV_MEAN_GATE_1946[clubCurrentDivKey(hostName) || ourDivisionKey()], 0.15), 0.85, 1.2));
+  return Math.round(clamp(baseCrowd * noise, 800, cap));
 }
-function aiNetGateFor(attendance){ return Math.round(attendance * 0.075 * (1-ENTERTAINMENTS_DUTY)); } /* same 1s6d and duty as your gate */
+function aiNetGateFor(attendance){ return Math.round(attendance * (typeof currentPricePerHead==='function' ? currentPricePerHead() : 0.075) * (1-currentEntertainmentsDuty())); } /* same era admission and duty as your gate */
 /* v119 : ONE money-conserving League gate split, used for every League game (AI-v-AI and your own, home or away).
    Before v119 the home club kept 100% of the net gate AND the visitors were paid 20% on top, so every League game
    invented an extra 20% of its net gate out of nothing (and on your away games the AI host was credited gate/0.2,
@@ -6556,7 +6829,7 @@ function aiNetGateFor(attendance){ return Math.round(attendance * 0.075 * (1-ENT
 var LEAGUE_AWAY_SHARE = 0.2;
 function leagueGateSplit(attendance, pricePerHead){
   var gross = Math.round(attendance * (pricePerHead || (typeof currentPricePerHead==='function' ? currentPricePerHead() : 0.075)));
-  var net = Math.round(gross * (1-ENTERTAINMENTS_DUTY));
+  var net = Math.round(gross * (1-currentEntertainmentsDuty()));
   var away = Math.round(net * LEAGUE_AWAY_SHARE);
   return {gross:gross, duty:gross-net, net:net, home:net-away, away:away};
 }
@@ -6916,21 +7189,23 @@ var manager = {name:'', age:35, rep:50}; /* set via the manager-setup prompt on 
 var trainerName = 'Bert Symons', clubSecretaryName = 'W. H. Cobbett'; /* sensible defaults for the very first page load, before NEW GAME has run -- regenerated per club in initGameStateFresh(), restored from the save in applyLoadedState() */
 function generateStaffNames(){
   var usedSurnames = [];
-  function freshSurname(){
+  var staffNat = (typeof isScoOnly==='function' && isScoOnly()) ? 'Scotland' : 'England';
+  var pickStaff = function(kind, nation, seed){
+    if (typeof pickGeneratedStaffName==='function') return pickGeneratedStaffName(nation || staffNat, seed, kind, usedSurnames);
+    var firsts = (typeof eraFirstNamePool==='function') ? eraFirstNamePool(nation || staffNat) : firstNamePool;
     var s = pick(surnamePool), guard = 0;
     while (usedSurnames.indexOf(s) >= 0 && guard < 20){ s = pick(surnamePool); guard++; }
     usedSurnames.push(s);
-    return s;
-  }
-  var staffNat = (typeof isScoOnly==='function' && isScoOnly()) ? 'Scotland' : 'England';
-  var firsts = (typeof eraFirstNamePool==='function') ? eraFirstNamePool(staffNat) : firstNamePool;
-  trainerName = pick(firsts)+' '+freshSurname();
-  clubSecretaryName = pick(firsts).charAt(0)+'. '+pick(firsts).charAt(0)+'. '+freshSurname();
+    return pick(firsts)+' '+s;
+  };
+  trainerName = pickStaff('trainer');
+  clubSecretaryName = pickStaff('secretary');
   scouts = {};
-  var scout1Name = pick(firsts).charAt(0)+'. '+freshSurname();
-  var scout2Name = pick(firsts).charAt(0)+'. '+freshSurname();
-  scouts[scout1Name] = {rep:30, wage:(typeof eraScoutWage==='function'?eraScoutWage(2):2), specialty:null};
-  scouts[scout2Name] = {rep:70, wage:(typeof eraScoutWage==='function'?eraScoutWage(3):3), specialty:null};
+  var scout1Name = pickStaff('scout', staffNat, 11.3);
+  var scout2Name = pickStaff('scout', staffNat, 29.7);
+  scouts[scout1Name] = {rep:30, wage:(typeof eraScoutWage==='function'?eraScoutWage(2):2), specialty:null, gen:true};
+  scouts[scout2Name] = {rep:70, wage:(typeof eraScoutWage==='function'?eraScoutWage(3):3), specialty:null, gen:true};
+  if (typeof generateScoutHirePool==='function') generateScoutHirePool(usedSurnames);
 }
 /* ---------- PLAYER-MANAGERS: a genuinely common arrangement at this level of
    the game in this era (plenty of secretary-managers in the lower divisions
@@ -8776,7 +9051,7 @@ function makeGeneratedAssistant(){
   var taken = assistantTakenNames();
   var name = null, i;
   for (i=0;i<20;i++){
-    var n = (typeof pickGeneratedName==='function') ? pickGeneratedName() : null;
+    var n = (typeof pickGeneratedStaffName==='function') ? pickGeneratedStaffName(null, undefined, 'assistant') : ((typeof pickGeneratedName==='function') ? pickGeneratedName() : null);
     if (n && !taken[n]){ name = n; break; }
   }
   if (!name) return null;
@@ -9061,17 +9336,17 @@ function updateHomeChampionshipNav(){
    are not labelled "Amateur" from 1974-75.
 */
 var ERA_ECONOMICS = [
-  {from:1946, wageByTier:null, bankScale:1, pricePerHead:0.075, feeIndex:null, nonLeagueFeeCap:750, preseason:'trials', youthPath:'ground-staff', amateurOfficial:true, retainerScale:1, groundstaffWage:2, gateMult:null, upkeepScale:1, travelScale:1, signingOnFee:10},
-  {from:1961, wageByTier:{3:20, 2:18, 1:16, 0:15}, bankScale:2, pricePerHead:0.20, nonLeagueFeeCap:2500, preseason:'friendlies', youthPath:'apprentice', retainerScale:1.5, groundstaffWage:3, gateMult:0.75, upkeepScale:3, travelScale:2, signingOnFee:25},
-  {from:1966, wageByTier:{3:45, 2:35, 1:28, 0:24}, bankScale:3.5, pricePerHead:0.22, retainerScale:2, groundstaffWage:4, gateMult:0.72, upkeepScale:5, travelScale:3.5, signingOnFee:40}, /* interpolated between 1961 SI £20 and 1970 Keegan-era anchors; MU terraces 20-25p (red11.org) */
+  {from:1946, wageByTier:null, bankScale:1, pricePerHead:0.075, feeIndex:null, nonLeagueFeeCap:750, preseason:'trials', youthPath:'ground-staff', amateurOfficial:true, retainerScale:1, groundstaffWage:2, gateMult:null, upkeepScale:1, travelScale:1, signingOnFee:10, winBonusTop:2, drawBonusTop:1, cupBonusScale:1},
+  {from:1961, wageByTier:{3:20, 2:18, 1:16, 0:15}, bankScale:2, pricePerHead:0.20, nonLeagueFeeCap:2500, preseason:'friendlies', youthPath:'apprentice', retainerScale:1.5, groundstaffWage:3, gateMult:0.75, upkeepScale:3, travelScale:2, signingOnFee:25, winBonusTop:10, drawBonusTop:5, cupBonusScale:3},
+  {from:1966, wageByTier:{3:45, 2:35, 1:28, 0:24}, bankScale:3.5, pricePerHead:0.22, retainerScale:2, groundstaffWage:4, gateMult:0.72, upkeepScale:5, travelScale:3.5, signingOnFee:40, winBonusTop:25, drawBonusTop:12, cupBonusScale:8}, /* interpolated between 1961 SI £20 and 1970 Keegan-era anchors; MU terraces 20-25p (red11.org) */
   {from:1968, nonLeagueFeeCap:6000},
-  {from:1970, wageByTier:{3:70, 2:50, 1:40, 0:30}, bankScale:5, pricePerHead:0.40, nonLeagueFeeCap:15000, youthPath:'apprentice', retainerScale:3, groundstaffWage:5, gateMult:0.70, upkeepScale:8, travelScale:5, signingOnFee:60},
+  {from:1970, wageByTier:{3:70, 2:50, 1:40, 0:30}, bankScale:5, pricePerHead:0.40, nonLeagueFeeCap:15000, youthPath:'apprentice', retainerScale:3, groundstaffWage:5, gateMult:0.70, upkeepScale:8, travelScale:5, signingOnFee:60, winBonusTop:50, drawBonusTop:25, cupBonusScale:12},
   {from:1972, nonLeagueFeeCap:25000},
   {from:1974, amateurOfficial:false, nonLeagueFeeCap:33000},
-  {from:1975, wageByTier:{3:308, 2:216, 1:169, 0:129}, bankScale:10, pricePerHead:0.80, retainerScale:8, groundstaffWage:8, gateMult:0.62, upkeepScale:16, travelScale:10, signingOnFee:120},
-  {from:1981, wageByTier:{3:422, 2:271, 1:200, 0:150}, bankScale:18, pricePerHead:1.80, retainerScale:12, groundstaffWage:12, gateMult:0.55, upkeepScale:36, travelScale:18, signingOnFee:200},
+  {from:1975, wageByTier:{3:308, 2:216, 1:169, 0:129}, bankScale:10, pricePerHead:0.80, retainerScale:8, groundstaffWage:8, gateMult:0.62, upkeepScale:16, travelScale:10, signingOnFee:120, winBonusTop:120, drawBonusTop:60, cupBonusScale:22},
+  {from:1981, wageByTier:{3:422, 2:271, 1:200, 0:150}, bankScale:18, pricePerHead:1.80, retainerScale:12, groundstaffWage:12, gateMult:0.55, upkeepScale:36, travelScale:18, signingOnFee:200, winBonusTop:350, drawBonusTop:150, cupBonusScale:35},
   {from:1983, youthPath:'yts', groundstaffWage:25},
-  {from:1986, wageByTier:{3:479, 2:298, 1:216, 0:160}, bankScale:24, pricePerHead:3.20, retainerScale:14, groundstaffWage:27, gateMult:0.52, nonLeagueFeeCap:40000, upkeepScale:48, travelScale:24, signingOnFee:250}
+  {from:1986, wageByTier:{3:479, 2:298, 1:216, 0:160}, bankScale:24, pricePerHead:3.20, retainerScale:14, groundstaffWage:27, gateMult:0.52, nonLeagueFeeCap:40000, upkeepScale:48, travelScale:24, signingOnFee:250, winBonusTop:450, drawBonusTop:200, cupBonusScale:45}
 ];
 function eraEcon(year, key){
   if (typeof ERA_ECONOMICS==='undefined' || !ERA_ECONOMICS || !ERA_ECONOMICS.length) return key ? undefined : {};
@@ -9134,6 +9409,43 @@ function currentTravelScale(){
 function scaleEraTravel(base){
   return Math.max(0, Math.round((base||0) * currentTravelScale()));
 }
+
+function eraLeagueWinBonusTop(){
+  var v = (typeof eraEcon==='function') ? eraEcon(null, 'winBonusTop') : undefined;
+  return (typeof v==='number' && v>0) ? v : LEAGUE_WIN_BONUS_TOP;
+}
+function eraLeagueDrawBonusTop(){
+  var v = (typeof eraEcon==='function') ? eraEcon(null, 'drawBonusTop') : undefined;
+  return (typeof v==='number' && v>0) ? v : LEAGUE_DRAW_BONUS_TOP;
+}
+function eraCupBonusScale(){
+  var v = (typeof eraEcon==='function') ? eraEcon(null, 'cupBonusScale') : undefined;
+  return (typeof v==='number' && v>0) ? v : 1;
+}
+function leagueBonusDivMult(tier){
+  /* v385 : from 1961, when the First Division top is set explicitly in ERA_ECONOMICS, a lower division pays a smaller per-man bonus. 1946-60 keeps the old path (division already falls out of repWage, no extra cut). */
+  var y = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  if (y < 1961) return 1;
+  if (typeof tier!=='number') tier = (typeof divisionTier==='number') ? divisionTier : 3;
+  return tier===3 ? 1 : tier===2 ? 0.65 : tier===1 ? 0.4 : 0.28;
+}
+function roundBonusMoney(v){
+  if (!(v>0)) return 0;
+  return v >= 10 ? Math.round(v) : Math.round(v*20)/20;
+}
+function scaleEraCost(base){
+  var s = (typeof eraEcon==='function') ? eraEcon(null, 'bankScale') : 1;
+  return Math.max(0, Math.round((base||0) * ((typeof s==='number' && s>0) ? s : 1)));
+}
+function studyTripCost(d){
+  return scaleEraCost(d && d.cost);
+}
+function currentEntertainmentsDuty(){
+  var y = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  /* Sourced: the 27% figure is the existing 1946-50 interpolation (v117). Entertainments Duty was abolished in 1960 (Finance Act 1960), so later seasons pay none. */
+  return y >= 1960 ? 0 : ENTERTAINMENTS_DUTY;
+}
+
 function currentSigningOnFee(){
   var f = eraEcon(null, 'signingOnFee');
   if (typeof f==='number' && f>=0) return f;
@@ -9695,6 +10007,7 @@ function confirmUserInjurySub(sendOn){
     addLine('card', 'No replacement is sent on, and '+ourClubName+' must play on with ten.');
   }
   if (typeof renderInMatchBox==='function') renderInMatchBox();
+  if (typeof eraSyncWho==='function') eraSyncWho();
   return true;
 }
 
@@ -9749,6 +10062,7 @@ function liveSendOnSubstitute(offId){
   if (!live.subPlayers) live.subUsed = true;
   if (typeof addLine === 'function') addLine('card', 'A CHANGE FROM THE BENCH : ' + onP.n.toUpperCase() + ' COMES ON FOR ' + offP.n.toUpperCase() + '.');
   if (typeof renderInMatchBox === 'function') renderInMatchBox();
+  if (typeof eraSyncWho === 'function') eraSyncWho();
   return true;
 }
 
@@ -15609,7 +15923,11 @@ function cupNeutralAttendance(venue){
    roughly £45,000 on ~98,000 in 1946 (about 9s a head; approximate, from period
    reporting), and semi-final prices sat well above an ordinary League gate
    (about 2s6d a head here, an illustrative estimate). The ordinary 1s6d is used everywhere else. */
-function cupNeutralPricePerHead(venue){ return venue.isFinal ? 0.45 : 0.125; }
+function cupNeutralPricePerHead(venue){
+  var base = venue.isFinal ? 0.45 : 0.125;
+  var p = (typeof currentPricePerHead==='function') ? currentPricePerHead() : 0.075;
+  return Math.round(base * (p / 0.075) * 1000) / 1000;
+}
 function cupVenueText(f){
   if (f.neutralVenue) return f.neutralVenue.ground+', '+f.neutralVenue.city;
   return f.home ? groundNameFor(ourClubName)+', '+ourClubName : (oppGround(f.opp)+', '+f.opp);
@@ -15945,6 +16263,152 @@ var CLUB_GATE_1946 = {
    weaker half), so D3 is set a little above the blended 3S/3N mean (12150+8350)/2=10250 and D4 a little below
    3N's 8350, rather than re-deriving either from a real post-1958 source this pass didn't go looking for. */
 var DIV_MEAN_GATE_1946 = {D1:32250, D2:23850, '3S':12150, '3N':8350, D3:10800, D4:6500};
+
+/* v385 : official 1981-82 Football League average / highest / lowest gates,
+   european-football-statistics.co.uk/attn/archive/eng/aveeng1982.htm
+   (also footballattendances.co.uk). Used as the league-gate base from the
+   1981-82 season on, in place of the 1946 average x 0.55 season curve that
+   was turning a 44,000 Old Trafford average into a 24,000 crowd. Friendlies
+   keep the v384 occasion model. */
+var CLUB_GATE_1981 = {
+  "Manchester United":[44571,57830,34499],
+  "Tottenham Hotspur":[35100,46827,22819],
+  "Liverpool":[35061,48461,24224],
+  "Manchester City":[34063,52037,24443],
+  "Aston Villa":[26780,41098,18294],
+  "West Ham United":[26585,34026,17130],
+  "Arsenal":[25589,48897,13738],
+  "Everton":[24674,51806,15328],
+  "Leeds United":[22109,33689,16385],
+  "Ipswich Town":[21925,29050,17924],
+  "Southampton":[21835,24704,18622],
+  "Nottingham Forest":[19937,26327,15037],
+  "Sunderland":[19608,29372,11845],
+  "Brighton & Hove Albion":[18244,27082,10427],
+  "Swansea City":[18236,24115,11811],
+  "Birmingham City":[17117,32817,10715],
+  "West Bromwich Albion":[16786,23329,11632],
+  "Wolverhampton Wanderers":[15242,28001,11099],
+  "Stoke City":[14635,25256,9120],
+  "Middlesbrough":[13413,21019,9403],
+  "Coventry City":[13100,19329,9677],
+  "Notts County":[11613,19304,6707],
+  "Sheffield Wednesday":[19170,30861,13047],
+  "Newcastle United":[17276,26994,9419],
+  "Barnsley":[15098,28870,9287],
+  "Watford":[14631,23987,9018],
+  "Leicester City":[14182,21123,9524],
+  "Norwich City":[14182,18827,11626],
+  "Chelsea":[13132,20036,6009],
+  "Queens Park Rangers":[12574,22091,8753],
+  "Luton Town":[11881,16657,8776],
+  "Derby County":[11828,16046,7518],
+  "Crystal Palace":[10381,17633,7198],
+  "Rotherham United":[9857,19841,6346],
+  "Grimsby Town":[8406,13370,6141],
+  "Blackburn Rovers":[8405,15182,5207],
+  "Bolton Wanderers":[7597,16577,5085],
+  "Oldham Athletic":[7023,15845,2919],
+  "Charlton Athletic":[6657,11133,3379],
+  "Cardiff City":[5574,10277,3239],
+  "Cambridge United":[5073,8815,3127],
+  "Shrewsbury Town":[4571,8103,2898],
+  "Orient":[4419,9698,2090],
+  "Wrexham":[4304,6506,3076],
+  "Portsmouth":[8544,11299,4889],
+  "Fulham":[6938,20461,3629],
+  "Burnley":[6936,18771,3377],
+  "Huddersfield Town":[6746,10269,3468],
+  "Bristol City":[6511,11451,3404],
+  "Oxford United":[5851,10407,3843],
+  "Swindon Town":[5825,9608,4084],
+  "Brentford":[5693,10834,4124],
+  "Preston North End":[5497,7815,4171],
+  "Bristol Rovers":[5402,12155,3650],
+  "Gillingham":[5241,9895,3245],
+  "Doncaster Rovers":[5234,11319,3431],
+  "Southend United":[5083,8108,3416],
+  "Plymouth Argyle":[4792,9458,2646],
+  "Chesterfield":[4737,7732,2028],
+  "Millwall":[4626,7474,2562],
+  "Newport County":[4459,5915,2978],
+  "Carlisle United":[4409,6653,3085],
+  "Lincoln City":[4222,8243,2218],
+  "Reading":[4026,7171,2596],
+  "Exeter City":[3858,9144,2498],
+  "Walsall":[3744,6010,2487],
+  "Wimbledon":[2596,5554,1503],
+  "Chester":[2062,3509,1210],
+  "Sheffield United":[14892,24593,11293],
+  "Bournemouth":[5933,9925,3244],
+  "Wigan Athletic":[5796,9021,3996],
+  "Bradford City":[5391,13919,3601],
+  "Peterborough United":[4698,13459,1897],
+  "Hull City":[4270,7397,3040],
+  "Blackpool":[4224,9439,1824],
+  "Port Vale":[3639,8773,1924],
+  "Bury":[3533,6650,1720],
+  "Colchester United":[2859,5194,1570],
+  "Mansfield Town":[2685,8944,1394],
+  "Hereford United":[2592,4191,2060],
+  "Stockport County":[2547,5450,1357],
+  "Darlington":[2510,12557,1283],
+  "Halifax Town":[2407,8077,1305],
+  "York City":[2360,5560,1571],
+  "Northampton Town":[2306,4975,1552],
+  "Torquay United":[2248,5126,1039],
+  "Scunthorpe United":[2232,8105,1106],
+  "Crewe Alexandra":[2192,6716,1116],
+  "Aldershot":[2168,4100,1171],
+  "Hartlepool":[2055,4548,1202],
+  "Rochdale":[1837,3966,1056],
+  "Tranmere Rovers":[1734,4675,1141]
+};
+var DIV_MEAN_GATE_1981 = {D1:22556, D2:10283, D3:5126, D4:3630, '3S':5126, '3N':3630};
+function usesSourced1981Gates(){
+  if (typeof isSco === 'function' && isSco()) return false;
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : (parseInt(String(seasonLabel||'1946-47').split('-')[0], 10) || 1946);
+  return y >= 1981;
+}
+function attendanceDivKey(name){
+  var k = clubCurrentDivKey(name) || ourDivisionKey();
+  if (usesSourced1981Gates()){
+    if (k === '3S') return 'D3';
+    if (k === '3N') return 'D4';
+  }
+  return k;
+}
+function clubHighGate1981(name){
+  var d = CLUB_GATE_1981[name];
+  return d ? d[1] : Math.round(clubBaseGate(name) * 1.3);
+}
+function clubLowGate1981(name){
+  var d = CLUB_GATE_1981[name];
+  return d ? d[2] : Math.round(clubBaseGate(name) * 0.75);
+}
+function eraDivMeanGate(key){
+  if (usesSourced1981Gates()) return DIV_MEAN_GATE_1981[key] || DIV_MEAN_GATE_1981.D3;
+  return DIV_MEAN_GATE_1946[key] || DIV_MEAN_GATE_1946.D3;
+}
+function leagueHostCrowdBase(hostName, visitorName){
+  /* v385 : from 1981-82, blend the host's sourced low/average/high by the
+     visitor's pull, so a big fixture (United v Liverpool) sits toward the
+     high end and a lesser visitor toward the low, averaging out near the
+     official club average over a season. */
+  if (usesSourced1981Gates()){
+    var avg = clubBaseGate(hostName);
+    var low = clubLowGate1981(hostName), high = clubHighGate1981(hostName);
+    var vis = clubBaseGate(visitorName);
+    var mean = eraDivMeanGate(attendanceDivKey(hostName)) || avg;
+    var t = clamp((vis / Math.max(mean, 1) - 0.5) / 1.2, 0, 1);
+    return Math.round(low + (high - low) * t);
+  }
+  var hostKey = attendanceDivKey(hostName);
+  var visitorPull = clamp(Math.pow(clubBaseGate(visitorName) / DIV_MEAN_GATE_1946[hostKey], 0.15), 0.85, 1.2);
+  return clubBaseGate(hostName) * currentGateSeasonMult() * visitorPull;
+}
+
+
 /* the division a club played in in 1946-47 (its real gate belongs to that level) */
 function clubOrigDivKey(name){
   function has(l){ return typeof l!=='undefined' && l && l.some(function(c){ return c.n===name; }); }
@@ -16114,6 +16578,12 @@ function gateMultForSeasonYear(startYear){
 function currentGateSeasonMult(){ return gateMultForSeasonYear(parseInt(String(seasonLabel||'1946-47').split('-')[0], 10) || 1946); }
 function clubBaseGate(name){
   var cur = clubCurrentDivKey(name), orig = clubOrigDivKey(name);
+  if (typeof usesSourced1981Gates === 'function' && usesSourced1981Gates()){
+    var d81 = typeof CLUB_GATE_1981 !== 'undefined' ? CLUB_GATE_1981[name] : null;
+    if (d81) return d81[0];
+    var k81 = (typeof attendanceDivKey === 'function') ? attendanceDivKey(name) : cur;
+    if (k81 && typeof DIV_MEAN_GATE_1981 !== 'undefined' && DIV_MEAN_GATE_1981[k81]) return Math.round(DIV_MEAN_GATE_1981[k81] * 0.7);
+  }
   var d = CLUB_GATE_1946[name];
   if (isSco()) return d ? Math.round(d[0]) : 2000; /* v317 : Scottish average gates are taken as stated (SCO_FACTS), no English division scaling */
   if (!d) return cur ? Math.round(DIV_MEAN_GATE_1946[cur]*0.55) : 3000;
@@ -18411,6 +18881,31 @@ function renderFormationSheet(){
   });
   if (typeof updateLineupEraBlurb==='function') updateLineupEraBlurb();
 }
+
+function formationOrderLabels(){
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : 1946;
+  if (y < 1970){
+    return ['1 GOAL','2 R.BACK','3 L.BACK','4 R.HALF','5 C.HALF','6 L.HALF','7 O.RIGHT','8 I.RIGHT','9 C.FWD','10 I.LEFT','11 O.LEFT'];
+  }
+  var shape = (typeof eraPitchShapeKey === 'function') ? eraPitchShapeKey() : '442';
+  var byShape = {
+    '442': ['1 GOALKEEPER','2 RIGHT-BACK','3 LEFT-BACK','4 MIDFIELD','5 CENTRE-BACK','6 CENTRE-BACK','7 RIGHT WING','8 MIDFIELD','9 STRIKER','10 STRIKER','11 LEFT WING'],
+    '424': ['1 GOALKEEPER','2 RIGHT-BACK','3 LEFT-BACK','4 MIDFIELD','5 CENTRE-BACK','6 CENTRE-BACK','7 RIGHT WING','8 MIDFIELD','9 STRIKER','10 STRIKER','11 LEFT WING'],
+    '433': ['1 GOALKEEPER','2 RIGHT-BACK','3 LEFT-BACK','4 MIDFIELD','5 CENTRE-BACK','6 CENTRE-BACK','7 RIGHT WING','8 MIDFIELD','9 STRIKER','10 MIDFIELD','11 LEFT WING'],
+    sweeper: ['1 GOALKEEPER','2 RIGHT-BACK','3 LEFT-BACK','4 CENTRE-BACK','5 SWEEPER','6 MIDFIELD','7 RIGHT WING','8 MIDFIELD','9 STRIKER','10 MIDFIELD','11 LEFT WING'],
+    diamond: ['1 GOALKEEPER','2 RIGHT-BACK','3 LEFT-BACK','4 MIDFIELD','5 CENTRE-BACK','6 CENTRE-BACK','7 HOLDING MIDFIELD','8 ATTACKING MIDFIELD','9 STRIKER','10 STRIKER','11 MIDFIELD'],
+    '352': ['1 GOALKEEPER','2 RIGHT WING-BACK','3 LEFT WING-BACK','4 CENTRE-BACK','5 CENTRE-BACK','6 CENTRE-BACK','7 MIDFIELD','8 MIDFIELD','9 STRIKER','10 STRIKER','11 MIDFIELD']
+  };
+  return byShape[shape] || byShape['442'];
+}
+function formationOrderLegendHtml(){
+  return formationOrderLabels().join(' &nbsp;');
+}
+function renderFormationOrderLegend(){
+  var el = document.getElementById('formation-order-legend');
+  if (el) el.innerHTML = formationOrderLegendHtml();
+}
+
 function updateLineupEraBlurb(){
   var el = document.getElementById('lineup-era-blurb'); if (!el) return;
   var f = tactics && tactics.formation;
@@ -18491,6 +18986,21 @@ var wrinkleSlotOptions = [
   {slot:'RIGHT-HALF', label:'No.4 pushes forward', desc:"The right-half joins the attack as an auxiliary forward rather than sitting in support : the old Scottish Combination idea taken further."},
   {slot:'LEFT-HALF', label:'No.6 pushes forward', desc:"The left-half does the same from his side : an extra man arriving late that a marker briefed on numbers, not men, won't expect."}
 ];
+
+var wrinkleSlotOptionsModern = [
+  {slot:'CENTRE-FORWARD', label:'No.9 drops deep', desc:"The striker drops off the front line into a withdrawn role, pulling a centre-back with him or finding space between the lines."},
+  {slot:'INSIDE-RIGHT', label:'No.8 sits withdrawn', desc:"The midfielder in the number 8 shirt plays deeper than a second striker, prompting the play from in front of the back four."},
+  {slot:'INSIDE-LEFT', label:'No.10 sits withdrawn', desc:"The number 10 comes short rather than playing up with the main striker, looking for the ball to feet in the hole."},
+  {slot:'OUTSIDE-RIGHT', label:'No.7 comes inside', desc:"The right winger comes inside rather than staying on the touchline, leaving the full-back with nobody to mark and a midfield runner in the space."},
+  {slot:'OUTSIDE-LEFT', label:'No.11 comes inside', desc:"The left winger cuts infield rather than hugging the line, looking to shoot or to slip a centre in from a narrower position."},
+  {slot:'RIGHT-HALF', label:'No.4 pushes on', desc:"The midfielder in the number 4 shirt breaks forward to join the attack, arriving late in the box rather than sitting in front of the defence."},
+  {slot:'LEFT-HALF', label:'No.6 pushes on', desc:"The midfielder in the number 6 shirt arrives from deep on his own side, a late run a marker briefed on strikers will not expect."}
+];
+function wrinkleOptionsForEra(){
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : 1946;
+  return (y >= 1970 && typeof wrinkleSlotOptionsModern !== 'undefined') ? wrinkleSlotOptionsModern : wrinkleSlotOptions;
+}
+
 var tacticalWrinkle = null; /* {slot} or null */
 var wrinkleFamiliarity = {}; /* oppName -> meetings faced while a wrinkle was on */
 var wrinkleCottonedOn = {}; /* v127 : oppName -> true once the "they've worked it out" note has been given */
@@ -18501,10 +19011,11 @@ function wrinkleBonusFor(oppName){
 }
 function renderWrinkleBox(){
   var box = document.getElementById('wrinkle-box'); if (!box) return;
-  var opts = '<option value="">NONE : PLAY IT STRAIGHT</option>' + wrinkleSlotOptions.map(function(o){
+  var wrinkleOpts = (typeof wrinkleOptionsForEra === 'function') ? wrinkleOptionsForEra() : wrinkleSlotOptions;
+  var opts = '<option value="">NONE : PLAY IT STRAIGHT</option>' + wrinkleOpts.map(function(o){
     return '<option value="'+o.slot+'"'+(tacticalWrinkle && tacticalWrinkle.slot===o.slot?' selected':'')+'>'+o.label.toUpperCase()+'</option>';
   }).join('');
-  var chosen = tacticalWrinkle ? wrinkleSlotOptions.find(function(o){return o.slot===tacticalWrinkle.slot;}) : null;
+  var chosen = tacticalWrinkle ? wrinkleOpts.find(function(o){return o.slot===tacticalWrinkle.slot;}) : null;
   box.innerHTML = '<div class="box-title" style="margin-left:0;">TACTICAL WRINKLE</div>'+
     '<select id="wrinkle-select" style="font-size:16px;">'+opts+'</select>'+
     '<p class="sub" style="margin-top:8px;">'+(chosen ? chosen.desc : "Play the shape straight, every number doing the job it's numbered for.")+'</p>'+
@@ -18657,10 +19168,10 @@ function renderTripOptions(){
       var staffTitle = (typeof staffTrainerTitle === 'function') ? staffTrainerTitle() : 'trainer';
       descText = descText.replace(/\ba trainer's trip\b/gi, staffTitle + "'s trip").replace(/\bthe trainer\b/gi, theStaff).replace(/\ba trainer\b/gi, staffTitle);
     }
-    div.innerHTML = '<b style="color:var(--dos-yellow);">'+d.label+'</b><br><span class="sub">'+descText+'</span><br><span class="sub">COST: £'+d.cost+' : '+weeksText(d.weeks,true)+' AWAY'+(d.kind==='badge' ? (offSeason ? ' : SUMMER COURSES ONLY, BOOK FROM MAY TO AUGUST' : ' : EXAM AT THE END') : '')+'</span>';
+    div.innerHTML = '<b style="color:var(--dos-yellow);">'+d.label+'</b><br><span class="sub">'+descText+'</span><br><span class="sub">COST: £'+studyTripCost(d)+' : '+weeksText(d.weeks,true)+' AWAY'+(d.kind==='badge' ? (offSeason ? ' : SUMMER COURSES ONLY, BOOK FROM MAY TO AUGUST' : ' : EXAM AT THE END') : '')+'</span>';
     var btn = document.createElement('button'); btn.textContent='ARRANGE TRIP'; btn.style.marginTop='6px'; btn.style.padding='2px 10px'; btn.style.fontSize='15px';
     var busy = d.traveler==='manager' ? !!activeTrip : !!activeTrainerTrip;
-    btn.disabled = busy || finances.bank < d.cost || offSeason;
+    btn.disabled = busy || finances.bank < studyTripCost(d) || offSeason;
     btn.addEventListener('click', function(){ arrangeStudyTrip(d); });
     div.appendChild(document.createElement('br')); div.appendChild(btn);
     box.appendChild(div);
@@ -18671,7 +19182,7 @@ function renderTripOptions(){
   document.getElementById('trip-status').textContent = statusParts.join(' ');
 }
 function arrangeStudyTrip(d){
-  finances.bank -= d.cost;
+  finances.bank -= studyTripCost(d);
   var returnDate = new Date(currentDate); returnDate.setDate(returnDate.getDate()+d.weeks*7);
   var trip = {key:d.key, resolveWeek: week + d.weeks, returnDate:returnDate};
   if (d.traveler === 'trainer'){
@@ -18916,31 +19427,123 @@ var dangerManThreats = {
   "wing-half":["the engine room of the side : wins it, then uses it well","reads the game better than most at this level","a real leader out there, by all accounts"],
   "centre-half":["commanding in the air, hard to get past","the reason they don't concede many","uncompromising, and the crowd love him for it"]
 };
+function posLabelInProse(pos){
+  var d = (typeof displayPos==='function') ? displayPos(pos) : String(pos||'');
+  return String(d||pos||'player').toLowerCase();
+}
+function oppositionSquadFor(oppName){
+  /* v385 : never call ensureClubSquad from a scouting note — that would invent a squad
+     for trial sides such as The Possibles and register the name in the sentence-case dictionary. */
+  if (!oppName) return [];
+  var sq = [];
+  try { if (typeof clubSquads==='object' && clubSquads && clubSquads[oppName]) sq = clubSquads[oppName] || []; } catch(e){}
+  if (sq && sq.length) return sq;
+  try {
+    if (typeof clubProfiles==='object' && clubProfiles[oppName] && clubProfiles[oppName].rawSquad)
+      return clubProfiles[oppName].rawSquad;
+  } catch(e){}
+  return [];
+}
+function isGeneratedPlayer(p){ return !!(p && (p.gen===true || p.gen===1)); }
+function oppositionKeyPlayers(oppName, n){
+  n = n || 3;
+  var sq = oppositionSquadFor(oppName).filter(function(p){ return p && p.n; });
+  var real = sq.filter(function(p){ return !isGeneratedPlayer(p); });
+  var pool = (real.length ? real : sq).slice().sort(function(a,b){ return (b.rep||0)-(a.rep||0); });
+  var out = [], seen = {};
+  pool.forEach(function(p){
+    if (out.length>=n) return;
+    var k = String(p.n).toLowerCase();
+    if (seen[k]) return;
+    seen[k] = 1;
+    out.push(p);
+  });
+  return out;
+}
 function dangerManFor(oppName){
-  var seed = 0; for (var i=0;i<oppName.length;i++) seed += oppName.charCodeAt(i)*1.3;
-  var pos = oppPositionPool[Math.floor(seededRand(seed)*oppPositionPool.length)];
-  var name = pickGeneratedName(null, seed);
-  var threat = dangerManThreats[pos][Math.floor(seededRand(seed*3.1)*dangerManThreats[pos].length)];
-  return {name:name, pos:pos, threat:threat};
+  /* v385 : previously invented a name with pickGeneratedName (e.g. "Darren Fothergill" at Arsenal). The one to watch must be a man actually in that club's current squad, preferring real (non-gen) players, and never a generated filler when real ones exist. */
+  var keys = oppositionKeyPlayers(oppName, 8);
+  var attackers = keys.filter(function(p){
+    var g = (typeof posGroupFromLabel==='function') ? posGroupFromLabel(p.pos) : 6;
+    return g >= 4;
+  });
+  var pool = attackers.length ? attackers : keys;
+  if (!pool.length) return {name:null, pos:null, threat:null, missing:true};
+  var seed = 0; for (var i=0;i<String(oppName||'').length;i++) seed += oppName.charCodeAt(i)*1.3;
+  var p = pool[Math.floor(((typeof seededRand==='function')?seededRand(seed):Math.random())*pool.length)];
+  var pl = String(p.pos||'').toLowerCase();
+  var threatPos = 'centre-forward';
+  if (/outside-right|right wing|right-winger/.test(pl)) threatPos = 'outside-right';
+  else if (/outside-left|left wing|left-winger/.test(pl)) threatPos = 'outside-left';
+  else if (/inside|attacking mid/.test(pl)) threatPos = 'inside-forward';
+  else if (/wing-half|centre mid|midfield/.test(pl) && !/winger/.test(pl)) threatPos = 'wing-half';
+  else if (/centre-half|centre-back|centre back|sweeper|libero|defender/.test(pl) && !/full-back|left-back|right-back/.test(pl)) threatPos = 'centre-half';
+  else if (/forward|striker|centre-forward/.test(pl)) threatPos = 'centre-forward';
+  var threats = dangerManThreats[threatPos] || dangerManThreats['centre-forward'];
+  var threat = threats[Math.floor(((typeof seededRand==='function')?seededRand(seed*3.1):Math.random())*threats.length)];
+  return {name:p.n, pos:p.pos, threat:threat, gen:isGeneratedPlayer(p), player:p};
 }
 var oppTendencyPool = {
   strong: ["a well-drilled side who move the ball quickly through their forwards","a slick outfit who don't waste much possession","hard to break down and dangerous on the counter"],
   mid: ["a solid, honest side who don't give much away","competent without being spectacular : the sort who grind results out","well organised, if a little short of a cutting edge up top"],
   weak: ["a side short on craft but hard-working, by all accounts","struggling for consistency, the papers reckon","there for the taking on paper, though these things are rarely that simple"]
 };
+function oppositionFormationLabel(opp){
+  var y = (typeof seasonStartYear==='function') ? seasonStartYear() : (parseInt(gameEra,10)||1946);
+  if (opp && opp.formation){
+    var f = String(opp.formation);
+    if (f === '442' || f === '4-4-2') return '4-4-2';
+    if (f === '424' || f === '4-2-4' || f === 'brazil424') return '4-2-4';
+    if (f === '433' || f === '4-3-3') return '4-3-3';
+    if (f === 'wm') return 'W-M';
+    if (f === '235') return '2-3-5';
+    return f;
+  }
+  if (y >= 1970) return '4-4-2';
+  if (y >= 1966) return '4-2-4';
+  return 'W-M';
+}
+function oppositionFormLine(rec){
+  if (!rec || !rec.p) return '';
+  if (rec.p >= 3) return ' Their form so far is '+rec.w+' wins, '+rec.d+' draws and '+rec.l+' defeats.';
+  if (rec.p > 0) return ' They have taken '+rec.pts+' point'+(rec.pts===1?'':'s')+' from '+rec.p+' game'+(rec.p===1?'':'s')+' so far.';
+  return '';
+}
+function oppositionManagerStyleLine(opp, tier){
+  if (!opp || !opp.mgr) return '';
+  var styles = {
+    strong: ' He has them well organised, and they go forward quickly.',
+    mid: ' He favours a straightforward, no-nonsense side.',
+    weak: ' He has them working hard, if not always with much craft.'
+  };
+  return styles[tier] || styles.mid;
+}
 function generateOppositionReport(opp){
-  var rec = table[opp.n];
-  var tier = opp.s > 70 ? 'strong' : opp.s > 55 ? 'mid' : 'weak';
+  var rec = (typeof table==='object' && table && table[opp.n]) ? table[opp.n] : {pts:0,p:0,w:0,d:0,l:0};
+  var year = (typeof seasonStartYear==='function') ? seasonStartYear() : (parseInt(gameEra,10)||1946);
+  var tier = (opp.s > 70) ? 'strong' : (opp.s > 55) ? 'mid' : 'weak';
   var tendency = pick(oppTendencyPool[tier]);
-  var mgrLine = opp.mgr ? (' Managed by '+opp.mgr+'.') : ' Manager unconfirmed in the records I hold.';
+  /* v385 : never a fourth-wall "unconfirmed in the records I hold" line. If the manager is unknown, say nothing. */
+  var mgrLine = opp.mgr ? (' They are managed by '+opp.mgr+'.') : '';
   var dm = dangerManFor(opp.n);
-  var dangerLine = ' Their '+(typeof displayPos==='function'?displayPos(dm.pos):dm.pos)+' '+dm.name+' is the one to watch : '+dm.threat+'.';
-  /* v192 : SURFACING AI CLUB INJURIES, otherwise invisible by design (see v190/v191 -- deliberately no weekly
-     news item for 91 clubs' worth of background injuries). The one place it's honest to actually say something
-     is here, once, about the specific club you're about to play : real period team news was exactly this vague
-     (a club didn't broadcast which man or for how long), so this never names a player or a timeframe, just
-     flags that the scouts picked up on a doubt. */
-  var injuryLine = aiClubInjuryCA[opp.n] ? ' Word from the scouts is '+opp.n+' are carrying at least one doubt for this one.' : '';
+  var injuryLine = (typeof aiClubInjuryCA==='object' && aiClubInjuryCA[opp.n]) ? ' Word from the scouts is '+opp.n+' are carrying at least one doubt for this one.' : '';
+  var dangerLine = (dm && dm.name) ? (' '+dm.name+', their '+posLabelInProse(dm.pos)+', is the one to watch : '+dm.threat+'.') : '';
+  if (year >= 1970){
+    var formn = oppositionFormationLabel(opp);
+    var formLine = oppositionFormLine(rec);
+    var keys = oppositionKeyPlayers(opp.n, 3);
+    var keyBit = '';
+    if (keys.length){
+      var bits = keys.map(function(p){ return posLabelInProse(p.pos)+' '+p.n; });
+      if (bits.length===1) keyBit = ' The name in the book is '+bits[0]+'.';
+      else if (bits.length===2) keyBit = ' The names in the book are '+bits[0]+' and '+bits[1]+'.';
+      else keyBit = ' The names in the book are '+bits[0]+', '+bits[1]+' and '+bits[2]+'.';
+    }
+    var setMan = keys.filter(function(p){ var g = (typeof posGroupFromLabel==='function') ? posGroupFromLabel(p.pos) : 6; return g===2 || g>=5; })[0] || keys[0];
+    var setBit = setMan ? (' '+setMan.n+' is the one they look to from set pieces.') : '';
+    var styleBit = oppositionManagerStyleLine(opp, tier);
+    return opp.n+' sit at '+rec.pts+' points from '+rec.p+' played ('+rec.w+'W '+rec.d+'D '+rec.l+'L). They go with a '+formn+', as most sides do now. The press describe them as '+tendency+'.'+formLine+mgrLine+styleBit+keyBit+dangerLine+setBit+injuryLine;
+  }
   return opp.n+' sit at '+rec.pts+' points from '+rec.p+' played ('+rec.w+'W '+rec.d+'D '+rec.l+'L). The press describe them as '+tendency+'.'+mgrLine+dangerLine+injuryLine;
 }
 /* pre-match tactical prep: spend the week working on the scouting report,
@@ -18954,7 +19557,12 @@ function renderScoutingPrep(){
   if (!next){ box.innerHTML = '<p class="sub">SEASON COMPLETE.</p>'; return; }
   var dm = dangerManFor(next.opp);
   var already = scoutingPrep && scoutingPrep.oppName === next.opp;
-  box.innerHTML = '<p class="sub">'+next.opp.toUpperCase()+'\'S DANGER MAN: '+dm.name.toUpperCase()+' ('+(typeof displayPos==='function'?displayPos(dm.pos).toUpperCase():dm.pos.toUpperCase())+').</p>'+
+  if (!dm || !dm.name){
+    box.innerHTML = '<p class="sub">'+next.opp.toUpperCase()+': a look at their side is being prepared.</p>';
+    renderMarkClosely(next, dm, already);
+    return;
+  }
+  box.innerHTML = '<p class="sub">'+next.opp.toUpperCase()+'\'S DANGER MAN: '+dm.name.toUpperCase()+' ('+(typeof displayPos==='function'?displayPos(dm.pos).toUpperCase():String(dm.pos||'').toUpperCase())+').</p>'+
     (already ? '<p class="val" style="color:var(--dos-green);">THE SIDE HAS BEEN WORKED ON SHUTTING HIM OUT THIS WEEK.</p>' :
       '<button id="btn-scout-prep" style="padding:4px 12px;">SPEND THE WEEK ON IT</button>');
   var btn = document.getElementById('btn-scout-prep');
@@ -18979,6 +19587,10 @@ function renderMarkClosely(next, dm, already){
   check.checked = markCloselyThisMatch;
   var status = document.getElementById('mark-closely-status');
   if (!status) return;
+  if (!dm || !dm.name){
+    status.innerHTML = '<p class="sub">A look at their side is being prepared.</p>';
+    return;
+  }
   if (!already){
     status.innerHTML = markCloselyThisMatch ?
       '<p class="val" style="color:var(--dos-red);">NOT YET WORKED ON IN TRAINING : MARKING '+dm.name.toUpperCase()+' OUT OF THE GAME LIKE THIS WILL DO MORE HARM THAN GOOD.</p>' :
@@ -19021,13 +19633,31 @@ var scouts = {
    PRO_SOURCE_NATION_WEIGHT skew). Names and wages are the game's own invention, same standard as
    every other generated name in this game -- what's real is the SHAPE (an informal, modestly-paid
    contact, sometimes with a genuine regional connection) not these specific men. */
-var SCOUT_HIRE_POOL = [
-  {name:"D. Fairweather", specialty:null, wage:2, blurb:"A retired referee, still well known around the lower divisions. General coverage, nothing specialist."},
-  {name:"H. Croall", specialty:"Scotland", wage:3, blurb:"A Glasgow publican with contacts right through the Scottish game, junior and senior alike. Given the real, heavy traffic of Scottish talent into England this era, worth having."},
-  {name:"E. Pritchard", specialty:"Wales", wage:2, blurb:"A Swansea schoolmaster with an eye for a player and a soft spot for the Vetch Field crowd."},
-  {name:"P. Duignan", specialty:"Ireland", wage:2, blurb:"Travels regularly between Dublin and the mailboat towns. Knows the League of Ireland clubs well."},
-  {name:"S. McAvoy", specialty:"Northern Ireland", wage:2, blurb:"A Belfast contact with good standing at Linfield and Glentoran."}
+var SCOUT_HIRE_TEMPLATES = [
+  {id:'general', specialty:null, wage:2, fallbackName:"D. Fairweather", blurb:"A retired referee, still well known around the lower divisions. General coverage, nothing specialist.", laterBlurb:"A well-known face around the lower divisions. General coverage, nothing specialist."},
+  {id:'scotland', specialty:"Scotland", wage:3, fallbackName:"H. Croall", blurb:"A Glasgow publican with contacts right through the Scottish game, junior and senior alike. Given the real, heavy traffic of Scottish talent into England this era, worth having.", laterBlurb:"Covers the Scottish junior and senior game, and the traffic of players south."},
+  {id:'wales', specialty:"Wales", wage:2, fallbackName:"E. Pritchard", blurb:"A Swansea schoolmaster with an eye for a player and a soft spot for the Vetch Field crowd.", laterBlurb:"A Welsh contact with a good eye for a youngster coming out of the schools and the lower clubs."},
+  {id:'ireland', specialty:"Ireland", wage:2, fallbackName:"P. Duignan", blurb:"Travels regularly between Dublin and the mailboat towns. Knows the League of Ireland clubs well.", laterBlurb:"Covers the League of Ireland clubs and the regular traffic across the Irish Sea."},
+  {id:'ni', specialty:"Northern Ireland", wage:2, fallbackName:"S. McAvoy", blurb:"A Belfast contact with good standing at Linfield and Glentoran.", laterBlurb:"A Belfast contact with good standing at Linfield and Glentoran."}
 ];
+var SCOUT_HIRE_POOL = SCOUT_HIRE_TEMPLATES.map(function(t){ return {id:t.id, name:t.fallbackName, specialty:t.specialty, wage:t.wage, blurb:t.blurb, laterBlurb:t.laterBlurb, gen:true}; });
+function generateScoutHirePool(usedSurnames){
+  usedSurnames = usedSurnames ? usedSurnames.slice() : [];
+  if (typeof scouts==='object' && scouts){
+    Object.keys(scouts).forEach(function(nm){
+      var sur = String(nm).split(' ').pop();
+      if (sur && usedSurnames.indexOf(sur)<0) usedSurnames.push(sur);
+    });
+  }
+  SCOUT_HIRE_POOL = SCOUT_HIRE_TEMPLATES.map(function(t, i){
+    var nat = t.specialty || ((typeof isScoOnly==='function' && isScoOnly()) ? 'Scotland' : ((typeof homeNation==='function') ? homeNation() : 'England'));
+    var name = (typeof pickGeneratedStaffName==='function')
+      ? pickGeneratedStaffName(nat, 40+i*17.3, 'scout', usedSurnames)
+      : t.fallbackName;
+    return {id:t.id, name:name, specialty:t.specialty, wage:t.wage, blurb:t.blurb, laterBlurb:t.laterBlurb, gen:true};
+  });
+  return SCOUT_HIRE_POOL;
+}
 function scoutTrustLabel(rep){
   if (typeof rep !== 'number') return 'UNPROVEN : A NEW CONTACT, NOT YET TESTED';
   if (rep >= 75) return 'TRUSTED : RARELY PUTS A FOOT WRONG';
@@ -19036,27 +19666,28 @@ function scoutTrustLabel(rep){
   return 'SHAKY : HIS LAST FEW TIPS HAVE NOT WORKED OUT';
 }
 function scoutContactBlurb(c){
-  /* later-era wording for the same real shape of contact (the 1940s/50s 'publican / schoolmaster' flavour is kept before 1970). */
+  /* later-era wording for the same real shape of contact (the 1940s/50s 'publican / schoolmaster' flavour is kept before 1970). Keyed by template id so generated era names do not break the lookup. */
   var y = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
-  if (y < 1970) return c.blurb;
-  var later = {
-    'H. Croall':'Covers the Scottish junior and senior game, and the traffic of players south.',
-    'E. Pritchard':'A Welsh contact with a good eye for a youngster coming out of the schools and the lower clubs.',
-    'P. Duignan':'Covers the League of Ireland clubs and the regular traffic across the Irish Sea.',
-    'S. McAvoy':'A Belfast contact with good standing at Linfield and Glentoran.',
-    'D. Fairweather':'A well-known face around the lower divisions. General coverage, nothing specialist.'
+  if (y < 1970) return (c && c.blurb) || '';
+  if (c && c.laterBlurb) return c.laterBlurb;
+  var laterById = {
+    scotland:'Covers the Scottish junior and senior game, and the traffic of players south.',
+    wales:'A Welsh contact with a good eye for a youngster coming out of the schools and the lower clubs.',
+    ireland:'Covers the League of Ireland clubs and the regular traffic across the Irish Sea.',
+    ni:'A Belfast contact with good standing at Linfield and Glentoran.',
+    general:'A well-known face around the lower divisions. General coverage, nothing specialist.'
   };
-  return later[c.name] || c.blurb;
+  return (c && (laterById[c.id] || c.blurb)) || '';
 }
 function renderScoutingNetworkBox(){
   var box = document.getElementById('scouting-network-box'); if (!box) return;
   var rows = Object.keys(scouts).map(function(name){
     var s = scouts[name];
-    return '<tr><td>'+name+(s.specialty?(' <span class="quiet">('+s.specialty+' contact)</span>'):'')+'</td><td>'+scoutTrustLabel(s.rep)+'</td><td class="num">£'+s.wage+'/WK</td>'+
+    return '<tr><td>'+displayPersonName(name, s)+(s.specialty?(' <span class="quiet">('+s.specialty+' contact)</span>'):'')+'</td><td>'+scoutTrustLabel(s.rep)+'</td><td class="num">£'+s.wage+'/WK</td>'+
       '<td><button class="dismiss-scout-btn" data-name="'+name+'" style="padding:2px 8px;font-size:11px;">LET GO</button></td></tr>';
   }).join('');
   var poolRows = SCOUT_HIRE_POOL.filter(function(c){ return !scouts[c.name]; }).map(function(c){
-    return '<tr><td>'+c.name+(c.specialty?(' <span class="quiet">('+c.specialty+' contact)</span>'):'')+'</td><td class="quiet">'+((typeof scoutContactBlurb==='function')?scoutContactBlurb(c):c.blurb)+'</td><td class="num">£'+(typeof eraScoutWage==='function'?eraScoutWage(c.wage):c.wage)+'/WK</td>'+
+    return '<tr><td>'+displayPersonName(c.name, c)+(c.specialty?(' <span class="quiet">('+c.specialty+' contact)</span>'):'')+'</td><td class="quiet">'+((typeof scoutContactBlurb==='function')?scoutContactBlurb(c):c.blurb)+'</td><td class="num">£'+(typeof eraScoutWage==='function'?eraScoutWage(c.wage):c.wage)+'/WK</td>'+
       '<td><button class="hire-scout-btn" data-name="'+c.name+'" style="padding:2px 8px;font-size:11px;">TAKE HIM ON</button></td></tr>';
   }).join('');
   box.innerHTML = '<p class="sub">YOUR NETWORK, EACH PAID A MODEST WEEKLY RETAINER (AN ESTIMATE : NO PERIOD FIGURE SURVIVES FOR A CLUB AT THIS LEVEL), DEDUCTED LIKE ANY OTHER WAGE. A SPECIALIST CONTACT RAISES THE ODDS OF A TIP FROM HIS OWN COUNTRY.</p>'+
@@ -19075,7 +19706,7 @@ function renderScoutingNetworkBox(){
       var nm = btn.getAttribute('data-name'), c = SCOUT_HIRE_POOL.find(function(x){ return x.name===nm; });
       if (!c) return;
       scouts[nm] = {rep:30, wage:(typeof eraScoutWage==='function'?eraScoutWage(c.wage):c.wage), specialty:c.specialty};
-      addNews('board', nm+' has been taken on as a scouting contact'+(c.specialty?(', with a particular eye on '+c.specialty):'')+', on a weekly retainer of £'+c.wage+'.');
+      addNews('board', nm+' has been taken on as a scouting contact'+(c.specialty?(', with a particular eye on '+c.specialty):'')+', on a weekly retainer of £'+(typeof eraScoutWage==='function'?eraScoutWage(c.wage):c.wage)+'.');
       renderScoutingNetworkBox(); renderYouthProspectsBox();
     });
   });
@@ -19545,7 +20176,7 @@ function resolveScoutTrips(){
         addNews('board', t.scout+' has revised his view of '+t.n+' after a second look.');
       } else {
         t.note = '"Went back for another look, and it\'s just what I told you before : '+(t.rep>=4?'a genuine talent for this level.':t.rep===3?'a decent, dependable player.':'a fringe player, no more than that.')+' Confident in that now."';
-        addNews('board', t.scout+' watched '+t.n+' again and it confirms what he told us before.');
+        addNews('board', displayPersonName(t.scout)+' watched '+displayPersonName(t.n, t)+' again and it confirms what he told us before.');
       }
     }
     return false;
@@ -20708,8 +21339,23 @@ function renderLineup(){
       if (idx>=0) lineup.splice(idx,1); else if (lineup.length<11) lineup.push(p.id);
       lineupConfirmed = false; renderLineup(); renderLineupCount();
     });
-    var tdName = document.createElement('td'); tdName.textContent = p.n.toUpperCase() + (p.isManagerPlayer ? ' (P-M)' : '') + (reason ? ' ('+reason+')' : '');
-    if (reason) tdName.className = 'val warn'; else { tdName.className='selrow'; tdName.style.cursor='pointer'; }
+    var tdName = document.createElement('td');
+    tdName.className = 'selrow';
+    if (!reason) tdName.style.cursor = 'pointer';
+    var nameTxt = document.createTextNode(p.n.toUpperCase() + (p.isManagerPlayer ? ' (P-M)' : ''));
+    tdName.appendChild(nameTxt);
+    if (reason){
+      var tag = document.createElement('span');
+      tag.className = 'inj-tag';
+      var tagText = reason;
+      if (p.injuredWeeks>0) tagText = 'inj. '+p.injuredWeeks+' wk'+(p.injuredWeeks>1?'s':'');
+      else if (p.suspendedMatches>0) tagText = 'susp. '+p.suspendedMatches;
+      else if (p.awayOnDuty) tagText = 'intl duty';
+      else if (p.retained) tagText = 'retained';
+      else if (p.registered===false) tagText = 'unreg.';
+      tag.textContent = tagText;
+      tdName.appendChild(tag);
+    }
     if (!reason) tdName.addEventListener('click', function(){
       var idx = lineup.indexOf(p.id);
       if (idx>=0) lineup.splice(idx,1); else if (lineup.length<11) lineup.push(p.id);
@@ -20755,6 +21401,7 @@ function renderLineupCount(){
   document.getElementById('btn-confirm-lineup').disabled = !ok;
   renderLineupSlots();
   renderSubstituteBox();
+  if (typeof renderFormationOrderLegend === 'function') renderFormationOrderLegend();
 }
 /* v157 : ONE nominated substitute, injury-only, from the real 1965-66 season
    on (see subsAllowed()). Not a bench of choices -- the real 1965-66 rule
@@ -21630,6 +22277,7 @@ function eraCaseMaps(){
   D.a.split(' ').forEach(function(w){ if (w) abbr[w.toLowerCase()] = w; });
   D.p.split('|').forEach(function(pr){ if (!pr) return; var a = pr.split(' '); pairs[a[0].toLowerCase()+' '+a[1].toLowerCase()] = 1; pcase[a[0].toLowerCase()] = a[0]; pcase[a[1].toLowerCase()] = a[1]; });
   ['Bundesliga','Regionalliga','Oberliga','Amateurliga','Endrunde','Aufstiegsrunde','Pokal','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Jan','Feb','Mar','Apr','Jun','Jul','Aug','Sep','Sept','Oct','Nov','Dec','January','February','March','April','June','July','August','September','October','November','December','England','English','Scotland','Scottish','Wales','Welsh','Ireland','Irish','Britain','British','Europe','European','Spain','Spanish','Primera','Segunda','Tercera','Wembley','Christmas','Easter','Boxing','Wartime'].forEach(function(w){ proper[w.toLowerCase()] = w; });
+  proper["int'l"] = "Int'l"; proper["int\u2019l"] = "Int'l"; abbr["int'l"] = "Int'l"; abbr["int\u2019l"] = "Int'l";
   try { Object.keys(FOR_ERA_DEFS.ESP).forEach(function(k){ var fa = FOR_ERA_DEFS.ESP[k].facts, ma = FOR_ERA_DEFS.ESP[k].masters || {}; Object.keys(fa).forEach(function(n){ [n, fa[n].city, fa[n].ground, (ma[n] || {}).ground].forEach(function(x){ String(x || '').split(/[\s\/]+/).forEach(function(w){ w = w.replace(/[(),.]/g, ''); if (w.length > 2 && /^[A-Z\u00c0-\u00de]/.test(w) && !proper[w.toLowerCase()]) proper[w.toLowerCase()] = w; }); }); }); }); } catch (e) {} /* v332 : Spanish club, town and ground words */
   try { Object.keys(FOR_ERA_DEFS.DEU).forEach(function(k){ var fa = FOR_ERA_DEFS.DEU[k].facts, ma = FOR_ERA_DEFS.DEU[k].masters || {}; Object.keys(fa).forEach(function(n){ [n, fa[n].city, (ma[n] || {}).ground].forEach(function(x){ String(x || '').split(/[\s\/]+/).forEach(function(w){ w = w.replace(/[(),.]/g, ''); if (w.length > 2 && /^[A-Z\u00c0-\u00de]/.test(w) && !proper[w.toLowerCase()]) proper[w.toLowerCase()] = w; }); }); }); }); } catch (e) {} /* v334 : German club, town and ground words */
   try { Object.keys(FOR_ERA_DEFS).forEach(function(c){ Object.keys(FOR_ERA_DEFS[c]).forEach(function(k){ var D2 = FOR_ERA_DEFS[c][k] || {}, fa = D2.facts || {}, ma = D2.masters || {}, names = Object.keys(fa).concat(D2.d1 || [], D2.d2 || [], (D2.pool || []).map(function(o){ return o && o.n; })); names.forEach(function(n){ [n, (fa[n] || {}).city, (fa[n] || {}).ground, (ma[n] || {}).ground].forEach(function(x){ String(x || '').split(/[\s\/-]+/).forEach(function(w){ w = w.replace(/[(),.]/g, ''); if (w.length > 1 && /^[A-Z\u00c0-\u00de]/.test(w) && /[a-z\u00df-\u00ff]/.test(w) && !/^(via|viale|el|arena|porta|ponte|alba|massa|toma|pier|celeste|sesto|natale|rot)$/i.test(w) && !proper[w.toLowerCase()]) proper[w.toLowerCase()] = w; }); }); }); }); }); } catch (e) {} /* v337 : club, town and ground words of every foreign country (Hellas Verona, not Hellas verona) */
@@ -21720,6 +22368,8 @@ function eraCaseText(t, atStart){
     out += before + res + tail; pos = k.e;
   });
   out = out + t.substring(pos);
+  /* v385 : month 'May' (kept out of the proper-noun list so the verb 'may' stays lowercase) and Home Int'l */
+  out = out.replace(/\b(\d{1,2} )may\b/gi, '$1May').replace(/\bmay( \d{4})\b/gi, 'May$1').replace(/\bint['\u2019]l\b/gi, "Int'l");
   return out.replace(/\b([Ss]erie) ([a-d])\b/g, function(m, w, c){ return w + ' ' + c.toUpperCase(); }).replace(/\b(primera|segunda|tercera) divisi\u00f3n\b/gi, function(m, w){ return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() + ' Divisi\u00f3n'; }).replace(/\bcopa del general\u00edsimo\b/gi, 'Copa del General\u00edsimo'); /* v329 : Serie A / Serie B */
 }
 function eraCaseAtStart(n){
@@ -22150,10 +22800,46 @@ var news = [];
    was always sitting in memory, just never rendered), and these category buttons let you narrow
    it down when that's still too much to scan. */
 var newsFilter = 'all';
-function addNews(tag, text){ text = scoTxt(text); news.unshift({tag:tag, text:text, date:fmtDateShort(currentDate)}); renderNewsFeed(); }
+function stripNewsSourceNotes(text){
+  /* v385 : never render research / verification asides in-game (VERIFIED, 1888 Letter, FEE SOURCING NOTE, nested "(fee)" citations, REAL_GEM_TARGETS, etc.). Also drop a trailing ", in September 1981" restatement — the news line already carries the date. */
+  var s = String(text==null?'':text);
+  function isSourceNote(inner){
+    return /VERIFIED|SOURCING NOTE|EXACT DATE|EXACT MONTH|UNCONFIRMED|1888 Letter|REAL_GEM_TARGETS|no fee given, so none is stated|independently(?: cross)?-?verif|this session's own|cross-checked|appendix|venue unverified|FEE AND EXACT DATE|Wikipedia/i.test(inner) || /^\s*See the /i.test(inner);
+  }
+  var out = '', i = 0;
+  while (i < s.length){
+    if (s.charAt(i) === '('){
+      var depth = 1, j = i+1;
+      while (j < s.length && depth){
+        if (s.charAt(j) === '(') depth++;
+        else if (s.charAt(j) === ')') depth--;
+        j++;
+      }
+      var inner = s.slice(i+1, j-1);
+      if (isSourceNote(inner)){
+        while (out.length && /[ \t]/.test(out.charAt(out.length-1))) out = out.slice(0,-1);
+        i = j;
+        continue;
+      }
+      out += s.slice(i, j);
+      i = j;
+      continue;
+    }
+    out += s.charAt(i);
+    i++;
+  }
+  s = out;
+  s = s.replace(/,\s+in(?:\s+the)?\s+(?:early\s+|late\s+)?(?:January|February|March|April|May|June|July|August|September|October|November|December|summer|winter|spring|autumn)(?:\s+of)?(?:\s+\d{4})?(?=\s*[.(]|$)/gi, '');
+  s = s.replace(/\s*--\s+[^.]*\b(?:REAL_GEM_TARGETS|given directly rather than inferred)[^.]*\.?/gi, '.');
+  s = s.replace(/\s{2,}/g, ' ').replace(/\s+$/g,'').trim();
+  s = s.replace(/\.\s*\./g, '.');
+  if (s && !/[.!?]$/.test(s) && /TRANSFER NEWS|signed|have paid|have signed/i.test(s)) s += '.';
+  return s;
+}
+function addNews(tag, text){ text = stripNewsSourceNotes(scoTxt(text)); news.unshift({tag:tag, text:text, date:fmtDateShort(currentDate)}); renderNewsFeed(); }
 function renderNewsFeed(){
   var filtered = newsFilter==='all' ? news : news.filter(function(n){ return n.tag===newsFilter; });
-  document.getElementById('news-feed').innerHTML = filtered.slice(0,150).map(function(n){ return '<div class="news-item"><span class="tag '+n.tag+'">'+n.tag.toUpperCase()+'</span>'+n.date+' : '+n.text+'</div>'; }).join('') || '<p class="sub">'+(newsFilter==='all' ? 'NOTHING TO REPORT YET.' : 'NOTHING IN THIS CATEGORY YET.')+'</p>';
+  document.getElementById('news-feed').innerHTML = filtered.slice(0,150).map(function(n){ return '<div class="news-item"><span class="tag '+n.tag+'">'+n.tag.toUpperCase()+'</span>'+n.date+' : '+(typeof stripNewsSourceNotes==='function'?stripNewsSourceNotes(n.text):n.text)+'</div>'; }).join('') || '<p class="sub">'+(newsFilter==='all' ? 'NOTHING TO REPORT YET.' : 'NOTHING IN THIS CATEGORY YET.')+'</p>';
 }
 var rivalScoreLines = ["{X} put out a good side and were held to a draw.","{X} slipped to a home defeat : results are going against the bigger clubs this week.","{X} are finding their feet at the top of the table.","A poor turn-out for {X}, by all accounts."];
 var rivalPreseasonLines = ["The press fancy {X} for a good season : plenty of money spent on the playing staff over the summer.","Nobody expects much of {X} this time round, by the look of their close-season business.","{X} are the form pick of the pundits before a ball's been kicked.","A quiet summer for {X} : more of the same expected, for better or worse.","{X} have brought in a couple of new faces and there's cautious optimism among their support."];
@@ -22733,6 +23419,7 @@ function wcGroupTable(stage){
 }
 var INTL_CALENDAR_END_ISO = '1984-05-26';
 var intlFired = []; /* ids of fixtures whose result has already been reported in the news */
+var careerStartIso = null; /* v385 : the in-game date the save began; internationals before this are never dumped into Club News */
 /* v105 breakthrough state, both saved : fixture id -> {pid,n,club,slot,replaced,hg,ag}
    for a match whose England side was altered, and fixture id -> true once a
    squad has been picked for it (one selection roll per fixture, never re-rolled) */
@@ -22794,8 +23481,20 @@ function intlNewsText(f){
   var txt = intlCompLabel(f)+': '+f.home.toUpperCase()+' '+f.hg+'-'+f.ag+' '+f.away.toUpperCase()+' at '+f.venue+' ('+intlFixtureLabelDate(f)+')';
   if (f.att) txt += ', before a crowd of '+f.att.toLocaleString('en-GB');
   txt += '.';
-  if (f.scorers) txt += ' '+f.scorers+'.';
-  if (f.note) txt += ' '+f.note.charAt(0).toUpperCase()+f.note.slice(1)+'.';
+  if (f.scorers){
+    var sc = String(f.scorers).trim();
+    if (!/[.!?]$/.test(sc)) sc += '.';
+    txt += ' '+sc;
+  }
+  if (f.note){
+    /* v385 : the 1980-81 "not completed" note belongs on a single wrap / last-season line, not on every result. Also never add a second full stop. */
+    var note = String(f.note).trim();
+    if (!/not completed/i.test(note)){
+      note = note.charAt(0).toUpperCase() + note.slice(1);
+      if (!/[.!?]$/.test(note)) note += '.';
+      txt += ' '+note;
+    }
+  }
   return txt;
 }
 /* follow-up line once the last Championship match of a season is in */
@@ -22865,12 +23564,47 @@ function wcStageComplete(stage){
    Saturday international on the same day as our own match hasn't been
    played yet when the Saturday news is written, so it's reported at the
    next stop instead. The news line always carries the match's real date. */
+
+function intlCareerStartIso(){
+  return careerStartIso || (typeof currentDate !== 'undefined' && currentDate ? isoOf(currentDate) : null);
+}
+function intlLastSeasonSummaryLine(){
+  var y = (typeof seasonStartYear === 'function') ? seasonStartYear() : (parseInt(String(seasonLabel||'').split('-')[0], 10) || 0);
+  if (!y) return null;
+  var prev = (y-1) + '-' + String(y).slice(-2);
+  if (prev === '1980-81') return 'LAST SEASON: the 1980-81 Home Championship was not completed, and no winner was declared.';
+  try {
+    if (typeof homeChampionshipTable === 'function' && typeof intlFixtures !== 'undefined' && intlFixtures.some(function(f){ return f.season === prev; })){
+      var t = homeChampionshipTable(prev, false);
+      if (t && t.length){
+        var line = t.map(function(r){ return r.n+' '+r.pts; }).join(', ');
+        var champs = (t[0].pts>t[1].pts) ? (t[0].n+' were British champions') : (t[0].n+' and '+t[1].n+' shared the championship');
+        return 'LAST SEASON: '+champs+' in the '+prev+' Home Championship. Final points: '+line+'.';
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+function addIntlLastSeasonSummaryOnce(){
+  /* v385 : the short last-season Home Championship line is for English saves only. A Scottish, Italian, Spanish or German start must not see "England were British champions". */
+  if (typeof gameCountry !== 'undefined' && gameCountry && gameCountry !== 'ENG') return;
+  if (typeof isSco === 'function' && isSco()) return;
+  if (news && news.some(function(n){ return n && /LAST SEASON:/.test(n.text||''); })) return;
+  var line = intlLastSeasonSummaryLine();
+  if (line) addNews('intl', line);
+}
+
 function fireDueInternationals(){
   if (isSco()) return; /* v317 */
   var today = isoOf(currentDate);
+  var start = intlCareerStartIso() || today;
   var due = intlFixtures.filter(function(f){ return f.date < today && !intlHasFired(f); });
   due.sort(function(a,b){ return a.date<b.date ? -1 : a.date>b.date ? 1 : 0; });
-  due.forEach(function(f){
+  /* v385 : anything before the save's own start is marked fired silently. At most one short last-season line is added on a new game, not a dump of historic results or old season wraps. */
+  var historic = due.filter(function(f){ return f.date < start; });
+  var fresh = due.filter(function(f){ return f.date >= start; });
+  historic.forEach(function(f){ intlFired.push(f.id); });
+  fresh.forEach(function(f){
     intlFired.push(f.id);
     if (isWcRow(f) && !wcRowPlays(f)){
       addNews('intl', 'WORLD CUP, '+f.stage+' ('+intlFixtureLabelDate(f)+') : '+f.home.toUpperCase()+' V '+f.away.toUpperCase()+' does not take place in this game, because '+f.wcNeeds+' did not qualify. (In reality it finished '+f.hg+'-'+f.ag+'.)');
@@ -22883,10 +23617,7 @@ function fireDueInternationals(){
     }
     if (isWcRow(f) && wcStageComplete(f.stage)){ var w = wcStageWrapText(f.stage); if (w) addNews('intl', w); }
   });
-  /* a long gap between stops (the close season above all) can bring several
-     results in at once : a heading line goes on top so the batch reads as a
-     round-up of past matches, not as this week's news */
-  if (due.length >= 3) addNews('intl', 'INTERNATIONAL ROUND-UP : '+due.length+' results since the last report, each with its real date, just below.');
+  if (fresh.length >= 3) addNews('intl', 'INTERNATIONAL ROUND-UP : '+fresh.length+' results since the last report, each with its real date, just below.');
   if (due.length) renderInternationals();
 }
 /* old saves (from before v104) carry no fired list : treat everything
@@ -27569,7 +28300,7 @@ function makeTargetFromSquadPlayer(clubName, p, scoutName){
     apps:p.apps || 0, goals:p.goalsSeason || p.goals || 0, age:age, ca:ca, attrs:attrs,
     scout:scoutName || pick(Object.keys(scouts)), timesWatched:1, personallyWatched:false, trueSeen:false,
     note:leagueScoutNote(p, clubName),
-    _sourceClub:clubName, _sourceIsClubSquad:true, _scoutGem:true
+    _sourceClub:clubName, _sourceIsClubSquad:true, _scoutGem:true, gen:!!p.gen
   };
 }
 function makeRealClubScoutTipFromPool(pool, wantPos){
@@ -27733,6 +28464,21 @@ function pickScoutTip(wantPos){
   var roll = Math.random();
   return roll < 0.55 ? makeProTarget(wantPos) : roll < 0.9 ? makeAmateurTarget() : makeSchoolboyTarget();
 }
+function displayPersonName(name, obj){
+  var n = String(name==null?'':name).replace(/†/g,'').trim();
+  if (!n) return n;
+  if (n === 'YOUR OWN INQUIRY' || n === 'The chief scout') return n;
+  var gen = !!(obj && (obj.gen===true || obj.gen===1));
+  if (!gen && typeof scouts==='object' && scouts && scouts[name] && scouts[name].gen) gen = true;
+  if (!gen && typeof SCOUT_HIRE_POOL!=='undefined' && SCOUT_HIRE_POOL){
+    var i, c;
+    for (i=0;i<SCOUT_HIRE_POOL.length;i++){
+      c = SCOUT_HIRE_POOL[i];
+      if (c && c.name===name && c.gen){ gen = true; break; }
+    }
+  }
+  return gen ? (n+'†') : n;
+}
 function maybeGenerateFreshScoutTip(){
   if (targets.length >= 9) return;
   if (scoutBrief && Math.random() < 0.45){
@@ -27743,18 +28489,18 @@ function maybeGenerateFreshScoutTip(){
     if (!briefTarget) briefTarget = makeProTarget(scoutBrief.pos, scoutBrief);
     else if (scoutBrief.attr) briefTarget.briefAttr = scoutBrief.attr;
     targets.push(briefTarget);
-    addNews('board', briefTarget.scout+' reports back on the instruction: '+briefTarget.n+' ('+(typeof displayPosOf==='function'?displayPosUpper(briefTarget):briefTarget.pos.toUpperCase())+', '+briefTarget.club.toUpperCase()+') fits the bill.');
+    addNews('board', displayPersonName(briefTarget.scout)+' reports back on the instruction: '+displayPersonName(briefTarget.n, briefTarget)+' ('+(typeof displayPosOf==='function'?displayPosUpper(briefTarget):briefTarget.pos.toUpperCase())+', '+briefTarget.club.toUpperCase()+') fits the bill.');
   }
   if (targets.length >= 9) return;
   if (Math.random() < 0.88){
     var t = pickScoutTip();
     targets.push(t);
-    addNews('board', t.scout+' writes in with a fresh name worth a look: '+t.n+' ('+(typeof displayPosOf==='function'?displayPosUpper(t):t.pos.toUpperCase())+', '+t.club.toUpperCase()+').');
+    addNews('board', displayPersonName(t.scout)+' writes in with a fresh name worth a look: '+displayPersonName(t.n, t)+' ('+(typeof displayPosOf==='function'?displayPosUpper(t):t.pos.toUpperCase())+', '+t.club.toUpperCase()+').');
   }
   if (targets.length < 9 && Math.random() < 0.4){
     var t2 = pickScoutTip();
     targets.push(t2);
-    addNews('board', t2.scout+' also sends word of a second name: '+t2.n+' ('+(typeof displayPosOf==='function'?displayPosUpper(t2):t2.pos.toUpperCase())+', '+t2.club.toUpperCase()+').');
+    addNews('board', displayPersonName(t2.scout)+' also sends word of a second name: '+displayPersonName(t2.n, t2)+' ('+(typeof displayPosOf==='function'?displayPosUpper(t2):t2.pos.toUpperCase())+', '+t2.club.toUpperCase()+').');
   }
 }
 /* ---------- v142, ROADMAP: REAL GEMS FROM SCOTLAND/WALES/N.IRELAND/IRELAND. proSourceClubs above
@@ -28649,7 +29395,7 @@ function buildSaveState(){
     targets:targets, pendingNegotiations:pendingNegotiations, pendingScoutTrips:pendingScoutTrips,
     activeTrip:activeTrip, faBadges:faBadges, unlockedFormations:unlockedFormations, unlockedMethods:unlockedMethods, formationFamiliarity:formationFamiliarity, activeTrainerTrip:activeTrainerTrip, unlockedTrainingMethods:unlockedTrainingMethods, pendingOffers:pendingOffers,
     news:news, southernTable:southernTable, futureLegends:futureLegends, historicalOneOffs:historicalOneOffs, historicalOneOffsPost1949:historicalOneOffsPost1949, realSchoolboyLegends:realSchoolboyLegends, scoutingPrep:scoutingPrep, markCloselyThisMatch:markCloselyThisMatch, cupState:cupState, cupBracket:cupBracket, scouts:scouts, realGemTargetsState:realGemTargetsState, foreignWhatIfState:foreignWhatIfState, whatIfApproachesThisSeason:whatIfApproachesThisSeason, whatIfSeasonKey:whatIfSeasonKey, assistantHireState:assistantHireState, youthProspects:youthProspects,
-    trainerName:trainerName, clubSecretaryName:clubSecretaryName, /* v206 : without these, reloading a save would show the generic default "Bert Symons"/"W. H. Cobbett" names even though a different trainer/secretary were generated and shown for the rest of that save */
+    trainerName:trainerName, clubSecretaryName:clubSecretaryName, scoutHirePool:SCOUT_HIRE_POOL, /* v206 : without these, reloading a save would show the generic default "Bert Symons"/"W. H. Cobbett" names even though a different trainer/secretary were generated and shown for the rest of that save */
     reserveLeagueRegion:reserveLeagueRegion, reserveLeagueTable:reserveLeagueTable, reserveLeagueLastLines:reserveLeagueLastLines, reserveFixtureQueue:reserveFixtureQueue, reserveXISelection:reserveXISelection, reservesRecord:reservesRecord, reserveRecentForm:reserveRecentForm,
     southernLastLines:southernLastLines, ourDivisionLastLines:ourDivisionLastLines, firstDivision:firstDivision, secondDivision:secondDivision, thirdDivisionSouthBg:thirdDivisionSouthBg, thirdDivisionNorth:thirdDivisionNorth, midlandLeague:midlandLeague, northEasternLeague:northEasternLeague,
     manager:manager, lineupSlots:lineupSlots, substituteId:substituteId, substituteId2:substituteId2, seasonNumber:seasonNumber, seasonLabel:seasonLabel, seasonHistory:seasonHistory, signingLog:signingLog, divisionChampions:divisionChampions, honoursHistory:honoursHistory, europeanCup:europeanCup, cupWinnersCup:cupWinnersCup, fairsCup:fairsCup, lastFaCupWinnerName:lastFaCupWinnerName, lastFaCupRunnerUpName:lastFaCupRunnerUpName, reservesRecord:reservesRecord,
@@ -28664,7 +29410,7 @@ function buildSaveState(){
     scoutedPlayers:scoutedPlayers, pendingClubScoutTrips:pendingClubScoutTrips, clubSquads:clubSquads, aiClubForm:aiClubForm, aiClubInjuryCA:aiClubInjuryCA, aiClubBank:aiClubBank, aiClubLastGate:aiClubLastGate,
     retiredManagerCandidates:retiredManagerCandidates, /* v160 */
     headToHead:headToHead, /* v171 : fixed to persist -- was session-only before, silently losing all rivalry/revenge context on every reload */
-    intlFired:intlFired, intlBreakthroughs:intlBreakthroughs, intlSelChecked:intlSelChecked, intlCallUpChecked:intlCallUpChecked, intlAnnounced:intlAnnounced, /* v248 */
+    intlFired:intlFired, careerStartIso:careerStartIso, intlBreakthroughs:intlBreakthroughs, intlSelChecked:intlSelChecked, intlCallUpChecked:intlCallUpChecked, intlAnnounced:intlAnnounced, /* v248 / v385 */
     realRetirementsFired:realRetirementsFired, /* v249 */
     southernLeague:southernLeague, isthmianLeague:isthmianLeague, isthmianTable:isthmianTable, isthmianLastLines:isthmianLastLines, /* v189 */
     electedClubProfileNames:Object.keys(clubProfiles).filter(function(n){ return canonicalClubNames.indexOf(n)<0; }).map(function(n){ return {n:n, profile:clubProfiles[n]}; }),
@@ -28997,6 +29743,7 @@ function applyLoadedState(s, silent){
     lineup = s.lineup; lineupConfirmed = s.lineupConfirmed; finances = s.finances; recentForm = s.recentForm; nextId = s.nextId;
     currentDate = new Date(s.currentDate); weekPhase = s.weekPhase; tactics = s.tactics; training = s.training; if (tactics && tactics.formation){ var fDest = studyDestinations.find(function(x){ return x.kind==='formation' && x.key===tactics.formation && x.unlockFormation && x.unlockFormation!==x.key; }); if (fDest) tactics.formation = fDest.unlockFormation; } /* v108 : a save made with the old destination-keyed radio ('riverplate') gets the real formation id */
     intlFired = Array.isArray(s.intlFired) ? s.intlFired.slice() : intlFiredBackfill(); /* v104 : which real internationals have already been reported */
+    careerStartIso = s.careerStartIso || (typeof fixtureRealDates !== 'undefined' && fixtureRealDates[0] ? isoOf(fixtureRealDates[0]) : isoOf(currentDate)); /* v385 : old saves take the first fixture date as the career start, so a reload does not dump historic internationals */
     intlBreakthroughs = s.intlBreakthroughs || {}; intlSelChecked = s.intlSelChecked || {}; intlCallUpChecked = s.intlCallUpChecked || {}; /* v105; v140 */
     intlAnnounced = s.intlAnnounced || {}; /* v248 : an old save without this just gets every still-upcoming fixture's team news announced fresh, same as a brand new game would -- never a flood, since intlHasFired already blocks anything genuinely in the past */
     realRetirementsFired = s.realRetirementsFired || {}; /* v249 : an old save without this just picks up every real retirement whose date has already passed on its very next weekly tick, same shape as the historicalOneOffs catch-up already relies on */
@@ -29004,6 +29751,8 @@ function applyLoadedState(s, silent){
     targets = s.targets; pendingNegotiations = s.pendingNegotiations; pendingScoutTrips = s.pendingScoutTrips;
     if (s.scouts) scouts = s.scouts; if (s.realGemTargetsState) realGemTargetsState = s.realGemTargetsState; /* v142 */
     trainerName = s.trainerName || trainerName; clubSecretaryName = s.clubSecretaryName || clubSecretaryName; /* v206 : old saves predate per-game staff names -- falls back to the generic defaults rather than undefined */
+    if (s.scoutHirePool && s.scoutHirePool.length) SCOUT_HIRE_POOL = s.scoutHirePool;
+    else if (typeof generateScoutHirePool==='function' && typeof eraStaffUsesInitials==='function' && !eraStaffUsesInitials('scout')) generateScoutHirePool(); /* v385 : an old 1970+ save still carries the 1940s initial hire-pool names; regenerate unused contacts only. Hired scouts in `scouts` are left as saved. */
     assistantHireState = (typeof mergeAssistantHireState==='function') ? mergeAssistantHireState(s.assistantHireState) : (s.assistantHireState || {advertised:false, advertisedOn:null, applicants:[], appointed:null, aiFilled:{}}); /* v383 : old saves start the unsourced post vacant */
     youthProspects = s.youthProspects || []; /* v144 : an old save from before this pipeline existed just starts with an empty ground-staff, honestly, rather than inventing anyone */
     /* OLD-SAVE BACKFILL: a real bug, reported directly -- a target scouted and
@@ -29610,6 +30359,7 @@ function initGameStateFresh(){
      the 1950 World Cup itself, since it falls AFTER that start date -- still fires normally, live, as
      the save's calendar genuinely reaches it. A 1946-era game is unaffected: its start date IS the
      calendar's own first date, so intlFiredBackfill() there would just return an empty array anyway. */
+  careerStartIso = isoOf(currentDate);
   intlFired = (gameEra === '1950' || gameEra === '1959' || gameEra === '1966' || gameEra === '1970' || gameEra === '1975' || gameEra === '1981' || gameEra === '1986') ? intlFiredBackfill() : []; /* v243/v352 : later English starts also mark past internationals as already reported */
   extendIntlCalendarIfNeeded(10); /* v194 : seed a decade of generated Home Championship seasons ahead of either start era, on top of the real 1946-1950 research */
   intlBreakthroughs = {}; intlSelChecked = {}; intlCallUpChecked = {}; intlAnnounced = {}; /* v248 */
@@ -29705,6 +30455,7 @@ function resetTacticsAndTrainingUI(){
   var aBal = document.getElementById('a-bal'); if (aBal) aBal.checked = true;
   var trStamina = document.getElementById('tr-stamina'); if (trStamina) trStamina.checked = true;
   renderWrinkleBox();
+  if (typeof renderFormationOrderLegend === 'function') renderFormationOrderLegend();
   renderUnlockedFormations();
   renderStyleOptions(); styleTacticsNote();
   if (typeof updateLineupEraBlurb==='function') updateLineupEraBlurb();
@@ -29912,6 +30663,7 @@ function finishNewGameSetup(){
   hideHelp();
   gotoView('week');
   addNews('board', 'A new season begins : the '+seasonLabel+' campaign starts here.');
+  if (typeof addIntlLastSeasonSummaryOnce === 'function') addIntlLastSeasonSummaryOnce();
   showManagerSetup();
   try{ bootEraSnapshot(); bindDataReportLink(); }catch(e){}
 }
@@ -30532,8 +31284,8 @@ var bank = {
   freeKickWall:["The wall stands firm and {P}'s effort cannons back into play.","{P} snatches at it and the ball cannons off the wall : chance gone."],
   freeKickOver:["{P} drags his effort well over the bar : a real chance spurned there.","{P}'s effort flies high into the stand behind the goal, to groans from the crowd."],
   cornerSetup:["{A} force a corner, and {P} jogs over to take it.","A last touch off the defender and {A} have a corner : {P} places the ball.","{P} stands over the corner flag for {A}, sizing up the delivery."],
-  cornerGoal:["GOAL : {A}! {P}'s corner is met with a thumping header and it's in!","GOAL : {A}! Chaos in the box from {P}'s corner and the ball ends up in the net!","GOAL : {A}! {P} whips it in and it somehow evades everyone all the way to the far post!"],
-  cornerHeaderOver:["{P}'s corner is met by a firm header, but it flies over the bar.","A good near-post flick from {P}'s corner, but it drifts just wide.","{P}'s delivery is dangerous, but the header at the far post lacks the power to trouble the keeper."],
+  cornerGoal:["GOAL : {A}! {P2}'s corner is met by a thumping header from {P}, and it's in!","GOAL : {A}! Chaos in the box from {P2}'s corner and {P} forces it in!","GOAL : {A}! {P2} whips it in and {P} is there at the far post to finish!"],
+  cornerHeaderOver:["{P2}'s corner is met by a firm header from {P}, but it flies over the bar.","A good near-post flick by {P} from {P2}'s corner, but it drifts just wide.","{P2}'s delivery is dangerous, but {P}'s header at the far post lacks the power to trouble the keeper."],
   cornerCleared:["The defence deals with {P}'s corner comfortably enough.","{P}'s corner is punched clear by the keeper under pressure.","Nothing comes of {P}'s corner : cleared as far as the edge of the box."],
   penaltySetup:["A foul in the box! The referee points straight to the spot : {P} will take it for {A}.","Handball given inside the area, to fury from the defence : {P} steps up to take {A}'s penalty.","A clumsy challenge inside the box and the referee has no hesitation : {P} places the ball on the spot for {A}."],
   penaltyGoal:["GOAL : {A}! {P} sends the keeper the wrong way from the spot!","GOAL : {A}! A coolly taken penalty from {P}, straight down the middle as the keeper dives!","GOAL : {A}! {P} buries it, low into the corner : never in doubt."],
@@ -40825,7 +41577,7 @@ function initClubSquad(clubName){
     applyRawTalentSpikes(attrs); /* REAL BUG, FIXED, PER DIRECT REPORT: a lower-rep pro at another club came up POOR/VERY POOR across the board once scouted, every single attribute, with no exceptions -- exactly the flat, lifeless read that applyRawTalentSpikes was already written to fix for schoolboys and amateurs (see that function's own note), but which was never actually applied here, to the one place that generates every OTHER club's whole squad. A 1 or 2-star man can now still have that one attribute a scout would genuinely flag him for, same as any amateur or schoolboy already could. */
     var realCaps = realStartingCapsFor(p.n, clubName); /* v162 : see REAL_ENGLAND_CAPS -- real, sourced caps for a real capped international at the right club this era, else 0 (AI clubSquad players previously had no caps field at all) */
     var nat = natForPlayer(p.n, clubName) || p.nat || null; /* v356 : raw-squad nat (1981 First Division) if natForPlayer has no 1946/1950 club-keyed hit; else null/unresearched */
-    return {n:p.n, pos:p.pos, slot:slot, rep:rep, ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, apps:0, goalsSeason:0, attrs:attrs, aiv:2, caps:realCaps||0, nat:nat};
+    return {n:p.n, pos:p.pos, slot:slot, rep:rep, ca:Math.round(ca), pa:rollPotential(Math.round(ca), age), age:age, apps:0, goalsSeason:0, attrs:attrs, aiv:2, caps:realCaps||0, nat:nat, gen:!!p.gen};
   });
 }
 /* v109 : a save's persistent background squads were built before AI_TIER_BAND
@@ -41126,7 +41878,7 @@ function createClubApproachTarget(clubName, playerName, kind){
     apps:p.apps, goals:p.goalsSeason, age:p.age, ca:p.ca, attrs:Object.assign({}, p.attrs),
     scout:'YOUR OWN INQUIRY', timesWatched:isScouted?1:0, personallyWatched:false, trueSeen:isScouted,
     note:note,
-    _sourceClub:clubName, _sourceIsClubSquad:true
+    _sourceClub:clubName, _sourceIsClubSquad:true, gen:!!p.gen
   };
   targets.push(t);
   return t;
@@ -41248,17 +42000,19 @@ function computeAttendanceFigure(f){
      at most 95%), and the old rule for a small club away at a much bigger host (filled 45-95% by host strength) is
      kept. Semi-Finals and the Final are unchanged (neutral grounds, above). */
   var hostName = f.home ? ourClubName : f.opp, visitorName = f.home ? f.opp : ourClubName;
-  var groundCapacity = groundCapacityFor(hostName, f.s);
-  var hostBase = clubBaseGate(hostName) * currentGateSeasonMult(); /* v122 season curve, same as aiLeagueAttendance */
   var hostKey = clubCurrentDivKey(hostName) || ourDivisionKey();
-  var visitorPull = clamp(Math.pow(clubBaseGate(visitorName) / DIV_MEAN_GATE_1946[hostKey], 0.15), 0.85, 1.2);
+  var groundCapacity = groundCapacityFor(hostName, f.s);
   var formSum = recentForm.reduce(function(s,v){return s+v;},0);
   var formFactor = f.home ? (1 + 0.03*formSum) : 1;
   var isLocalDerby = localRivalOpponents.indexOf(f.opp) >= 0;
   var derbyFactor = isLocalDerby ? 1.2 : 1;
   var buzzFactor = (f.home && signingHypeWeeksLeft > 0) ? 1.05 : 1;
   var noise = 1 + (seededRand(week*1.9 + (f.opp||'').length)-0.5)*0.16;
-  var baseCrowd = hostBase * visitorPull * formFactor * derbyFactor * buzzFactor * noise;
+  /* v385 : leagueHostCrowdBase already includes visitor pull (and, from 1981, the sourced low-to-high blend). Do not also multiply currentGateSeasonMult on a 1981 sourced base. Friendlies still scale this figure below. */
+  var hostBase = (typeof leagueHostCrowdBase === 'function')
+    ? leagueHostCrowdBase(hostName, visitorName)
+    : (clubBaseGate(hostName) * currentGateSeasonMult() * clamp(Math.pow(clubBaseGate(visitorName) / DIV_MEAN_GATE_1946[clubCurrentDivKey(hostName) || ourDivisionKey()], 0.15), 0.85, 1.2));
+  var baseCrowd = hostBase * formFactor * derbyFactor * buzzFactor * noise;
   if (f.isFriendly){
     /* Friendlies are modest next to a league afternoon, but a well-known visiting club still
        draws — a hard 3,000-ish cap (or a 1.2 visitor-pull cap on a stub host gate) made a
@@ -41371,7 +42125,7 @@ document.getElementById('btn-kickoff').addEventListener('click', function(){
      become unavailable between picking the lineup and now. */
   var subList = (subsAllowed() && typeof namedSubstitutePlayers === 'function') ? namedSubstitutePlayers() : ((subsAllowed() && substituteId !== null) ? [squad.find(function(p){ return p.id===substituteId && !unavailableReason(p); })].filter(Boolean) : []);
   var subPlayer = subList[0] || null;
-  live = {f:f, minute:0, usScore:0, oppScore:0, oppSquad:oppSquad, ourXI:ourXI, halfShown:false, scorers:[], usGoals:[], oppGoals:[], shotsUs:0, shotsOpp:0, pitchMod:pitch.mod*weather.mod, weather:weather, refName:refName, maxLeadUs:0, maxLeadOpp:0, attendanceFigure:computeAttendanceFigure(f), attendanceAnnounced:false, attendanceAnnounceAt: 52+Math.floor(Math.random()*20), /* second half only : a real tannoy attendance call came well after kick-off, not while the gates were still turning */
+  live = {f:f, minute:0, usScore:0, oppScore:0, oppSquad:oppSquad, ourXI:ourXI, halfShown:false, scorers:[], usGoals:[], oppGoals:[], shotsUs:0, shotsOpp:0, pitchMod:pitch.mod*weather.mod, weather:weather, refName:refName, maxLeadUs:0, maxLeadOpp:0, attendanceFigure:computeAttendanceFigure(f), attendanceAnnounced:false, attendanceAnnounceAt: (52+Math.floor(Math.random()*20), 45), /* v385 : announced at half-time, not mid-second-half. The discarded 52+rand*20 roll keeps the kick-off RNG stream where it was. */
     stoppage1: 1+Math.floor(Math.random()*3), stoppage2: 1+Math.floor(Math.random()*4), stoppage1Announced:false, stoppage2Announced:false,
     teamTalkAtk:1, teamTalkDef:1, teamTalkGiven:false, subPlayer:subPlayer, subPlayers:subList, subUsed:false, subsUsed:0, hobbledIds:[], oppSubPlayers:(typeof pickOppNamedSubs==='function'?pickOppNamedSubs(oppSquad, f.opp, fixtureIdx):[]), oppSubsUsed:0, pendingInjurySub:null}; /* v169 / v384 : user bench, AI bench, injury prompt */
   var pmp2 = document.getElementById('prematch-panel-match'); if (pmp2) pmp2.style.display = 'none'; /* v303 : the match is on, the comparison panel steps aside */
@@ -41430,8 +42184,12 @@ document.getElementById('btn-kickoff').addEventListener('click', function(){
    just from the next match. */
 function renderInMatchBox(){
   var note = document.getElementById('im-sub-note');
-  if (note && typeof subTouchlineNote === 'function') note.textContent = subTouchlineNote();
   var hold = document.getElementById('im-sub-controls');
+  var showRulesNote = !(live && ((live.pendingInjurySub) || (typeof liveUnusedSubs==='function' && liveUnusedSubs().length) || (typeof subsAllowed==='function' && subsAllowed())));
+  if (note){
+    if (showRulesNote && typeof subTouchlineNote === 'function'){ note.textContent = subTouchlineNote(); note.style.display = ''; }
+    else { note.textContent = ''; note.style.display = 'none'; }
+  }
   if (hold){
     var html = '';
     if (live && live.pendingInjurySub){
@@ -41439,19 +42197,21 @@ function renderInMatchBox(){
       var onName = (pend.on && pend.on.n) ? pend.on.n : 'the named substitute';
       var offName = (pend.off && pend.off.n) ? pend.off.n : 'the injured man';
       html += '<p class="sub" style="margin:0 0 6px;">'+offName+' cannot go on. Send on '+onName+', or play out the match with ten.</p>';
-      html += '<p class="sub" style="margin:0;"><a href="#" id="im-injury-send" class="sub">Send '+onName+' on</a> &nbsp;·&nbsp; <a href="#" id="im-injury-ten" class="sub">Play on with ten</a></p>';
+      html += '<p class="im-row" style="margin:0;"><button type="button" class="im-chip" id="im-injury-send">Send '+onName+' on</button> <button type="button" class="im-chip" id="im-injury-ten">Play on with ten</button></p>';
     } else if (live && typeof liveUnusedSubs === 'function'){
       var left = liveUnusedSubs();
       if (left.length && typeof subAnyReasonAllowed === 'function' && subAnyReasonAllowed()){
         var offOpts = (live.ourXI||[]).filter(function(x){ return x && left.indexOf(x)<0 && !/goalkeeper/i.test(x.pos); }).map(function(x){
           return '<option value="'+x.id+'">'+x.n+'</option>';
         }).join('');
-        html += '<p class="sub" style="margin:0 0 4px;">Named substitute'+(left.length>1?'s':'')+' : '+left.map(function(p){return p.n;}).join(', ')+'. A change may be made for any reason.</p>';
-        html += '<p class="sub" style="margin:0;">Send '+left[0].n+' on for <select id="im-sub-off" style="font-size:13px;">'+offOpts+'</select> <a href="#" id="im-sub-send" class="sub">send him on</a></p>';
+        var subLabel = (left.length===1)
+          ? left[0].n
+          : ('<select id="im-sub-on" class="im-chip">'+left.map(function(p){ return '<option value="'+p.id+'">'+p.n+'</option>'; }).join('')+'</select>');
+        html += '<p class="im-row" style="margin:0;">Substitute: '+subLabel+' for <select id="im-sub-off" class="im-chip">'+offOpts+'</select> <button type="button" class="im-chip" id="im-sub-send">Send him on</button></p>';
       } else if (left.length){
-        html += '<p class="sub" style="margin:0;">Named substitute : '+left.map(function(p){return p.n;}).join(', ')+' (injury only — the referee will allow the change if a man cannot continue).</p>';
+        html += '<p class="im-row" style="margin:0;">Substitute: '+left.map(function(p){return p.n;}).join(', ')+' (injury only).</p>';
       } else if (typeof subsAllowed==='function' && subsAllowed()){
-        html += '<p class="sub" style="margin:0;">The named substitute'+(typeof subsAllowedCount==='function' && subsAllowedCount()>=2?'s have':' has')+' already been used, or none was named.</p>';
+        html += '<p class="im-row" style="margin:0;">The named substitute'+(typeof subsAllowedCount==='function' && subsAllowedCount()>=2?'s have':' has')+' already been used, or none was named.</p>';
       }
     }
     hold.innerHTML = html;
@@ -41467,12 +42227,21 @@ function renderInMatchBox(){
       if (oid && typeof liveSendOnSubstitute === 'function') liveSendOnSubstitute(oid);
     });
   }
-  var cur = document.getElementById('im-approach-current'); if (cur) cur.textContent = tactics.approach.toUpperCase();
+  var cur = document.getElementById('im-approach-current'); if (cur) cur.textContent = '';
+  ['im-attacking','im-balanced','im-defensive'].forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    var val = id==='im-attacking' ? 'attacking' : id==='im-defensive' ? 'defensive' : 'balanced';
+    if (tactics && tactics.approach === val) el.classList.add('primary');
+    else el.classList.remove('primary');
+  });
   var sel = document.getElementById('im-wrinkle'); if (!sel) return;
-  var opts = '<option value="">NONE : PLAY IT STRAIGHT</option>' + wrinkleSlotOptions.map(function(o){
-    return '<option value="'+o.slot+'"'+(tacticalWrinkle && tacticalWrinkle.slot===o.slot?' selected':'')+'>'+o.label.toUpperCase()+'</option>';
+  var wrinkleOpts = (typeof wrinkleOptionsForEra==='function') ? wrinkleOptionsForEra() : wrinkleSlotOptions;
+  var opts = '<option value="">None — play it straight</option>' + wrinkleOpts.map(function(o){
+    return '<option value="'+o.slot+'"'+(tacticalWrinkle && tacticalWrinkle.slot===o.slot?' selected':'')+'>'+(o.label||o.slot)+'</option>';
   }).join('');
   sel.innerHTML = opts;
+  if (tacticalWrinkle && tacticalWrinkle.slot) sel.classList.add('primary');
+  else sel.classList.remove('primary');
 }
 ['im-attacking','im-balanced','im-defensive'].forEach(function(id){
   var el = document.getElementById(id); if (!el) return;
@@ -41507,6 +42276,13 @@ function giveHalfTimeTalk(kind){
   }
   document.getElementById('ht-chosen').textContent = msg.toUpperCase();
   addLine('', 'DRESSING ROOM: '+msg);
+  ['ht-rally','ht-calm','ht-none'].forEach(function(id){
+    var b = document.getElementById(id);
+    if (b){
+      var on = (kind==='rally' && id==='ht-rally') || (kind==='calm' && id==='ht-calm') || (kind==='none' && id==='ht-none');
+      if (on) b.classList.add('primary'); else b.classList.remove('primary');
+    }
+  });
   document.getElementById('halftime-talk-box').style.display = 'none';
 }
 ['ht-rally','ht-calm','ht-none'].forEach(function(id){
@@ -41563,7 +42339,8 @@ function eraStart(f){
     function rec(p, team){ return {n:p.n, pos:p.pos, slot:p.slot, team:team, rep:p.rep}; }
     live.ourXI.forEach(function(p){ who.push(rec(p,'us')); });
     live.oppSquad.forEach(function(p){ who.push(rec(p,'opp')); });
-    (live.subPlayers && live.subPlayers.length ? live.subPlayers : (live.subPlayer ? [live.subPlayer] : [])).forEach(function(p){ who.push(Object.assign(rec(p,'us'), {bench:true})); });
+    /* v385 : benches stay off meta.who, so a unused keeper (Ogrizovic, etc.) cannot be named while another man is in goal */
+    /* v385-corner-banks */
     var meta = {era:gameEra, seasonLabel:seasonLabel, club:ourClubName, opp:f.opp, home:f.home, comp:(f.isCup?'cup':f.isLCup?'leaguecup':f.isFriendly?'friendly':'league'), roundName:f.roundName||null,
       ground:document.getElementById('match-sub').textContent, ref:live.refName, weather:live.weather.label, pitch:pitchConditionFor(currentDate).label, date:isoOf(currentDate), dow:currentDate.getDay(),
       kickoff:kickoffTimeFor(currentDate), fixtureIdx:fixtureIdx, division:currentDivisionLabel, subs:subsAllowed(), subAny:subAnyReasonAllowed(), cards:cardsInUseNow(), formation:tactics.formation, who:who, subPlayer:live.subPlayer?live.subPlayer.n:null};
@@ -41730,14 +42507,26 @@ var ERA_SHARED_BUILD = {
     '{A} knock it about. {P} has a yard of space.',
     'A ball in, and {P} is in the mixer.',
     '{P} drives forward, numbers up with him.',
-    '{P} nicks it and comes on.'
+    '{P} nicks it and comes on.',
+    '{P} finds a man in space, and {A} come on again.',
+    'Worked short by {P}, then a ball into the area.',
+    '{A} recycle it. {P} has a sight of the box.',
+    'Down the line from {P}, and they look for a runner.',
+    '{P} turns inside and looks for a colleague.'
   ],
   '1981': [
     '{P} turns and comes forward for {A}.',
-    'Wide to {P}, and the ball is played in.',
     '{A} keep it, then switch it to {P}.',
     '{P} drives forward. They have numbers up.',
-    '{P} takes it on, looking for a way through.'
+    '{P} takes it on, looking for a way through.',
+    'Built patiently, and {P} is arriving in the area.',
+    '{P} drops a shoulder and looks for the cut-back.',
+    'A long diagonal towards {P}, and {A} have a man in the box.',
+    '{P} holds it up and lays it off, and they come again.',
+    'Worked down the left, then inside to {P}.',
+    'A one-two on the edge, and {P} is through the gap.',
+    '{A} knock it about midfield. {P} has a sight of goal.',
+    'Wide to {P}, and the ball is played in.'
   ]
 };
 var ERA_OFF_BUILD = {
@@ -41766,10 +42555,34 @@ function eraDwellMs(text, extra){
   return Math.floor(ms + (extra||0));
 }
 function eraSuspenseMs(){ return 280 + Math.floor(Math.random() * 440); }
+function eraSamePlayerName(a, b){
+  function parts(s){ return String(s||'').toLowerCase().replace(/\s+(jr\.?|sr\.?)$/i,'').trim().split(/\s+/).filter(Boolean); }
+  var A = parts(a), B = parts(b);
+  if (!A.length || !B.length) return false;
+  if (A.join(' ') === B.join(' ')) return true;
+  return A[A.length-1] === B[B.length-1];
+}
 function eraFillBuild(tpl, ev){
   var meta = eraCap && eraCap.cap && eraCap.cap.meta;
-  var P = (ev && ev.P && ev.P.n) ? ev.P.n : ((ev && ev.P2 && ev.P2.n) ? ev.P2.n : 'a forward');
-  /* surname-style for earlier voices is applied in render; keep the full name here if needed, but prefer what fill already used — just the name */
+  var exclude = [];
+  if (ev && ev.P && ev.P.n) exclude.push(ev.P.n);
+  if (ev && ev.P2 && ev.P2.n) exclude.push(ev.P2.n);
+  if (ev && ev.K && ev.K.n) exclude.push(ev.K.n);
+  if (ev && ev.fill){
+    if (ev.fill.P) exclude.push(ev.fill.P);
+    if (ev.fill.P2) exclude.push(ev.fill.P2);
+  }
+  /* v385 : the build-up names a team-mate currently on the pitch, never the man who is about to shoot or score (so a winger is not described meeting his own cross). Compare surnames as well as full names: the resolve line may have already shortened "Chris Waddle" to "Waddle". */
+  var P = exclude[0] || 'a forward';
+  try {
+    var sideName = (ev && ev.side === 'us') ? ourClubName : (live && live.f ? live.f.opp : null);
+    var pool = (typeof onPitchPlayers === 'function' && sideName) ? onPitchPlayers(sideName).filter(function(p){
+      if (!p || (typeof isGoalkeeperPlayer === 'function' && isGoalkeeperPlayer(p))) return false;
+      return !exclude.some(function(n){ return eraSamePlayerName(p.n, n); });
+    }) : [];
+    if (pool.length) P = pool[Math.floor(((eraCap && eraCap.seed) || 1) * 13 + (live ? live.minute * 7 : 0) + String(tpl).length) % pool.length].n;
+    else if (exclude.length) P = 'a colleague';
+  } catch (e) {}
   if (P && /^[A-Z].*\s+[A-Z]/.test(P) && eraCap && (eraCap.key === '1946' || eraCap.key === '1950' || eraCap.key === '1959')){
     P = P.split(/\s+/).pop();
   }
@@ -41786,12 +42599,18 @@ function eraFillBuild(tpl, ev){
 function eraPickBuild(pool){
   var key = (eraCap && eraCap.key) || '1966';
   var arr = pool[key] || pool['1966'];
-  var seed = ((eraCap && eraCap.seed) || 1) + eraReveal.queue.length * 17 + (live ? live.minute * 3 : 0);
-  var rng = ((seed * 1664525 + 1013904223) >>> 0) / 4294967296;
-  var tpl = arr[Math.floor(rng * arr.length)];
-  if (ERA_SPOILER_RE.test(tpl)) {
-    for (var i = 0; i < arr.length; i++){ if (!ERA_SPOILER_RE.test(arr[i])) { tpl = arr[i]; break; } }
+  if (eraCap) eraCap.usedBuild = eraCap.usedBuild || [];
+  var used = (eraCap && eraCap.usedBuild) || [];
+  var fresh = arr.filter(function(t){ return used.indexOf(t) < 0 && !(typeof ERA_SPOILER_RE !== 'undefined' && ERA_SPOILER_RE.test(t)); });
+  if (!fresh.length){
+    used.length = 0;
+    fresh = arr.filter(function(t){ return !(typeof ERA_SPOILER_RE !== 'undefined' && ERA_SPOILER_RE.test(t)); });
+    if (!fresh.length) fresh = arr.slice();
   }
+  var seed = ((eraCap && eraCap.seed) || 1) + ((eraCap && eraCap.usedBuild) ? eraCap.usedBuild.length * 17 : 0) + (live ? live.minute * 3 : 0);
+  var rng = ((seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  var tpl = fresh[Math.floor(rng * fresh.length)];
+  if (eraCap) eraCap.usedBuild.push(tpl);
   return tpl;
 }
 function eraLastQueuedSet(){
@@ -42110,8 +42929,36 @@ function checkGoalMilestones(scorerObj){
    (centre-forward and inside-forwards included) with no preference for the wide men who actually took
    corners in this era. Now prefers an Outside-Right/Outside-Left/winger by real researched position first,
    falling back to scorerFor's broader pool only when the side has no recognisable winger in the XI at all. */
+
+/* v385 : every named player in commentary (keepers included) is taken from
+   the eleven currently on the pitch, not the bench or the club's full squad. */
+function isGoalkeeperPlayer(p){
+  if (!p) return false;
+  if (p.slot === 'GK') return true;
+  var pos = String(p.pos || '').toLowerCase();
+  return /(^|[^a-z])goalkeeper([^a-z]|$)|(^|[^a-z])keeper([^a-z]|$)/.test(pos);
+}
+function onPitchPlayers(team){
+  if (!live) return [];
+  if (team === ourClubName) return (live.ourXI || []).filter(Boolean);
+  return (live.oppSquad || []).filter(Boolean);
+}
+function onPitchKeeper(team){
+  var pool = onPitchPlayers(team).filter(isGoalkeeperPlayer);
+  if (pool.length) return pool[0]; /* the one man in goal, never a random pick among keepers */
+  return null;
+}
+function eraSyncWho(){
+  if (!eraCap || !eraCap.cap || !eraCap.cap.meta || !live) return;
+  function rec(p, team){ return {n:p.n, pos:p.pos, slot:p.slot, team:team, rep:p.rep}; }
+  var who = [];
+  (live.ourXI || []).forEach(function(p){ if (p) who.push(rec(p,'us')); });
+  (live.oppSquad || []).forEach(function(p){ if (p) who.push(rec(p,'opp')); });
+  eraCap.cap.meta.who = who;
+}
+
 function cornerTakerFor(team){
-  var pool = team === ourClubName ? live.ourXI : live.oppSquad;
+  var pool = onPitchPlayers(team);
   var wingers = (pool||[]).filter(function(p){ return p && /Outside-Right|Outside-Left|Winger/.test(p.pos||''); });
   if (wingers.length) return wingers[Math.floor(Math.random()*wingers.length)];
   return scorerFor(team);
@@ -42166,8 +43013,8 @@ function scorerFor(team){
   return pick(pool);
 }
 function keeperFor(team){
-  var pool = team === ourClubName ? live.ourXI.filter(function(p){return p.slot==='GK';}) : live.oppSquad.filter(function(p){return p.slot==='GK';});
-  return pool.length ? pick(pool).n : (team===ourClubName?ourClubName:live.f.opp);
+  var k = onPitchKeeper(team);
+  return k ? k.n : (team===ourClubName?ourClubName:live.f.opp);
 }
 /* ---------- RICHER SITUATIONAL COMMENTARY: two outfield players named in the
    one passage of play (a through-ball, a cross, a tackle that stops a man),
@@ -42175,7 +43022,7 @@ function keeperFor(team){
    line singling out whoever's actually having the standout game at half-back
    or in defence, drawing on the same squads already in play. */
 function twoDistinctAttackers(team){
-  var pool = (team === ourClubName ? live.ourXI : live.oppSquad).filter(function(p){return p.slot!=='GK';});
+  var pool = onPitchPlayers(team).filter(function(p){return !isGoalkeeperPlayer(p);});
   if (pool.length < 2) { var one = scorerFor(team); return [one, one]; }
   var p1 = pick(pool);
   var rest = pool.filter(function(p){return p!==p1;});
@@ -42190,14 +43037,14 @@ function twoDistinctAttackers(team){
    rather than a goalkeeper or an out-and-out forward wrongly cast as a defender/half-back), and only to the
    truly full pool if there's genuinely nobody else to name. */
 function defenderFor(team){
-  var full = team === ourClubName ? live.ourXI : live.oppSquad;
+  var full = onPitchPlayers(team);
   var pool = full.filter(function(p){return p.slot==='FB' || p.slot==='HB';});
   if (pool.length) return pick(pool);
   var outfield = full.filter(function(p){ return p.slot!=='GK'; });
   return outfield.length ? pick(outfield) : pick(full);
 }
 function standoutHalfBack(team){
-  var full = team === ourClubName ? live.ourXI : live.oppSquad;
+  var full = onPitchPlayers(team);
   var pool = full.filter(function(p){return p.slot==='HB';});
   if (pool.length) return pick(pool);
   var outfield = full.filter(function(p){ return p.slot!=='GK'; });
@@ -43504,7 +44351,8 @@ function simulateMinuteBlock(skipHalfPause){
      statistic either. Shot counts, by contrast, weren't a thing the press or
      a ground announcer compiled at all in 1946-47, so that's gone from the
      commentary entirely rather than just moved. */
-  if (!live.attendanceAnnounced && live.minute >= live.attendanceAnnounceAt){
+  /* v385 : the crowd is announced at half-time (see the interval block below), not mid-second-half or in first-half stoppage. */
+  if (!live.attendanceAnnounced && live.halfShown && live.minute >= (live.attendanceAnnounceAt || 45)){
     live.attendanceAnnounced = true;
     addLine('', "ANNOUNCEMENT: today's attendance is given as "+live.attendanceFigure.toLocaleString()+'.');
   }
@@ -43522,6 +44370,10 @@ function simulateMinuteBlock(skipHalfPause){
     live.halfShown=true;
     live.minute = 45;
     addLine('', pick(bank.half));
+    if (!live.attendanceAnnounced){
+      live.attendanceAnnounced = true;
+      addLine('', "ANNOUNCEMENT: today's attendance is given as "+live.attendanceFigure.toLocaleString()+'.');
+    }
     document.getElementById('clock').textContent = '45:00';
     if (!skipHalfPause){
       document.getElementById('btn-pause').textContent = 'RESUME (2ND HALF)';
@@ -43619,17 +44471,21 @@ function simulateMinuteBlock(skipHalfPause){
     addLine('', fill(pickFresh(bank.cornerSetup), cTeam, cTaker.n));
     var cOdds = cTeam===ourClubName ? usOdds : (1-usOdds);
     var cRoll = Math.random();
+    var cPair = twoDistinctAttackers(cTeam);
+    var cOther = (cPair[0] && cTaker && cPair[0].n === cTaker.n) ? cPair[1] : cPair[0];
+    if (!cOther || (cTaker && cOther.n === cTaker.n)) cOther = cPair[1] || cTaker;
     if (cRoll < (0.08 + cOdds*0.06) * engineGoalScale() * (cTeam===ourClubName ? gr.usMult : gr.oppMult)){
-      if (cTeam===ourClubName){ live.usScore++; live.scorers.push(cTaker.n); } else { live.oppScore++; }
-      (cTeam===ourClubName ? live.usGoals : live.oppGoals).push({n:cTaker.n, min:live.minute});
+      var cScorer = cOther || cTaker;
+      if (cTeam===ourClubName){ live.usScore++; live.scorers.push(cScorer.n); } else { live.oppScore++; }
+      (cTeam===ourClubName ? live.usGoals : live.oppGoals).push({n:cScorer.n, min:live.minute});
       live.maxLeadUs = Math.max(live.maxLeadUs, live.usScore-live.oppScore);
       live.maxLeadOpp = Math.max(live.maxLeadOpp, live.oppScore-live.usScore);
-      addLine('goal', fill(pickFresh(bank.cornerGoal), cTeam, cTaker.n));
-      if (cTeam===ourClubName) checkGoalMilestones(cTaker);
+      addLine('goal', fill(pickFresh(bank.cornerGoal), cTeam, cScorer.n, cTaker.n));
+      if (cTeam===ourClubName) checkGoalMilestones(cScorer);
       eraHoldScoreFromSim();
       renderScoreboardScorers();
     } else if (cRoll < 0.45){
-      addLine('', fill(pickFresh(bank.cornerHeaderOver), cTeam, cTaker.n));
+      addLine('', fill(pickFresh(bank.cornerHeaderOver), cTeam, (cOther||cTaker).n, cTaker.n));
     } else {
       addLine('', fill(pickFresh(bank.cornerCleared), cTeam, cTaker.n));
     }
@@ -47084,7 +47940,7 @@ function finishMatch(){
        season's attendance model). Reuses the exact figure announced over
        the tannoy at kick-off, rather than rolling a fresh one now. */
     var friendlyAttendance = live.attendanceFigure;
-    var friendlyGate = Math.round(friendlyAttendance * 0.05 * (1-ENTERTAINMENTS_DUTY)); /* v117 : less Entertainments Duty */
+    var friendlyGate = Math.round(friendlyAttendance * ((typeof currentPricePerHead==='function' ? currentPricePerHead() : 0.075) * (0.05/0.075)) * (1-currentEntertainmentsDuty())); /* v117/v385 : a friendly is cheaper than the league admission, scaled with the era price; duty as it then stood */
     var friendlyTravel = f.home ? 0 : ((typeof scaleEraTravel==='function') ? scaleEraTravel(10 + Math.floor(Math.random()*10)) : (10 + Math.floor(Math.random()*10)));
     finances.bank += friendlyGate - wageBill - friendlyTravel;
     finances.lastGate = friendlyGate;
@@ -47106,7 +47962,7 @@ function finishMatch(){
       var cupRoundIdx = cupRoundNames.indexOf((f.roundName||'').replace(' (Replay)',''));
       var ourCupShare = (cupRoundIdx>=0 && cupRoundIdx<=1) ? 0.5 : 0.45;
       var cupPricePerHead = f.neutralVenue ? cupNeutralPricePerHead(f.neutralVenue) : pricePerHead;
-      gate = Math.round(attendance*cupPricePerHead*(1-ENTERTAINMENTS_DUTY)*ourCupShare); /* v117 : duty off the gross first, then the split */ /* v107 : neutral Semi-Final/Final uses its own bigger crowd and dearer admission; same 45% club share */
+      gate = Math.round(attendance*cupPricePerHead*(1-currentEntertainmentsDuty())*ourCupShare); /* v117 : duty off the gross first, then the split */ /* v107 : neutral Semi-Final/Final uses its own bigger crowd and dearer admission; same 45% club share */
     } else {
       var lgSplit = leagueGateSplit(attendance, pricePerHead); /* v119 : one pot, split 80/20, see leagueGateSplit */
       gate = f.home ? lgSplit.home : lgSplit.away; /* v117 : 27% Entertainments Duty off the gross gate first */ /* visiting club's share of the gate : the game's own figure, not a sourced 1946-50 League rule (v116 note) */
@@ -47120,7 +47976,7 @@ function finishMatch(){
     if (f.isCup || (f.isLCup && f.neutralVenue)){ aiAdjustBalance(f.opp, gate); } /* Cup : both clubs take the same share of one net pot (50/50, or 45/45 + 10% pool) : already conserving */
     else if (f.home){ aiAdjustBalance(f.opp, lgSplit.away); } /* v119 : the visitors' 20% comes out of the same pot, not on top */
     else { aiAdjustBalance(f.opp, lgSplit.home); aiClubLastGate[f.opp] = {att:attendance, net:lgSplit.home}; } /* v119 : host keeps net less our 20% (was gate/0.2 = the whole net) */
-    finances.lastDuty = Math.round(attendance*((f.isCup||f.isLCup)&&f.neutralVenue?cupPricePerHead:pricePerHead)*ENTERTAINMENTS_DUTY*((f.isCup||(f.isLCup&&f.neutralVenue))?ourCupShare:(f.home?(1-LEAGUE_AWAY_SHARE):LEAGUE_AWAY_SHARE))); /* v117 : our share of the duty, for reference (v119 : pro rata to our 80/20 share) */
+    finances.lastDuty = Math.round(attendance*((f.isCup||f.isLCup)&&f.neutralVenue?cupPricePerHead:pricePerHead)*currentEntertainmentsDuty()*((f.isCup||(f.isLCup&&f.neutralVenue))?ourCupShare:(f.home?(1-LEAGUE_AWAY_SHARE):LEAGUE_AWAY_SHARE))); /* v117 : our share of the duty, for reference (v119 : pro rata to our 80/20 share) */
   }
 
   /* preseason friendlies happen before the real season has kicked off for
@@ -47310,7 +48166,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v384'; /* v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v385'; /* v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
