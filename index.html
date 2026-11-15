@@ -4148,7 +4148,8 @@ body.theme-turnstile #halftime-talk-box .matchctl button.primary{
         <p class="sub" id="table-results-line" style="font-size:12px; margin-bottom:4px;">LAST SATURDAY'S RESULTS:</p>
         <p class="sub" id="table-results-text" style="margin-bottom:14px;"></p>
         <p class="sub" id="table-zone-legend" style="font-size:12px;"></p>
-        <div class="scroll-box"><table><thead><tr><th class="num">POS</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">F</th><th class="num">A</th><th class="num">GD</th><th class="num">PTS</th></tr></thead><tbody id="table-body"></tbody></table></div>
+        <div class="scroll-box"><table><thead><tr><th class="num">POS</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">F</th><th class="num">A</th><th class="num">GD</th><th class="num">PTS</th><th class="num" id="table-gih-th" style="display:none;">GIH</th></tr></thead><tbody id="table-body"></tbody></table></div>
+        <div class="box" id="run-in-box" style="margin-top:12px; display:none;"><div class="box-title">THE RUN-IN</div><p class="sub" id="run-in-text"></p></div>
         <div class="box" style="margin-top:16px;">
           <div class="box-title">LEADING GOALSCORERS</div>
           <div class="scroll-box" style="max-height:220px;"><table><thead><tr><th>Player</th><th>Club</th><th class="num">Goals</th></tr></thead><tbody id="scorers-body"></tbody></table></div>
@@ -16545,6 +16546,10 @@ function advanceCupField(){
       cupBracket.lastDayLines = firstPassLines.slice();
       cupBracket.lastDayIso = cupRoundDates[cupBracket.roundIdx];
       cupBracket.lastDayRoundName = cupRoundNames[cupBracket.roundIdx];
+      if (cupRoundNames[cupBracket.roundIdx]==='Final'){
+        var _fn = (cupBracket.alive||[]).map(function(c){ return c.n; });
+        addNews('board', 'FA CUP FINAL DAY: '+((_fn[0]&&_fn[1])?(_fn[0]+' v '+_fn[1]+' at '):( 'the Final at '))+cupFinalGroundShort()+'.');
+      }
       if (cupBracket.pendingReplays.some(function(r){ return r.roundIdx===cupBracket.roundIdx && !r.resolved; })) break; /* at least one fresh replay just got scheduled : wait for it, same as any other */
     }
 
@@ -16692,6 +16697,496 @@ function clubsOccupiedByCupOn(dateIso){
   }
   return set;
 }
+/* v394 : close-season cup finals, dated midweek catch-ups, and run-in clarity. */
+function fmtDateSat(d){
+  if (d==null || d==='') return '';
+  if (typeof d==='string') d = (typeof dateFromIso==='function') ? dateFromIso(d) : new Date(d+'T12:00:00');
+  if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+  var dn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var mn = (typeof MONTH_LONG!=='undefined' && MONTH_LONG) ? MONTH_LONG : ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return dn[d.getDay()]+' '+d.getDate()+' '+mn[d.getMonth()]+' '+d.getFullYear();
+}
+function faCupFinalIso(){
+  var i = (typeof cupRoundNames!=='undefined' && cupRoundNames) ? cupRoundNames.length-1 : -1;
+  return (i>=0 && typeof cupRoundDates!=='undefined' && cupRoundDates && cupRoundDates[i]) ? cupRoundDates[i] : null;
+}
+function cupFinalGroundShort(){
+  var g = (typeof cupFinalVenue!=='undefined' && cupFinalVenue && cupFinalVenue.ground) ? String(cupFinalVenue.ground) : 'Wembley';
+  if (/wembley/i.test(g)) return 'Wembley';
+  return g || 'Wembley';
+}
+function faCupFinalReplayPending(){
+  if (!cupBracket) return null;
+  var fi = (typeof cupRoundNames!=='undefined' && cupRoundNames) ? cupRoundNames.length-1 : -1;
+  var list = (cupBracket.pendingReplays||[]).filter(function(r){
+    return r && !r.resolved && (r.roundIdx===fi || /final/i.test(r.roundName||''));
+  });
+  return list[0] || null;
+}
+function faCupFinalists(){
+  var alive = (cupBracket && cupBracket.alive) ? cupBracket.alive.map(function(c){ return c.n; }) : [];
+  if (alive.length>=2) return {a:alive[0], b:alive[1]};
+  return null;
+}
+function faCupHistoryHasFinal(){
+  return (cupBracket && cupBracket.history||[]).some(function(h){ return h && (/^Final/i.test(h.roundName||'') || h.roundName==='Final'); });
+}
+function faCupStatusLine(){
+  var venue = cupFinalGroundShort();
+  var finIso = faCupFinalIso();
+  var replay = faCupFinalReplayPending();
+  if (cupBracket && cupBracket.championName) return 'Won by '+cupBracket.championName;
+  if (replay && replay.replayDateIso) return 'Final replay, '+fmtDateSat(replay.replayDateIso)+', '+venue;
+  if (finIso && !faCupHistoryHasFinal()){
+    var sfDone = (cupBracket && cupBracket.history||[]).some(function(h){ return /Semi/i.test(h.roundName||''); });
+    var sfDate = (typeof cupRoundDates!=='undefined' && cupRoundDates) ? cupRoundDates[cupRoundNames.length-2] : null;
+    if (sfDone || (sfDate && isoOf(currentDate) >= sfDate) || (cupBracket && cupBracket.roundIdx >= cupRoundNames.length-1))
+      return 'Final, '+fmtDateSat(finIso)+', '+venue;
+  }
+  if (cupState && !cupState.alive && (cupBracket && (cupBracket.history||[]).length))
+    return "You're out. The competition continues without you.";
+  if (cupState && cupState.alive){
+    var pendingCupFx = (typeof fixtures!=='undefined' && fixtures) ? fixtures.find(function(f){ return f.isCup && !f.played; }) : null;
+    if (pendingCupFx){
+      var when = '';
+      try { when = fmtDateSat(fixtureDate(fixtures.indexOf(pendingCupFx))); } catch(e){}
+      return (cupRoundNames[cupState.roundIdx]||'FA Cup')+(when?', '+when:'')+(pendingCupFx.opp?', v '+pendingCupFx.opp:'');
+    }
+    return 'Still in it. The draw for '+(cupRoundNames[cupState.roundIdx]||'the next round')+' is still to come.';
+  }
+  if (finIso) return 'Final, '+fmtDateSat(finIso)+', '+venue;
+  return (seasonLabel||'')+' FA Challenge Cup';
+}
+function scheduledFinalTab(){
+  if (faCupHistoryHasFinal()) return null;
+  var finIso = faCupFinalIso();
+  if (!finIso) return null;
+  var sfDone = (cupBracket && cupBracket.history||[]).some(function(h){ return /Semi/i.test(h.roundName||''); });
+  var sfDate = (typeof cupRoundDates!=='undefined' && cupRoundDates) ? cupRoundDates[cupRoundNames.length-2] : null;
+  if (!sfDone && !(sfDate && isoOf(currentDate) >= sfDate) && !(cupBracket && cupBracket.roundIdx >= cupRoundNames.length-1)) return null;
+  var venue = cupFinalGroundShort();
+  var replay = faCupFinalReplayPending();
+  var lines = [];
+  var finalists = faCupFinalists();
+  var when = replay && replay.replayDateIso ? ('replay '+fmtDateSat(replay.replayDateIso)) : fmtDateSat(finIso);
+  if (finalists) lines.push(finalists.a+' v '+finalists.b+', '+venue+', '+when+'. Not yet played.');
+  else lines.push('The Final is at '+venue+' on '+fmtDateSat(finIso)+'. Not yet played.');
+  if (replay && replay.replayDateIso) lines.push('The first match was drawn. The replay is at '+venue+' on '+fmtDateSat(replay.replayDateIso)+'.');
+  return {roundName:'Final', lines:lines, remaining:2, matchDateIso:replay&&replay.replayDateIso?replay.replayDateIso:finIso, scheduled:true};
+}
+function leagueCutoffIso(){
+  var fin = faCupFinalIso();
+  if (fin){
+    var d = dateFromIso(fin);
+    d.setDate(d.getDate()-1);
+    return isoOf(d);
+  }
+  var y = (typeof seasonStartYear==='function') ? seasonStartYear() : (currentDate ? currentDate.getFullYear() : 1981);
+  return (y+1)+'-05-21';
+}
+var ourDivisionCatchUpLog = [];
+var clubLeagueDateLog = {};
+var lastRunInNewsWeek = null;
+function resetRunInState(){
+  ourDivisionCatchUpLog = [];
+  clubLeagueDateLog = {};
+  lastRunInNewsWeek = null;
+}
+function noteClubLeagueGame(name, iso){
+  if (!name || !iso) return;
+  if (!clubLeagueDateLog[name]) clubLeagueDateLog[name] = [];
+  if (clubLeagueDateLog[name].indexOf(iso)<0) clubLeagueDateLog[name].push(iso);
+}
+function clubGamesInRollingWeek(name, iso){
+  if (!name || !iso) return 0;
+  var t = dateFromIso(iso).getTime();
+  return (clubLeagueDateLog[name]||[]).filter(function(x){
+    var d = dateFromIso(x).getTime();
+    return d <= t && (t-d) < 7*86400000;
+  }).length;
+}
+function countMidweeksLeft(fromIso, toIso){
+  var d = dateFromIso(fromIso), end = dateFromIso(toIso), n=0, guard=0;
+  if (!d || !end || isNaN(d.getTime()) || isNaN(end.getTime())) return 0;
+  d = new Date(d.getTime()+86400000);
+  while (guard++<120 && d.getTime()<=end.getTime()){
+    var dow = d.getDay();
+    if (dow===2 || dow===3) n++;
+    d = new Date(d.getTime()+86400000);
+  }
+  return n;
+}
+function weeklyLeagueCap(iso){
+  var target = 2*((typeof rivals!=='undefined' && rivals) ? rivals.length : 0);
+  var cutoff = leagueCutoffIso();
+  var maxShort = 0;
+  (rivals||[]).forEach(function(r){
+    if (table[r.n] && table[r.n].p < target) maxShort = Math.max(maxShort, target-table[r.n].p);
+  });
+  if (typeof ourClubName!=='undefined' && table[ourClubName] && table[ourClubName].p < target)
+    maxShort = Math.max(maxShort, target-table[ourClubName].p);
+  var left = countMidweeksLeft(iso, cutoff);
+  if (maxShort > left) return 3;
+  return 2;
+}
+function isKnownCupDateIso(iso){
+  if (!iso) return false;
+  if (typeof cupRoundDates!=='undefined' && cupRoundDates){
+    if (Array.isArray(cupRoundDates) && cupRoundDates.indexOf(iso)>=0) return true;
+  }
+  var fin = faCupFinalIso();
+  if (fin && iso===fin) return true;
+  return false;
+}
+function nextCatchUpMidweekIso(fromIso){
+  var d = dateFromIso(fromIso);
+  if (!d || isNaN(d.getTime())) return null;
+  d = new Date(d.getTime()+86400000);
+  var cutoff = dateFromIso(leagueCutoffIso());
+  var guard=0;
+  while (guard++<80 && d.getTime()<=cutoff.getTime()){
+    var dow = d.getDay();
+    var iso = isoOf(d);
+    if ((dow===3 || dow===2) && !isKnownCupDateIso(iso)) return iso;
+    d = new Date(d.getTime()+86400000);
+  }
+  return null;
+}
+function planRemainingCatchUps(){
+  if (typeof rivals==='undefined' || !rivals || !table) return;
+  var target = 2*rivals.length;
+  var shortMax = 0;
+  rivals.forEach(function(r){ if (table[r.n]) shortMax = Math.max(shortMax, target-table[r.n].p); });
+  var planned = (ourDivisionCatchUpLog||[]).filter(function(c){ return c && !c.played; }).length;
+  var iso = isoOf(currentDate);
+  var guard=0;
+  while (planned < shortMax && guard++<40){
+    iso = nextCatchUpMidweekIso(iso);
+    if (!iso) break;
+    if (!(ourDivisionCatchUpLog||[]).some(function(c){ return c && c.iso===iso; })){
+      ourDivisionCatchUpLog.push({iso:iso, ko:'7.45pm', played:false, lines:null});
+      planned++;
+    }
+  }
+}
+function playCatchUpOnIso(iso){
+  if (!iso) return [];
+  var rec = (ourDivisionCatchUpLog||[]).filter(function(c){ return c && c.iso===iso; })[0];
+  if (rec && rec.played) return rec.lines||[];
+  var cap = weeklyLeagueCap(iso);
+  var target = 2*rivals.length;
+  var occupied = (typeof clubsOccupiedByCupOn==='function') ? clubsOccupiedByCupOn(iso) : {};
+  var pool = rivals.filter(function(r){
+    return table[r.n] && table[r.n].p < target && !occupied[r.n] && clubGamesInRollingWeek(r.n, iso) < cap;
+  }).slice();
+  for (var i=pool.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=pool[i]; pool[i]=pool[j]; pool[j]=tmp; }
+  pool.sort(function(a,b){ return table[a.n].p - table[b.n].p; });
+  var lines = [];
+  while (pool.length>=2){
+    var a=pool.shift(), b=pool.shift();
+    var sc = simAiLeagueMatch(a,b), gA=sc[0], gB=sc[1];
+    if (typeof updateAiForm==='function'){ updateAiForm(a.n,gA,gB); updateAiForm(b.n,gB,gA); }
+    if (typeof settleAiLeagueGate==='function') settleAiLeagueGate(a.n,b.n);
+    if (typeof aiAdjustBalance==='function'){
+      aiAdjustBalance(a.n, aiLeagueMatchBonus(a.n,gA>gB,gA===gB));
+      aiAdjustBalance(b.n, aiLeagueMatchBonus(b.n,gB>gA,gA===gB));
+    }
+    table[a.n].p++; table[b.n].p++; table[a.n].f+=gA; table[a.n].a+=gB; table[b.n].f+=gB; table[b.n].a+=gA;
+    if (gA>gB){ table[a.n].w++; table[a.n].pts+=pointsForWin(); table[b.n].l++; }
+    else if (gB>gA){ table[b.n].w++; table[b.n].pts+=pointsForWin(); table[a.n].l++; }
+    else { table[a.n].d++; table[b.n].d++; table[a.n].pts++; table[b.n].pts++; }
+    lines.push(a.n.toUpperCase()+' '+gA+'-'+gB+' '+b.n.toUpperCase());
+    if (typeof statDistributeMatch==='function'){ statDistributeMatch(a.n,gA); statDistributeMatch(b.n,gB); }
+    noteClubLeagueGame(a.n,iso); noteClubLeagueGame(b.n,iso);
+  }
+  if (!lines.length){
+    var still = rivals.some(function(r){ return table[r.n] && table[r.n].p < target; });
+    if (!still && rec){ rec.played=true; rec.lines=[]; }
+    return [];
+  }
+  if (!rec){
+    rec = {iso:iso, ko:'7.45pm', played:true, lines:lines};
+    ourDivisionCatchUpLog.push(rec);
+  } else {
+    rec.played = true; rec.lines = lines; rec.ko = rec.ko||'7.45pm';
+  }
+  ourDivisionLastLines = lines.slice();
+  return lines;
+}
+function maybePlayCatchUpThisMidweek(){
+  planRemainingCatchUps();
+  var iso = isoOf(currentDate);
+  var rec = (ourDivisionCatchUpLog||[]).filter(function(c){ return c && c.iso<=iso && !c.played; })[0];
+  if (!rec) return [];
+  return playCatchUpOnIso(rec.iso);
+}
+function catchUpOurDivisionBacklog(){
+  /* v394: spread remaining league games over midweek dates instead of dumping them all today. */
+  planRemainingCatchUps();
+  var today = isoOf(currentDate);
+  (ourDivisionCatchUpLog||[]).forEach(function(c){
+    if (c && !c.played && c.iso<=today) playCatchUpOnIso(c.iso);
+  });
+}
+function showGamesInHandCol(){
+  if (!currentDate) return false;
+  var m = currentDate.getMonth();
+  return m===3 || m===4;
+}
+function gamesInHandOf(name){
+  var maxP = 0;
+  Object.keys(table||{}).forEach(function(n){ if (table[n] && table[n].p>maxP) maxP=table[n].p; });
+  var p = (table && table[name]) ? table[name].p : 0;
+  return Math.max(0, maxP-p);
+}
+function runInStandings(){
+  return Object.keys(table||{}).map(function(n){ return Object.assign({name:n}, table[n], {gd:(table[n].f||0)-(table[n].a||0), gih:gamesInHandOf(n)}); })
+    .sort(function(a,b){ return b.pts-a.pts || (typeof tableTieBreak==='function'?tableTieBreak(a,b):((b.gd||0)-(a.gd||0))); });
+}
+function renderRunInPanel(){
+  var box = document.getElementById('run-in-box');
+  var text = document.getElementById('run-in-text');
+  if (!box || !text) return;
+  if (!showGamesInHandCol()){ box.style.display='none'; text.textContent=''; return; }
+  var gamesTotal = 2*((typeof rivals!=='undefined' && rivals) ? rivals.length : 0);
+  var rows = runInStandings();
+  if (!rows.length){ box.style.display='none'; return; }
+  var shape = (typeof divisionShapeNow==='function') ? divisionShapeNow() : {promote:0, relegate:2};
+  var parts = [];
+  var lead = rows[0];
+  var titleOpen = rows.length>1 && (lead.pts <= (rows[1].pts + pointsForWin()*Math.max(0, gamesTotal-rows[1].p)));
+  if (titleOpen || (lead && (gamesTotal-lead.p)<=3)){
+    var chase = rows.filter(function(r,i){ return i>0 && (r.pts + pointsForWin()*Math.max(0, gamesTotal-r.p)) >= lead.pts; }).slice(0,3);
+    var line = lead.name+' lead on '+lead.pts+' points with '+Math.max(0, gamesTotal-lead.p)+' to play.';
+    if (chase.length){
+      line += ' Still in the title race: '+chase.map(function(r){
+        return r.name+' on '+r.pts+(r.gih?(' with '+r.gih+' game'+(r.gih===1?'':'s')+' in hand'):(' , '+Math.max(0, gamesTotal-r.p)+' to play'));
+      }).join('; ')+'.';
+    } else {
+      line += ' No other club can now catch them for the title.';
+    }
+    if (Math.max(0, gamesTotal-lead.p)===1 && chase.length) line += ' It could be decided on the final day.';
+    parts.push(line);
+  }
+  if (shape && shape.relegate>0){
+    var n = rows.length;
+    var danger = rows.slice(n-shape.relegate-3);
+    var still = danger.filter(function(r){
+      var max = r.pts + pointsForWin()*Math.max(0, gamesTotal-r.p);
+      var safe = rows[n-shape.relegate-1];
+      return safe && max >= safe.pts;
+    });
+    if (still.length){
+      parts.push('Relegation: '+still.map(function(r){ return r.name+' ('+r.pts+' pts, '+Math.max(0, gamesTotal-r.p)+' left)'; }).join(', ')+'.');
+    }
+  }
+  if (shape && shape.promote>0 && (typeof divisionTier==='undefined' || divisionTier!==3)){
+    var promo = rows.slice(0, shape.promote+3);
+    parts.push('Promotion places are still live at the top: '+promo.slice(0, shape.promote+2).map(function(r){ return r.name+' '+r.pts; }).join(', ')+'.');
+  }
+  if (!parts.length){ box.style.display='none'; return; }
+  box.style.display='';
+  text.textContent = parts.join(' ');
+}
+function maybeRunInNews(){
+  if (!showGamesInHandCol()) return;
+  var weekKey = isoOf(currentDate).slice(0,8);
+  try { weekKey = (function(){ var d=currentDate; var back=d.getDay()===0?6:d.getDay()-1; var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()-back); return isoOf(x); })(); } catch(e){}
+  if (lastRunInNewsWeek === weekKey) return;
+  var gamesTotal = 2*((typeof rivals!=='undefined' && rivals) ? rivals.length : 0);
+  if (!gamesTotal) return;
+  var rows = runInStandings();
+  if (!rows.length || rows[0].p < gamesTotal-8) return;
+  lastRunInNewsWeek = weekKey;
+  var lead = rows[0];
+  var left = Math.max(0, gamesTotal-lead.p);
+  var chase = rows.filter(function(r,i){ return i>0 && (r.pts + pointsForWin()*Math.max(0, gamesTotal-r.p)) >= lead.pts; }).slice(0,3);
+  if (chase.length){
+    if (left<=1){
+      addNews('board', 'FINAL-DAY DECIDER: '+lead.name+' sit top on '+lead.pts+' points with '+left+' game'+(left===1?'':'s')+' left. '+chase.map(function(r){ return r.name+' have '+r.pts+' points and '+Math.max(0, gamesTotal-r.p)+' to play'+(r.gih?(' ('+r.gih+' in hand)'):''); }).join('; ')+'.');
+    } else {
+      addNews('board', 'TITLE RACE: '+lead.name+' lead on '+lead.pts+' points with '+left+' to play. '+chase.map(function(r){ return r.name+' are on '+r.pts+(r.gih?(' with '+r.gih+' game'+(r.gih===1?'':'s')+' in hand'):(' with '+Math.max(0, gamesTotal-r.p)+' to play')); }).join('; ')+'.');
+    }
+  }
+  var shape = (typeof divisionShapeNow==='function') ? divisionShapeNow() : {promote:0, relegate:2};
+  if (shape.relegate>0){
+    var n = rows.length;
+    var zone = rows.slice(n-shape.relegate);
+    var still = zone.filter(function(r){ var safe=rows[n-shape.relegate-1]; return safe && (r.pts + pointsForWin()*Math.max(0, gamesTotal-r.p)) >= safe.pts; });
+    if (still.length){
+      addNews('board', 'RELEGATION BATTLE: '+still.map(function(r){ return r.name+' ('+r.pts+' pts, '+Math.max(0, gamesTotal-r.p)+' left)'; }).join(', ')+'.');
+    }
+  }
+  if (shape.promote>0 && (typeof divisionTier==='undefined' || divisionTier!==3)){
+    var bubble = rows[shape.promote];
+    var outside = rows[shape.promote];
+    if (bubble && outside){
+      addNews('board', 'PROMOTION RACE: the cut-off sits around '+rows[Math.max(0,shape.promote-1)].name+' on '+rows[Math.max(0,shape.promote-1)].pts+' points, with '+rows[shape.promote].name+' still in touch on '+rows[shape.promote].pts+'.');
+    }
+  }
+}
+function pendingCloseSeasonCalendar(){
+  var evs = [];
+  if (cupBracket && cupBracket.initialized && !cupBracket.championName){
+    var fin = faCupFinalIso();
+    if (fin) evs.push({iso:fin, kind:'fa-final', label:'the FA Cup Final at '+cupFinalGroundShort(), arrive:'on'});
+    var rp = faCupFinalReplayPending();
+    if (rp && rp.replayDateIso) evs.push({iso:rp.replayDateIso, kind:'fa-final-replay', label:'the FA Cup Final replay at '+cupFinalGroundShort(), arrive:'on'});
+  }
+  if (typeof leagueCup!=='undefined' && leagueCup && leagueCup.active && !leagueCup.champion && (leagueCup.stage==='fin' || leagueCup.stage==='final')){
+    var finD = (typeof elcDatesFor==='function') ? elcDatesFor('fin') : (leagueCup.dates && leagueCup.dates.fin);
+    var isos = Array.isArray(finD) ? finD.slice() : (finD ? [finD] : []);
+    (leagueCup.ties||[]).forEach(function(t){
+      if ((t.stage==='fin' || t.stage==='final') && !t.winner){
+        (t.legs||[]).forEach(function(l){ if (l.iso && !l.played) isos.push(l.iso); });
+      }
+    });
+    var lcName = (typeof currentLeagueCupName==='function'?currentLeagueCupName():'League Cup');
+    isos.forEach(function(iso){ if (iso) evs.push({iso:iso, kind:'lc-final', label:'the '+lcName+' Final', arrive:'on'}); });
+  }
+  [['ec', typeof europeanCup!=='undefined'?europeanCup:null],
+   ['cwc', typeof cupWinnersCup!=='undefined'?cupWinnersCup:null],
+   ['fairs', typeof fairsCup!=='undefined'?fairsCup:null]].forEach(function(pair){
+    var st = pair[1];
+    if (!st || st.championName || (st.active===false && !(st.alive&&st.alive.length))) return;
+    if (!st.active) return;
+    var last = (st.roundDates||[])[(st.roundDates||[]).length-1];
+    if (last) evs.push({iso:last, kind:'eu-final', comp:pair[0], label:'the '+(typeof euCompName==='function'?euCompName(pair[0], (typeof euYear==='function'?euYear(seasonLabel):0)):pair[0])+' Final', arrive:'on'});
+  });
+  (ourDivisionCatchUpLog||[]).forEach(function(c){
+    if (c && c.iso && !c.played) evs.push({iso:c.iso, kind:'catch-up', label:'midweek league fixtures', arrive:'on'});
+  });
+  if (typeof pendingCloseSeasonInternationals==='function'){
+    pendingCloseSeasonInternationals().forEach(function(f){
+      evs.push({iso:f.date, kind:'intl', label:(f.home||'')+' v '+(f.away||''), arrive:'after', intl:f});
+    });
+  }
+  var seen = {};
+  evs = evs.filter(function(e){ if (!e.iso) return false; var k=e.kind+'|'+e.iso; if (seen[k]) return false; seen[k]=1; return true; });
+  evs.sort(function(a,b){ return a.iso<b.iso?-1:a.iso>b.iso?1:0; });
+  return evs;
+}
+function settleOutstandingCupFinals(){
+  var guard=0;
+  while (guard++<8){
+    var needFa = cupBracket && cupBracket.initialized && !cupBracket.championName;
+    var rp = faCupFinalReplayPending();
+    var fin = faCupFinalIso();
+    var today = isoOf(currentDate);
+    if (needFa && fin && today < fin && !rp) break;
+    if (rp && rp.replayDateIso && today < rp.replayDateIso) break;
+    if (typeof advanceCupField==='function') advanceCupField();
+    if (typeof announceCupWinnerIfDue==='function') announceCupWinnerIfDue();
+    if (typeof lcActive==='function' && lcActive() && typeof lcAdvance==='function') lcAdvance();
+    if (cupBracket && cupBracket.championName) break;
+    if (!needFa) break;
+    var stillRp = faCupFinalReplayPending();
+    if (stillRp && stillRp.replayDateIso && isoOf(currentDate) < stillRp.replayDateIso) break;
+    if (fin && isoOf(currentDate) < fin) break;
+  }
+}
+function playCloseSeasonEvent(e){
+  if (!e) return false;
+  var target = dateFromIso(e.iso);
+  if (e.arrive==='after') target = new Date(target.getTime()+86400000);
+  if (target && !isNaN(target.getTime()) && target.getTime() > currentDate.getTime()) currentDate = target;
+  if (e.kind==='fa-final' || e.kind==='fa-final-replay'){
+    settleOutstandingCupFinals();
+    var lines = [];
+    if (cupBracket.lastDayIso === isoOf(currentDate) && cupBracket.lastDayLines && cupBracket.lastDayLines.length) lines = cupBracket.lastDayLines;
+    else if (cupBracket.lastResolvedLines && cupBracket.lastResolvedLines.length) lines = cupBracket.lastResolvedLines;
+    if (lines.length && typeof revealVidiprinter==='function')
+      revealVidiprinter(lines.slice(0,10), 'Vidiprinter – FA Cup, Final');
+    return true;
+  }
+  if (e.kind==='lc-final'){
+    if (typeof lcActive==='function' && lcActive() && typeof lcAdvance==='function') lcAdvance();
+    if (leagueCup && leagueCup.lastLines && leagueCup.lastLines.length && typeof revealVidiprinter==='function')
+      revealVidiprinter(leagueCup.lastLines.slice(0,12), leagueCup.lastTitle || 'Vidiprinter – League Cup Final');
+    return true;
+  }
+  if (e.kind==='eu-final'){
+    try {
+      if (e.comp==='ec' && typeof advanceEuropeanCupField==='function') advanceEuropeanCupField();
+      if (e.comp==='cwc' && typeof advanceCupWinnersCupField==='function') advanceCupWinnersCupField();
+      if (e.comp==='fairs' && typeof advanceFairsCupField==='function') advanceFairsCupField();
+    } catch(err){}
+    return true;
+  }
+  if (e.kind==='catch-up'){
+    playCatchUpOnIso(e.iso);
+    var rec = (ourDivisionCatchUpLog||[]).filter(function(c){ return c && c.iso===e.iso && c.played; }).pop();
+    if (rec && rec.lines && rec.lines.length && typeof revealVidiprinter==='function')
+      revealVidiprinter(['§-- CATCH-UP FIXTURES --'].concat(rec.lines), 'Vidiprinter – Midweek league, 7.45pm');
+    if (typeof maybeRunInNews==='function') maybeRunInNews();
+    if (typeof checkMathematicalCertainties==='function') checkMathematicalCertainties();
+    return true;
+  }
+  if (e.kind==='intl'){
+    if (typeof checkBreakthroughSelections==='function') checkBreakthroughSelections();
+    if (typeof fireDueInternationals==='function') fireDueInternationals();
+    return true;
+  }
+  return false;
+}
+function closeSeasonSnap(){
+  return isoOf(currentDate)+'|'+(cupBracket&&cupBracket.championName||'')+'|'+(cupBracket&&(cupBracket.history||[]).length||0)+'|'+(leagueCup&&leagueCup.champion||'')+'|'+((ourDivisionCatchUpLog||[]).filter(function(c){ return c && !c.played; }).length)+'|'+(typeof europeanCup!=='undefined'&&europeanCup&&europeanCup.championName||'')+'|'+(typeof pendingCloseSeasonInternationals==='function'?pendingCloseSeasonInternationals().length:0);
+}
+function advanceCloseSeasonCalendar(){
+  if (typeof planRemainingCatchUps==='function') planRemainingCatchUps();
+  var evs = pendingCloseSeasonCalendar();
+  var i, progressed=false;
+  for (i=0;i<evs.length;i++){
+    var snap = closeSeasonSnap();
+    playCloseSeasonEvent(evs[i]);
+    try { if (typeof catchUpBackgroundDivisions==='function') catchUpBackgroundDivisions(); } catch(err){}
+    if (closeSeasonSnap()!==snap){ progressed=true; break; }
+  }
+  return progressed;
+}
+function renderCatchUpFixturesBox(){
+  var host = document.getElementById('v-fixtures');
+  if (!host) return;
+  var box = document.getElementById('division-catchup-box');
+  if (!(ourDivisionCatchUpLog||[]).length){ if (box) box.style.display='none'; return; }
+  if (!box){
+    box = document.createElement('div');
+    box.id = 'division-catchup-box';
+    box.className = 'box';
+    box.style.marginTop = '16px';
+    host.appendChild(box);
+  }
+  box.style.display = '';
+  var rows = (ourDivisionCatchUpLog||[]).slice().sort(function(a,b){ return a.iso<b.iso?-1:a.iso>b.iso?1:0; }).map(function(c){
+    var d = dateFromIso(c.iso);
+    var when = fmtDateSat(c.iso);
+    var ko = c.ko || '7.45pm';
+    var res = (c.played && c.lines && c.lines.length) ? c.lines.join('; ') : 'Not yet played';
+    return '<tr><td>'+(d?['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]:'')+'</td><td>'+when+'</td><td>'+ko+'</td><td>League catch-up</td><td>'+res+'</td></tr>';
+  }).join('');
+  box.innerHTML = '<div class="box-title">REST OF THE DIVISION — REARRANGED AND CATCH-UP MATCHES</div><p class="sub">Midweek floodlit fixtures at 7.45pm, shown on their own dates.</p><div class="scroll-box"><table><thead><tr><th>Day</th><th>Date</th><th>K.O.</th><th>Comp</th><th>Result</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+function leagueCupStatusLine(){
+  var name = (typeof currentLeagueCupName==='function'?currentLeagueCupName():'League Cup');
+  if (typeof leagueCup==='undefined' || !leagueCup || !leagueCup.active) return name;
+  if (leagueCup.champion) return 'Won by '+leagueCup.champion;
+  var finD = (typeof elcDatesFor==='function') ? elcDatesFor('fin') : (leagueCup.dates && leagueCup.dates.fin);
+  var iso = Array.isArray(finD) ? finD[0] : finD;
+  if (!iso && leagueCup.ties){
+    (leagueCup.ties||[]).forEach(function(t){
+      if ((t.stage==='fin' || t.stage==='final') && t.legs){
+        (t.legs||[]).forEach(function(l){ if (l.iso && !iso) iso=l.iso; });
+      }
+    });
+  }
+  var venue = 'Wembley';
+  if (leagueCup.stage==='fin' || leagueCup.stage==='final' || (iso && leagueCup.stage && !leagueCup.champion && /fin/i.test(String(leagueCup.stage))))
+    return 'Final, '+(iso?fmtDateSat(iso):'')+(iso?', ':'')+venue;
+  if (leagueCup.ourStatus==='out') return (ourClubName||'We')+' are out'+(leagueCup.ourOut?' ('+leagueCup.ourOut+')':'')+'. The competition continues without us.';
+  if (typeof ELC_NAMES!=='undefined' && ELC_NAMES[leagueCup.stage]) return 'Still in it. '+(ELC_NAMES[leagueCup.stage]||'');
+  return 'Still in it.';
+}
+
 function pickCupOpponent(){
   advanceCupField();
   var poolNames = cupBracket.alive.filter(function(c){ return c.n!==ourClubName; });
@@ -19475,21 +19970,7 @@ function renderAllBackgroundDivisions(){
 function renderCupTab(){
   var statusEl = document.getElementById('cup-status-line');
   if (statusEl){
-    var statusText;
-    if (cupBracket.championName){
-      statusText = cupBracket.championName === ourClubName
-        ? seasonLabel+' FA CHALLENGE CUP : WON BY '+ourClubName.toUpperCase()+' !'
-        : seasonLabel+' FA CHALLENGE CUP : WON BY '+cupBracket.championName.toUpperCase();
-    } else if (!cupState.alive && (cupBracket.history||[]).length){
-      statusText = seasonLabel+' FA CHALLENGE CUP : YOU\'RE OUT — COMPETITION CONTINUES WITHOUT YOU';
-    } else if (cupState.alive && cupState.drawnForRoundIdx >= cupState.roundIdx && cupState.roundIdx < cupRoundNames.length){
-      var pendingCupFx = fixtures.find(function(f){ return f.isCup && !f.played; });
-      statusText = seasonLabel+' FA CHALLENGE CUP : STILL IN IT — '+(pendingCupFx ? (cupRoundNames[cupState.roundIdx].toUpperCase()+' V '+pendingCupFx.opp.toUpperCase()+', '+fmtDateShort(fixtureDate(fixtures.indexOf(pendingCupFx)))) : cupRoundNames[cupState.roundIdx].toUpperCase());
-    } else if (cupState.alive){
-      statusText = seasonLabel+' FA CHALLENGE CUP : STILL IN IT — DRAW FOR '+((cupRoundNames[cupState.roundIdx]||'THE NEXT ROUND')).toUpperCase()+' STILL TO COME';
-    } else {
-      statusText = seasonLabel+' FA CHALLENGE CUP';
-    }
+    var statusText = (typeof faCupStatusLine==='function') ? faCupStatusLine() : (seasonLabel+' FA Challenge Cup');
     statusEl.textContent = statusText;
   }
   var runBody = document.getElementById('cup-ourrun-body');
@@ -19518,7 +19999,10 @@ function allCupRoundsSoFar(){
     var dIso = ri>=0 ? qualifyingRoundDateIso(ri) : null;
     return {roundName:h.roundName, lines:h.lines, remaining:h.remaining, isQualifying:true, dateIso:dIso};
   }).filter(function(h){ return !h.dateIso || h.dateIso <= todayIso || (cupBracket.history||[]).length>0; }); /* v127 : revealed on its real date (and never hidden once the Proper rounds are under way) */
-  return out.concat(cupBracket.history||[]);
+  out = out.concat(cupBracket.history||[]);
+  var sched = (typeof scheduledFinalTab==='function') ? scheduledFinalTab() : null;
+  if (sched) out.push(sched);
+  return out;
 }
 var cupSelectedRoundName = null; /* which round's results are currently shown in cup-history-box : UI-only, not saved */
 function renderCupRoundTabs(){
@@ -23206,6 +23690,7 @@ function renderFixtures(){
     tr.innerHTML = '<td>'+(i+1)+'</td><td>'+dayNames[d.getDay()]+'</td><td>'+fmtDateShort(d)+'</td><td>'+kickoffTimeFor(d)+'</td><td>'+compLabel+'</td><td>'+oppLabel+'</td><td class="num">'+(f.neutralVenue?'N':f.home?'H':'A')+'</td><td>'+resPlain+'</td><td>'+scorersText+'</td><td class="num">'+attendanceText+'</td>';
     body.appendChild(tr);
   });
+  if (typeof renderCatchUpFixturesBox==='function') renderCatchUpFixturesBox();
 }
 /* ---------- PROMOTION/RELEGATION ZONES SHOWN ON THE TABLE: the real shape
    differs by division (see processSeasonEnd) : Third Division (South) promotes
@@ -23285,12 +23770,17 @@ function renderTable(){
   rows.forEach(function(r,i){
     var tr = document.createElement('tr'); if (r.name===ourClubName) tr.classList.add('us');
     var zone = zoneClassFor(i+1, rows.length); if (zone) tr.classList.add(zone);
-    tr.innerHTML = '<td class="num">'+(i+1)+'</td><td class="club-link" data-club="'+r.name.replace(/"/g,'&quot;')+'" style="cursor:pointer; text-decoration:underline;">'+r.name.toUpperCase()+'</td><td class="num">'+r.p+'</td><td class="num">'+r.w+'</td><td class="num">'+r.d+'</td><td class="num">'+r.l+'</td><td class="num">'+r.f+'</td><td class="num">'+r.a+'</td><td class="num">'+(r.gd>0?'+':'')+r.gd+'</td><td class="num">'+r.pts+'</td>';
+    var gihOn = typeof showGamesInHandCol==='function' && showGamesInHandCol();
+    var gihCell = gihOn ? '<td class="num">'+((typeof gamesInHandOf==='function' && gamesInHandOf(r.name)) ? gamesInHandOf(r.name) : '')+'</td>' : '';
+    tr.innerHTML = '<td class="num">'+(i+1)+'</td><td class="club-link" data-club="'+r.name.replace(/"/g,'&quot;')+'" style="cursor:pointer; text-decoration:underline;">'+r.name.toUpperCase()+'</td><td class="num">'+r.p+'</td><td class="num">'+r.w+'</td><td class="num">'+r.d+'</td><td class="num">'+r.l+'</td><td class="num">'+r.f+'</td><td class="num">'+r.a+'</td><td class="num">'+(r.gd>0?'+':'')+r.gd+'</td><td class="num">'+r.pts+'</td>'+gihCell;
     body.appendChild(tr);
   });
+  var gihTh = document.getElementById('table-gih-th');
+  if (gihTh) gihTh.style.display = (typeof showGamesInHandCol==='function' && showGamesInHandCol()) ? '' : 'none';
   var legendEl = document.getElementById('table-zone-legend'); if (legendEl) legendEl.textContent = tableZoneLegend();
   var resultsEl = document.getElementById('table-results-text');
   if (resultsEl) resultsEl.textContent = (ourDivisionLastLines&&ourDivisionLastLines.length) ? ourDivisionLastLines.join(', ') : 'NO MATCHES PLAYED YET THIS SEASON.';
+  if (typeof renderRunInPanel==='function') renderRunInPanel();
   renderTopScorers();
 }
 function rivalMarksmanName(rivalName){
@@ -31166,14 +31656,21 @@ function renderWeek(){
   renderNewsFeed();
   var btn = document.getElementById('btn-goto-lineup');
   if (seasonEndPending){
-    var intlLeft = pendingCloseSeasonInternationals();
-    if (intlLeft.length){
-      var nx = intlLeft[0];
-      document.getElementById('week-sub').textContent = 'CLOSE SEASON : OUR '+seasonLabel+' PROGRAMME IS DONE, BUT '+intlLeft.length+' INTERNATIONAL'+(intlLeft.length>1?'S':'')+' OF THIS SEASON STILL TO BE PLAYED. NEXT : '+nx.home.toUpperCase()+' V '+nx.away.toUpperCase()+', '+intlFixtureLabelDate(nx)+'.';
-      btn.textContent = '> CONTINUE TO '+fmtDate(new Date(dateFromIso(nx.date).getTime()+86400000));
+    if (typeof planRemainingCatchUps==='function') planRemainingCatchUps();
+    var closeEvs = (typeof pendingCloseSeasonCalendar==='function') ? pendingCloseSeasonCalendar() : [];
+    if (!closeEvs.length && typeof pendingCloseSeasonInternationals==='function'){
+      closeEvs = pendingCloseSeasonInternationals().map(function(nx){ return {iso:nx.date, kind:'intl', label:nx.home.toUpperCase()+' V '+nx.away.toUpperCase(), arrive:'after'}; });
+    }
+    if (closeEvs.length){
+      var nx = closeEvs[0];
+      var whenDate = dateFromIso(nx.iso);
+      if (nx.arrive==='after') whenDate = new Date(whenDate.getTime()+86400000);
+      var when = (typeof fmtDate==='function') ? fmtDate(whenDate) : (nx.iso||'');
+      document.getElementById('week-sub').textContent = 'THE LEAGUE PROGRAMME IS OVER, BUT '+String(nx.label||'a fixture').toUpperCase()+' IS STILL TO COME. NEXT, '+when+'.';
+      btn.textContent = '> CONTINUE TO '+when;
       return;
     }
-    document.getElementById('week-sub').textContent = 'THE '+seasonLabel+' SEASON IS OVER : SEE THE NEWS BELOW FOR THE FULL REVIEW.';
+    document.getElementById('week-sub').textContent = 'THE '+seasonLabel+' SEASON IS OVER. SEE THE NEWS BELOW FOR THE FULL REVIEW.';
     btn.textContent = '> BEGIN THE '+nextSeasonLabel()+' SEASON';
     return;
   }
@@ -31240,7 +31737,15 @@ function checkWeatherPostponement(){
 }
 document.getElementById('btn-goto-lineup').addEventListener('click', function(){
   if (seasonEndPending){
-    if (advanceCloseSeasonInternational()){ renderWeek(); return; } /* v105 : this season's internationals first, see pendingCloseSeasonInternationals */
+    if (typeof advanceCloseSeasonCalendar==='function' ? advanceCloseSeasonCalendar() : (typeof advanceCloseSeasonInternational==='function' && advanceCloseSeasonInternational())){
+      try { if (typeof renderCupTab==='function') renderCupTab(); } catch(e){}
+      try { if (typeof renderTable==='function') renderTable(); } catch(e){}
+      try { if (typeof renderFixtures==='function') renderFixtures(); } catch(e){}
+      try { if (typeof renderLeagueCupBox==='function') renderLeagueCupBox(); } catch(e){}
+      try { if (typeof renderEurope==='function') renderEurope(); } catch(e){}
+      renderWeek();
+      return;
+    }
     processSeasonEnd();
     return;
   }
@@ -31251,6 +31756,14 @@ document.getElementById('btn-goto-lineup').addEventListener('click', function(){
     maybeAnnounceEuroCupDraw(); /* v233 */
     maybeAnnounceCwcDraw(); /* v236 */
     maybeAnnounceFairsCupDraw(); /* v258 */
+    if (typeof maybePlayCatchUpThisMidweek==='function'){
+      var cuLines = maybePlayCatchUpThisMidweek();
+      if (cuLines && cuLines.length){
+        addNews('board', 'MIDWEEK LEAGUE (7.45pm): '+cuLines.join(', ')+'.');
+        if (typeof maybeRunInNews==='function') maybeRunInNews();
+        if (typeof checkMathematicalCertainties==='function') checkMathematicalCertainties();
+      }
+    }
     if (checkWeatherPostponement()){
       currentDate = new Date(currentDate.getTime() + 7*86400000);
       resolvePendingNegotiations();
@@ -31382,7 +31895,7 @@ function buildSaveState(){
     news:news, southernTable:southernTable, futureLegends:futureLegends, historicalOneOffs:historicalOneOffs, historicalOneOffsPost1949:historicalOneOffsPost1949, realSchoolboyLegends:realSchoolboyLegends, scoutingPrep:scoutingPrep, markCloselyThisMatch:markCloselyThisMatch, cupState:cupState, cupBracket:cupBracket, scouts:scouts, realGemTargetsState:realGemTargetsState, foreignWhatIfState:foreignWhatIfState, whatIfApproachesThisSeason:whatIfApproachesThisSeason, whatIfSeasonKey:whatIfSeasonKey, assistantHireState:assistantHireState, youthProspects:youthProspects,
     trainerName:trainerName, clubSecretaryName:clubSecretaryName, scoutHirePool:SCOUT_HIRE_POOL, /* v206 : without these, reloading a save would show the generic default "Bert Symons"/"W. H. Cobbett" names even though a different trainer/secretary were generated and shown for the rest of that save */
     reserveLeagueRegion:reserveLeagueRegion, reserveLeagueTable:reserveLeagueTable, reserveLeagueLastLines:reserveLeagueLastLines, reserveFixtureQueue:reserveFixtureQueue, reserveXISelection:reserveXISelection, reservesRecord:reservesRecord, reserveRecentForm:reserveRecentForm,
-    southernLastLines:southernLastLines, ourDivisionLastLines:ourDivisionLastLines, firstDivision:firstDivision, secondDivision:secondDivision, thirdDivisionSouthBg:thirdDivisionSouthBg, thirdDivisionNorth:thirdDivisionNorth, midlandLeague:midlandLeague, northEasternLeague:northEasternLeague,
+    southernLastLines:southernLastLines, ourDivisionLastLines:ourDivisionLastLines, ourDivisionCatchUpLog:(typeof ourDivisionCatchUpLog!=='undefined'?ourDivisionCatchUpLog:[]), clubLeagueDateLog:(typeof clubLeagueDateLog!=='undefined'?clubLeagueDateLog:{}), firstDivision:firstDivision, secondDivision:secondDivision, thirdDivisionSouthBg:thirdDivisionSouthBg, thirdDivisionNorth:thirdDivisionNorth, midlandLeague:midlandLeague, northEasternLeague:northEasternLeague,
     manager:manager, lineupSlots:lineupSlots, substituteId:substituteId, substituteId2:substituteId2, seasonNumber:seasonNumber, seasonLabel:seasonLabel, seasonHistory:seasonHistory, signingLog:signingLog, transferHistory:transferHistory, divisionChampions:divisionChampions, honoursHistory:honoursHistory, europeanCup:europeanCup, cupWinnersCup:cupWinnersCup, fairsCup:fairsCup, lastFaCupWinnerName:lastFaCupWinnerName, lastFaCupRunnerUpName:lastFaCupRunnerUpName, reservesRecord:reservesRecord,
     currentDivisionLabel:currentDivisionLabel, currentDivisionShort:currentDivisionShort, seasonEndPending:seasonEndPending, divisionTier:divisionTier, divisionRegion:divisionRegion, fourthDivisionCreated:fourthDivisionCreated,
     thirdDivisionExpanded1950:thirdDivisionExpanded1950,
@@ -31997,6 +32510,8 @@ function applyLoadedState(s, silent){
     cupBracket = s.cupBracket || cupBracket; /* old saves predate the wider FA Cup field : falling back to the fresh, uninitialised bracket is correct here since one will simply build itself from scratch the next time the draw is checked */
     if (s.southernLastLines) southernLastLines = s.southernLastLines;
     if (s.ourDivisionLastLines) ourDivisionLastLines = s.ourDivisionLastLines;
+    ourDivisionCatchUpLog = s.ourDivisionCatchUpLog || [];
+    clubLeagueDateLog = s.clubLeagueDateLog || {};
     if (s.firstDivision) firstDivision = s.firstDivision;
     if (s.thirdDivisionSouthBg) thirdDivisionSouthBg = s.thirdDivisionSouthBg;
     if (s.secondDivision) secondDivision = s.secondDivision;
@@ -32623,6 +33138,7 @@ function initGameStateFresh(){
   reservesRecord = {p:0,w:0,d:0,l:0}; reserveRecentForm = []; lastBgSimDateMs = null; /* v200 : a fresh season's real calendar starts over, so the same-real-week guard must too */
   lineupSlots = [];
   seasonEndPending = false;
+  if (typeof resetRunInState==='function') resetRunInState(); else { ourDivisionCatchUpLog = []; clubLeagueDateLog = {}; }
   tacticalWrinkle = null; wrinkleFamiliarity = {}; wrinkleCottonedOn = {};
   formationFamiliarity = {}; unlockedMethods = []; faBadges = {prelim:false, full:false}; if (tactics) tactics.method = null;
   blackBook = []; scoutBrief = null;
@@ -46273,7 +46789,19 @@ function buildSeasonSummary(entry, fieldSize, warningReached){
   if (entry.reElectionScare) events.push('HAD TO SEEK RE-ELECTION TO THE LEAGUE.');
   if (entry.cupRound === 'WON THE FA CUP') events.push('WON THE FA CUP.');
   else if (entry.cupRound) events.push('REACHED THE FA CUP '+String(entry.cupRound).toUpperCase()+'.');
-  else events.push('NO FA CUP RUN TO SPEAK OF.');
+  else if (!(cupBracket && cupBracket.championName===ourClubName)) events.push('NO FA CUP RUN TO SPEAK OF.');
+  if (cupBracket && cupBracket.championName)
+    events.push('THE FA CUP WAS WON BY '+cupBracket.championName.toUpperCase()+'.');
+  if (typeof leagueCup!=='undefined' && leagueCup && leagueCup.champion){
+    var lcN = (typeof currentLeagueCupName==='function'?currentLeagueCupName():(typeof LCUP_NAME==='string'&&LCUP_NAME?LCUP_NAME:'League Cup'));
+    events.push('THE '+String(lcN).toUpperCase()+' WAS WON BY '+leagueCup.champion.toUpperCase()+'.');
+  }
+  if (typeof europeanCup!=='undefined' && europeanCup && europeanCup.championName)
+    events.push('THE EUROPEAN CUP WAS WON BY '+europeanCup.championName.toUpperCase()+'.');
+  if (typeof cupWinnersCup!=='undefined' && cupWinnersCup && cupWinnersCup.championName)
+    events.push("THE CUP WINNERS' CUP WAS WON BY "+cupWinnersCup.championName.toUpperCase()+'.');
+  if (typeof fairsCup!=='undefined' && fairsCup && fairsCup.championName)
+    events.push('THE '+(fairsCup.compName||'FAIRS CUP').toUpperCase()+' WAS WON BY '+fairsCup.championName.toUpperCase()+'.');
   if (warningReached >= 1) events.push(warningReached>=2 ? 'THE DIRECTORS GAVE YOU TWO WARNINGS.' : 'THE DIRECTORS GAVE YOU A WARNING.');
   if (unbeaten >= 5) events.push('A RUN OF '+unbeaten+' GAMES UNBEATEN.');
   if (winStreak >= 4) events.push(winStreak+' WINS IN A ROW AT ONE POINT.');
@@ -46318,7 +46846,7 @@ function renderSeasonSummaryBox(){
   var e = seasonSummaryOpen, S = e && seasonHistory[e.idx] && seasonHistory[e.idx].summary;
   if (!e || e.dismissed || !S){ box.style.display = 'none'; box.innerHTML = ''; return; }
   box.style.display = '';
-  box.innerHTML = '<div class="box-title">SEASON REVIEW</div><p class="val">THE '+S.label+' SEASON : THE FINAL REPORT</p>'+seasonSummaryHtml(S)+
+  box.innerHTML = '<div class="box-title">SEASON REVIEW</div><p class="val">THE '+S.label+' SEASON. THE FINAL REPORT</p>'+seasonSummaryHtml(S)+
     '<p><button id="ss-close" style="padding:2px 10px;font-size:15px;">CLOSE</button> <span class="sub">IT STAYS IN CLUB OFFICE UNDER SEASON RECORD.</span></p>';
   document.getElementById('ss-close').addEventListener('click', function(){ seasonSummaryOpen.dismissed = true; renderSeasonSummaryBox(); });
 }
@@ -46326,7 +46854,7 @@ function openSeasonSummaryFromHistory(i){
   var box = document.getElementById('season-summary-reopen'), h = seasonHistory[i];
   if (!box || !h || !h.summary) return;
   box.style.display = '';
-  box.innerHTML = '<div class="box-title">SEASON REVIEW</div><p class="val">THE '+h.summary.label+' SEASON : THE FINAL REPORT</p>'+seasonSummaryHtml(h.summary)+'<p><button id="ss-reclose" style="padding:2px 10px;font-size:15px;">CLOSE</button></p>';
+  box.innerHTML = '<div class="box-title">SEASON REVIEW</div><p class="val">THE '+h.summary.label+' SEASON. THE FINAL REPORT</p>'+seasonSummaryHtml(h.summary)+'<p><button id="ss-reclose" style="padding:2px 10px;font-size:15px;">CLOSE</button></p>';
   document.getElementById('ss-reclose').addEventListener('click', function(){ box.style.display = 'none'; box.innerHTML = ''; });
 }
 /* ============================================================================================
@@ -47948,16 +48476,7 @@ function vidiprinterizeLine(line){
     return (g1==='7' ? '7 (SEVEN)' : g1) + '-' + (g2==='7' ? '7 (SEVEN)' : g2);
   });
 }
-function catchUpOurDivisionBacklog(){
-  /* v388: clubs that missed a league Saturday for a cup tie must still complete
-     their 2*(N-1) games, on spare midweeks. Once our own league list is finished,
-     drain any remaining backlog with no cup occupancy. */
-  var target = 2*rivals.length;
-  var guard = 0;
-  while (guard++ < 30 && rivals.some(function(r){ return table[r.n] && table[r.n].p < target; })){
-    simulateVidiprinter(null, {backlog:true});
-  }
-}
+/* v394: catchUpOurDivisionBacklog is defined with the close-season / run-in helpers. */
 function simulateVidiprinter(excludeOpp, opts){
   var occupiedToday = (opts && opts.backlog) ? {} : clubsOccupiedByCupOn(isoOf(currentDate));
   /* FIXED A REAL BUG HERE, per direct report (v149) : same fix, same reasoning,
@@ -48004,6 +48523,10 @@ function simulateVidiprinter(excludeOpp, opts){
     else { table[a.n].d++; table[b.n].d++; table[a.n].pts++; table[b.n].pts++; }
     lines.push(a.n.toUpperCase()+' '+gA+'-'+gB+' '+b.n.toUpperCase()); /* v232 : kept as bare numbers here on purpose -- this same array is also reused verbatim as ourDivisionLastLines for the TABLE tab's results box (see that var's own comment), which must NOT get the vidiprinter-only SEVEN treatment. The SEVEN rendering is applied purely as a display-time transform inside revealVidiprinter, not here at the data source. */
     statDistributeMatch(a.n, gA); statDistributeMatch(b.n, gB);
+    if (typeof noteClubLeagueGame==='function'){
+      var isoNote = isoOf(currentDate);
+      noteClubLeagueGame(a.n, isoNote); noteClubLeagueGame(b.n, isoNote);
+    }
   });
   return lines;
 }
@@ -48913,12 +49436,14 @@ function renderLeagueCupBox(){
   if (!box){ box = document.createElement('div'); box.id = 'lcup-box'; box.className = 'box'; box.style.marginTop = '16px'; host.appendChild(box); }
   box.style.display = '';
   if (__eng){ elcRenderBox(box); return; }
-  var h = '<div class="box-title">'+((typeof currentLeagueCupName==='function'?currentLeagueCupName():'Scottish League Cup').toUpperCase())+' : '+(leagueCup.label||'')+'</div>';
+  var h = '<div class="box-title">'+((typeof currentLeagueCupName==='function'?currentLeagueCupName():'Scottish League Cup').toUpperCase())+', '+(leagueCup.label||'')+'</div>';
   var status;
-  if (leagueCup.champion) status = 'WON BY '+leagueCup.champion.toUpperCase()+(leagueCup.runnerUp?' (RUNNERS-UP '+leagueCup.runnerUp.toUpperCase()+')':'');
-  else if (leagueCup.ourStatus==='out') status = 'WE ARE OUT ('+(leagueCup.ourOut||'').toUpperCase()+') : COMPETITION CONTINUES WITHOUT US';
-  else status = 'STILL IN IT : '+({group:'SECTIONS',supp:'SUPPLEMENTARY ROUND',qf:'QUARTER-FINALS',sf:'SEMI-FINALS',fin:'FINAL'}[leagueCup.stage]||'');
+  if (leagueCup.champion) status = 'Won by '+leagueCup.champion+(leagueCup.runnerUp?' (runners-up '+leagueCup.runnerUp+')':'');
+  else if (leagueCup.ourStatus==='out') status = 'We are out ('+(leagueCup.ourOut||'')+'). The competition continues without us.';
+  else if (leagueCup.stage==='fin') status = 'Final'+(leagueCup.dates && leagueCup.dates.fin ? ', '+((typeof fmtDateSat==='function')?fmtDateSat(Array.isArray(leagueCup.dates.fin)?leagueCup.dates.fin[0]:leagueCup.dates.fin):leagueCup.dates.fin) : '');
+  else status = 'Still in it. '+({group:'Sections',supp:'Supplementary Round',qf:'Quarter-Finals',sf:'Semi-Finals',fin:'Final'}[leagueCup.stage]||'');
   h += '<p class="sub">'+status+'</p>';
+  try { var sl2 = document.getElementById('lcup-status-line'); if (sl2) sl2.textContent = status; } catch(e){}
   var og = lcOurGroup();
   if (og){
     h += '<div style="padding:0 8px;"><b>'+lcGroupName(og).toUpperCase()+' (YOURS)</b></div><div class="scroll-box"><table><thead><tr><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">F-A</th><th class="num">Pts</th></tr></thead><tbody>'+lcStandings(og).map(lcRowHtml).join('')+'</tbody></table></div>';
@@ -49203,12 +49728,15 @@ function elcIsNeutral(t, leg){
   return leg.kind==='decider' || leg.kind==='replay2' || (leg.kind==='replay' && t.stage==='sf');
 }
 function elcRenderBox(box){
-  try { var sl = document.getElementById('lcup-status-line'); if (sl) sl.textContent = (typeof currentLeagueCupName==='function'?currentLeagueCupName():'League Cup')+', '+(leagueCup.label||''); } catch(e){}
+  var status = (typeof leagueCupStatusLine==='function') ? leagueCupStatusLine() : '';
+  if (!status){
+    if (leagueCup.champion) status = 'Won by '+leagueCup.champion+(leagueCup.runnerUp?' (runners-up '+leagueCup.runnerUp+')':'');
+    else if (leagueCup.ourStatus==='out') status = (ourClubName||'We')+' are out'+(leagueCup.ourOut?' ('+leagueCup.ourOut+')':'')+'. The competition continues without us.';
+    else status = 'Still in it. '+(ELC_NAMES[leagueCup.stage]||'')+(elcTieKind(leagueCup.stage)==='two'?' (two legs)':'')+'.';
+  }
+  if (leagueCup.champion && leagueCup.championD1) status += '. A Fairs / UEFA Cup place.';
+  try { var sl = document.getElementById('lcup-status-line'); if (sl) sl.textContent = status; } catch(e){}
   var h = '<div class="box-title">'+((typeof currentLeagueCupName==='function'?currentLeagueCupName():'League Cup'))+', '+(leagueCup.label||'')+'</div>';
-  var status;
-  if (leagueCup.champion) status = 'Won by '+leagueCup.champion+(leagueCup.runnerUp?' (runners-up '+leagueCup.runnerUp+')':'')+(leagueCup.championD1?'. A Fairs / UEFA Cup place.':'. Not a First Division club, so no European place.');
-  else if (leagueCup.ourStatus==='out') status = (ourClubName||'We')+' are out'+(leagueCup.ourOut?' ('+leagueCup.ourOut+')':'')+'. The competition continues without us.';
-  else status = 'Still in it. '+(ELC_NAMES[leagueCup.stage]||'')+(elcTieKind(leagueCup.stage)==='two'?' (two legs)':'')+'.';
   h += '<p class="sub">'+status+'</p>';
   var ours = fixtures.filter(function(f){ return f.isLCup; });
   if (ours.length){
@@ -50130,6 +50658,8 @@ function checkMathematicalCertainties(){
   }
 }
 function processSeasonEnd(){
+  try { if (typeof planRemainingCatchUps==='function') planRemainingCatchUps(); } catch(err){}
+  try { if (typeof settleOutstandingCupFinals==='function') settleOutstandingCupFinals(); } catch(err){}
   recordDivisionChampions(); /* v127 : before any table is reset or clubs move */
   try { euFinishSeason(); } catch(err){} /* v319 : the Finals can fall after the last league match : settle them before the fields are rebuilt */
   recordFaCupWinner(); /* v236 : before cupBracket resets for the next season -- see lastFaCupWinnerName */
@@ -50970,7 +51500,8 @@ function startNewSeason(outcome){
      dips under 16 for any other reason (injuries, sales, etc). */
   retireCandidates.forEach(function(p){
     if (Math.random() < 0.4){
-      addNews('board', p.n+' has decided to hang up his boots at the end of the '+seasonHistory[seasonHistory.length-1].label+' season.');
+      var _retLabel = (seasonHistory && seasonHistory.length && seasonHistory[seasonHistory.length-1] && seasonHistory[seasonHistory.length-1].label) || finishedSeasonLabel || seasonLabel;
+      addNews('board', p.n+' has decided to hang up his boots at the end of the '+_retLabel+' season.');
       squad = squad.filter(function(x){ return x.id !== p.id; });
       addRetiredManagerCandidate(p.n, ourClubName, p.ca, p.rep, true); /* v160 : a retiring man of real standing might genuinely turn up managing a rival club later -- see maybeRivalManagerSacking */
     }
@@ -51194,6 +51725,7 @@ function startNewSeason(outcome){
   southernLastLines = [];
   isthmianTable = {}; isthmianLeague.forEach(function(r){ isthmianTable[r.n]={p:0,w:0,d:0,l:0,f:0,a:0,pts:0}; }); isthmianLastLines = []; /* v189 : same close-season reset as Southern League, startNewSeason */
   ourDivisionLastLines = [];
+  if (typeof resetRunInState==='function') resetRunInState(); else { ourDivisionCatchUpLog = []; clubLeagueDateLog = {}; }
   fixtureIdx = 0; week = 1; lineup = []; lineupConfirmed = false; live = null; substituteId = null;
   lineupSlots = [];
   currentDate = new Date(fixtureRealDates[0]);
@@ -51729,6 +52261,10 @@ function finishMatch(){
       catchUpOurDivisionBacklog();
     }
     /* persist our own division's full set of scorelines (our result plus the rest of the division just computed above) so the TABLE tab has real results to show, same as the three background divisions already do -- see ourDivisionLastLines. */
+    if (typeof noteClubLeagueGame==='function'){
+      noteClubLeagueGame(ourClubName, isoOf(currentDate));
+      if (f && f.opp) noteClubLeagueGame(f.opp, isoOf(currentDate));
+    }
     ourDivisionLastLines = [homeName.toUpperCase()+' '+homeScore+'-'+awayScore+' '+awayName.toUpperCase()].concat(restOfOursLines);
     var vidiLines = ['§-- REST OF '+currentDivisionLabel+' --'].concat(restOfOursLines);
     if (divisionTier !== 3 && firstDivision.lastLines && firstDivision.lastLines.length) vidiLines = vidiLines.concat(['§-- FIRST DIVISION --']).concat(firstDivision.lastLines.slice(0,4));
@@ -51737,6 +52273,7 @@ function finishMatch(){
     if (!weAreInThird('N') && ourDivisionKey()!=='D4' && thirdDivisionNorth.lastLines && thirdDivisionNorth.lastLines.length) vidiLines = vidiLines.concat(['§-- '+(fourthDivisionCreated?'FOURTH DIVISION':'THIRD DIVISION (NORTH)')+' --']).concat(thirdDivisionNorth.lastLines.slice(0,4));
     revealVidiprinter(vidiLines, 'Vidiprinter – Around the grounds');
     checkMathematicalCertainties(); /* v234 : once per round, right after our own division's live table is fully settled for this round */
+    if (typeof maybeRunInNews==='function') maybeRunInNews();
   }
 
   renderFixtures(); renderTable(); renderStatus(); renderDivisionLabels(); renderSouthernTable(); renderIsthmianTable(); renderReserveLeagueTable(); renderReserveXIBox(); renderReserveFormBox(); renderReserveAppearancesBox(); renderAllBackgroundDivisions(); renderCupTab(); renderSquad(); renderLineup(); renderLineupCount(); renderClub();
@@ -51761,7 +52298,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v393'; /* v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v394'; /* v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
