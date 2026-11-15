@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RetroMatch – Club Office overhaul (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3e6c4;
+  --ink:#1a120c;
+  --red:#c0122a;
+  --red-dark:#8e0c1f;
+  --yellow:#ffd000;
+  --line:#1a120c;
+  --muted:#5a4636;
+  --card:#fff8e8;
+  --chip:#ffd000;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#2a1a14;color:var(--ink);font:15px/1.4 Barlow,Helvetica,Arial,sans-serif}
+a{color:var(--red-dark)}
+.wrap{max-width:880px;margin:0 auto;padding:12px 14px 40px}
+.banner{
+  background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;
+  font-weight:700;letter-spacing:.02em;
+}
+.banner b{font-family:Anton,Impact,sans-serif;letter-spacing:.04em;font-weight:400;font-size:18px;margin-right:.4em}
+.mast{
+  background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;
+  display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;
+}
+.mast h1{margin:0;font:400 42px/0.9 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.mast .sub{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;opacity:.95}
+.mast .club{text-align:right}
+.mast .club strong{display:block;font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.03em}
+.sheet{background:var(--paper);border:3px solid #111;border-top:0;padding:12px 14px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.chip{
+  appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 13px/1 Barlow,sans-serif;
+  padding:7px 12px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;
+}
+.chip[aria-pressed="true"],.chip.on{background:#111;color:var(--yellow)}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+.chip.ghost{background:var(--card)}
+.panel{display:none}
+.panel.on{display:block}
+h2{margin:0 0 8px;font:400 28px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
+h3{margin:16px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.bank{
+  background:#111;color:var(--yellow);border:3px solid #111;padding:10px 12px;margin:0 0 12px;
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;
+}
+.bank .lab{font:700 12px/1 Barlow;letter-spacing:.14em;text-transform:uppercase;color:#fff}
+.bank .fig{font:400 40px/1 Anton,Impact,sans-serif;letter-spacing:.01em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.grid{grid-template-columns:1fr}.mast .club{text-align:left}.mast h1{font-size:34px}}
+.card{background:var(--card);border:2px solid #111;padding:8px 10px}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border:2px solid #111}
+th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #c9b48a;vertical-align:top}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:#111;color:var(--yellow);border-bottom:0}
+td.num,th.num{text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.note{color:var(--muted);font-size:13px;margin:8px 0 0}
+.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted #b79a6e;padding:4px 0}
+.row b{font-weight:700}
+.staff{display:grid;gap:8px}
+.staff-row{display:grid;grid-template-columns:140px 1fr auto auto;gap:8px;align-items:center;background:var(--card);border:2px solid #111;padding:8px 10px}
+@media (max-width:640px){.staff-row{grid-template-columns:1fr 1fr;}}
+.staff-row .post{font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+.vacant{color:var(--muted);font-style:italic}
+.src{font-size:12px;color:var(--muted)}
+.foot{margin-top:16px;font-size:12px;color:var(--muted);border-top:2px solid #111;padding-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>PREVIEW</b> Club Office overhaul for a 1981-82 Manchester United save. This is not the live game. Real figures only; no invented players, fees or capacities.</div>
+
+  <div class="mast">
+    <div>
+      <div class="sub">Club Office · 1981-82</div>
+      <h1>MATCH!</h1>
+    </div>
+    <div class="club">
+      <strong>Manchester United</strong>
+      <div>First Division · Old Trafford</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="chips" role="tablist" aria-label="Club Office sections">
+      <button class="chip on" id="tab-fin" aria-pressed="true">Finances</button>
+      <button class="chip" id="tab-gnd" aria-pressed="false">Ground</button>
+      <button class="chip" id="tab-stf" aria-pressed="false">Staff</button>
+    </div>
+
+    <section class="panel on" id="panel-fin">
+      <h2>Finances</h2>
+      <div class="bank">
+        <span class="lab">Bank</span>
+        <span class="fig">£835,710</span>
+      </div>
+      <p class="note">One figure, the same number the status bar and the transfer desk would use. Opening balance on a new 1981-82 United save. Money always carries a thousands comma.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>This season so far</h3>
+          <div class="row"><span>Gate receipts</span><b>£0</b></div>
+          <div class="row"><span>Programmes and other home income</span><b>£0</b></div>
+          <div class="row"><span>Transfer fees received</span><b>£0</b></div>
+          <div class="row"><span>Wages and bonuses</span><b>£0</b></div>
+          <div class="row"><span>Ground upkeep (weekly £2,592)</span><b>£0</b></div>
+          <div class="row"><span>Transfer fees paid</span><b>£0</b></div>
+          <p class="note">The season has not kicked off. Upkeep is the game’s 1981 scale: £18 × 36 × (60,000 / 15,000), already live as a weekly bill. Transfer income will credit this same bank when a player is sold, instead of sitting in a second total.</p>
+        </div>
+        <div class="card">
+          <h3>What this replaces</h3>
+          <p>The live Club Office can still feel like more than one bank, and a sale does not always show as transfer income on a history. This overhaul keeps a single ledger: every gate, fee in, fee out and weekly bill hits £835,710.</p>
+        </div>
+      </div>
+
+      <h3>Transfer history</h3>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Player</th><th>Deal</th><th class="num">Fee</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>April 1981</td>
+            <td>John Gidman</td>
+            <td>Signed from Everton</td>
+            <td class="num">£450,000</td>
+          </tr>
+          <tr>
+            <td>August 1981</td>
+            <td>Frank Stapleton</td>
+            <td>Signed from Arsenal (tribunal)</td>
+            <td class="num">£900,000</td>
+          </tr>
+          <tr>
+            <td>September 1981</td>
+            <td>Remi Moses</td>
+            <td>Signed from West Bromwich Albion</td>
+            <td class="num">£500,000</td>
+          </tr>
+          <tr>
+            <td>3 October 1981</td>
+            <td>Bryan Robson</td>
+            <td>Signed from West Bromwich Albion, a British record</td>
+            <td class="num">£1,500,000</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="src">Fees already held in the game’s 1981 signing list. Robson is 3 October 1981, £1,500,000; Stapleton’s £900,000 was fixed by a Football League tribunal; Moses £500,000; Gidman £450,000 in April, before this season opened. The opening bank is not reduced here for deals that have not yet been posted on the date of a new save. Sales will appear in the same table as fees received.</p>
+    </section>
+
+    <section class="panel" id="panel-gnd">
+      <h2>The ground</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Old Trafford</h3>
+          <div class="row"><span>Name</span><b>Old Trafford</b></div>
+          <div class="row"><span>Capacity</span><b>60,000</b></div>
+          <div class="row"><span>Weekly upkeep</span><b>£2,592</b></div>
+          <p class="src">Wikipedia, Old Trafford: by the 1980s capacity had dropped from the original 80,000 to approximately 60,000. Upkeep uses the game’s 1981 scale against that capacity.</p>
+        </div>
+        <div class="card">
+          <h3>Development</h3>
+          <p>Improvements are bought from the same bank, at early-1980s prices, not 2020s millions. Floodlights are already in. This preview does not invent a stand or a price that has not been sourced.</p>
+          <div class="chips" style="margin-top:10px">
+            <button class="chip ghost" disabled>Cover a terrace</button>
+            <button class="chip ghost" disabled>Seat a paddock</button>
+            <button class="chip ghost" disabled>Safety work</button>
+          </div>
+          <p class="note">Live buttons will carry a sourced 1980s cost (Inglis and club histories) and come off the £835,710 bank. Until a figure is sourced, the work stays off the menu.</p>
+        </div>
+      </div>
+
+      <h3>First Division grounds, 1981-82</h3>
+      <table>
+        <thead>
+          <tr><th>Club</th><th>Ground</th><th class="num">Capacity</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Manchester United</td><td>Old Trafford</td><td class="num">60,000</td></tr>
+          <tr><td>Nottingham Forest</td><td>City Ground</td><td class="num">35,567</td></tr>
+          <tr><td>Liverpool</td><td>Anfield</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Ipswich Town</td><td>Portman Road</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Tottenham Hotspur</td><td>White Hart Lane</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Arsenal</td><td>Highbury</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Swansea City</td><td>Vetch Field</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Southampton</td><td>The Dell</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Everton</td><td>Goodison Park</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>West Ham United</td><td>Upton Park</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Manchester City</td><td>Maine Road</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Aston Villa</td><td>Villa Park</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Brighton &amp; Hove Albion</td><td>Goldstone Ground</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Coventry City</td><td>Highfield Road</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Notts County</td><td>Meadow Lane</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Birmingham City</td><td>St Andrew's</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>West Bromwich Albion</td><td>The Hawthorns</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Stoke City</td><td>Victoria Ground</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Sunderland</td><td>Roker Park</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Leeds United</td><td>Elland Road</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Wolverhampton Wanderers</td><td>Molineux</td><td class="num">Not yet sourced for 1981-82</td></tr>
+          <tr><td>Middlesbrough</td><td>Ayresome Park</td><td class="num">Not yet sourced for 1981-82</td></tr>
+        </tbody>
+      </table>
+      <p class="src">Ground names are the real 1981-82 grounds (already in the game). Capacities are printed only where a 1981-era source is already held: United 60,000 (Wikipedia, Old Trafford); Forest 35,567 after the 1980 Brian Clough Stand (Wikipedia / Inglis), broadly constant until the 1989 cuts. The live game still falls back to 1946 capacities for the others (Everton 79,000, Maine Road 80,000 and so on). Those leftovers are not shown here. A live overhaul should source the missing 1981 figures rather than reuse the 1946 ones.</p>
+    </section>
+
+    <section class="panel" id="panel-stf">
+      <h2>Staff</h2>
+      <p class="note">Posts are split out. A name appears only when it is sourced for this club and season. Generated names are not used. Hire and sack are yellow chips; a vacant post can be advertised.</p>
+      <div class="staff">
+        <div class="staff-row">
+          <div class="post">Manager</div>
+          <div>Ron Atkinson</div>
+          <button class="chip" type="button">Sack</button>
+          <span></span>
+        </div>
+        <div class="staff-row">
+          <div class="post">Assistant manager</div>
+          <div>Mick Brown</div>
+          <button class="chip" type="button">Sack</button>
+          <span></span>
+        </div>
+        <div class="staff-row">
+          <div class="post">Trainer</div>
+          <div class="vacant">Vacant</div>
+          <button class="chip" type="button">Advertise</button>
+          <button class="chip ghost" type="button" disabled>Hire</button>
+        </div>
+        <div class="staff-row">
+          <div class="post">Physiotherapist</div>
+          <div class="vacant">Vacant</div>
+          <button class="chip" type="button">Advertise</button>
+          <button class="chip ghost" type="button" disabled>Hire</button>
+        </div>
+        <div class="staff-row">
+          <div class="post">Chief scout</div>
+          <div class="vacant">Vacant</div>
+          <button class="chip" type="button">Advertise</button>
+          <button class="chip ghost" type="button" disabled>Hire</button>
+        </div>
+      </div>
+      <p class="src">Atkinson is the opening 1981-82 United manager in the game. Mick Brown was Atkinson’s assistant from 1981 until Atkinson was dismissed on 4 November 1986 (Wikipedia, Mick Brown; Manchester United official history). Other posts are left vacant rather than filled with a generated name. Advertise would raise a short list of applicants; Hire stays off until a list exists. In the live game, a generated trainer name can still appear; this preview does not repeat it.</p>
+    </section>
+
+    <p class="foot">Preview only. Not deployed as the live game. Skin is the compact 1980s MATCH! treatment (Anton masthead, Barlow body, yellow chips). No dagger marks, no spaced colons, commas on every pound figure. Stadium names and the two sourced capacities, the four transfer fees, the bank, the weekly upkeep and the two named staff posts are all taken from data already in the game or from the sources named above.</p>
+  </div>
+</div>
+<script>
+(function(){
+  var tabs = [
+    {btn:'tab-fin', panel:'panel-fin'},
+    {btn:'tab-gnd', panel:'panel-gnd'},
+    {btn:'tab-stf', panel:'panel-stf'}
+  ];
+  function show(id){
+    tabs.forEach(function(t){
+      var on = t.panel===id;
+      document.getElementById(t.panel).classList.toggle('on', on);
+      var b = document.getElementById(t.btn);
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  tabs.forEach(function(t){
+    document.getElementById(t.btn).addEventListener('click', function(){ show(t.panel); });
+  });
+})();
+</script>
+</body>
+</html>
