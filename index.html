@@ -626,7 +626,7 @@ blockquote{margin:0; padding:8px 12px; border-left:4px solid var(--dos-yellow); 
 .news-item{padding:6px 0; border-bottom:1px dashed var(--dos-blue-dark); font-size:19px;}
 .news-item .tag{color:var(--dos-white); background:var(--dos-cyan); padding:0 6px; margin-right:8px; font-size:15px;}
 .news-item .tag.board{background:var(--dos-yellow); color:var(--ink);}
-.news-item .tag.injury{background:var(--dos-red); color:var(--dos-white);}
+.news-item .tag.injury,.news-item .tag.discipline{background:var(--dos-red); color:var(--dos-white);}
 .news-item .tag.rivals{background:var(--dos-grey); color:var(--dos-white);}
 .news-item .tag.intl{background:var(--dos-green); color:var(--dos-white);}
 .news-item .tag.finance{background:var(--dos-cyan); color:var(--dos-white);}
@@ -773,7 +773,7 @@ body.theme-pink input[type=range]{accent-color:var(--ink);}
 /* news: the classified column */
 body.theme-pink .news-item{font-size:15px; border-bottom:1px dotted var(--ink); padding:5px 0; line-height:1.3;}
 body.theme-pink .news-item .tag{font-family:var(--t-cond); font-size:10px; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--ink); background:transparent; color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
-body.theme-pink .news-item .tag.board, body.theme-pink .news-item .tag.injury{background:var(--ink); color:var(--pink);}
+body.theme-pink .news-item .tag.board, body.theme-pink .news-item .tag.injury, body.theme-pink .news-item .tag.discipline{background:var(--ink); color:var(--pink);}
 body.theme-pink blockquote{border-left:4px solid var(--ink); font-size:15px; font-style:italic;}
 body.theme-pink .cite{color:var(--soft); font-size:13px;}
 body.theme-pink .statline{font-size:15px;} body.theme-pink .statline .lbl{color:var(--soft);}
@@ -976,7 +976,7 @@ body.theme-turnstile input[type=range]{accent-color:var(--ink);}
 /* news: the classified column */
 body.theme-turnstile .news-item{font-size:15px; border-bottom:1px dotted var(--ink); padding:5px 0; line-height:1.3;}
 body.theme-turnstile .news-item .tag{font-family:var(--t-cond); font-size:10px; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--ink); background:transparent; color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
-body.theme-turnstile .news-item .tag.board, body.theme-turnstile .news-item .tag.injury{background:var(--ink); color:var(--pink);}
+body.theme-turnstile .news-item .tag.board, body.theme-turnstile .news-item .tag.injury, body.theme-turnstile .news-item .tag.discipline{background:var(--ink); color:var(--pink);}
 body.theme-turnstile blockquote{border-left:4px solid var(--ink); font-size:15px; font-style:italic;}
 body.theme-turnstile .cite{color:var(--soft); font-size:13px;}
 body.theme-turnstile .statline{font-size:15px;} body.theme-turnstile .statline .lbl{color:var(--soft);}
@@ -1157,7 +1157,7 @@ body.theme-turnstile input[type=range], body.theme-turnstile input[type=radio], 
 /* news and commentary */
 body.theme-turnstile .news-item{font-size:14px; border-bottom:2px dotted var(--ink); padding:7px 0; line-height:1.35;}
 body.theme-turnstile .news-item .tag{font-family:var(--t-cond); font-weight:500; font-size:10px; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
-body.theme-turnstile .news-item .tag.board, body.theme-turnstile .news-item .tag.injury{background:var(--blue); border-color:var(--blue); color:var(--paper);}
+body.theme-turnstile .news-item .tag.board, body.theme-turnstile .news-item .tag.injury, body.theme-turnstile .news-item .tag.discipline{background:var(--blue); border-color:var(--blue); color:var(--paper);}
 body.theme-turnstile blockquote{border-left:5px solid var(--red); font-style:italic;}
 body.theme-turnstile .commentary{background:var(--paper); border:3px solid var(--ink); box-shadow:5px 5px 0 var(--ink); font-size:14px;}
 body.theme-turnstile .commentary .min{font-family:var(--t-cond); color:var(--blue); font-weight:700;}
@@ -1300,7 +1300,7 @@ body.theme-programme input[type=range]{accent-color:var(--ink);}
 /* news: the classified column */
 body.theme-programme .news-item{font-size:15px; border-bottom:1px dotted var(--ink); padding:5px 0; line-height:1.3;}
 body.theme-programme .news-item .tag{font-family:var(--t-cond); font-size:10px; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--ink); background:transparent; color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
-body.theme-programme .news-item .tag.board, body.theme-programme .news-item .tag.injury{background:var(--ink); color:var(--pink);}
+body.theme-programme .news-item .tag.board, body.theme-programme .news-item .tag.injury, body.theme-programme .news-item .tag.discipline{background:var(--ink); color:var(--pink);}
 body.theme-programme blockquote{border-left:4px solid var(--ink); font-size:15px; font-style:italic;}
 body.theme-programme .cite{color:var(--soft); font-size:13px;}
 body.theme-programme .statline{font-size:15px;} body.theme-programme .statline .lbl{color:var(--soft);}
@@ -1493,7 +1493,7 @@ body.theme-programme input[type=range], body.theme-programme input[type=radio], 
 /* news : the Football Echo column */
 body.theme-programme .news-item{font-size:16px; border-bottom:1px dotted var(--ink); padding:7px 0; line-height:1.3;}
 body.theme-programme .news-item .tag{font-family:var(--t-cond); font-weight:800; font-size:11px; letter-spacing:.12em; text-transform:uppercase; border:1.5px solid var(--ink); background:transparent; color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
-body.theme-programme .news-item .tag.board, body.theme-programme .news-item .tag.injury{background:var(--red); border-color:var(--red); color:#fff7ea;}
+body.theme-programme .news-item .tag.board, body.theme-programme .news-item .tag.injury, body.theme-programme .news-item .tag.discipline{background:var(--red); border-color:var(--red); color:#fff7ea;}
 body.theme-programme blockquote{border-left:5px solid var(--red); font-style:italic;}
 body.theme-programme .commentary{background:rgba(255,255,255,.18); border:2px solid var(--ink); box-shadow:none; font-size:16px;}
 body.theme-programme .commentary .min{font-family:var(--t-cond); color:var(--red); font-weight:800;}
@@ -1621,7 +1621,7 @@ body.theme-shoot select, body.theme-shoot input[type=text], body.theme-shoot inp
 body.theme-shoot input[type=range]{accent-color:var(--red);}
 body.theme-shoot .news-item{font-size:15px; border-bottom:1px dotted #bbb; padding:5px 0; line-height:1.3;}
 body.theme-shoot .news-item .tag{font-family:var(--t-cond); font-size:10px; letter-spacing:.12em; text-transform:uppercase; border:2px solid var(--ink); background:var(--yellow); color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
-body.theme-shoot .news-item .tag.board, body.theme-shoot .news-item .tag.injury{background:var(--ink); color:var(--yellow);}
+body.theme-shoot .news-item .tag.board, body.theme-shoot .news-item .tag.injury, body.theme-shoot .news-item .tag.discipline{background:var(--ink); color:var(--yellow);}
 body.theme-shoot blockquote{border-left:4px solid var(--red); font-size:15px; font-style:italic;}
 body.theme-shoot .cite{color:var(--mute); font-size:13px;}
 body.theme-shoot .statline{font-size:15px;} body.theme-shoot .statline .lbl{color:var(--mute);}
@@ -1722,7 +1722,7 @@ body.theme-match select, body.theme-match input[type=text], body.theme-match inp
 body.theme-match input[type=range]{accent-color:var(--red);}
 body.theme-match .news-item{font-size:15px; border-bottom:1px dotted #bbb; padding:5px 0; line-height:1.3;}
 body.theme-match .news-item .tag{font-family:var(--t-cond); font-size:10px; letter-spacing:.12em; text-transform:uppercase; border:2px solid var(--ink); background:var(--yellow); color:var(--ink); padding:0 5px; margin-right:6px; vertical-align:2px;}
-body.theme-match .news-item .tag.board, body.theme-match .news-item .tag.injury{background:var(--ink); color:var(--yellow);}
+body.theme-match .news-item .tag.board, body.theme-match .news-item .tag.injury, body.theme-match .news-item .tag.discipline{background:var(--ink); color:var(--yellow);}
 body.theme-match blockquote{border-left:4px solid var(--red); font-size:15px; font-style:italic;}
 body.theme-match .cite{color:var(--mute); font-size:13px;}
 body.theme-match .statline{font-size:15px;} body.theme-match .statline .lbl{color:var(--mute);}
@@ -3618,6 +3618,16 @@ body.theme-pink .matchctl button.primary{
 }
 body.theme-turnstile .matchctl button.primary:disabled{ color: #2a2430 !important; }
 
+/* v391 : Vidiprinter speed chips, same yellow-chip look as the touchline. */
+#vidi-speed-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+#vidi-speed-row button.im-chip, #ft-block button.vidi-speed{
+  display:inline-block; width:auto; font-family:var(--t-cond, var(--font-dos), sans-serif);
+  font-size:13px; font-weight:700; letter-spacing:.06em; line-height:1.2;
+  padding:3px 10px; margin:0; border:2px solid #111; background:#ffe66a; color:#111; cursor:pointer;
+}
+#vidi-speed-row button.im-chip.primary, #ft-block button.vidi-speed.primary{ background:#111; color:#ffe66a; }
+#vidi-box{cursor:pointer;}
+
 /* v385 : Vidiprinter / Around the Grounds — classic yellow teleprinter on navy, every skin. */
 .vidi, #vidi-box,
 body.theme-match .vidi, body.theme-match #vidi-box,
@@ -3858,6 +3868,7 @@ body.theme-turnstile #halftime-talk-box .matchctl button.primary{
           <button class="newsfilter" data-tag="rivals">RIVALS</button>
           <button class="newsfilter" data-tag="intl">INTERNATIONALS</button>
           <button class="newsfilter" data-tag="injury">INJURY</button>
+          <button class="newsfilter" data-tag="discipline">SUSPENSION</button>
           <button class="newsfilter" data-tag="finance">FINANCE</button>
         </div>
         <div class="scroll-box" style="max-height:420px;"><div id="news-feed"></div></div>
@@ -4220,7 +4231,14 @@ body.theme-turnstile #halftime-talk-box .matchctl button.primary{
       <div class="commentary" id="commentary-box"><p>PICK YOUR ELEVEN, THEN PRESS "KICK OFF". THE CLOCK RUNS ITSELF : PAUSE ANY TIME.</p></div>
       <div id="ft-block" style="display:none;">
         <div class="ft-banner" id="ft-banner"></div>
-        <div class="box"><div class="box-title" id="vidi-title">VIDIPRINTER : REST OF DIVISION THREE (SOUTH)</div><div class="vidi" id="vidi-box"></div></div>
+        <div class="box"><div class="box-title" id="vidi-title">VIDIPRINTER : REST OF DIVISION THREE (SOUTH)</div>
+        <div id="vidi-speed-row" class="im-row" style="margin:6px 0 8px;">SPEED:
+          <button type="button" class="im-chip vidi-speed" data-vidi-speed="slow" id="vidi-speed-slow">SLOW</button>
+          <button type="button" class="im-chip vidi-speed primary" data-vidi-speed="normal" id="vidi-speed-normal">NORMAL</button>
+          <button type="button" class="im-chip vidi-speed" data-vidi-speed="instant" id="vidi-speed-instant">INSTANT</button>
+          <span class="sub" style="margin-left:8px;">CLICK THE TICKER TO FINISH</span>
+        </div>
+        <div class="vidi" id="vidi-box" title="Click to finish instantly"></div></div>
         <div class="matchctl"><button class="primary" id="btn-continue">CONTINUE &gt;</button></div>
       </div>
       <div class="matchctl" id="live-controls">
@@ -14841,6 +14859,14 @@ function kickoffTimeFor(d){
   return deepWinter ? '2.15pm' : '3.00pm';
 }
 function isoOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function isoAddDays(iso, n){
+  var p = String(iso||'').split('-');
+  var d = (p.length>=3) ? new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10)) : new Date();
+  d.setDate(d.getDate() + (n||0));
+  return isoOf(d);
+}
+function isoCmp(a,b){ return String(a||'') < String(b||'') ? -1 : String(a||'') > String(b||'') ? 1 : 0; }
+
 
 /* ---------- WEATHER & PITCHES: not sourced per-match (no such record exists),
    just a seasonal pattern true of any English ground in this era : firm in
@@ -21592,7 +21618,7 @@ function simulateReserves(){
      than just whoever wasn't picked for Saturday; prioritises exactly the men a reserve
      fixture existed for in real football : an injured man working back to full fitness on
      a run-out, and young reserves needing games, ahead of a first-teamer just rested. */
-  var eligible = squad.filter(function(p){ return lineup.indexOf(p.id) < 0 && p.injuredWeeks<=0 && p.suspendedMatches<=0 && !p.awayOnDuty && !p.retained && p.registered!==false; });
+  var eligible = squad.filter(function(p){ return lineup.indexOf(p.id) < 0 && !playerIsInjured(p) && !playerIsServingSuspension(p) && !p.awayOnDuty && !p.retained && p.registered!==false; });
   if (eligible.length < 4){ document.getElementById('reserves-report').innerHTML = '<p class="sub">NO RESERVE TEAM FIXTURE THIS WEEK : TOO FEW MEN AVAILABLE TO FIELD A SIDE.</p>'; return; }
   /* v146 : the manager's own standing picks (see reserveXISelection/toggleReserveXI) go out ahead of
      the automatic priority list, wherever they're actually available this week -- the real decision
@@ -21941,8 +21967,15 @@ function pcardBio(p, era, best, attrsAll){
   if (p.caps) extra.push('capped ' + num(p.caps) + ' time' + (p.caps === 1 ? '' : 's') + ' by his country');
   if (p.motmCount) extra.push('named man of the match ' + num(p.motmCount) + ' time' + (p.motmCount === 1 ? '' : 's'));
   if (extra.length) s.push('He has been ' + extra.join(' and ') + '.');
-  if (p.injuredWeeks > 0) s.push('He is out injured for ' + p.injuredWeeks + ' more week' + (p.injuredWeeks === 1 ? '' : 's') + '.');
-  else if (p.suspendedMatches > 0) s.push('He is suspended for ' + p.suspendedMatches + ' more match' + (p.suspendedMatches === 1 ? '' : 'es') + '.');
+  if (typeof playerIsInjured==='function' ? playerIsInjured(p) : p.injuredWeeks > 0){
+    if (p.injuryName && p.injuredUntil) s.push('He is out with '+p.injuryName+' until '+p.injuredUntil+'.');
+    else s.push('He is out injured for ' + p.injuredWeeks + ' more week' + (p.injuredWeeks === 1 ? '' : 's') + '.');
+  } else if (typeof playerIsServingSuspension==='function' ? playerIsServingSuspension(p) : p.suspendedMatches > 0){
+    if (p.suspendedUntil) s.push('He is suspended until ' + p.suspendedUntil + '.');
+    else s.push('He is suspended for ' + p.suspendedMatches + ' more match' + (p.suspendedMatches === 1 ? '' : 'es') + '.');
+  } else if (p.suspensionStartsOn && (p.suspendedMatches>0 || p.suspendedUntil)){
+    s.push('He has a suspension due to take effect from ' + p.suspensionStartsOn + '.');
+  }
   else if (p.awayOnDuty) s.push('He is away on international duty.');
   return s.join(' ');
 }
@@ -22066,8 +22099,15 @@ function unavailableReason(p){
   if (p.registered===false) return 'NOT YET REGISTERED, ELIGIBLE FROM NEXT SEASON';
   if (p.retained) return 'RETAINED, NOT UNDER CONTRACT';
   if (p.awayOnDuty) return 'INTERNATIONAL DUTY';
-  if (p.injuredWeeks>0) return 'INJURED, '+p.injuredWeeks+' WK'+(p.injuredWeeks>1?'S':'')+' LEFT';
-  if (p.suspendedMatches>0) return 'SUSPENDED, '+p.suspendedMatches+' MATCH'+(p.suspendedMatches>1?'ES':'')+' LEFT';
+  if (typeof playerIsInjured==='function' ? playerIsInjured(p) : p.injuredWeeks>0){
+    if (p.injuryName) return ('INJURED, '+String(p.injuryName).toUpperCase()+(p.injuredUntil?(', UNTIL '+p.injuredUntil):(' , '+p.injuredWeeks+' WK'+(p.injuredWeeks>1?'S':'')+' LEFT')));
+    return 'INJURED, '+p.injuredWeeks+' WK'+(p.injuredWeeks>1?'S':'')+' LEFT';
+  }
+  if (typeof playerIsServingSuspension==='function' ? playerIsServingSuspension(p) : p.suspendedMatches>0){
+    if (p.suspendedUntil) return 'SUSPENDED UNTIL '+p.suspendedUntil;
+    return 'SUSPENDED, '+p.suspendedMatches+' MATCH'+(p.suspendedMatches>1?'ES':'')+' LEFT';
+  }
+  if (p.suspensionStartsOn && (p.suspendedMatches>0 || p.suspendedUntil)) return 'SUSPENSION FROM '+p.suspensionStartsOn;
   return null;
 }
 function renderLineup(){
@@ -22102,8 +22142,9 @@ function renderLineup(){
       var tag = document.createElement('span');
       tag.className = 'inj-tag';
       var tagText = reason;
-      if (p.injuredWeeks>0) tagText = 'inj. '+p.injuredWeeks+' wk'+(p.injuredWeeks>1?'s':'');
-      else if (p.suspendedMatches>0) tagText = 'susp. '+p.suspendedMatches;
+      if (typeof playerIsInjured==='function' ? playerIsInjured(p) : p.injuredWeeks>0) tagText = 'inj.'+(p.injuryName?(' '+p.injuryName):(' '+p.injuredWeeks+' wk'+(p.injuredWeeks>1?'s':'')));
+      else if (typeof playerIsServingSuspension==='function' ? playerIsServingSuspension(p) : p.suspendedMatches>0) tagText = p.suspendedUntil ? ('susp. until '+p.suspendedUntil) : ('susp. '+p.suspendedMatches);
+      else if (p.suspensionStartsOn && (p.suspendedMatches>0 || p.suspendedUntil)) tagText = 'susp. from '+p.suspensionStartsOn;
       else if (p.awayOnDuty) tagText = 'intl duty';
       else if (p.retained) tagText = 'retained';
       else if (p.registered===false) tagText = 'unreg.';
@@ -24680,7 +24721,7 @@ function breakthroughClears(p, f){
   if (!inc) return null;
   if (!(p.rep >= inc.rep + 1)) return null;           /* hard gate 1 */
   if ((p.bkRun||0) < BK_RUN_NEEDED) return null;     /* hard gate 2 */
-  if (p.injuredWeeks>0 || p.suspendedMatches>0) return null;
+  if ((typeof playerIsInjured==='function' ? playerIsInjured(p) : p.injuredWeeks>0) || (typeof playerIsServingSuspension==='function' ? playerIsServingSuspension(p) : p.suspendedMatches>0)) return null;
   return inc;
 }
 function updateBreakthroughRuns(xiIds){
@@ -30242,8 +30283,264 @@ function simulateRivalInterestInHumanTargets(){
    and bans were usually short, a small number of matches rather than a
    modern tariff. Both are modelled here as real, occasional consequences,
    not routine ones. */
-function processWeeklyAvailability(){
+
+/* v391 DISCIPLINE
+   Sources (own wording):
+   - The Guardian Knowledge, 12 Apr 2023: until 2004, English suspensions did not begin
+     until 14 days after the offence (Cantona 1994, Vieira 2000).
+   - Ian Ridley, The Independent, 26 Jan 1997, "Helping fans to read the bans":
+     sending-off bans of one to three matches (second bookable / professional foul 1,
+     abusive language 2, violent conduct 3); all bans begin a fortnight after the last
+     offence. Caution totting-up on a points scale, 21 points triggering a ban (3 matches
+     if reached by the end of November, 2 by the end of February, 1 by the end of April),
+     with further bans at 33 points.
+   - The Independent, 26 Jan 1998, "Counting the cost of minor offences": the 21/33/45
+     points scheme was the previous system, replaced in mid-1997. Applied here from
+     1976-77, when coloured cards (and systematic caution records) were in English use
+     (first English reds: 2 Oct 1976, BBC/SoccerData). The exact introduction year of
+     the points tariff is not pinned earlier than that description, so pre-1976 saves
+     have no totting-up.
+   - When Saturday Comes, "Referees' tolerance of foul play annoyed fans and blighted
+     1950s matches": 1950s suspensions were measured in days, not matches; a sent-off
+     man stayed away from the club and was unpaid.
+   - Margate FC history, George Dover, sent off 10 Jan 1953: FA hearing at Chatham,
+     a 14-day suspension. Willie Fagan (Liverpool), FA Disciplinary Committee, 14 days
+     from April 1939 (Play Up Liverpool). Typical commission ban of the 1940s-50s is
+     therefore 14 days, occasionally 28 for a more serious report.
+*/
+function eraDisciplineRules(year){
+  year = year || ((typeof seasonStartYear==='function') ? seasonStartYear() : 1946);
+  if (year < 1970){
+    return {era:'days', delayDays:7, banDaysTypical:14, banDaysSerious:28, matchesMin:0, matchesMax:0, totting:false};
+  }
+  if (year < 1976){
+    return {era:'matches', delayDays:14, banDaysTypical:0, matchesMin:2, matchesMax:2, totting:false};
+  }
+  return {era:'matches', delayDays:14, banDaysTypical:0, matchesMin:2, matchesMax:3, totting:true};
+}
+function fixtureIsCompetitive(f){
+  if (!f) return false;
+  if (f.isFriendly || f.isTrial) return false;
+  return !!(f.isCup || f.isLCup || f.isEuroCup || f.isCWC || f.isFairsCup || !f.isFriendly);
+}
+function playerIsInjured(p, d){
+  if (!p) return false;
+  d = d || currentDate;
+  if (p.injuredUntil){
+    try { return isoCmp(isoOf(d), p.injuredUntil) < 0; } catch(e){}
+  }
+  return (p.injuredWeeks||0) > 0;
+}
+function playerIsServingSuspension(p, d){
+  if (!p) return false;
+  d = d || currentDate;
+  var today = (d && typeof isoOf==='function') ? isoOf(d) : '';
+  if (p.suspendedUntil){
+    var start = p.suspensionStartsOn || today;
+    return isoCmp(today, start) >= 0 && isoCmp(today, p.suspendedUntil) < 0;
+  }
+  if (!(p.suspendedMatches>0)) return false;
+  if (p.suspensionStartsOn) return isoCmp(today, p.suspensionStartsOn) >= 0;
+  return true;
+}
+function playerUnavailable(p, d){
+  return playerIsInjured(p, d) || playerIsServingSuspension(p, d) || !!(p && (p.awayOnDuty || p.retained || p.registered===false));
+}
+function tottingBanLength(d){
+  d = d || currentDate;
+  var m = d.getMonth(), day = d.getDate();
+  /* Ridley 1997: 3 matches if 21 points by end of November, 2 by end of February, 1 by end of April. */
+  if (m < 10 || (m===10 && day<=30)) return 3; /* Aug–Nov */
+  if (m < 2 || (m===1 && day<=29) || m===11 || m===0) return 2; /* Dec–Feb */
+  return 1;
+}
+function applyCautionPoints(p, pts, date){
+  if (!p) return;
+  var year = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  var R = eraDisciplineRules(year);
+  if (!R.totting) { p.bookingsSeason = (p.bookingsSeason||0)+1; return; }
+  p.cautionPoints = (p.cautionPoints||0) + (pts||4);
+  p.bookingsSeason = (p.bookingsSeason||0)+1;
+  var fired = p.tottingBansFired || 0;
+  var thresholds = [21, 33, 45];
+  if (fired >= thresholds.length) return;
+  if (p.cautionPoints >= thresholds[fired]){
+    p.tottingBansFired = fired+1;
+    imposeMatchSuspension(p, tottingBanLength(date||currentDate), date||currentDate, 'totting');
+  }
+}
+function imposeMatchSuspension(p, matches, date, kind){
+  if (!p || !(matches>0)) return null;
+  var year = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  var R = eraDisciplineRules(year);
+  var offence = isoOf(date||currentDate);
+  var start = isoAddDays(offence, R.delayDays);
+  p.suspensionOffenceDate = offence;
+  p.suspensionStartsOn = start;
+  p.suspendedMatches = (p.suspendedMatches||0) + matches;
+  p.suspensionKind = kind || 'sending-off';
+  if (R.era==='days'){
+    var days = (Math.random()<0.2 && kind==='sending-off') ? R.banDaysSerious : R.banDaysTypical;
+    var until = isoAddDays(start, days);
+    if (!p.suspendedUntil || isoCmp(until, p.suspendedUntil)>0) p.suspendedUntil = until;
+    p.suspendedMatches = 0;
+    return {kind:'days', start:start, until:p.suspendedUntil, days:days, offence:offence};
+  }
+  return {kind:'matches', start:start, matches:matches, remaining:p.suspendedMatches, offence:offence, delay:R.delayDays};
+}
+function imposeSendingOffBan(p, date){
+  var year = (typeof seasonStartYear==='function') ? seasonStartYear() : 1946;
+  var R = eraDisciplineRules(year);
+  if (R.era==='days') return imposeMatchSuspension(p, 1, date, 'sending-off');
+  /* 1980s tariff, Ridley 1997: violent conduct 3, abusive language 2, second bookable / professional foul 1.
+     Ordinary sendings-off in this era are treated as serious foul play / violent conduct, so 2 or 3 matches
+     (parent: a 1981-82 sending-off normally meant a 2-or-3-match ban). About two-thirds are 2, one-third 3. */
+  var n = (year>=1980) ? (Math.random()<0.67 ? 2 : 3) : R.matchesMin;
+  return imposeMatchSuspension(p, n, date, 'sending-off');
+}
+function sendingOffNews(p, rec){
+  var name = p && p.n ? p.n : 'A player';
+  if (!rec) return name+' was sent off. The FA will deal with the matter.';
+  if (rec.kind==='days'){
+    return name+' was sent off. The FA disciplinary commission has suspended him for '+rec.days+' days, from '+rec.start+'.';
+  }
+  var n = rec.matches, word = n===1 ? 'match' : 'matches';
+  return name+' was sent off. The FA has imposed a '+n+'-'+word+' suspension, to take effect a fortnight after the offence (from '+rec.start+').';
+}
+function suspensionServedNews(p){
+  return (p && p.n ? p.n : 'The player')+' has served his suspension and is available again.';
+}
+function tottingNews(p, rec){
+  var name = p && p.n ? p.n : 'A player';
+  var n = rec && rec.matches ? rec.matches : 1;
+  var word = n===1 ? 'match' : 'matches';
+  return name+' has reached '+p.cautionPoints+' disciplinary points this season. The FA has imposed a '+n+'-'+word+' suspension, to take effect a fortnight after the last offence.';
+}
+function serveSuspensionsForFixture(f){
+  if (!fixtureIsCompetitive(f)) return;
+  var today = isoOf(currentDate);
   squad.forEach(function(p){
+    if (!playerIsServingSuspension(p, currentDate)) return;
+    if (p.suspendedUntil){
+      /* day-based: time itself lifts the ban; no match decrement */
+      if (isoCmp(today, p.suspendedUntil) >= 0){
+        p.suspendedUntil = '';
+        p.suspensionStartsOn = '';
+        p.suspendedMatches = 0;
+        addNews('discipline', suspensionServedNews(p));
+      }
+      return;
+    }
+    if ((p.suspendedMatches||0) > 0){
+      p.suspendedMatches--;
+      if (p.suspendedMatches<=0){
+        p.suspendedMatches = 0;
+        p.suspensionStartsOn = '';
+        addNews('discipline', suspensionServedNews(p));
+      }
+    }
+  });
+}
+function clearExpiredDayBans(){
+  var today = isoOf(currentDate);
+  squad.forEach(function(p){
+    if (p.suspendedUntil && isoCmp(today, p.suspendedUntil) >= 0){
+      p.suspendedUntil = '';
+      p.suspensionStartsOn = '';
+      p.suspendedMatches = 0;
+      addNews('discipline', suspensionServedNews(p));
+    }
+  });
+}
+
+/* v391 INJURIES
+   A sourced-ish range, not a published period medical table: knocks of a few days,
+   strains of 1-3 weeks, hamstrings and ankles of 4-8 weeks, breaks and cartilage
+   operations of 2-4 months (cartilage ops were a common 1970s-80s diagnosis), and
+   rare season-ending breaks. Earlier eras recover more slowly (fewer specialists).
+   Players are actually unavailable until injuredUntil (or injuredWeeks for older saves). */
+function eraInjuryStretch(year){
+  year = year || ((typeof seasonStartYear==='function') ? seasonStartYear() : 1946);
+  if (year < 1960) return 1.4;
+  if (year < 1970) return 1.2;
+  return 1;
+}
+function rollInjurySpell(year, context){
+  year = year || ((typeof seasonStartYear==='function') ? seasonStartYear() : 1946);
+  var stretch = eraInjuryStretch(year);
+  var roll = Math.random();
+  var kind, days, names;
+  if (context==='knock-only' || roll < 0.38){
+    kind = 'knock';
+    days = 3 + Math.floor(Math.random()*5); /* 3-7 days */
+    names = year < 1970 ? ['a knock','a bruised leg','a bang on the ankle','a twisted knee'] : ['a knock','a dead leg','a bruised foot','a jarred knee'];
+  } else if (roll < 0.63){
+    kind = 'strain';
+    days = (7 + Math.floor(Math.random()*15)) * stretch; /* 1-3 weeks */
+    names = year < 1970 ? ['a pulled muscle','a strain','a thigh strain'] : ['a muscle strain','a groin strain','a pulled hamstring'];
+  } else if (roll < 0.83){
+    kind = 'hamstring-ankle';
+    days = (28 + Math.floor(Math.random()*29)) * stretch; /* 4-8 weeks */
+    names = year < 1970 ? ['a badly twisted ankle','a torn muscle','ligament trouble'] : ['a hamstring tear','an ankle ligament','a torn calf'];
+  } else if (roll < 0.97){
+    kind = 'cartilage-break';
+    days = (60 + Math.floor(Math.random()*63)) * stretch; /* 2-4 months */
+    names = (year>=1970 && year<=1989)
+      ? ['a cartilage operation','a broken bone','a fractured ankle','cartilage trouble']
+      : ['cartilage trouble','a broken bone','a fractured ankle','a chipped bone'];
+  } else {
+    kind = 'season';
+    var left = 120;
+    try {
+      var end = new Date((year+1), 4, 10); /* around 10 May */
+      left = Math.max(90, Math.round((end - currentDate)/86400000));
+    } catch(e){}
+    days = Math.max(150, left) * (stretch>1 ? 1.1 : 1);
+    names = year < 1970 ? ['a broken leg','a badly broken ankle'] : ['a broken tibia','a season-ending break','a badly broken leg'];
+  }
+  days = Math.max(2, Math.round(days));
+  return {kind:kind, days:days, weeks:Math.max(1, Math.ceil(days/7)), name:names[Math.floor(Math.random()*names.length)]};
+}
+function applyInjurySpell(p, spell, date){
+  if (!p || !spell) return spell;
+  var from = isoOf(date||currentDate);
+  var until = isoAddDays(from, spell.days);
+  if (!p.injuredUntil || isoCmp(until, p.injuredUntil)>0) p.injuredUntil = until;
+  p.injuredWeeks = Math.max(p.injuredWeeks||0, spell.weeks);
+  p.injuryName = spell.name;
+  return spell;
+}
+function injurySpellNews(p, spell, context){
+  var name = p && p.n ? p.n : 'A player';
+  var span;
+  if (spell.kind==='knock') span = spell.days+' days';
+  else if (spell.kind==='season') span = 'the rest of the season';
+  else if (spell.weeks>=8) span = 'around '+Math.round(spell.weeks/4)+' months';
+  else span = weeksText(spell.weeks);
+  var who = (typeof staffTrainerThe==='function') ? staffTrainerThe() : 'the trainer';
+  who = who.charAt(0).toUpperCase()+who.slice(1);
+  if (context==='match-off') return name+' had to be helped off. '+who+' diagnoses '+spell.name+' and has him out for '+span+'.';
+  if (context==='match-hobble') return name+' was carrying '+spell.name+' from today\'s game. '+who+' has him out for '+span+'.';
+  return name+' has picked up '+spell.name+' this week and is expected to be out for '+span+'.';
+}
+
+function processWeeklyAvailability(){
+  if (typeof clearExpiredDayBans==='function') clearExpiredDayBans();
+  var today = isoOf(currentDate);
+  squad.forEach(function(p){
+    if (p.injuredUntil){
+      if (isoCmp(today, p.injuredUntil) >= 0){
+        p.injuredUntil = '';
+        p.injuredWeeks = 0;
+        p.injuryName = '';
+        p._justRecovered = true;
+        addNews('injury', (typeof injuryRecoveredNews==='function'?injuryRecoveredNews(p.n):p.n+' is passed fit and available for selection again.'));
+      } else {
+        var left = Math.max(0, Math.ceil((new Date(p.injuredUntil+'T12:00:00') - currentDate)/86400000));
+        p.injuredWeeks = Math.max(1, Math.ceil(left/7));
+      }
+      return;
+    }
     if (p.injuredWeeks>0){
       p.injuredWeeks--;
       if (p.injuredWeeks===0){ p._justRecovered = true; addNews('injury', (typeof injuryRecoveredNews==='function'?injuryRecoveredNews(p.n):p.n+' is passed fit and available for selection again.')); }
@@ -30252,14 +30549,14 @@ function processWeeklyAvailability(){
 }
 function maybeGenerateRealInjury(){
   if (Math.random() >= 0.09) return; /* most weeks nobody picks up a real injury */
-  var candidates = squad.filter(function(p){ return p.injuredWeeks<=0; });
+  var candidates = squad.filter(function(p){ return !(typeof playerIsInjured==='function' ? playerIsInjured(p) : p.injuredWeeks>0); });
   if (!candidates.length) return;
   var p = pick(candidates);
-  var roll = Math.random();
-  var weeksOut = roll<0.55 ? 1 : roll<0.85 ? 2 : roll<0.96 ? (3+Math.floor(Math.random()*2)) : (5+Math.floor(Math.random()*3));
-  p.injuredWeeks = weeksOut;
+  var spell = (typeof rollInjurySpell==='function') ? rollInjurySpell() : {kind:'strain', days:14, weeks:2, name:'a strain'};
+  if (typeof applyInjurySpell==='function') applyInjurySpell(p, spell);
+  else p.injuredWeeks = spell.weeks;
   var idx = lineup.indexOf(p.id); if (idx>=0){ lineup.splice(idx,1); lineupConfirmed = false; }
-  addNews('injury', (typeof injuryPickedUpNews==='function'?injuryPickedUpNews(p.n, weeksOut):p.n+' has picked up a genuine injury this week and is expected to be out for '+weeksText(weeksOut)+'.'));
+  addNews('injury', (typeof injurySpellNews==='function'?injurySpellNews(p, spell, 'week'):(p.n+' has picked up '+spell.name+' and is expected to be out for '+weeksText(spell.weeks)+'.')));
 }
 /* ---------- TESTIMONIAL MATCHES: a real, specific period practice, added
    per direct request -- a club granted a benefit/testimonial match to a
@@ -44887,7 +45184,7 @@ function preMatchBreakdown(){
     var injured = squad.filter(function(q){ return q.injuredWeeks>0; });
     var topN = function(list){ return list.map(function(q){return effectiveCA(q);}).sort(function(x,y){return y-x;}).slice(0,11); };
     var bestFit = topN(squad.filter(function(q){ return !unavailableReason(q); }));
-    var bestAll = topN(squad.filter(function(q){ return !(q.suspendedMatches>0 || q.awayOnDuty || q.retained || q.registered===false); }) /* everyone bar the injured, who stay in here on purpose */);
+    var bestAll = topN(squad.filter(function(q){ return !((typeof playerIsServingSuspension==='function' ? playerIsServingSuspension(q) : q.suspendedMatches>0) || q.awayOnDuty || q.retained || q.registered===false); }) /* everyone bar the injured, who stay in here on purpose */);
     var mean = function(a){ return a.length ? a.reduce(function(t,v){return t+v;},0)/a.length : 0; };
     var injuredInXI = xi.filter(function(q){ return q.injuredWeeks>0; });
     var injuredCost = Math.max(0, mean(bestAll) - mean(bestFit)); /* what the knocks cost the best eleven you could pick */
@@ -46424,10 +46721,9 @@ function simulateMinuteBlock(skipHalfPause){
         if (offIdx>=0) live.ourXI.splice(offIdx,1); /* genuinely a man light for the rest of this match : ourStrengthAvg/scorerFor etc all read live.ourXI fresh every tick */
         var realSentOff = squad.find(function(x){return x.id===cardedObj.id;});
         if (realSentOff){
-          var bans = Math.random()<0.7 ? 1 : 2; /* short bans, period-typical : no modern red-card tariff existed */
-          realSentOff.suspendedMatches = (realSentOff.suspendedMatches||0) + bans;
+          var rec = (typeof imposeSendingOffBan==='function') ? imposeSendingOffBan(realSentOff, currentDate) : null;
           var lineupIdx = lineup.indexOf(realSentOff.id); if (lineupIdx>=0) lineup.splice(lineupIdx,1);
-          addNews('injury', realSentOff.n+' was sent off and faces the FA\'s disciplinary commission : a '+bans+'-match suspension once it reports.');
+          addNews('discipline', (typeof sendingOffNews==='function') ? sendingOffNews(realSentOff, rec) : (realSentOff.n+' was sent off. The FA will deal with the matter.'));
         }
       } else {
         var oppOffIdx = live.oppSquad.indexOf(cardedObj);
@@ -46448,7 +46744,8 @@ function simulateMinuteBlock(skipHalfPause){
       if (cardTeam===ourClubName){
         var realCarded = squad.find(function(x){return x.id===cardedObj.id;});
         if (realCarded){
-          realCarded.bookingsSeason = (realCarded.bookingsSeason||0) + 1;
+          if (typeof applyCautionPoints==='function') applyCautionPoints(realCarded, (Math.random()<0.7?4:(Math.random()<0.5?3:2)), currentDate);
+          else realCarded.bookingsSeason = (realCarded.bookingsSeason||0) + 1;
         }
       }
     }
@@ -46508,9 +46805,10 @@ function simulateMinuteBlock(skipHalfPause){
       var offIdx = live.ourXI.indexOf(injured);
       if (offIdx>=0) live.ourXI.splice(offIdx,1);
       if (realInjured && Math.random() < 0.55){
-        var weeksOutA = 1 + Math.floor(Math.random()*3);
-        realInjured.injuredWeeks = Math.max(realInjured.injuredWeeks||0, weeksOutA);
-        addNews('injury', realInjured.n+' had to be helped off against '+live.f.opp+' : '+staffTrainerThe()+' reckons on '+weeksText(weeksOutA)+' on the sidelines.');
+        var spellA = (typeof rollInjurySpell==='function') ? rollInjurySpell(null, null) : {kind:'strain', days:14, weeks:2, name:'a strain'};
+        if (typeof applyInjurySpell==='function') applyInjurySpell(realInjured, spellA);
+        else realInjured.injuredWeeks = Math.max(realInjured.injuredWeeks||0, spellA.weeks);
+        addNews('injury', (typeof injurySpellNews==='function')?injurySpellNews(realInjured, spellA, 'match-off'):(realInjured.n+' had to be helped off and is expected out for '+weeksText(spellA.weeks)+'.'));
       }
     } else {
       var realInjured = squad.find(function(x){return x.id===injured.id;});
@@ -46518,9 +46816,10 @@ function simulateMinuteBlock(skipHalfPause){
       live.hobbledIds = live.hobbledIds || [];
       if (live.hobbledIds.indexOf(injured.id) < 0) live.hobbledIds.push(injured.id);
       if (realInjured && Math.random() < 0.20){
-        var weeksOutB = 1 + Math.floor(Math.random()*2);
-        realInjured.injuredWeeks = Math.max(realInjured.injuredWeeks||0, weeksOutB);
-        addNews('injury', realInjured.n+' was carrying a knock from today\'s game : '+staffTrainerThe()+' reckons on '+weeksText(weeksOutB)+' on the sidelines.');
+        var spellB = (typeof rollInjurySpell==='function') ? rollInjurySpell(null, 'knock-only') : {kind:'knock', days:5, weeks:1, name:'a knock'};
+        if (typeof applyInjurySpell==='function') applyInjurySpell(realInjured, spellB);
+        else realInjured.injuredWeeks = Math.max(realInjured.injuredWeeks||0, spellB.weeks);
+        addNews('injury', (typeof injurySpellNews==='function')?injurySpellNews(realInjured, spellB, 'match-hobble'):(realInjured.n+' was carrying a knock and is expected out for '+spellB.days+' days.'));
       }
     }
     } else {
@@ -46744,20 +47043,107 @@ function simulateVidiprinter(excludeOpp, opts){
   });
   return lines;
 }
-function revealVidiprinter(lines, title){
-  if (title) document.getElementById('vidi-title').textContent = title;
-  var box = document.getElementById('vidi-box');
-  box.innerHTML = '<p class="header">... RESULTS COMING IN ...</p>';
-  /* a line prefixed with "§" is a section header (e.g. "-- FIRST DIVISION --"), rendered like the "RESULTS COMING IN" banner rather than as a scoreline : lets one ticker cover several competitions in a single read-out */
-  lines.forEach(function(line, i){
-    setTimeout(function(){
-      var isHeader = line.charAt(0) === '§';
-      var p = document.createElement('p');
-      if (isHeader) p.className = 'header';
-      p.textContent = isHeader ? line.slice(1) : vidiprinterizeLine(line); /* v232 : SEVEN quirk, applied only here at the vidiprinter's own render step */
-      box.appendChild(p); box.scrollTop = box.scrollHeight;
-    }, 300 + i*380);
+function vidiPrepareLines(lines){
+  return (lines||[]).map(function(line){
+    var isHeader = !!(line && line.charAt(0)==='§');
+    var text = isHeader ? line.slice(1) : vidiprinterizeLine(line);
+    if (!isHeader && text && !/\(FT\)|FULL TIME|FT/.test(text) && /\d/.test(text)) text = text.replace(/\s*$/, '') + ' (FT)';
+    return {header:isHeader, text:text};
   });
+}
+var vidiSpeedPref = 'normal';
+var vidiAnim = null;
+function vidiSpeedMs(){
+  if (vidiSpeedPref==='slow') return {char:48, gap:700, start:240};
+  if (vidiSpeedPref==='instant') return {char:0, gap:0, start:0};
+  return {char:22, gap:380, start:200};
+}
+function vidiCancelAnim(){
+  if (vidiAnim && vidiAnim.timers){
+    vidiAnim.timers.forEach(function(id){ clearTimeout(id); });
+  }
+  vidiAnim = null;
+}
+function vidiPaintAll(box, prepared){
+  box.innerHTML = '<p class="header">... RESULTS COMING IN ...</p>';
+  prepared.forEach(function(rec){
+    var p = document.createElement('p');
+    if (rec.header) p.className = 'header';
+    p.textContent = rec.text;
+    box.appendChild(p);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+function vidiFinishNow(){
+  if (!vidiAnim) return;
+  var box = document.getElementById('vidi-box');
+  var prepared = vidiAnim.prepared;
+  vidiCancelAnim();
+  if (box && prepared) vidiPaintAll(box, prepared);
+}
+function setVidiSpeed(pref){
+  vidiSpeedPref = (pref==='slow'||pref==='instant') ? pref : 'normal';
+  document.querySelectorAll('#vidi-speed-row button.vidi-speed').forEach(function(b){
+    if (b.getAttribute('data-vidi-speed')===vidiSpeedPref) b.classList.add('primary');
+    else b.classList.remove('primary');
+  });
+}
+function bindVidiSpeedControls(){
+  var row = document.getElementById('vidi-speed-row');
+  if (!row || row._vidiBound) return;
+  row._vidiBound = true;
+  row.querySelectorAll('button.vidi-speed').forEach(function(b){
+    b.addEventListener('click', function(ev){
+      ev.preventDefault(); ev.stopPropagation();
+      setVidiSpeed(b.getAttribute('data-vidi-speed'));
+      if (vidiAnim && vidiSpeedPref==='instant') vidiFinishNow();
+    });
+  });
+  var box = document.getElementById('vidi-box');
+  if (box && !box._vidiSkipBound){
+    box._vidiSkipBound = true;
+    box.addEventListener('click', function(){ vidiFinishNow(); });
+  }
+}
+function revealVidiprinter(lines, title){
+  if (title && document.getElementById('vidi-title')) document.getElementById('vidi-title').textContent = title;
+  var box = document.getElementById('vidi-box');
+  if (!box) return;
+  bindVidiSpeedControls();
+  setVidiSpeed(vidiSpeedPref);
+  var prepared = vidiPrepareLines(lines);
+  vidiCancelAnim();
+  if (vidiSpeedPref==='instant'){
+    vidiPaintAll(box, prepared);
+    return prepared;
+  }
+  box.innerHTML = '<p class="header">... RESULTS COMING IN ...</p>';
+  var ms = vidiSpeedMs();
+  var timers = [];
+  vidiAnim = {timers:timers, prepared:prepared};
+  function typeLine(i){
+    if (!vidiAnim || vidiAnim.prepared!==prepared) return;
+    if (i>=prepared.length){ vidiAnim = {timers:[], prepared:prepared, done:true}; return; }
+    var rec = prepared[i];
+    var p = document.createElement('p');
+    if (rec.header) p.className = 'header';
+    p.textContent = '';
+    box.appendChild(p);
+    var j = 0;
+    function tick(){
+      if (!vidiAnim || vidiAnim.prepared!==prepared) return;
+      if (j < rec.text.length){
+        p.textContent += rec.text.charAt(j++);
+        box.scrollTop = box.scrollHeight;
+        timers.push(setTimeout(tick, ms.char));
+      } else {
+        timers.push(setTimeout(function(){ typeLine(i+1); }, ms.gap));
+      }
+    }
+    tick();
+  }
+  timers.push(setTimeout(function(){ typeLine(0); }, ms.start));
+  return prepared;
 }
 
 /* the board's reaction to a result : accounts for the actual shape of the
@@ -49877,15 +50263,10 @@ function finishMatch(){
   f.played = true; f.res = live.usScore+'-'+live.oppScore+(f.home?' (H)':' (A)');
   f.scorers = live.scorers.slice(); f.penScorers = (live.penScorers||[]).slice(); /* v127 */ /* for the fixture list's OUR SCORERS column : first-name-and-surname, in scoring order, no minutes kept per goal here */
   f.attendance = live.attendanceFigure; /* fixture list shows this for home games only, but it's stored regardless */
-  /* suspensions are served match by match : decrement anyone already serving
-     one BEFORE checking for a fresh sending-off in this match, so a man sent
-     off today starts his ban from the next game, not this one. */
-  squad.forEach(function(p){
-    if (p.suspendedMatches>0){
-      p.suspendedMatches--;
-      if (p.suspendedMatches===0) addNews('injury', p.n+'\'s suspension is served : available again.');
-    }
-  });
+  /* v391 : a sending-off today must not serve itself at the final whistle.
+     Match-based bans begin after the era delay (14 days from 1970) and are
+     decremented only when the club then completes a competitive fixture. */
+  if (typeof serveSuspensionsForFixture==='function') serveSuspensionsForFixture(f);
   /* v168 : the old once-a-match, post-final-whistle sending-off roll that used to live here is removed -- it
      always read as happening "after" full time and never actually affected the match it supposedly occurred
      in. A sending-off is now a real, in-match event with its own minute : see the card branch of
@@ -50344,7 +50725,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v390'; /* v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v391'; /* v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
