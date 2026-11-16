@@ -3441,6 +3441,35 @@ html body .pc-e81 .pc-badge span {
 }
 
 
+
+    /* v395 : Club Office overhaul — compact chips, one bank figure, staff rows */
+    .office-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;}
+    .office-chip{
+      appearance:none;-webkit-appearance:none;border:2px solid var(--ink,#111);background:var(--yellow,#ffd000);color:var(--ink,#111);
+      font:700 13px/1 Barlow,Helvetica,Arial,sans-serif;padding:7px 12px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;
+    }
+    .office-chip.on,.office-chip[aria-pressed="true"]{background:var(--ink,#111);color:var(--yellow,#ffd000);}
+    .office-chip:disabled,.office-chip.ghost{opacity:.45;cursor:not-allowed;background:#fff8e8;}
+    .office-panel{display:none;}
+    .office-panel.on{display:block;}
+    .office-bank{
+      background:var(--ink,#111);color:var(--yellow,#ffd000);border:3px solid var(--ink,#111);padding:10px 12px;margin:0 0 12px;
+      display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;
+    }
+    .office-bank .lab{font:700 12px/1 Barlow,Helvetica,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;}
+    .office-bank .fig{font:400 36px/1 Anton,Impact,sans-serif;letter-spacing:.01em;}
+    .office-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted #b79a6e;padding:4px 0;}
+    .office-row b{font-weight:700;}
+    .office-note{color:var(--mute,#5a4636);font-size:13px;margin:8px 0 0;}
+    .office-staff{display:grid;gap:8px;}
+    .office-staff-row{display:grid;grid-template-columns:150px 1fr auto auto;gap:8px;align-items:center;border:2px solid var(--ink,#111);background:#fff8e8;padding:8px 10px;}
+    @media (max-width:640px){.office-staff-row{grid-template-columns:1fr 1fr;}.office-bank .fig{font-size:28px;}}
+    .office-staff-row .post{font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:12px;}
+    .office-vacant{color:var(--mute,#5a4636);font-style:italic;}
+    body.theme-match .office-chip{background:var(--yellow);color:var(--ink);border-color:var(--ink);}
+    body.theme-match .office-chip.on,body.theme-match .office-chip[aria-pressed="true"]{background:var(--ink);color:var(--yellow);}
+    body.theme-match .office-bank{background:var(--ink);color:var(--yellow);border-color:var(--ink);}
+
     /* v383 : compact staff text links on the club page (no button chrome, ink underline) */
     #club-assistant-actions, #club-assistant-applicants { display:block; margin-top:2px; }
     #club-assistant-applicants p { margin:4px 0 0; }
@@ -4000,33 +4029,95 @@ body.theme-turnstile #halftime-talk-box .matchctl button.primary{
 
     <div class="view" id="v-club">
       <h1>Club Office</h1>
-      <p class="sub" id="club-name-ground">ALDERSHOT F.C. : RECREATION GROUND</p>
-      <div class="grid3">
-        <div class="box">
-          <div class="box-title">FINANCES</div>
-          <p><span class="field">BANK BALANCE</span><br><span class="val" id="club-bank">--</span></p>
-          <p><span class="field">WEEKLY WAGE BILL</span><br><span class="val" id="club-wages">--</span></p>
-          <p><span class="field">GROUND UPKEEP (WEEKLY)</span><br><span class="val" id="club-upkeep">--</span></p>
-          <p><span class="field">LAST AWAY TRAVEL COST</span><br><span class="val" id="club-travel">--</span></p>
-          <p><span class="field">LAST ATTENDANCE</span><br><span class="val" id="club-attendance">--</span></p>
-          <p><span class="field">LAST GATE RECEIPTS</span><br><span class="val" id="club-gate">--</span></p>
-          <p><span class="field">LAST MATCH BONUS PAID</span><br><span class="val" id="club-bonus">--</span></p>
-          <p><span class="field">BONUSES PAID THIS SEASON</span><br><span class="val" id="club-bonus-season">--</span></p>
-          <p><span class="field">Transfers in</span><br><span class="val" id="club-transfers-in">--</span></p>
-          <p><span class="field">Transfers out</span><br><span class="val" id="club-transfers-out">--</span></p>
+      <p class="sub" id="club-name-ground">ALDERSHOT F.C. — RECREATION GROUND</p>
+      <div class="office-chips" role="tablist" aria-label="Club Office sections">
+        <button type="button" class="office-chip on" id="club-tab-fin" aria-pressed="true">Finances</button>
+        <button type="button" class="office-chip" id="club-tab-gnd" aria-pressed="false">Ground</button>
+        <button type="button" class="office-chip" id="club-tab-stf" aria-pressed="false">Staff</button>
+      </div>
+
+      <section class="office-panel on" id="club-panel-fin">
+        <div class="office-bank"><span class="lab">Bank</span><span class="fig" id="club-bank">--</span></div>
+        <div class="grid2">
+          <div class="box">
+            <div class="box-title">This season so far</div>
+            <div class="office-row"><span>Weekly wage bill</span><b id="club-wages">--</b></div>
+            <div class="office-row"><span>Ground upkeep (weekly)</span><b id="club-upkeep">--</b></div>
+            <div class="office-row"><span>Transfer fees received</span><b id="club-transfers-in">--</b></div>
+            <div class="office-row"><span>Transfer fees paid</span><b id="club-transfers-out">--</b></div>
+            <div class="office-row"><span>Bonuses paid this season</span><b id="club-bonus-season">--</b></div>
+            <div class="office-row"><span>Last attendance</span><b id="club-attendance">--</b></div>
+            <div class="office-row"><span>Last gate receipts</span><b id="club-gate">--</b></div>
+            <div class="office-row"><span>Last match bonus</span><b id="club-bonus">--</b></div>
+            <div class="office-row"><span>Last away travel</span><b id="club-travel">--</b></div>
+          </div>
         </div>
-        <div class="box">
-          <div class="box-title">STAFF</div>
-          <p><span class="field" id="club-manager-title">SECRETARY-MANAGER</span><br><span class="val" id="club-manager">You</span></p>
-          <p><span class="field">MANAGER REPUTATION</span><br><span class="val" id="club-manager-rep">--</span></p>
-          <p><span class="field">BOARD TARGET THIS SEASON</span><br><span class="val" id="club-board-target">--</span></p>
-          <p><span class="field" id="club-trainer-title">TRAINER</span><br><span class="val" id="club-trainer">Bert Symons</span><span class="val" id="club-trainer-duty"> : handles fitness &amp; injuries</span></p>
-          <p><span class="field" id="club-secretary-title">CLUB SECRETARY</span><br><span class="val" id="club-secretary">W. H. Cobbett</span><span class="val" id="club-secretary-duty"> : books, correspondence, gate takings</span></p>
-          <p id="club-assistant-row" style="display:none;"><span class="field" id="club-assistant-title">ASSISTANT MANAGER</span><br><span class="val" id="club-assistant">Vacant</span><span class="val" id="club-assistant-duty"></span><span id="club-assistant-actions"></span></p><div id="club-assistant-applicants" style="display:none;"></div>
+        <div class="box" style="margin-top:12px;">
+          <div class="box-title">Transfer history</div>
+          <p class="office-note">This club's completed deals in the save, newest first. Fees use a thousands comma.</p>
+          <div class="scroll-box" style="max-height:280px;"><table><thead><tr><th>Date</th><th>Player</th><th>Deal</th><th class="num">Fee</th></tr></thead><tbody id="club-transfer-history-body"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="office-panel" id="club-panel-gnd">
+        <div class="grid2">
+          <div class="box">
+            <div class="box-title" id="club-ground-title">The ground</div>
+            <div class="office-row"><span>Name</span><b id="club-ground-name">--</b></div>
+            <div class="office-row"><span>Capacity</span><b id="club-ground-cap">--</b></div>
+            <div class="office-row"><span>Weekly upkeep</span><b id="club-ground-upkeep">--</b></div>
+            <p class="office-note" id="club-ground-src"></p>
+          </div>
+          <div class="box">
+            <div class="box-title">Development</div>
+            <p class="office-note">Improvements are bought from the same bank, at the prices of the day. Floodlights are already in where the era allows. Work stays off the menu until a sourced cost is held.</p>
+            <div class="office-chips" style="margin-top:10px">
+              <button type="button" class="office-chip ghost" disabled>Cover a terrace</button>
+              <button type="button" class="office-chip ghost" disabled>Seat a paddock</button>
+              <button type="button" class="office-chip ghost" disabled>Safety work</button>
+            </div>
+          </div>
+        </div>
+        <div class="box" style="margin-top:12px;">
+          <div class="box-title" id="club-grounds-table-title">League grounds</div>
+          <div class="scroll-box" style="max-height:280px;"><table><thead><tr><th>Club</th><th>Ground</th><th class="num">Capacity</th></tr></thead><tbody id="club-grounds-body"></tbody></table></div>
+          <p class="office-note" id="club-grounds-note"></p>
+        </div>
+      </section>
+
+      <section class="office-panel" id="club-panel-stf">
+        <p class="office-note">Posts are split out. Hire and sack are on the yellow chips. A vacant post can be advertised.</p>
+        <div class="office-staff" id="club-staff-list">
+          <div class="office-staff-row">
+            <div class="post" id="club-manager-title">SECRETARY-MANAGER</div>
+            <div><span class="val" id="club-manager">You</span><div class="office-note" id="club-manager-rep">--</div><div class="office-note" id="club-board-target">--</div></div>
+            <span></span><span></span>
+          </div>
+          <div class="office-staff-row" id="club-assistant-row" style="display:none;">
+            <div class="post" id="club-assistant-title">ASSISTANT MANAGER</div>
+            <div><span class="val" id="club-assistant">Vacant</span><span class="val" id="club-assistant-duty"></span><div id="club-assistant-applicants" style="display:none;"></div></div>
+            <span id="club-assistant-actions"></span>
+            <span></span>
+          </div>
+          <div class="office-staff-row">
+            <div class="post" id="club-trainer-title">TRAINER</div>
+            <div><span class="val" id="club-trainer">Bert Symons</span><span class="val" id="club-trainer-duty"></span><div id="club-trainer-applicants" style="display:none;"></div></div>
+            <span id="club-trainer-actions"></span>
+            <span></span>
+          </div>
+          <div class="office-staff-row">
+            <div class="post" id="club-secretary-title">CLUB SECRETARY</div>
+            <div><span class="val" id="club-secretary">W. H. Cobbett</span><span class="val" id="club-secretary-duty"></span><div id="club-secretary-applicants" style="display:none;"></div></div>
+            <span id="club-secretary-actions"></span>
+            <span></span>
+          </div>
+        </div>
+        <div class="box" style="margin-top:12px;">
+          <div class="box-title">On the field</div>
           <p><span class="field">TEAM CAPTAIN</span><br><select id="captain-select" style="width:100%; margin-top:2px;"></select></p>
           <p><span class="field">PENALTY TAKER</span><br><select id="penalty-taker-select" style="width:100%; margin-top:2px;"></select></p>
         </div>
-      </div>
+      </section>
       <div class="box" id="unhappy-box" style="margin-top:16px; display:none;">
         <div class="box-title">A PLAYER WANTS TO LEAVE</div>
         <p class="sub" id="unhappy-text"></p>
@@ -6346,7 +6437,7 @@ function generateBoardTarget(newlyPromoted){
       : {type:'promotion', label:'PUSH FOR PROMOTION to First Division.'};
   } else {
     boardTarget = rep < 35 ? {type:'survival', label:'AVOID RELEGATION out of First Division.'}
-      : rep < 65 ? {type:'midtable', label:'ESTABLISH THE CLUB IN FIRST DIVISION : a mid-table finish would be well received.'}
+      : rep < 65 ? {type:'midtable', label:'ESTABLISH THE CLUB IN FIRST DIVISION. A mid-table finish would be well received.'}
       : {type:'title', label:'CHALLENGE FOR THE FIRST DIVISION TITLE.'};
   }
   /* v306 : the reputation figure alone ignores the squad actually in the dressing room. A manager whose rep was lifted
@@ -7170,9 +7261,10 @@ function recordUserPurchase(opts){
 }
 function renderTransferHistory(){
   var body = document.getElementById('transfer-history-body');
-  if (!body) return;
+  if (!body){ if (typeof renderClubTransferHistory==='function') renderClubTransferHistory(); return; }
   if (!Array.isArray(transferHistory) || !transferHistory.length){
     body.innerHTML = '<tr><td colspan="5" class="sub">No completed transfers recorded in this save yet.</td></tr>';
+    if (typeof renderClubTransferHistory==='function') renderClubTransferHistory();
     return;
   }
   var rows = transferHistory.slice().reverse();
@@ -7194,6 +7286,7 @@ function renderTransferHistory(){
       '</tr>';
   });
   body.innerHTML = html;
+  if (typeof renderClubTransferHistory==='function') renderClubTransferHistory();
 }
 function fixtureOppRoundLabel(f, rn){
   var label = rn || '';
@@ -9466,6 +9559,7 @@ function mergeAssistantHireState(saved){
   d.applicants = Array.isArray(saved.applicants) ? saved.applicants.slice() : [];
   d.appointed = saved.appointed || null;
   d.aiFilled = (saved.aiFilled && typeof saved.aiFilled==='object') ? saved.aiFilled : {};
+  d.sackedSourced = saved.sackedSourced || null;
   return d;
 }
 function currentAssistantWage(clubName){
@@ -9501,6 +9595,14 @@ function assistantDisplayName(rec, sourced){
 }
 function assistantManagerDisplay(club, when){
   club = club || (typeof ourClubName==='undefined' ? '' : ourClubName);
+  var sacked = assistantHireState && assistantHireState.sackedSourced;
+  if (sacked && sacked.club===club){
+    var hiredEarly = assistantHiredFor(club);
+    if (hiredEarly){
+      return {name:assistantDisplayName(hiredEarly, false), duty:hiredEarly.duty || staffAssistantDuty(), sourced:false, vacant:false, hired:true, wage:hiredEarly.wage, gen:!!hiredEarly.gen};
+    }
+    return {name:'Vacant', duty:'', sourced:false, vacant:true};
+  }
   var row = sourcedAssistant(club, when);
   if (row) return {name:row.name, duty:row.duty, sourced:true, vacant:false};
   var hired = assistantHiredFor(club);
@@ -9774,13 +9876,13 @@ function renderAssistantStaffExtras(info){
   var box = document.getElementById('club-assistant-applicants');
   if (act) act.innerHTML = '';
   if (box){ box.innerHTML = ''; box.style.display = 'none'; }
-  if (!info || info.sourced) return;
+  if (!info) return;
   if (info.vacant){
     if (act){
       if (assistantHireState.advertised){
-        act.innerHTML = '<span class="val">applications invited</span>';
+        act.innerHTML = '<span class="office-note">Applications invited</span>';
       } else {
-        act.innerHTML = ' \u2014 <a href="#" class="staff-text-link" id="assistant-advertise-link">Advertise post</a>';
+        act.innerHTML = officeChipHtml('Advertise', 'assistant-advertise-link');
         var link = document.getElementById('assistant-advertise-link');
         if (link) link.onclick = function(ev){ if (ev) ev.preventDefault(); advertiseAssistantPost(); return false; };
       }
@@ -9790,27 +9892,41 @@ function renderAssistantStaffExtras(info){
       box.style.display = '';
       apps.forEach(function(a, i){
         var p = document.createElement('p');
-        p.className = 'sub';
-        p.innerHTML = staffEsc(assistantDisplayName(a, false))+', '+staffEsc(a.line||'')+' \u2014 <a href="#" class="staff-text-link" data-app-idx="'+i+'">Appoint</a>';
+        p.className = 'office-note';
+        p.innerHTML = staffEsc(assistantDisplayName(a, false))+', '+staffEsc(a.line||'')+' ';
+        var hire = document.createElement('button');
+        hire.type = 'button'; hire.className = 'office-chip'; hire.textContent = 'Hire';
+        hire.setAttribute('data-app-idx', String(i));
+        hire.onclick = function(ev){ if (ev) ev.preventDefault(); appointAssistant(parseInt(hire.getAttribute('data-app-idx'),10)); return false; };
+        p.appendChild(hire);
         box.appendChild(p);
       });
-      Array.prototype.forEach.call(box.querySelectorAll('a.staff-text-link[data-app-idx]'), function(a){
-        a.onclick = function(ev){ if (ev) ev.preventDefault(); appointAssistant(parseInt(a.getAttribute('data-app-idx'),10)); return false; };
-      });
     }
-  } else if (info.hired && info.wage && act){
-    act.innerHTML = '<span class="val"> : \u00a3'+info.wage+' a week</span>';
+  } else {
+    var bits = [];
+    if (info.hired && info.wage) bits.push('\u00a3'+info.wage+' a week');
+    if (act){
+      act.innerHTML = (bits.length ? '<span class="office-note">'+bits.join(', ')+'</span> ' : '') + officeChipHtml('Sack', 'assistant-sack-link');
+      var sl = document.getElementById('assistant-sack-link');
+      if (sl) sl.onclick = function(ev){ if (ev) ev.preventDefault(); sackAssistant(); return false; };
+    }
   }
 }
 function updateStaffPanelTitles(){
   var tr = document.getElementById('club-trainer-title');
   if (tr) tr.textContent = staffTrainerTitleLabel('upper');
   var td = document.getElementById('club-trainer-duty');
-  if (td) td.textContent = ' : ' + staffTrainerDuty();
+  if (td){
+    var tName = officeStaffCurrentName ? officeStaffCurrentName('trainer') : trainerName;
+    td.textContent = tName ? staffTrainerDuty() : '';
+  }
   var sr = document.getElementById('club-secretary-title');
   if (sr) sr.textContent = staffSecretaryTitleLabel('upper');
   var sd = document.getElementById('club-secretary-duty');
-  if (sd) sd.textContent = ' : ' + staffSecretaryDuty();
+  if (sd){
+    var sName = officeStaffCurrentName ? officeStaffCurrentName('secretary') : clubSecretaryName;
+    sd.textContent = sName ? staffSecretaryDuty() : '';
+  }
   var row = document.getElementById('club-assistant-row');
   if (row){
     var on = (typeof staffAssistantOn==='function') && staffAssistantOn();
@@ -9822,12 +9938,26 @@ function updateStaffPanelTitles(){
       var an = document.getElementById('club-assistant');
       if (an) an.textContent = info.name;
       var ad = document.getElementById('club-assistant-duty');
-      if (ad) ad.textContent = info.duty ? (' : ' + info.duty) : '';
+      if (ad) ad.textContent = info.duty ? info.duty : '';
       renderAssistantStaffExtras(info);
     } else {
       renderAssistantStaffExtras(null);
     }
   }
+  var tn = document.getElementById('club-trainer');
+  if (tn){
+    var tShown = officeStaffCurrentName('trainer');
+    tn.textContent = tShown || 'Vacant';
+    tn.className = tShown ? 'val' : 'val office-vacant';
+  }
+  var sn = document.getElementById('club-secretary');
+  if (sn){
+    var sShown = officeStaffCurrentName('secretary');
+    sn.textContent = sShown || 'Vacant';
+    sn.className = sShown ? 'val' : 'val office-vacant';
+  }
+  renderOfficeStaffExtras('trainer');
+  renderOfficeStaffExtras('secretary');
 }
 
 /* v363 : British Home Championship last real season was 1983-84. */
@@ -17902,6 +18032,66 @@ var GROUND_CAP_SERIES = {
   "Nottingham Forest": [
     {from:1980, through:1988, cap:35567, ground:"City Ground", src:"Wikipedia City Ground: Brian Clough Stand (1980) took capacity to 35,567, broadly constant until Hillsborough cuts in 1989 (Inglis)"}
   ],
+  "Liverpool": [
+    {from:1981, cap:52518, ground:"Anfield", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 52,518 (Anfield Road, Liverpool 4)"}
+  ],
+  "Ipswich Town": [
+    {from:1981, cap:32000, ground:"Portman Road", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 32,000 (Portman Road, Ipswich)"}
+  ],
+  "Tottenham Hotspur": [
+    {from:1981, cap:50000, ground:"White Hart Lane", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 50,000 (748 High Rd, Tottenham, London N17). The West Stand was rebuilt from November 1980 and reopened 6 February 1982; Rothmans still listed 50,000 in both the 1981-82 and 1982-83 yearbooks"}
+  ],
+  "Arsenal": [
+    {from:1981, cap:60000, ground:"Highbury", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 60,000 (Arsenal Stadium, Highbury)"}
+  ],
+  "Swansea City": [
+    {from:1981, cap:26496, ground:"Vetch Field", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 26,496 (Vetch Field, Swansea)"}
+  ],
+  "Southampton": [
+    {from:1981, cap:25000, ground:"The Dell", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 25,000 (The Dell, Milton Road, Southampton)"}
+  ],
+  "Everton": [
+    {from:1981, cap:54709, ground:"Goodison Park", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 54,709 (25,000 seats) (Goodison Park, Liverpool L4 4EL)"}
+  ],
+  "West Ham United": [
+    {from:1981, cap:35500, ground:"Boleyn Ground", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 35,500 (Boleyn Ground, Green Street, Upton Park)"}
+  ],
+  "Manchester City": [
+    {from:1981, cap:52500, ground:"Maine Road", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 52,500 (Maine Road, Moss Side, Manchester)"}
+  ],
+  "Aston Villa": [
+    {from:1981, cap:48000, ground:"Villa Park", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 48,000 (Villa Park, Trinity Rd, Birmingham)"}
+  ],
+  "Brighton & Hove Albion": [
+    {from:1981, cap:32500, ground:"Goldstone Ground", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 32,500 (Goldstone Ground, Old Shoreham Rd, Hove)"}
+  ],
+  "Coventry City": [
+    {from:1981, through:1982, cap:20600, ground:"Highfield Road", src:"Coventry City club historian Jim Brown, The History of Highfield Road (CCFC official history; also CWN 100 Years of Highfield Road): in 1981 Highfield Road became England's first all-seater, capacity reduced from 36,500 to 20,600. Rothmans Football Yearbook 1981-82 lists 20,000 all-seater (rounded). Standing returned on the Kop in 1985"}
+  ],
+  "Notts County": [
+    {from:1981, cap:24654, ground:"Meadow Lane", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 24,654 (County Ground, Meadow Lane, Nottingham)"}
+  ],
+  "Birmingham City": [
+    {from:1981, cap:44500, ground:"St Andrew's", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 44,500 (9,009 seats) (St Andrews, Birmingham B9 4NH)"}
+  ],
+  "West Bromwich Albion": [
+    {from:1981, cap:38600, ground:"The Hawthorns", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 38,600 (seats 12,500) (The Hawthorns, West Bromwich)"}
+  ],
+  "Stoke City": [
+    {from:1981, cap:35000, ground:"Victoria Ground", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 35,000 (Victoria Ground, Stoke-on-Trent)"}
+  ],
+  "Sunderland": [
+    {from:1981, cap:47000, ground:"Roker Park", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 47,000 (Roker Park Ground, Sunderland)"}
+  ],
+  "Leeds United": [
+    {from:1981, cap:43900, ground:"Elland Road", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 43,900 (Elland Road, Leeds LS11 0ES)"}
+  ],
+  "Wolverhampton Wanderers": [
+    {from:1981, cap:41074, ground:"Molineux", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 41,074 (Molineux Grounds, Wolverhampton)"}
+  ],
+  "Middlesbrough": [
+    {from:1981, cap:42000, ground:"Ayresome Park", src:"Rothmans Football Yearbook 1981-82 (Jack Rollin, Queen Anne Press): Ground capacity 42,000 (Ayresome Park, Middlesbrough, Teesside)"}
+  ],
   "Derby County": [
     {from:1969, through:1980, cap:42000, ground:"Baseball Ground", src:"Wikipedia Baseball Ground: highest capacity 42,000 (1969–1980)"}
   ]
@@ -23497,7 +23687,222 @@ document.getElementById('btn-confirm-lineup').addEventListener('click', function
 renderLineup(); renderLineupCount();
 
 /* ---------- CLUB OFFICE ---------- */
+/* v395 : Club Office overhaul — tabs, transfer history on the finances panel, ground panel, staff hire and sack. */
+var clubOfficeTab = 'fin';
+function initClubOfficeTabs(){
+  if (initClubOfficeTabs._done) return;
+  var tabs = [
+    {btn:'club-tab-fin', panel:'club-panel-fin', id:'fin'},
+    {btn:'club-tab-gnd', panel:'club-panel-gnd', id:'gnd'},
+    {btn:'club-tab-stf', panel:'club-panel-stf', id:'stf'}
+  ];
+  function show(id){
+    clubOfficeTab = id;
+    tabs.forEach(function(t){
+      var on = t.id===id;
+      var p = document.getElementById(t.panel);
+      var b = document.getElementById(t.btn);
+      if (p) p.classList.toggle('on', on);
+      if (b){ b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    });
+  }
+  tabs.forEach(function(t){
+    var b = document.getElementById(t.btn);
+    if (b) b.addEventListener('click', function(){ show(t.id); });
+  });
+  initClubOfficeTabs._done = true;
+  show(clubOfficeTab || 'fin');
+}
+function officePounds(n){
+  return (typeof formatClubPounds==='function') ? formatClubPounds(n) : ('£'+Math.round(Number(n)||0).toLocaleString('en-GB'));
+}
+function clubTransferDealLabel(rec){
+  if (!rec) return '';
+  if (rec.to === ourClubName) return rec.from ? ('Signed from '+rec.from) : 'Signed';
+  if (rec.from === ourClubName) return rec.to ? ('Sold to '+rec.to) : 'Sold';
+  return (rec.from||'')+' to '+(rec.to||'');
+}
+function renderClubTransferHistory(){
+  var body = document.getElementById('club-transfer-history-body');
+  if (!body) return;
+  var rows = (transferHistory||[]).filter(function(r){ return typeof isOurTransferDeal==='function' ? isOurTransferDeal(r) : (r && (r.from===ourClubName || r.to===ourClubName)); }).slice().reverse();
+  if (!rows.length){
+    body.innerHTML = '<tr><td colspan="4" class="sub">No completed transfers recorded for this club yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(function(rec){
+    var when = rec.date || rec.iso || '';
+    return '<tr><td>'+when+'</td><td>'+(rec.player||'')+'</td><td>'+clubTransferDealLabel(rec)+'</td><td class="num">'+(typeof formatTransferFeeLabel==='function'?formatTransferFeeLabel(rec.fee, rec.kind):officePounds(rec.fee))+'</td></tr>';
+  }).join('');
+}
+function formatCapNumber(n){
+  if (!(n>0)) return '—';
+  return Math.round(n).toLocaleString('en-GB');
+}
+function groundCapIsSourcedForSeason(name, year){
+  var e = (typeof groundCapLookup==='function') ? groundCapLookup(name, year) : null;
+  return !!(e && e.exact && e.cap);
+}
+function renderClubGroundPanel(){
+  var gName = (typeof groundNameFor==='function') ? groundNameFor(ourClubName) : '';
+  var cap = (typeof groundCapacityFor==='function') ? groundCapacityFor(ourClubName) : 0;
+  var upkeep = (typeof currentGroundUpkeep==='function') ? currentGroundUpkeep() : 0;
+  var title = document.getElementById('club-ground-title');
+  if (title) title.textContent = gName || 'The ground';
+  var nEl = document.getElementById('club-ground-name'); if (nEl) nEl.textContent = gName || '—';
+  var cEl = document.getElementById('club-ground-cap'); if (cEl) cEl.textContent = formatCapNumber(cap);
+  var uEl = document.getElementById('club-ground-upkeep'); if (uEl) uEl.textContent = officePounds(upkeep);
+  var srcEl = document.getElementById('club-ground-src');
+  if (srcEl) srcEl.textContent = '';
+  var year = (typeof currentCapSeasonYear==='function') ? currentCapSeasonYear() : 0;
+  var tEl = document.getElementById('club-grounds-table-title');
+  if (tEl) tEl.textContent = (typeof currentDivisionLabel==='string' && currentDivisionLabel) ? (currentDivisionLabel+' grounds') : 'League grounds';
+  var body = document.getElementById('club-grounds-body');
+  if (body){
+    var names = [ourClubName].concat((rivals||[]).map(function(r){ return r.n; }));
+    var seen = {};
+    body.innerHTML = names.filter(function(n){ if (!n || seen[n]) return false; seen[n]=1; return true; }).map(function(n){
+      var g = (typeof groundNameFor==='function') ? groundNameFor(n) : '';
+      var c = (typeof groundCapacityFor==='function') ? groundCapacityFor(n) : 0;
+      return '<tr'+(n===ourClubName?' class="us"':'')+'><td>'+n+'</td><td>'+g+'</td><td class="num">'+formatCapNumber(c)+'</td></tr>';
+    }).join('');
+  }
+  var note = document.getElementById('club-grounds-note');
+  if (note) note.textContent = 'Capacities for this season.';
+}
+function officeChipHtml(label, id, disabled){
+  return '<button type="button" class="office-chip" id="'+id+'"'+(disabled?' disabled':'')+'>'+label+'</button>';
+}
+function sackAssistant(){
+  if (!(typeof staffAssistantOn==='function') || !staffAssistantOn()) return false;
+  var info = assistantManagerDisplay();
+  if (!info || info.vacant) return false;
+  var shown = info.name || 'The assistant manager';
+  if (!assistantHireState) assistantHireState = {advertised:false, advertisedOn:null, applicants:[], appointed:null, aiFilled:{}};
+  if (info.sourced) assistantHireState.sackedSourced = {name:shown, on:(typeof staffDateISO==='function'?staffDateISO():''), club:ourClubName};
+  assistantHireState.appointed = null;
+  assistantHireState.advertised = false;
+  assistantHireState.applicants = [];
+  if (typeof addNews==='function') addNews('board', shown+' has left the club.');
+  if (typeof updateStaffPanelTitles==='function') updateStaffPanelTitles();
+  if (typeof renderClub==='function') renderClub();
+  return true;
+}
+var officeStaffHire = {
+  trainer:{vacated:false, advertised:false, advertisedOn:null, applicants:[], appointed:null},
+  secretary:{vacated:false, advertised:false, advertisedOn:null, applicants:[], appointed:null}
+};
+function resetOfficeStaffHire(){
+  officeStaffHire = {
+    trainer:{vacated:false, advertised:false, advertisedOn:null, applicants:[], appointed:null},
+    secretary:{vacated:false, advertised:false, advertisedOn:null, applicants:[], appointed:null}
+  };
+}
+function mergeOfficeStaffHire(saved){
+  resetOfficeStaffHire();
+  if (!saved || typeof saved!=='object') return officeStaffHire;
+  ['trainer','secretary'].forEach(function(k){
+    var s = saved[k]; if (!s || typeof s!=='object') return;
+    officeStaffHire[k] = {
+      vacated:!!s.vacated, advertised:!!s.advertised, advertisedOn:s.advertisedOn||null,
+      applicants:Array.isArray(s.applicants)?s.applicants.slice():[], appointed:s.appointed||null
+    };
+  });
+  return officeStaffHire;
+}
+function officeStaffPostName(kind){
+  if (kind==='trainer') return (typeof staffTrainerTitle==='function') ? staffTrainerTitle() : 'trainer';
+  return (typeof staffSecretaryTitle==='function') ? staffSecretaryTitle() : 'club secretary';
+}
+function officeStaffCurrentName(kind){
+  var st = officeStaffHire[kind];
+  if (st && st.appointed && st.appointed.name) return st.appointed.name;
+  if (st && st.vacated) return '';
+  return kind==='trainer' ? (trainerName||'') : (clubSecretaryName||'');
+}
+function sackOfficeStaff(kind){
+  var st = officeStaffHire[kind]; if (!st) return false;
+  var shown = officeStaffCurrentName(kind);
+  if (!shown) return false;
+  st.vacated = true; st.appointed = null; st.advertised = false; st.applicants = [];
+  if (kind==='trainer') trainerName = '';
+  else clubSecretaryName = '';
+  if (typeof addNews==='function') addNews('board', (shown||('The '+officeStaffPostName(kind)))+' has left the club.');
+  if (typeof updateStaffPanelTitles==='function') updateStaffPanelTitles();
+  if (typeof renderClub==='function') renderClub();
+  return true;
+}
+function advertiseOfficeStaff(kind){
+  var st = officeStaffHire[kind]; if (!st) return false;
+  if (officeStaffCurrentName(kind)) return false;
+  if (st.advertised) return true;
+  st.advertised = true;
+  st.advertisedOn = (typeof staffDateISO==='function') ? staffDateISO() : '';
+  st.vacated = true;
+  var nation = (typeof isScoOnly==='function' && isScoOnly()) ? 'Scotland' : 'England';
+  var name = (typeof pickGeneratedStaffName==='function') ? pickGeneratedStaffName(nation, Math.random()*100, kind) : ('A. Applicant');
+  st.applicants = [{name:name, line:'An application for the '+officeStaffPostName(kind)+' post.'}];
+  if (typeof addNews==='function') addNews('board', 'The club have advertised for a '+officeStaffPostName(kind)+'.');
+  if (typeof updateStaffPanelTitles==='function') updateStaffPanelTitles();
+  if (typeof renderClub==='function') renderClub();
+  return true;
+}
+function appointOfficeStaff(kind, idx){
+  var st = officeStaffHire[kind]; if (!st) return false;
+  var rec = st.applicants && st.applicants[idx];
+  if (!rec) return false;
+  st.appointed = {name:rec.name, appointedOn:(typeof staffDateISO==='function'?staffDateISO():'')};
+  st.applicants = [];
+  st.advertised = false;
+  st.vacated = false;
+  if (kind==='trainer') trainerName = rec.name;
+  else clubSecretaryName = rec.name;
+  if (typeof addNews==='function') addNews('board', 'The club have appointed '+rec.name+' as '+officeStaffPostName(kind)+'.');
+  if (typeof updateStaffPanelTitles==='function') updateStaffPanelTitles();
+  if (typeof renderClub==='function') renderClub();
+  return true;
+}
+function renderOfficeStaffExtras(kind){
+  var act = document.getElementById('club-'+kind+'-actions');
+  var box = document.getElementById('club-'+kind+'-applicants');
+  if (act) act.innerHTML = '';
+  if (box){ box.innerHTML = ''; box.style.display = 'none'; }
+  var name = officeStaffCurrentName(kind);
+  if (name){
+    if (act){
+      act.innerHTML = officeChipHtml('Sack', 'office-sack-'+kind);
+      var b = document.getElementById('office-sack-'+kind);
+      if (b) b.addEventListener('click', function(){ sackOfficeStaff(kind); });
+    }
+    return;
+  }
+  var st = officeStaffHire[kind] || {};
+  if (act){
+    if (st.advertised) act.innerHTML = '<span class="office-note">Applications invited</span>';
+    else {
+      act.innerHTML = officeChipHtml('Advertise', 'office-adv-'+kind);
+      var a = document.getElementById('office-adv-'+kind);
+      if (a) a.addEventListener('click', function(){ advertiseOfficeStaff(kind); });
+    }
+  }
+  var apps = st.applicants || [];
+  if (box && apps.length){
+    box.style.display = '';
+    apps.forEach(function(app, i){
+      var p = document.createElement('p');
+      p.className = 'office-note';
+      p.innerHTML = (app.name||'')+(app.line?', '+app.line:'')+' ';
+      var hire = document.createElement('button');
+      hire.type = 'button'; hire.className = 'office-chip'; hire.textContent = 'Hire';
+      hire.addEventListener('click', function(){ appointOfficeStaff(kind, i); });
+      p.appendChild(hire);
+      box.appendChild(p);
+    });
+  }
+}
+
 function renderClub(){
+  if (typeof initClubOfficeTabs==='function') initClubOfficeTabs();
   var nameGroundEl = document.getElementById('club-name-ground');
   if (nameGroundEl) nameGroundEl.textContent = ourClubName+(/F\.?C\.?$/i.test(ourClubName)?'':' F.C.')+' — '+groundNameFor(ourClubName);
   document.getElementById('club-bank').textContent = (typeof formatClubPounds==='function'?formatClubPounds((typeof userBank==='function')?userBank():finances.bank):('£'+Number(((typeof userBank==='function')?userBank():finances.bank)||0).toLocaleString('en-GB')));
@@ -23507,10 +23912,12 @@ function renderClub(){
   var upkeepEl = document.getElementById('club-upkeep'); if (upkeepEl) upkeepEl.textContent = (typeof formatClubPounds==='function'?formatClubPounds(typeof currentGroundUpkeep==='function' ? currentGroundUpkeep() : 18):('£'+(typeof currentGroundUpkeep==='function' ? currentGroundUpkeep() : 18).toLocaleString('en-GB')));
   var travelEl = document.getElementById('club-travel'); if (travelEl) travelEl.textContent = finances.lastTravelCost ? ((typeof formatClubPounds==='function'?formatClubPounds(finances.lastTravelCost):('£'+Number(finances.lastTravelCost).toLocaleString('en-GB')))) : '£0 (HOME, OR NOT YET TRAVELLED)';
   var bonusEl = document.getElementById('club-bonus'); if (bonusEl) bonusEl.textContent = finances.lastBonus ? ((typeof formatClubPounds==='function'?formatClubPounds(finances.lastBonus):('£'+Number(finances.lastBonus).toLocaleString('en-GB')))) : '£0'; /* v138 : win/draw/Cup bonus paid on the last result, see MATCH BONUSES */
-  var bonusSeasonEl = document.getElementById('club-bonus-season'); if (bonusSeasonEl) bonusSeasonEl.textContent = '£' + (finances.seasonBonusTotal||0).toLocaleString();
+  var bonusSeasonEl = document.getElementById('club-bonus-season'); if (bonusSeasonEl) bonusSeasonEl.textContent = (typeof formatClubPounds==='function'?formatClubPounds(finances.seasonBonusTotal||0):('£'+(finances.seasonBonusTotal||0).toLocaleString()));
   if (typeof ensureTransferFinanceFields==='function') ensureTransferFinanceFields();
   var tinEl = document.getElementById('club-transfers-in'); if (tinEl) tinEl.textContent = (typeof transferFinanceLine==='function') ? transferFinanceLine(finances.weekTransferIn, finances.seasonTransferIn) : '';
   var toutEl = document.getElementById('club-transfers-out'); if (toutEl) toutEl.textContent = (typeof transferFinanceLine==='function') ? transferFinanceLine(finances.weekTransferOut, finances.seasonTransferOut) : '';
+  if (typeof renderClubTransferHistory==='function') renderClubTransferHistory();
+  if (typeof renderClubGroundPanel==='function') renderClubGroundPanel();
   var trainerEl = document.getElementById('club-trainer'); if (trainerEl) trainerEl.textContent = trainerName;
   var secretaryEl = document.getElementById('club-secretary'); if (secretaryEl) secretaryEl.textContent = clubSecretaryName;
   var mgrTitleEl = document.getElementById('club-manager-title');
@@ -23521,8 +23928,8 @@ function renderClub(){
   var repEl = document.getElementById('club-manager-rep');
   if (repEl){
     var rep = Math.round(manager.rep || 50);
-    var repWord = rep>=75 ? 'STRONG : the board are firmly behind you' : rep>=45 ? 'STEADY : no cause for concern either way' : rep>=25 ? 'UNDER SOME PRESSURE : results need to turn' : 'SHAKY : real boardroom concern, though a sacking mid-season was rare in this era';
-    repEl.textContent = rep+'/100 : '+repWord+(faBadges.prelim ? ' : '+faBadgeText() : '');
+    var repWord = rep>=75 ? 'STRONG. The board are firmly behind you' : rep>=45 ? 'STEADY. No cause for concern either way' : rep>=25 ? 'UNDER SOME PRESSURE. Results need to turn' : 'SHAKY. Real boardroom concern, though a sacking mid-season was rare in this era';
+    repEl.textContent = rep+'/100. '+repWord+(faBadges.prelim ? '. '+faBadgeText() : '');
   }
   var jobBox = document.getElementById('job-offer-box');
   if (jobBox){
@@ -23583,7 +23990,7 @@ function renderClub(){
   var penSel = document.getElementById('penalty-taker-select');
   if (penSel){
     var penOptions = squad.filter(function(p){ return p.slot!=='GK'; }).sort(function(a,b){ return (b.shooting-a.shooting) || (b.rep-a.rep); });
-    penSel.innerHTML = '<option value="">(NO STANDING PICK : LEFT TO WHOEVER\'S UP)</option>'+penOptions.map(function(p){ return '<option value="'+p.id+'"'+(p.id===penaltyTakerId?' selected':'')+'>'+p.n.toUpperCase()+' ('+(typeof displayPosAbbrevOf==='function'?displayPosAbbrevOf(p):p.slot)+', SHOOTING '+Math.round(p.shooting)+'/20)</option>'; }).join('');
+    penSel.innerHTML = '<option value="">(NO STANDING PICK. LEFT TO WHOEVER\'S UP)</option>'+penOptions.map(function(p){ return '<option value="'+p.id+'"'+(p.id===penaltyTakerId?' selected':'')+'>'+p.n.toUpperCase()+' ('+(typeof displayPosAbbrevOf==='function'?displayPosAbbrevOf(p):p.slot)+', SHOOTING '+Math.round(p.shooting)+'/20)</option>'; }).join('');
   }
   var histBox = document.getElementById('club-history-box');
   if (histBox){
@@ -31892,7 +32299,7 @@ function buildSaveState(){
     currentDate:currentDate.toISOString(), weekPhase:weekPhase, tactics:tactics, training:training,
     targets:targets, pendingNegotiations:pendingNegotiations, pendingScoutTrips:pendingScoutTrips,
     activeTrip:activeTrip, faBadges:faBadges, unlockedFormations:unlockedFormations, unlockedMethods:unlockedMethods, formationFamiliarity:formationFamiliarity, activeTrainerTrip:activeTrainerTrip, unlockedTrainingMethods:unlockedTrainingMethods, pendingOffers:pendingOffers,
-    news:news, southernTable:southernTable, futureLegends:futureLegends, historicalOneOffs:historicalOneOffs, historicalOneOffsPost1949:historicalOneOffsPost1949, realSchoolboyLegends:realSchoolboyLegends, scoutingPrep:scoutingPrep, markCloselyThisMatch:markCloselyThisMatch, cupState:cupState, cupBracket:cupBracket, scouts:scouts, realGemTargetsState:realGemTargetsState, foreignWhatIfState:foreignWhatIfState, whatIfApproachesThisSeason:whatIfApproachesThisSeason, whatIfSeasonKey:whatIfSeasonKey, assistantHireState:assistantHireState, youthProspects:youthProspects,
+    news:news, southernTable:southernTable, futureLegends:futureLegends, historicalOneOffs:historicalOneOffs, historicalOneOffsPost1949:historicalOneOffsPost1949, realSchoolboyLegends:realSchoolboyLegends, scoutingPrep:scoutingPrep, markCloselyThisMatch:markCloselyThisMatch, cupState:cupState, cupBracket:cupBracket, scouts:scouts, realGemTargetsState:realGemTargetsState, foreignWhatIfState:foreignWhatIfState, whatIfApproachesThisSeason:whatIfApproachesThisSeason, whatIfSeasonKey:whatIfSeasonKey, assistantHireState:assistantHireState, officeStaffHire:officeStaffHire, youthProspects:youthProspects,
     trainerName:trainerName, clubSecretaryName:clubSecretaryName, scoutHirePool:SCOUT_HIRE_POOL, /* v206 : without these, reloading a save would show the generic default "Bert Symons"/"W. H. Cobbett" names even though a different trainer/secretary were generated and shown for the rest of that save */
     reserveLeagueRegion:reserveLeagueRegion, reserveLeagueTable:reserveLeagueTable, reserveLeagueLastLines:reserveLeagueLastLines, reserveFixtureQueue:reserveFixtureQueue, reserveXISelection:reserveXISelection, reservesRecord:reservesRecord, reserveRecentForm:reserveRecentForm,
     southernLastLines:southernLastLines, ourDivisionLastLines:ourDivisionLastLines, ourDivisionCatchUpLog:(typeof ourDivisionCatchUpLog!=='undefined'?ourDivisionCatchUpLog:[]), clubLeagueDateLog:(typeof clubLeagueDateLog!=='undefined'?clubLeagueDateLog:{}), firstDivision:firstDivision, secondDivision:secondDivision, thirdDivisionSouthBg:thirdDivisionSouthBg, thirdDivisionNorth:thirdDivisionNorth, midlandLeague:midlandLeague, northEasternLeague:northEasternLeague,
@@ -32445,6 +32852,7 @@ function applyLoadedState(s, silent){
     if (s.scoutHirePool && s.scoutHirePool.length) SCOUT_HIRE_POOL = s.scoutHirePool;
     else if (typeof generateScoutHirePool==='function' && typeof eraStaffUsesInitials==='function' && !eraStaffUsesInitials('scout')) generateScoutHirePool(); /* v385 : an old 1970+ save still carries the 1940s initial hire-pool names; regenerate unused contacts only. Hired scouts in `scouts` are left as saved. */
     assistantHireState = (typeof mergeAssistantHireState==='function') ? mergeAssistantHireState(s.assistantHireState) : (s.assistantHireState || {advertised:false, advertisedOn:null, applicants:[], appointed:null, aiFilled:{}}); /* v383 : old saves start the unsourced post vacant */
+    officeStaffHire = (typeof mergeOfficeStaffHire==='function') ? mergeOfficeStaffHire(s.officeStaffHire) : (s.officeStaffHire || {trainer:{vacated:false, advertised:false, advertisedOn:null, applicants:[], appointed:null}, secretary:{vacated:false, advertised:false, advertisedOn:null, applicants:[], appointed:null}});
     youthProspects = s.youthProspects || []; /* v144 : an old save from before this pipeline existed just starts with an empty ground-staff, honestly, rather than inventing anyone */
     /* OLD-SAVE BACKFILL: a real bug, reported directly -- a target scouted and
        watched personally in a save from before the CA/attrs system existed
@@ -33007,6 +33415,8 @@ function initGameStateFresh(){
      generateStaffNames() keeps all four surnames distinct from each other so a fresh game never shows
      two different roles sharing a name by coincidence. */
   generateStaffNames();
+  assistantHireState = {advertised:false, advertisedOn:null, applicants:[], appointed:null, aiFilled:{}};
+  if (typeof resetOfficeStaffHire==='function') resetOfficeStaffHire();
   realGemTargetsState = {}; /* v142 : a fresh game starts with no real gems yet found or lost to real history */
   reservesRecord = {p:0,w:0,d:0,l:0}; reserveXISelection = []; buildReserveLeagueSeason(); /* v146 */
   fixtureIdx = 0; week = 1; lineup = []; lineupConfirmed = false; live = null; tickTimer = null; substituteId = null;
@@ -52298,7 +52708,7 @@ renderScoutingPrep();
    z-index sits below the manager-setup/confirm overlays (9999) so a confirm
    dialog raised from here still shows on top of it correctly. */
 /* v309 : the visible build string on the title screen, so a player (or a bug report) can say which build this is */
-var RETROMATCH_VERSION = 'v394'; /* v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v395'; /* v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
