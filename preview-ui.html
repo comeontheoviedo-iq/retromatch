@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RetroMatch – 1980s screens (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f3e6c4;--ink:#1a120c;--red:#c0122a;--red-dark:#8e0c1f;--yellow:#ffd000;--muted:#5a4636;--card:#fff8e8;--chip:#ffd000;--grass:#3d6b3a;--grass-dark:#2f542c;--warn:#8e0c1f}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#2a1a14;color:var(--ink);font:15px/1.4 Barlow,Helvetica,Arial,sans-serif}
+a{color:inherit;text-decoration:none;pointer-events:none}
+button,select{font:inherit;color:inherit}
+.wrap{max-width:920px;margin:0 auto;padding:12px 14px 40px}
+.banner{background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;font-weight:700;letter-spacing:.02em}
+.banner b{font-family:Anton,Impact,sans-serif;letter-spacing:.04em;font-weight:400;font-size:18px;margin-right:.4em}
+.mast{background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.mast h1{margin:0;font:400 42px/0.9 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.mast .sub{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;opacity:.95}
+.mast .club{text-align:right}
+.mast .club strong{display:block;font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.03em}
+.sheet{background:var(--paper);border:3px solid #111;border-top:0;padding:12px 14px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip,.btn{appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 12px/1 Barlow,sans-serif;padding:7px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.chip[aria-pressed="true"],.chip.on,.btn.on,.btn[aria-pressed="true"]{background:#111;color:var(--yellow)}
+.chip:disabled,.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:5px 8px;font-size:11px}
+.panel{display:none}
+.panel.on{display:block}
+h2{margin:0 0 8px;font:400 28px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
+h3{margin:14px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.grid{grid-template-columns:1fr}.mast .club{text-align:left}.mast h1{font-size:34px}.file-grid{grid-template-columns:1fr !important}}
+.card{background:var(--card);border:2px solid #111;padding:8px 10px}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border:2px solid #111}
+th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #c9b48a;vertical-align:top}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:#111;color:var(--yellow);border-bottom:0}
+td.num,th.num{text-align:right}
+tr:last-child td{border-bottom:0}
+tr.hl td{background:#fff3b0}
+.note{color:var(--muted);font-size:13px;margin:8px 0 0}
+.src{font-size:12px;color:var(--muted)}
+.foot{margin-top:16px;font-size:12px;color:var(--muted);border-top:2px solid #111;padding-top:8px}
+.era-lab{font:700 12px/1 Barlow;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
+.style-list{display:grid;gap:6px;margin:8px 0 0}
+.style-item{background:var(--card);border:2px solid #111;padding:7px 9px;cursor:pointer;text-align:left;width:100%}
+.style-item.on{background:#111;color:var(--yellow)}
+.style-item .name{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+.style-item .ben{display:none;margin:4px 0 0;font-size:12px;line-height:1.35;color:#ffe9a8}
+.style-item.on .ben{display:block}
+.style-item p{margin:3px 0 0;font-size:12px;line-height:1.35}
+.style-item.on p{color:#f3e6c4}
+.picked{background:#111;color:var(--yellow);border:2px solid #111;padding:8px 10px;margin:8px 0 0}
+.picked .k{font:700 11px/1 Barlow;letter-spacing:.12em;text-transform:uppercase;color:#fff;margin:0 0 4px}
+.pitch-wrap{background:#111;border:2px solid #111;padding:8px}
+.pitch{position:relative;height:420px;border:2px solid #f3e6c4;overflow:hidden;background:repeating-linear-gradient(180deg,var(--grass) 0 30px,var(--grass-dark) 30px 60px)}
+.pitch .half{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.45)}
+.pitch .box-t,.pitch .box-b{position:absolute;left:50%;transform:translateX(-50%);width:54%;height:16%;border:2px solid rgba(255,255,255,.45)}
+.pitch .box-t{top:0;border-top:0}
+.pitch .box-b{bottom:0;border-bottom:0}
+.pitch .end-lab{position:absolute;left:50%;transform:translateX(-50%);font:700 9px/1 Barlow,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.pitch .end-lab.att{top:8px}
+.pitch .end-lab.our{bottom:8px}
+.pl{position:absolute;transform:translate(-50%,-50%);width:86px;text-align:center;z-index:2;transition:top .25s,left .25s}
+.pl .disc{width:22px;height:22px;border-radius:50%;background:var(--yellow);border:2px solid #111;margin:0 auto 2px;font:700 8px/18px Barlow,sans-serif;color:#111}
+.pl.hole .disc,.pl.adv .disc{background:#fff;box-shadow:0 0 0 2px var(--yellow)}
+.pl.gk .disc{background:#fff}
+.pl .nm{font:700 11px/1.1 Barlow,sans-serif;color:#fff;text-shadow:0 1px 0 #111,0 0 4px #111}
+.pl .meta{font:700 8px/1.2 Barlow,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#ffe9a8;text-shadow:0 1px 0 #111}
+.xi{width:100%;margin:8px 0 0}
+.subrow{margin-top:8px;background:var(--card);border:2px solid #111;padding:6px 10px;display:flex;align-items:center;gap:10px;font-size:14px}
+.subrow .lab{font:700 11px/1 Barlow;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ychip{display:inline-block;background:var(--yellow);color:#111;font:700 10px/1 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border:1px solid #111;margin:0 2px 2px 0;white-space:nowrap}
+.bar{background:#111;color:var(--yellow);border:2px solid #111;padding:8px 10px;margin:0 0 10px}
+.bar .lab{font:700 12px/1 Barlow;letter-spacing:.14em;text-transform:uppercase;color:#fff}
+.bar .fig{font:400 22px/1.1 Anton,Impact,sans-serif}
+.train-how{background:#111;color:#f3e6c4;border:2px solid #111;padding:10px 12px;margin:10px 0}
+.train-how h3{color:var(--yellow);margin:0 0 6px}
+.train-how p{margin:0 0 6px}
+.train-how p:last-child{margin:0}
+.file-grid{display:grid;grid-template-columns:280px 1fr;gap:12px;align-items:start}
+.sticker{background:#fff;border:3px solid #111;padding:8px 8px 10px;box-shadow:4px 4px 0 #111;position:relative}
+.sticker:before{content:"";position:absolute;inset:-6px;border:2px dashed #bbb;pointer-events:none}
+.sticker .clubbar{background:var(--red);color:#fff;text-align:center;padding:6px 4px 4px;font:400 16px/1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.sticker .pic{height:180px;margin:6px 0;background:linear-gradient(180deg,#6a1b1b 0%,#c0122a 60%,#7a1018 100%);border:2px solid #111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+.sticker .pic .no{font:400 64px/1 Anton,Impact,sans-serif}
+.sticker .pic .mono{font:700 18px/1 Barlow;letter-spacing:.12em;text-transform:uppercase;opacity:.9}
+.sticker .nmbar{background:#111;color:var(--yellow);text-align:center;padding:6px 4px;font:400 18px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase}
+.sticker .posbar{text-align:center;font:700 11px/1 Barlow;letter-spacing:.12em;text-transform:uppercase;padding:6px 0 0;color:var(--muted)}
+.file-body h3{margin-top:0}
+.attr{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;font-size:13px}
+.attr .pip{letter-spacing:1px;color:var(--red-dark)}
+.staff-line{margin:0 0 10px;padding:8px 10px;background:var(--card);border:2px solid #111}
+.staff-line .who{font-weight:700}
+.staff-line .duty{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>PREVIEW</b> 1980s screens on a 1981-82 Manchester United save, with a 1986-87 switch where the question changes. This is not the live game. Nothing here is a blue hyperlink: choices are buttons, and a selected choice stays clearly selected.</div>
+  <div class="mast">
+    <div>
+      <div class="sub" id="mast-era">Screens · 1981-82</div>
+      <h1>MATCH!</h1>
+    </div>
+    <div class="club">
+      <strong>Manchester United</strong>
+      <div>First Division · Old Trafford</div>
+    </div>
+  </div>
+  <div class="sheet">
+    <p class="era-lab">Season</p>
+    <div class="chips" role="tablist" aria-label="Season">
+      <button type="button" class="chip on" id="era-1981" aria-pressed="true">1981-82</button>
+      <button type="button" class="chip" id="era-1986" aria-pressed="false">1986-87</button>
+    </div>
+    <p class="era-lab">Screen</p>
+    <div class="chips nav" role="tablist" aria-label="Screens" id="nav"></div>
+    <section class="panel on" id="panel-lineup"></section>
+    <section class="panel" id="panel-tactics"></section>
+    <section class="panel" id="panel-training"></section>
+    <section class="panel" id="panel-transfers"></section>
+    <section class="panel" id="panel-squad"></section>
+    <section class="panel" id="panel-staff"></section>
+    <section class="panel" id="panel-club"></section>
+    <section class="panel" id="panel-league"></section>
+    <section class="panel" id="panel-facup"></section>
+    <section class="panel" id="panel-europe"></section>
+    <div class="foot" id="foot"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var era = 1981, screen = "lineup";
+  var formation = "442", defStyle = "manmark", atkStyle = "passmove", train = "shape", wrinkle = "none";
+  var fileId = "wilkins", trTab = "market", clubTab = "office", leagueId = "eng1", cupRound = "r3";
+  var NAV = [
+    {id:"lineup", label:"Line-up"},{id:"tactics", label:"Tactics"},{id:"training", label:"Training"},
+    {id:"transfers", label:"Transfers"},{id:"squad", label:"Squad"},{id:"staff", label:"Staff"},
+    {id:"club", label:"Club"},{id:"league", label:"League"},{id:"facup", label:"FA Cup"},{id:"europe", label:"Europe"}
+  ];
+  var P = {
+    bailey:{id:"bailey", name:"Gary Bailey", short:"Bailey", pos:"Goalkeeper", nation:"England", caps:0, goals:0, capsNote:"sourced nought. Senior debut 26 March 1985", caps86:2, goals86:0, capsNote86:"as of 23 August 1986", age81:23, age86:28, personality:"Quiet", no:1, attrs:{handling:16,shooting:3,passing:8,tackling:4,heading:8,pace:9,stamina:10}},
+    roche:{id:"roche", name:"Paddy Roche", short:"Roche", pos:"Goalkeeper", nation:"Republic of Ireland", caps:8, goals:0, capsNote:"as of 29 August 1981. Last cap 29 October 1975", age81:30, age86:35, personality:"Flamboyant", no:13, attrs:{handling:16,shooting:2,passing:8,tackling:7,heading:5,pace:8,stamina:7}},
+    gidman:{id:"gidman", name:"John Gidman", short:"Gidman", pos:"Right-back", nation:"England", caps:1, goals:0, capsNote:"as of 29 August 1981. Only cap 30 March 1977", age81:27, age86:32, personality:"Steady", no:2},
+    albiston:{id:"albiston", name:"Arthur Albiston", short:"Albiston", pos:"Left-back", nation:"Scotland", caps:0, goals:0, capsNote:"sourced nought. Scotland debut 1982", caps86:null, capsLabel86:"Scotland international", age81:24, age86:29, personality:"Steady", no:3},
+    mcqueen:{id:"mcqueen", name:"Gordon McQueen", short:"McQueen", pos:"Centre-back", nation:"Scotland", caps:null, capsLabel:"Scotland international", age81:29, age86:34, personality:"Commanding", no:5},
+    buchan:{id:"buchan", name:"Martin Buchan", short:"Buchan", pos:"Centre-back", nation:"Scotland", caps:null, capsLabel:"Scotland international", age81:32, age86:37, personality:"Professional", no:6},
+    moran:{id:"moran", name:"Kevin Moran", short:"Moran", pos:"Centre-back", nation:"Republic of Ireland", caps:null, capsLabel:"Republic of Ireland international", age81:25, age86:30, personality:"Committed", no:4},
+    wilkins:{id:"wilkins", name:"Ray Wilkins", short:"Wilkins", pos:"Centre midfielder", nation:"England", caps:42, goals:2, capsNote:"as of 29 August 1981. Last cap Hungary, 6 June 1981", age81:24, age86:29, personality:"Composed", no:8, career:[{years:"1973–1979", club:"Chelsea", apps:179, gls:30},{years:"1979–", club:"Manchester United", apps:null, gls:null}], attrs:{shooting:10,passing:17,tackling:15,heading:12,pace:15,stamina:18}},
+    macari:{id:"macari", name:"Lou Macari", short:"Macari", pos:"Centre midfielder", nation:"Scotland", caps:null, capsLabel:"Scotland international", age81:32, age86:37, personality:"Sharp", no:10},
+    mcilroy:{id:"mcilroy", name:"Sammy McIlroy", short:"McIlroy", pos:"Centre midfielder", nation:"Northern Ireland", caps:null, capsLabel:"Northern Ireland international", age81:27, age86:32, personality:"Willing", no:11},
+    coppell:{id:"coppell", name:"Steve Coppell", short:"Coppell", pos:"Right midfielder", nation:"England", caps:33, goals:6, capsNote:"as of 29 August 1981", age81:26, age86:31, personality:"Direct", no:7},
+    stapleton:{id:"stapleton", name:"Frank Stapleton", short:"Stapleton", pos:"Striker", nation:"Republic of Ireland", caps:null, capsLabel:"Republic of Ireland international", age81:25, age86:30, personality:"Airborne", no:9},
+    birtles:{id:"birtles", name:"Garry Birtles", short:"Birtles", pos:"Striker", nation:"England", caps:3, goals:0, capsNote:"as of 29 August 1981. Last cap 15 October 1980", age81:25, age86:30, personality:"Honest", no:12},
+    turner:{id:"turner", name:"Chris Turner", short:"Turner", pos:"Goalkeeper", nation:"England", caps:null, age81:22, age86:27, personality:"Calm", no:1},
+    sivebaek:{id:"sivebaek", name:"John Sivebaek", short:"Sivebaek", pos:"Right-back", nation:"Denmark", caps:null, capsLabel:"Denmark international", age81:19, age86:24, personality:"Tidy", no:2},
+    mcgrath:{id:"mcgrath", name:"Paul McGrath", short:"McGrath", pos:"Centre-back", nation:"Republic of Ireland", caps:null, capsLabel:"Republic of Ireland international", age81:21, age86:26, personality:"Assured", no:5},
+    moses:{id:"moses", name:"Remi Moses", short:"Moses", pos:"Centre midfielder", nation:"England", caps:null, age81:20, age86:25, personality:"Fierce", no:4},
+    robson:{id:"robson", name:"Bryan Robson", short:"Robson", pos:"Centre midfielder", nation:"England", caps:53, goals:18, capsNote:"as of 23 August 1986. Last cap Morocco, 6 June 1986, World Cup", age81:24, age86:29, personality:"Leader", no:7, career:[{years:"1975–1981", club:"West Bromwich Albion", apps:null, gls:null},{years:"1981–", club:"Manchester United", apps:null, gls:null}], attrs:{shooting:16,passing:15,tackling:16,heading:14,pace:16,stamina:18}},
+    strachan:{id:"strachan", name:"Gordon Strachan", short:"Strachan", pos:"Centre midfielder", nation:"Scotland", caps:null, capsLabel:"Scotland international", age81:24, age86:29, personality:"Chirpy", no:8},
+    olsen:{id:"olsen", name:"Jesper Olsen", short:"Olsen", pos:"Left midfielder", nation:"Denmark", caps:null, capsLabel:"Denmark international", age81:20, age86:25, personality:"Tricky", no:11},
+    whiteside:{id:"whiteside", name:"Norman Whiteside", short:"Whiteside", pos:"Striker", nation:"Northern Ireland", caps:null, capsLabel:"Northern Ireland international", age81:16, age86:21, personality:"Aggressive", no:9},
+    hogg:{id:"hogg", name:"Graeme Hogg", short:"Hogg", pos:"Centre-back", nation:"Scotland", caps:null, age81:17, age86:22, personality:"Raw", no:6},
+    duxbury:{id:"duxbury", name:"Mike Duxbury", short:"Duxbury", pos:"Right-back", nation:"England", caps:null, capsLabel:"England international", age81:21, age86:26, personality:"Willing", no:2}
+  };
+  var FORMS = {
+    "442":{label:"4-4-2", from:1981, blurb:"Two banks of four, the everyday English shape."},
+    "433":{label:"4-3-3", from:1981, blurb:"A back four, three in midfield, three up front."},
+    "442sw":{label:"4-4-2 sweeper", from:1981, blurb:"A 4-4-2 in which one centre-back sits as the sweeper, slightly deeper than his partner."},
+    "433sw":{label:"4-3-3 sweeper", from:1981, blurb:"A 4-3-3 in which one centre-back sits as the sweeper."},
+    "1432":{label:"1-4-3-2", from:1981, blurb:"A sweeper behind four defenders, three midfielders and two strikers."},
+    "352":{label:"3-5-2", from:1986, blurb:"Three at the back, wing-backs pushed on, two up front."}
+  };
+  function layout(key){
+    if (key==="442") return {GK:{x:50,y:90}, LB:{x:16,y:72}, LCB:{x:38,y:72}, RCB:{x:62,y:72}, RB:{x:84,y:72}, LM:{x:16,y:46}, LCM:{x:38,y:48}, RCM:{x:62,y:48}, RM:{x:84,y:46}, LST:{x:38,y:20}, RST:{x:62,y:20}};
+    if (key==="433") return {GK:{x:50,y:90}, LB:{x:16,y:72}, LCB:{x:38,y:72}, RCB:{x:62,y:72}, RB:{x:84,y:72}, LCM:{x:28,y:50}, CM:{x:50,y:52}, RCM:{x:72,y:50}, LW:{x:18,y:20}, ST:{x:50,y:18}, RW:{x:82,y:20}};
+    if (key==="442sw") return {GK:{x:50,y:90}, LB:{x:16,y:72}, SW:{x:38,y:78}, CB:{x:62,y:68}, RB:{x:84,y:72}, LM:{x:16,y:46}, LCM:{x:38,y:48}, RCM:{x:62,y:48}, RM:{x:84,y:46}, LST:{x:38,y:20}, RST:{x:62,y:20}};
+    if (key==="433sw") return {GK:{x:50,y:90}, LB:{x:16,y:72}, SW:{x:38,y:78}, CB:{x:62,y:68}, RB:{x:84,y:72}, LCM:{x:28,y:50}, CM:{x:50,y:52}, RCM:{x:72,y:50}, LW:{x:18,y:20}, ST:{x:50,y:18}, RW:{x:82,y:20}};
+    if (key==="1432") return {GK:{x:50,y:92}, SW:{x:50,y:82}, LB:{x:14,y:66}, LCB:{x:38,y:66}, RCB:{x:62,y:66}, RB:{x:86,y:66}, LCM:{x:26,y:42}, CM:{x:50,y:44}, RCM:{x:74,y:42}, LST:{x:38,y:18}, RST:{x:62,y:18}};
+    return {GK:{x:50,y:90}, LCB:{x:22,y:74}, CB:{x:50,y:76}, RCB:{x:78,y:74}, LWB:{x:12,y:48}, LCM:{x:32,y:48}, CM:{x:50,y:50}, RCM:{x:68,y:48}, RWB:{x:88,y:48}, LST:{x:38,y:20}, RST:{x:62,y:20}};
+  }
+  function applyWrinkle(ly, wr){
+    var out = {};
+    Object.keys(ly).forEach(function(k){ out[k] = {x:ly[k].x, y:ly[k].y}; });
+    if (wr==="hole" && out.LST){ out.LST.y = 34; out.LST.x = 46; }
+    if (wr==="twohold" && out.CM && out.LCM){ out.LCM.y = 62; out.RCM.y = 62; out.CM.y = 38; }
+    if (wr==="onehold" && out.CM && out.LCM){ out.CM.y = 64; out.LCM.y = 38; out.RCM.y = 38; }
+    return out;
+  }
+  function wrinkleSet(form){
+    var out = [{key:"none", label:"No wrinkle", text:"The Saturday shape is played as written, with no extra instruction."}];
+    if (form==="442" || form==="442sw") out.push({key:"hole", label:"Striker in the hole", text:"One of the two strikers drops off, in the hole, the way Beardsley played the part at Newcastle and later for England. It is a 4-4-2 instruction, shown on the board as the deeper of the two forwards."});
+    if (form==="433" || form==="433sw" || form==="1432" || form==="352"){
+      out.push({key:"twohold", label:"Two holding, one advanced", text:"Two of the midfield three sit and keep the shape. The third steps on and joins the attack. Shown on the board."});
+      out.push({key:"onehold", label:"One holding, two advanced", text:"One man sits at the base of the midfield three. The other two push on. Shown on the board."});
+    }
+    return out;
+  }
+  function xiFor(key){
+    if (era>=1986){
+      if (key==="442") return {GK:P.turner, LB:P.albiston, LCB:P.moran, RCB:P.mcgrath, RB:P.sivebaek, LM:P.olsen, LCM:P.moses, RCM:P.robson, RM:P.strachan, LST:P.whiteside, RST:P.stapleton};
+      if (key==="433") return {GK:P.turner, LB:P.albiston, LCB:P.moran, RCB:P.mcgrath, RB:P.sivebaek, LCM:P.moses, CM:P.robson, RCM:P.strachan, LW:P.olsen, ST:P.stapleton, RW:P.whiteside};
+      if (key==="442sw") return {GK:P.turner, SW:P.moran, LB:P.albiston, CB:P.mcgrath, RB:P.sivebaek, LM:P.olsen, LCM:P.moses, RCM:P.robson, RM:P.strachan, LST:P.whiteside, RST:P.stapleton};
+      if (key==="433sw") return {GK:P.turner, SW:P.moran, LB:P.albiston, CB:P.mcgrath, RB:P.sivebaek, LCM:P.moses, CM:P.robson, RCM:P.strachan, LW:P.olsen, ST:P.stapleton, RW:P.whiteside};
+      if (key==="1432") return {GK:P.turner, SW:P.moran, LB:P.albiston, LCB:P.hogg, RCB:P.mcgrath, RB:P.sivebaek, LCM:P.moses, CM:P.robson, RCM:P.strachan, LST:P.whiteside, RST:P.stapleton};
+      return {GK:P.turner, LCB:P.albiston, CB:P.mcgrath, RCB:P.moran, LWB:P.olsen, LCM:P.moses, CM:P.robson, RCM:P.strachan, RWB:P.sivebaek, LST:P.whiteside, RST:P.stapleton};
+    }
+    if (key==="442") return {GK:P.bailey, LB:P.albiston, LCB:P.buchan, RCB:P.mcqueen, RB:P.gidman, LM:P.mcilroy, LCM:P.macari, RCM:P.wilkins, RM:P.coppell, LST:P.stapleton, RST:P.birtles};
+    if (key==="433") return {GK:P.bailey, LB:P.albiston, LCB:P.buchan, RCB:P.mcqueen, RB:P.gidman, LCM:P.mcilroy, CM:P.wilkins, RCM:P.macari, LW:P.birtles, ST:P.stapleton, RW:P.coppell};
+    if (key==="442sw") return {GK:P.bailey, SW:P.buchan, LB:P.albiston, CB:P.mcqueen, RB:P.gidman, LM:P.mcilroy, LCM:P.macari, RCM:P.wilkins, RM:P.coppell, LST:P.stapleton, RST:P.birtles};
+    if (key==="433sw") return {GK:P.bailey, SW:P.buchan, LB:P.albiston, CB:P.mcqueen, RB:P.gidman, LCM:P.mcilroy, CM:P.wilkins, RCM:P.macari, LW:P.birtles, ST:P.stapleton, RW:P.coppell};
+    if (key==="1432") return {GK:P.bailey, SW:P.buchan, LB:P.albiston, LCB:P.moran, RCB:P.mcqueen, RB:P.gidman, LCM:P.mcilroy, CM:P.wilkins, RCM:P.macari, LST:P.stapleton, RST:P.birtles};
+    return {GK:P.bailey, LCB:P.albiston, CB:P.mcqueen, RCB:P.buchan, LWB:P.mcilroy, LCM:P.macari, CM:P.wilkins, RCM:P.coppell, RWB:P.gidman, LST:P.stapleton, RST:P.birtles};
+  }
+  function subFor(){ return era>=1986 ? P.duxbury : P.moran; }
+  var ROLE = {GK:"GK", LB:"LB", RB:"RB", LCB:"CB", RCB:"CB", CB:"CB", SW:"SW", LM:"LM", RM:"RM", LCM:"CM", RCM:"CM", CM:"CM", LW:"LW", RW:"RW", LST:"ST", RST:"ST", ST:"ST", LWB:"LWB", RWB:"RWB"};
+  var DEF = [
+    {key:"manmark", from:1981, label:"Man-marking", text:"Each man is given an opponent to pick up and stays with him. Still the usual English defensive method in the early 1980s.", benefit:"The side is harder to play through in ones, but can be pulled about if their runners drag markers out of the line.", train:"shape"},
+    {key:"zonal", from:1986, label:"Zonal marking", text:"Defenders hold a zone of the pitch rather than tracking one nominated man. More discussed by the mid-1980s, and still a minority habit in the League.", benefit:"The shape holds, but a runner who is not picked up can find space between zones.", train:"shape"},
+    {key:"pressing", from:1981, label:"Pressing", text:"Close the man on the ball down quickly, so the other side cannot settle. It asks more of the side's legs than a deeper defence.", benefit:"They have less time on the ball. The cost is tired legs, especially for older defenders.", train:"fitness"},
+    {key:"offsidetrap", from:1981, label:"Offside trap", text:"The back line steps up together to catch opposing forwards offside. Taylor's Watford did not use it; Phillips records that Taylor abhorred the offside game.", benefit:"Their forwards can be left stranded if the line steps up as one. It wants rehearsal in the week's pattern of play.", train:"shape"},
+    {key:"sitting", from:1981, label:"Deep or sitting", text:"The side sits in and keeps a compact shape, rather than hunting the ball high up the pitch. A natural partner for a sweeper, and a useful approach against a stronger side.", benefit:"You concede less space in behind. You will see less of the ball in their half.", train:"shape"}
+  ];
+  var ATK = [
+    {key:"passmove", from:1981, label:"Pass-and-move", text:"Short, early passes and movement off the ball. Paisley said that after signing Kenny Dalglish, a 4-4-2 with the accent on passing was Liverpool's most effective line-up.", benefit:"The side should keep the ball better and play through midfield. It is helped by a midweek of ball work.", train:"ball"},
+    {key:"direct", from:1981, label:"Long ball / direct", text:"The ball goes forward early, into the channels or onto a target man, with wide men and crosses. Taylor's Watford were the outstanding English example.", benefit:"The ball arrives in their box sooner. It asks the front men to win the first one, and the midfield to gamble on the second.", train:"shape"},
+    {key:"counters", from:1981, label:"Quick counters", text:"Win the ball and go forward at once, before the other lot can reset. A natural partner for a sweeper and a sitting defence.", benefit:"You catch them high up if the first pass is right. You will have less of the ball in a settled attack.", train:"fitness"},
+    {key:"possession", from:1981, label:"Patient possession", text:"Keep the ball and wait for the opening, rather than going long at the first chance. A minority English habit in this decade.", benefit:"You should see more of the ball. It can look slow if the front men are isolated.", train:"ball"}
+  ];
+  var TRAINS = [
+    {key:"fitness", label:"Fitness", note:"Lapping, running and stamina work, still the standard English midweek staple at many clubs. It keeps legs under a man, but a heavy week in a crowded run-in can leave him heavy-legged on Saturday.", backs:"Pressing and quick counters, which ask more of the legs."},
+    {key:"ball", label:"Ball work", note:"Passing, control, shooting and five-a-sides. At Liverpool this was the week's real work. Ian Rush later said of Melwood, \"all we did was five-a-sides,\" set against the more timed, sectional coaching he found in Italy.", backs:"Pass-and-move and patient possession, which live on the quality of the first touch and the pass."},
+    {key:"shape", label:"Pattern of play", note:"Rehearsing the chosen formation, so every man knows his job and his options. Taylor \"worked on the pattern of play day after day, every week along with set-pieces\" (Oliver Phillips).", backs:"The offside trap, man-marking, a sitting defence, and the long-ball shape, all of which want the Saturday jobs walked through midweek."},
+    {key:"setpieces", label:"Set pieces", note:"Corners, free-kicks and long throws, taken as part of the ordinary midweek, not as a modern specialism. Phillips records that Taylor treated them as weekly work beside the pattern of play.", backs:"Restarts rather than the open-play styles. A modest midweek habit, not a separate goal-machine."},
+    {key:"opp", label:"The next lot", note:"The week is spent on the coming opponents, and on their danger man in particular. That is the groundwork that makes a \"Mark him closely\" instruction worth giving on Saturday.", backs:"The match instruction, not a standing style. Ticking \"mark him\" without this week's work loosens your own shape for nothing."}
+  ];
+  var D1_81 = ["Liverpool","Ipswich Town","Manchester United","Tottenham Hotspur","Arsenal","Swansea City","Southampton","Everton","West Ham United","Manchester City","Aston Villa","Nottingham Forest","Brighton & Hove Albion","Coventry City","Notts County","Birmingham City","West Bromwich Albion","Stoke City","Sunderland","Leeds United","Wolverhampton Wanderers","Middlesbrough"];
+  var D2_81 = ["Luton Town","Watford","Norwich City","Sheffield Wednesday","Queens Park Rangers","Barnsley","Rotherham United","Leicester City","Newcastle United","Blackburn Rovers","Oldham Athletic","Chelsea","Charlton Athletic","Cambridge United","Crystal Palace","Derby County","Grimsby Town","Shrewsbury Town","Bolton Wanderers","Cardiff City","Wrexham","Orient"];
+  var D1_86 = ["Everton","Liverpool","Tottenham Hotspur","Arsenal","Norwich City","Wimbledon","Luton Town","Nottingham Forest","Watford","Coventry City","Manchester United","Southampton","Sheffield Wednesday","Chelsea","West Ham United","Queens Park Rangers","Newcastle United","Oxford United","Charlton Athletic","Leicester City","Manchester City","Aston Villa"];
+  var D2_86 = ["Derby County","Portsmouth","Oldham Athletic","Leeds United","Ipswich Town","Crystal Palace","Plymouth Argyle","Stoke City","Sheffield United","Bradford City","Barnsley","Blackburn Rovers","Reading","Hull City","West Bromwich Albion","Millwall","Huddersfield Town","Shrewsbury Town","Birmingham City","Sunderland","Grimsby Town","Brighton & Hove Albion"];
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+  function el(id){ return document.getElementById(id); }
+  function formsForEra(){ return Object.keys(FORMS).filter(function(k){ return era>=FORMS[k].from; }); }
+  function defOf(){ return DEF.filter(function(s){ return era>=s.from && s.key===defStyle; })[0] || DEF[0]; }
+  function atkOf(){ return ATK.filter(function(s){ return era>=s.from && s.key===atkStyle; })[0] || ATK[0]; }
+  function trainOf(){ return TRAINS.filter(function(s){ return s.key===train; })[0]; }
+  function ensureWrinkle(){
+    var set = wrinkleSet(formation).map(function(w){ return w.key; });
+    if (set.indexOf(wrinkle)<0) wrinkle = "none";
+  }
+  function capsLine(p){
+    var caps = p.caps, goals = p.goals, note = p.capsNote, label = p.capsLabel;
+    if (era>=1986){
+      if (Object.prototype.hasOwnProperty.call(p, "caps86")) caps = p.caps86;
+      if (Object.prototype.hasOwnProperty.call(p, "goals86")) goals = p.goals86;
+      if (Object.prototype.hasOwnProperty.call(p, "capsNote86")) note = p.capsNote86;
+      if (Object.prototype.hasOwnProperty.call(p, "capsLabel86")) label = p.capsLabel86;
+    }
+    if (typeof caps==="number"){
+      var g = (goals==null) ? "" : (goals===1 ? ", 1 goal" : ", "+goals+" goals");
+      var n = caps===1 ? "1 cap" : caps+" caps";
+      var nte = note ? " ("+note+")" : "";
+      return p.nation + ", " + n + g + nte + ".";
+    }
+    if (label) return label + ".";
+    return "";
+  }
+  function pitchHTML(xi, ly){
+    var html = '<div class="pitch-wrap"><div class="pitch">';
+    html += '<div class="half"></div><div class="box-t"></div><div class="box-b"></div>';
+    html += '<div class="end-lab att">Attacking</div><div class="end-lab our">Our goal</div>';
+    Object.keys(ly).forEach(function(slot){
+      var p = xi[slot], pos = ly[slot]; if (!p) return;
+      var klass = "pl";
+      if (slot==="GK") klass += " gk";
+      if (wrinkle==="hole" && slot==="LST") klass += " hole";
+      if ((wrinkle==="twohold" && slot==="CM") || (wrinkle==="onehold" && (slot==="LCM"||slot==="RCM"))) klass += " adv";
+      var role = ROLE[slot]||slot, wrLab = "";
+      if (wrinkle==="hole" && slot==="LST") wrLab = "In the hole";
+      if (wrinkle==="twohold" && slot==="CM") wrLab = "Advanced";
+      if (wrinkle==="twohold" && (slot==="LCM"||slot==="RCM")) wrLab = "Holding";
+      if (wrinkle==="onehold" && slot==="CM") wrLab = "Holding";
+      if (wrinkle==="onehold" && (slot==="LCM"||slot==="RCM")) wrLab = "Advanced";
+      html += '<div class="'+klass+'" style="left:'+pos.x+'%;top:'+pos.y+'%"><div class="disc">'+(p.short||"").slice(0,2).toUpperCase()+'</div><div class="nm">'+esc(p.short)+'</div><div class="meta">'+role+(wrLab?" · "+wrLab:"")+'</div></div>';
+    });
+    return html + '</div></div>';
+  }
+  function xiTable(xi){
+    var rows = Object.keys(xi).map(function(slot){
+      var p=xi[slot];
+      return "<tr><td>"+esc(ROLE[slot]||slot)+"</td><td>"+esc(p.name)+"</td><td>"+((era>=1986)?p.age86:p.age81)+"</td></tr>";
+    }).join("");
+    var sub = subFor();
+    return '<table class="xi"><thead><tr><th>Pos</th><th>Name</th><th>Age</th></tr></thead><tbody>'+rows+"</tbody></table>"+
+      '<div class="subrow"><span class="lab">Substitute</span><span><b>'+esc(sub.name)+"</b>, "+esc(sub.pos)+"</span></div>"+
+      '<p class="note">The substitute sits in a small row under the eleven, not in a panel above the side. '+(era>=1986?"Duxbury":"Moran")+" is in the opening squad and is the spare man in this line-up, not a sourced claim about the actual bench on the opening Saturday.</p>";
+  }
+  function renderNav(){
+    el("nav").innerHTML = NAV.map(function(n){
+      return '<button type="button" class="chip'+(screen===n.id?" on":"")+'" data-screen="'+n.id+'" aria-pressed="'+(screen===n.id?"true":"false")+'">'+n.label+'</button>';
+    }).join("");
+    el("nav").querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){ screen=b.getAttribute("data-screen"); renderAll(); });
+    });
+    el("mast-era").textContent = "Screens · " + (era>=1986 ? "1986-87" : "1981-82");
+    document.querySelectorAll("#era-1981,#era-1986").forEach(function(b){
+      var on = (b.id==="era-1986" && era>=1986) || (b.id==="era-1981" && era<1986);
+      b.className = "chip"+(on?" on":"");
+      b.setAttribute("aria-pressed", on?"true":"false");
+    });
+    document.querySelectorAll(".panel").forEach(function(p){ p.classList.toggle("on", p.id==="panel-"+screen); });
+  }
+  function trainName(key){
+    var t = TRAINS.filter(function(s){ return s.key===key; })[0];
+    return t ? t.label : key;
+  }
+  function trainFitHTML(){
+    var d = defOf(), a = atkOf(), t = trainOf();
+    var html = "<p>This week's work is <b>"+esc(t.label)+"</b>. "+esc(t.note)+"</p>";
+    var backsDef = t.key===d.train, backsAtk = t.key===a.train;
+    if (backsDef && backsAtk && d.train===a.train) html += "<p>It backs both <b>"+esc(d.label)+"</b> and <b>"+esc(a.label)+"</b>.</p>";
+    else if (backsDef && backsAtk) html += "<p>It backs both <b>"+esc(d.label)+"</b> and <b>"+esc(a.label)+"</b>.</p>";
+    else if (backsDef) html += "<p>It backs <b>"+esc(d.label)+"</b>. <b>"+esc(a.label)+"</b> is better backed by <b>"+esc(trainName(a.train))+"</b>.</p>";
+    else if (backsAtk) html += "<p>It backs <b>"+esc(a.label)+"</b>. <b>"+esc(d.label)+"</b> is better backed by <b>"+esc(trainName(d.train))+"</b>.</p>";
+    else {
+      var need = [];
+      if (need.indexOf(d.train)<0) need.push(d.train);
+      if (need.indexOf(a.train)<0) need.push(a.train);
+      html += "<p>Your styles would be better backed by <b>"+esc(need.map(trainName).join(" and "))+"</b>.</p>";
+    }
+    if (screen==="training") html += "<p>Training is a single weekly choice, not a second row of links. Pick a different button above to change the week's work.</p>";
+    else html += "<p>Training is a single weekly choice, not a second row of links. You can change the week's work on the Training screen.</p>";
+    return html;
+  }
+  function renderLineup(){
+
+    ensureWrinkle();
+    var xi = xiFor(formation), ly = applyWrinkle(layout(formation), wrinkle);
+    var fix = era>=1986 ? "Arsenal · First Division · Saturday 23 August 1986, home at Old Trafford." : "Coventry City · First Division · Saturday 29 August 1981, 3.00pm, away at Highfield Road.";
+    el("panel-lineup").innerHTML = "<h2>The line-up</h2><p class='note'>"+fix+" The eleven is the opening shape used in the tactics preview, assigned to a "+FORMS[formation].label+".</p><div class='card'>"+pitchHTML(xi, ly)+xiTable(xi)+"</div>";
+  }
+  function renderTactics(){
+    ensureWrinkle();
+    var xi = xiFor(formation), ly = applyWrinkle(layout(formation), wrinkle);
+    var formChips = formsForEra().map(function(k){
+      return '<button type="button" class="chip'+(formation===k?" on":"")+'" data-form="'+k+'" aria-pressed="'+(formation===k?"true":"false")+'">'+FORMS[k].label+"</button>";
+    }).join("");
+    var wr = wrinkleSet(formation);
+    var wrHtml = wr.map(function(w){
+      return '<button type="button" class="style-item'+(wrinkle===w.key?" on":"")+'" data-wr="'+w.key+'" aria-pressed="'+(wrinkle===w.key?"true":"false")+'"><div class="name">'+esc(w.label)+'</div><p>'+esc(w.text)+"</p></button>";
+    }).join("");
+    function styleBlock(pool, cur, kind){
+      return pool.filter(function(s){ return era>=s.from; }).map(function(s){
+        return '<button type="button" class="style-item'+(cur===s.key?" on":"")+'" data-kind="'+kind+'" data-key="'+s.key+'" aria-pressed="'+(cur===s.key?"true":"false")+'"><div class="name">'+esc(s.label)+(cur===s.key?" · selected":"")+'</div><p>'+esc(s.text)+'</p><div class="ben">Benefit. '+esc(s.benefit)+"</div></button>";
+      }).join("");
+    }
+    var d = defOf(), a = atkOf(), t = trainOf();
+    el("panel-tactics").innerHTML =
+      "<h2>Tactics</h2><p class='note'>"+FORMS[formation].blurb+(era>=1986?" The mid-1980s English game is still mostly 4-4-2. 3-5-2 is on the sheet after Jim Smith made it Queens Park Rangers' first-choice shape from 1985.":" The early-1980s English game is mostly 4-4-2.")+"</p>"+
+      "<h3>Formation</h3><div class='chips' id='form-chips'>"+formChips+"</div>"+
+      "<div class='card'><h3>"+FORMS[formation].label+(wrinkle!=="none"?" · "+wr.filter(function(w){return w.key===wrinkle;})[0].label:"")+"</h3>"+
+      pitchHTML(xi, ly)+"<p class='note'>Attacking up the board. Our left is on the left. A wrinkle that belongs to this shape is drawn on the pitch, not only listed underneath.</p></div>"+
+      "<h3>Tactical wrinkles</h3><p class='note'>Only wrinkles that fit this formation are offered. A 4-4-2 can play a striker in the hole. A midfield three can be two holding and one advanced, or one holding and two advanced.</p><div class='style-list' id='wr-list'>"+wrHtml+"</div>"+
+      "<div class='grid' style='margin-top:12px'><div class='card'><h3>Defensive style</h3><p class='note'>How the side keeps its shape without the ball.</p><div class='style-list' id='def-list'>"+styleBlock(DEF, defStyle, "def")+"</div></div>"+
+      "<div class='card'><h3>Attacking style</h3><p class='note'>How the side plays when it has the ball.</p><div class='style-list' id='atk-list'>"+styleBlock(ATK, atkStyle, "atk")+"</div></div></div>"+
+      "<div class='picked'><div class='k'>Selected</div>Defending with <b>"+esc(d.label)+"</b>. Attacking with <b>"+esc(a.label)+"</b>. "+esc(d.benefit)+" "+esc(a.benefit)+"</div>"+
+      "<div class='train-how'><h3>The week's training that backs this</h3>"+trainFitHTML()+"</div>";
+    el("form-chips").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ formation=b.getAttribute("data-form"); ensureWrinkle(); renderAll(); }); });
+    el("wr-list").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ wrinkle=b.getAttribute("data-wr"); renderAll(); }); });
+    document.querySelectorAll("#def-list button, #atk-list button").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (b.getAttribute("data-kind")==="def") defStyle=b.getAttribute("data-key"); else atkStyle=b.getAttribute("data-key");
+        renderAll();
+      });
+    });
+  }
+  function renderTraining(){
+    var t = trainOf(), d = defOf(), a = atkOf();
+    var chips = TRAINS.map(function(s){ return '<button type="button" class="chip'+(train===s.key?" on":"")+'" data-train="'+s.key+'" aria-pressed="'+(train===s.key?"true":"false")+'">'+s.label+"</button>"; }).join("");
+    el("panel-training").innerHTML =
+      "<h2>Training</h2><p class='note'>One choice for the week. There is no second row of links. The selected work is the dark button, and the panel below says what it does for Saturday and how it backs the tactics.</p>"+
+      "<p class='era-lab'>This week's work</p><div class='chips' id='train-chips'>"+chips+"</div>"+
+      "<div class='bar'><div><div class='lab'>Selected</div><div class='fig'>"+esc(t.label)+"</div></div></div>"+
+      "<div class='card'><h3>"+esc(t.label)+"</h3><p>"+esc(t.note)+"</p></div>"+
+      "<div class='train-how'><h3>How this backs the tactics</h3><p>You are defending with <b>"+esc(d.label)+"</b> and attacking with <b>"+esc(a.label)+"</b>.</p>"+trainFitHTML()+
+      "</div><p class='src'>Fitness, ball work, pattern of play and set pieces follow the cited midweek habits already used in the tactics preview (Rush on Melwood five-a-sides; Phillips on Taylor's pattern of play and set pieces).</p>";
+    el("train-chips").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ train=b.getAttribute("data-train"); renderAll(); }); });
+  }
+  function money(n){ return "£" + n.toLocaleString("en-GB"); }
+  function renderTransfers(){
+    var tabs = [
+      {id:"market", label:"For sale"},
+      {id:"enquiry", label:"Enquiries"},
+      {id:"office", label:"The office"},
+      {id:"scouts", label:"Scouts"}
+    ];
+    var tabBar = tabs.map(function(t){ return '<button type="button" class="chip'+(trTab===t.id?" on":"")+'" data-tr="'+t.id+'" aria-pressed="'+(trTab===t.id?"true":"false")+'">'+t.label+"</button>"; }).join("");
+    var body = "";
+    if (trTab==="market"){
+      body = "<h3>For sale</h3><p class='note'>Asking prices come in on the telex, not in a newspaper column. At the opening of the season no list of men for sale is printed here, so this tab is empty rather than filled with invented names or figures.</p>"+
+        "<div class='card'><p>No players listed for sale in this opening week.</p></div>";
+    } else if (trTab==="enquiry"){
+      body = "<h3>Enquiries</h3><p class='note'>Incoming and outgoing enquiries sit here, away from the for-sale list and away from the office post. None are in at the opening of the season.</p>"+
+        "<div class='card'><p>No enquiries outstanding.</p></div>";
+    } else if (trTab==="office"){
+      body = "<h3>The office</h3><p class='note'>The fax and telex sit on their own screen, not mixed in with the for-sale list.</p>"+
+        "<div class='card'><b>Incoming telex</b><p>No offers outstanding at the opening of the season.</p></div>";
+    } else {
+      var wage = era>=1986 ? "£28 a week" : "£24 a week";
+      var chief = era>=1986 ? "£42 a week" : "£36 a week";
+      if (era<1986){
+        body = "<h3>Scouts</h3><p class='note'>Sourced men already on the books stay at the top. Regional contacts below are retired players with a sourced nationality, shown here as hireable regional scouts. They are not claimed as historical United payroll in 1981-82. Joe Armstrong (1894–1975) is not offered: he was dead by both save dates.</p>"+
+          "<table><thead><tr><th>Name</th><th>Duty</th><th>Nationality</th><th>Wage</th><th></th></tr></thead><tbody>"+
+          "<tr class='hl'><td>Bob Bishop</td><td>Scout (Northern Ireland)</td><td>Northern Ireland</td><td>"+wage+"</td><td>On the books</td></tr>"+
+          "</tbody></table>"+
+          "<h3>Regional contacts, not yet taken on</h3>"+
+          "<table><thead><tr><th>Name</th><th>Region</th><th>Note</th><th>Wage</th><th></th></tr></thead><tbody>"+
+          "<tr><td>Jimmy Armfield</td><td>England</td><td>England international, retired 1971. Age 45.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "<tr><td>Denis Law</td><td>Scotland</td><td>Scotland international, retired 1974. Age 41.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "<tr><td>Ivor Allchurch</td><td>Wales</td><td>Wales international, retired 1968. Age 51.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "<tr><td>Tony Dunne</td><td>Republic of Ireland</td><td>Republic of Ireland international, last played 1979. Age 40.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "<tr><td>Derek Dougan</td><td>Northern Ireland</td><td>Northern Ireland international, retired 1975. Age 43.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "</tbody></table>"+
+          "<p class='src'>Bishop: John White, Irish Devils, tenure 1950 to 1987. Retainer band 2 is the 1981-82 scout wage already used in the live game (£24 a week). The five regional names are sourced as to retirement and nationality only.</p>";
+      } else {
+        body = "<h3>Scouts</h3><p class='note'>Bob Bishop is still on the books in 1986-87 (tenure to 1987). Geoff Twentyman is not offered at Liverpool after 1986, and is not a United man. The contacts below are retired players already in the live 1986 hire pool, each with a sourced nationality for a regional slot.</p>"+
+          "<table><thead><tr><th>Name</th><th>Duty</th><th>Nationality</th><th>Wage</th><th></th></tr></thead><tbody>"+
+          "<tr class='hl'><td>Bob Bishop</td><td>Scout (Northern Ireland)</td><td>Northern Ireland</td><td>"+wage+"</td><td>On the books</td></tr>"+
+          "</tbody></table>"+
+          "<h3>Regional contacts, not yet taken on</h3>"+
+          "<table><thead><tr><th>Name</th><th>Region</th><th>Note</th><th>Wage</th><th></th></tr></thead><tbody>"+
+          "<tr><td>Bruce Rioch</td><td>Scotland</td><td>Scotland international, retired as a player.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "<tr><td>John Mahoney</td><td>Wales</td><td>Wales international, retired as a player.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "<tr><td>Tony Macken</td><td>Republic of Ireland</td><td>Republic of Ireland international, retired as a player.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "<tr><td>Allan Hunter</td><td>Northern Ireland</td><td>Northern Ireland international, retired as a player.</td><td>"+wage+"</td><td><button type='button' class='btn small'>Take him on</button></td></tr>"+
+          "</tbody></table>"+
+          "<p class='src'>Bishop still at United in 1986. The hire examples follow the live v407 retired-player pool. A chief scout retainer in 1986-87 is "+chief+".</p>";
+      }
+    }
+    el("panel-transfers").innerHTML = "<h2>Transfers</h2><p class='note'>The old single transfers screen is split. For sale, enquiries, the office, and scouts each have their own tab. Actions are buttons, not blue links.</p><p class='era-lab'>Section</p><div class='chips' id='tr-tabs'>"+tabBar+"</div>"+body;
+    el("tr-tabs").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ trTab=b.getAttribute("data-tr"); renderAll(); }); });
+  }
+  var FILE_81 = ["wilkins","coppell","gidman","birtles","bailey","roche","mcqueen","buchan","stapleton","macari","mcilroy","albiston","moran"];
+  var FILE_86 = ["robson","stapleton","whiteside","mcgrath","strachan","olsen","sivebaek","turner","albiston","moran","moses","duxbury"];
+  function stickerHTML(p){
+    var age = era>=1986 ? p.age86 : p.age81;
+    var season = era>=1986 ? "1986-87" : "1981-82";
+    var ini = (p.name||"").split(" ").map(function(w){ return w.charAt(0); }).join("");
+    return '<div class="sticker"><div class="clubbar">Manchester United</div><div class="pic"><div class="no">'+esc(ini)+'</div><div class="mono">'+season+'</div></div><div class="nmbar">'+esc(p.name)+'</div><div class="posbar">'+esc(p.pos)+(age?(" · age "+age):"")+"</div></div>";
+  }
+  function fileBody(p){
+    var line = capsLine(p);
+    var html = "<h3>"+esc(p.name)+"</h3><p>";
+    html += esc(p.pos) + (p.personality ? ". Personality · "+esc(p.personality) : "") + ".</p>";
+    if (line) html += "<p>"+esc(line)+"</p>";
+    if (p.career && p.career.length){
+      html += "<h3>Career</h3><table><thead><tr><th>Years</th><th>Club</th><th class='num'>Apps</th><th class='num'>Gls</th></tr></thead><tbody>";
+      p.career.forEach(function(c){
+        html += "<tr><td>"+esc(c.years)+"</td><td>"+esc(c.club)+"</td><td class='num'>"+(c.apps==null?"":c.apps)+"</td><td class='num'>"+(c.gls==null?"":c.gls)+"</td></tr>";
+      });
+      html += "</tbody></table>";
+    }
+    if (p.attrs){
+      html += "<h3>Attributes</h3><div class='attr'>";
+      Object.keys(p.attrs).forEach(function(k){
+        var n = p.attrs[k], pip = "";
+        for (var i=0;i<Math.round(n/2);i++) pip += "●";
+        html += "<div><b>"+k.charAt(0).toUpperCase()+k.slice(1)+"</b> "+n+" <span class='pip'>"+pip+"</span></div>";
+      });
+      html += "</div>";
+    }
+    return html;
+  }
+  function renderSquad(){
+    var list = (era>=1986 ? FILE_86 : FILE_81).map(function(id){ return P[id]; });
+    if (!list.some(function(p){ return p.id===fileId; })) fileId = list[0].id;
+    var p = P[fileId];
+    var chips = list.map(function(x){ return '<button type="button" class="chip'+(fileId===x.id?" on":"")+'" data-file="'+x.id+'" aria-pressed="'+(fileId===x.id?"true":"false")+'">'+esc(x.short)+"</button>"; }).join("");
+    el("panel-squad").innerHTML = "<h2>Squad</h2><p class='note'>Player profiles are era cigarette-card and Panini-sticker fronts, merged with the file data already in v405 and v406: nationality, cut-date caps where sourced, personality, career clubs, and attributes. There is no typographic likeness of a face, only a number and a season on a red ground. Missing facts are simply omitted. A known international without a cut-date figure is written as, for example, 'Scotland international', with no number.</p>"+
+      "<p class='era-lab'>Player</p><div class='chips' id='file-chips'>"+chips+"</div>"+
+      "<div class='file-grid'>"+stickerHTML(p)+"<div class='file-body card'>"+fileBody(p)+"</div></div>";
+    el("file-chips").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ fileId=b.getAttribute("data-file"); renderAll(); }); });
+  }
+  function renderStaff(){
+    el("panel-staff").innerHTML =
+      "<h2>Staff</h2>"+
+      "<div class='staff-line'><span class='who'>Ron Atkinson, manager.</span><span class='duty'>You.</span></div>"+
+      "<div class='staff-line'><span class='who'>Mick Brown, assistant manager.</span><span class='duty'>Helps with training, and stands in if you are away.</span></div>"+
+      "<p class='note'>The name and the duty no longer run together. Mick Brown is the sourced United assistant from July 1981 to November 1986. A trainer or secretary is not named here, because no sourced appointment is on the sheet for this preview.</p>"+
+      (era<1986
+        ? "<div class='staff-line'><span class='who'>Bob Bishop, scout (Northern Ireland).</span><span class='duty'>On a weekly retainer, covering Northern Ireland.</span></div>"
+        : "<div class='staff-line'><span class='who'>Bob Bishop, scout (Northern Ireland).</span><span class='duty'>Still on a weekly retainer in 1986-87. Tenure to 1987.</span></div>")+
+      "<p class='src'>Brown: United assistant, July 1981 to November 1986. Bishop: John White, Irish Devils, 1950 to 1987.</p>";
+  }
+  function renderClub(){
+    var tabs = [{id:"office",label:"The office"},{id:"ground",label:"The ground"},{id:"board",label:"The board"}];
+    var tabBar = tabs.map(function(t){ return '<button type="button" class="chip'+(clubTab===t.id?" on":"")+'" data-club="'+t.id+'" aria-pressed="'+(clubTab===t.id?"true":"false")+'">'+t.label+"</button>"; }).join("");
+    var body = "";
+    if (clubTab==="office") body = "<div class='card'><h3>The office</h3><p>Manchester United, First Division, Old Trafford. The week is the opening Saturday of "+(era>=1986?"1986-87":"1981-82")+".</p></div>";
+    else if (clubTab==="ground") body = "<div class='card'><h3>The ground</h3><p>Old Trafford. Capacity and stand work are not listed here when the figure is not on this preview sheet.</p></div>";
+    else body = "<div class='card'><h3>The board</h3><p>The directors are not named in this preview, because a sourced board list is not on the sheet.</p></div>";
+    el("panel-club").innerHTML = "<h2>Club</h2><p class='era-lab'>Section</p><div class='chips' id='club-tabs'>"+tabBar+"</div>"+body;
+    el("club-tabs").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ clubTab=b.getAttribute("data-club"); renderAll(); }); });
+  }
+  function tableRows(clubs){
+    return clubs.slice().sort().map(function(name){
+      var hl = name==="Manchester United" ? " class='hl'" : "";
+      return "<tr"+hl+"><td class='num'>—</td><td>"+esc(name)+"</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0</td><td class='num'>0</td></tr>";
+    }).join("");
+  }
+  function renderLeague(){
+    var tabs = era>=1986
+      ? [{id:"eng1",label:"First Division"},{id:"eng2",label:"Second Division"}]
+      : [{id:"eng1",label:"First Division"},{id:"eng2",label:"Second Division"}];
+    if (tabs.filter(function(t){ return t.id===leagueId; }).length===0) leagueId = "eng1";
+    var tabBar = tabs.map(function(t){ return '<button type="button" class="chip'+(leagueId===t.id?" on":"")+'" data-lg="'+t.id+'" aria-pressed="'+(leagueId===t.id?"true":"false")+'">'+t.label+"</button>"; }).join("");
+    var clubs, title, note, pts;
+    if (era>=1986){
+      pts = 3;
+      if (leagueId==="eng2"){ clubs=D2_86; title="Second Division · 1986-87"; note="Twenty-two clubs, listed alphabetically. Opening table for Saturday 23 August 1986, all on 0. Three points for a win."; }
+      else { clubs=D1_86; title="First Division · 1986-87"; note="Twenty-two clubs, listed alphabetically. Opening table for Saturday 23 August 1986, all on 0. Three points for a win."; }
+    } else {
+      pts = 2;
+      if (leagueId==="eng2"){ clubs=D2_81; title="Second Division · 1981-82"; note="Twenty-two clubs, listed alphabetically. Opening table for Saturday 29 August 1981, all on 0. Two points for a win."; }
+      else { clubs=D1_81; title="First Division · 1981-82"; note="Twenty-two clubs, listed alphabetically. Opening table for Saturday 29 August 1981, all on 0. Two points for a win."; }
+    }
+    var thead = "<thead><tr><th class='num'>Pos</th><th>Club</th><th class='num'>Pld</th><th class='num'>W</th><th class='num'>D</th><th class='num'>L</th><th class='num'>F</th><th class='num'>A</th><th class='num'>GD</th><th class='num'>Pts</th></tr></thead>";
+    el("panel-league").innerHTML = "<h2>League</h2><p class='note'>A table screen for each English division. Kick-off is "+(era>=1986?"23 August 1986":"29 August 1981")+", so every side has played 0. Mid-season scores are not invented. Other countries' leagues are offered only where a real opening list is on the sheet: none is, so there is no Scottish or Italian table here. The 1981-82 Scotland squads stay dropped.</p>"+
+      "<p class='era-lab'>Division</p><div class='chips' id='lg-tabs'>"+tabBar+"</div>"+
+      "<h3>"+title+"</h3><p class='note'>"+note+"</p>"+
+      "<table>"+thead+"<tbody>"+tableRows(clubs)+"</tbody></table>"+
+      "<h3>Results</h3><p class='note'>No matches have been played. The results list stays empty until a Saturday is in the book.</p>";
+    el("lg-tabs").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ leagueId=b.getAttribute("data-lg"); renderAll(); }); });
+  }
+  function renderFaCup(){
+    var rounds = [{id:"r3",label:"Third round"},{id:"r4",label:"Fourth round"},{id:"r5",label:"Fifth round"},{id:"r6",label:"Sixth round"},{id:"sf",label:"Semi-finals"},{id:"f",label:"Final"}];
+    var tabBar = rounds.map(function(t){ return '<button type="button" class="chip'+(cupRound===t.id?" on":"")+'" data-cup="'+t.id+'" aria-pressed="'+(cupRound===t.id?"true":"false")+'">'+t.label+"</button>"; }).join("");
+    el("panel-facup").innerHTML = "<h2>FA Cup</h2><p class='note'>The rounds are buttons, not blue links, and the selected round stays selected. The "+(era>=1986?"1986-87":"1981-82")+" competition has not reached the first Saturday of the proper rounds in this opening week, so no ties are listed.</p>"+
+      "<p class='era-lab'>Round</p><div class='chips' id='cup-tabs'>"+tabBar+"</div>"+
+      "<div class='card'><p>No ties to print for this round yet.</p></div>";
+    el("cup-tabs").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ cupRound=b.getAttribute("data-cup"); renderAll(); }); });
+  }
+  function renderEurope(){
+    el("panel-europe").innerHTML =
+      "<h2>Europe</h2>"+
+      "<div class='card'><h3>European Cup</h3><p>Manchester United are not in the European Cup in "+(era>=1986?"1986-87":"1981-82")+".</p></div>"+
+      "<div class='card' style='margin-top:8px'><h3>Cup Winners' Cup</h3><p>Not United's competition in this opening week.</p></div>"+
+      "<div class='card' style='margin-top:8px'><h3>UEFA Cup</h3><p>Not United's competition in this opening week.</p></div>"+
+      "<div class='card' style='margin-top:8px'><h3>European Championship</h3><p>The finals are staged in a summer. They are not in progress in the opening week of an English season.</p></div>";
+  }
+  function renderFoot(){
+    el("foot").innerHTML = "Preview only, based on the live v407 game. There is no DATA tab. Caps and nationality follow the v406 cut dates (29 August 1981 and 23 August 1986). Missing facts are hidden, not labelled unsourced. A known international without a figure is written as a nationality plus 'international'.";
+  }
+  function renderAll(){
+    if (era<1986 && formation==="352") formation = "442";
+    if (era<1986 && defStyle==="zonal") defStyle = "manmark";
+    renderNav();
+    renderLineup();
+    renderTactics();
+    renderTraining();
+    renderTransfers();
+    renderSquad();
+    renderStaff();
+    renderClub();
+    renderLeague();
+    renderFaCup();
+    renderEurope();
+    renderFoot();
+  }
+  el("era-1981").addEventListener("click", function(){ era=1981; renderAll(); });
+  el("era-1986").addEventListener("click", function(){ era=1986; renderAll(); });
+  renderAll();
+})();
+</script>
+</body>
+</html>
