@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RetroMatch – Transfers and Scouting, 1981-82 (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3e6c4;
+  --ink:#1a120c;
+  --red:#c0122a;
+  --red-dark:#8e0c1f;
+  --yellow:#ffd000;
+  --muted:#5a4636;
+  --card:#fff8e8;
+  --chip:#ffd000;
+  --warn:#8e0c1f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#2a1a14;color:var(--ink);font:15px/1.4 Barlow,Helvetica,Arial,sans-serif}
+a{color:var(--red-dark)}
+.wrap{max-width:880px;margin:0 auto;padding:12px 14px 40px}
+.banner{background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;font-weight:700;letter-spacing:.02em}
+.banner b{font-family:Anton,Impact,sans-serif;letter-spacing:.04em;font-weight:400;font-size:18px;margin-right:.4em}
+.mast{background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.mast h1{margin:0;font:400 42px/0.9 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.mast .sub{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;opacity:.95}
+.mast .club{text-align:right}
+.mast .club strong{display:block;font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.03em}
+.sheet{background:var(--paper);border:3px solid #111;border-top:0;padding:12px 14px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 12px/1 Barlow,sans-serif;padding:7px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.chip[aria-pressed="true"],.chip.on{background:#111;color:var(--yellow)}
+.panel{display:none}
+.panel.on{display:block}
+h2{margin:0 0 8px;font:400 28px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
+h3{margin:14px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:680px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid #111;padding:10px 12px}
+.card p,.note p,li{margin:0 0 8px}
+.card p:last-child,.note p:last-child{margin-bottom:0}
+.kicker{margin:0 0 8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.fee{font:400 32px/1 Anton,Impact,sans-serif;letter-spacing:.01em}
+table{width:100%;border-collapse:collapse;background:var(--card);border:2px solid #111;margin:8px 0 10px;font-size:14px}
+th,td{border-bottom:1px solid #111;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#111;color:var(--yellow);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+td.num,th.num{text-align:right;white-space:nowrap}
+.tag{display:inline-block;background:var(--yellow);border:1.5px solid #111;padding:1px 6px;font:700 10px/1.3 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-right:4px}
+.tag.warn{background:#111;color:var(--yellow)}
+.warn-box{background:#111;color:var(--yellow);border:2px solid #111;padding:8px 10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin:0 0 10px}
+.sub{color:var(--muted);font-size:13px}
+.office-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #ccc;padding:5px 0;font-size:14px}
+.office-row b{font-weight:700}
+.news{border-left:5px solid var(--red);background:var(--card);border:2px solid #111;border-left-width:6px;padding:8px 10px;margin:0 0 8px}
+.news .when{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+select,button.act{font:700 13px/1 Barlow,sans-serif;border:2px solid #111;background:var(--yellow);padding:7px 10px;text-transform:uppercase;letter-spacing:.04em}
+button.act.ghost{background:var(--card)}
+button.act:disabled{opacity:.45}
+.row-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.note{background:#fff;border:2px dashed #111;padding:10px 12px;margin-top:12px;font-size:13px}
+.note h3{margin-top:0;font-size:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>PREVIEW</b> Transfers and scouting for the 1980s, mocked for 1981-82. This is not the live game. Nothing here changes a save.</div>
+  <header class="mast">
+    <div>
+      <div class="sub">Season 1981-82</div>
+      <h1>Transfers</h1>
+    </div>
+    <div class="club">
+      <strong>Manchester United</strong>
+      <div class="sub">First Division</div>
+    </div>
+  </header>
+  <div class="sheet">
+    <div class="chips" role="tablist" aria-label="Transfers preview sheets">
+      <button class="chip on" data-panel="market" aria-pressed="true">The market</button>
+      <button class="chip" data-panel="talks" aria-pressed="false">Bids and talks</button>
+      <button class="chip" data-panel="freedom" aria-pressed="false">Freedom of contract</button>
+      <button class="chip" data-panel="list" aria-pressed="false">The list</button>
+      <button class="chip" data-panel="loans" aria-pressed="false">Temporary transfers</button>
+      <button class="chip" data-panel="deadline" aria-pressed="false">Deadline and news</button>
+      <button class="chip" data-panel="reports" aria-pressed="false">Scout reports</button>
+      <button class="chip" data-panel="network" aria-pressed="false">The network</button>
+    </div>
+
+    <section class="panel on" id="p-market">
+      <h2>The market, 1981-82</h2>
+      <p class="kicker">A British record stands this October</p>
+      <div class="card" style="margin-bottom:10px">
+        <p class="kicker">Bryan Robson, West Bromwich Albion to Manchester United</p>
+        <div class="fee">£1,500,000</div>
+        <p>Signed 1 October 1981. He put pen to paper on the Old Trafford pitch two days later, before the game against Wolverhampton Wanderers. The fee was a British record, and it stood until Liverpool paid £1,900,000 for Peter Beardsley in the summer of 1987.</p>
+        <p class="sub">Manchester United; National Football Museum; Robson, <i>Robbo: My Autobiography</i>.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>Other fees of the moment</h3>
+          <p>Frank Stapleton, Arsenal to Manchester United, August 1981. The fee was set at £900,000 by a tribunal after Arsenal had been seeking £2,000,000.</p>
+          <p class="sub">Phil Soar and Martin Tyler, <i>Official History of Arsenal</i>, as cited in later club histories. The live game already records this move as a tribunal-set fee.</p>
+          <p>Remi Moses also followed Ron Atkinson from West Bromwich Albion that autumn. United’s own club history says the club spent around a third of the Robson fee to bring Moses in. No exact pound figure is used here.</p>
+        </div>
+        <div class="card">
+          <h3>How the live game already scales a fee</h3>
+          <p>Asking prices are built from a 1946-47 ability scale and then multiplied by a record-fee index. The 1981 step is already set from Robson’s £1,500,000 (index 75 against a £20,000 1946 top). The 1979 step is Andy Gray, Aston Villa to Wolves, £1,469,000. The next researched step is Mark Hughes to Barcelona, £2,300,000, in May 1986.</p>
+          <p>A First Division star in 1981-82 can already be asked for at around that record. The job for a live build is to show the scale clearly, not to invent a new one.</p>
+        </div>
+      </div>
+      <h3>Wages of the era</h3>
+      <p>The legal maximum wage was abolished in January 1961. There is no national ceiling left in 1981-82. Pay varies by club and by man.</p>
+      <table>
+        <thead><tr><th>Landmark</th><th class="num">Figure</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Only eight players in England on a basic £50,000 a year, 1980-81</td><td class="num">£50,000 / year</td><td>PFA official history, cited by Sporting Intelligence (Nick Harris, 2011)</td></tr>
+          <tr><td>West Bromwich Albion’s offer to keep Robson, summer 1981</td><td class="num">£1,000 / week</td><td>Robson, <i>Robbo</i>, pp. 45-46. He turned it down and asked away.</td></tr>
+          <tr><td>PFA average basic wages, division by division</td><td class="num">From 1984-85</td><td>Official PFA document published by Sporting Intelligence. No official 1981-82 average is used here.</td></tr>
+        </tbody>
+      </table>
+      <p class="sub">The live game already pays a typical First Division regular from its own era table (about £422 a week in 1981). That is a calibration, not a PFA average, and should be labelled as such if it stays.</p>
+    </section>
+
+    <section class="panel" id="p-talks">
+      <h2>Bids and talks</h2>
+      <p>A club still has to agree a fee while a man is under contract. Talks are with the selling club, then with the player about wages and a signing-on fee. The live game already opens talks from the targets list: three attempts in the week, a low offer, the asking price, or over the odds, and incoming bids for your own men, including a part-exchange.</p>
+      <div class="card">
+        <p class="kicker">Negotiating</p>
+        <div class="office-row"><span>The player</span><b>Bryan Robson</b></div>
+        <div class="office-row"><span>From</span><b>West Bromwich Albion</b></div>
+        <div class="office-row"><span>Asking, as the record stood</span><b>£1,500,000</b></div>
+        <div class="office-row"><span>His present club’s last wage offer</span><b>£1,000 a week, turned down</b></div>
+        <div class="office-row"><span>Attempts left this week</span><b>3</b></div>
+        <div class="row-acts">
+          <button class="act" type="button" disabled>Low ball</button>
+          <button class="act" type="button" disabled>Meet asking £1,500,000</button>
+          <button class="act" type="button" disabled>Over the odds</button>
+        </div>
+        <p class="sub" style="margin-top:8px">Buttons are shown only to illustrate the live talks. This preview does not move money or registrations.</p>
+      </div>
+      <h3>What still needs a live pass</h3>
+      <p>The talks already work. What 1981-82 still wants on the same sheet is the player’s wage once the fee is agreed, a signing-on fee in the money of the day, and, when the man is out of contract, the tribunal path on the next sheet rather than a forced retain. No new fee maths is proposed here.</p>
+    </section>
+
+    <section class="panel" id="p-freedom">
+      <h2>Freedom of contract</h2>
+      <p>From 1978 a player who has seen out his contract may seek registration with any club that will have him. That is the system in force in 1981-82. It is not the old retain-and-transfer rule, and it is not a free transfer in the later Bosman sense: the holding club can still claim a compensation fee if it has offered to extend the deal on terms no less favourable than before.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>If the clubs agree</h3>
+          <p>The two clubs settle a fee between themselves, as they would for a man still under contract, and the player signs his new terms.</p>
+        </div>
+        <div class="card">
+          <h3>If they do not</h3>
+          <p>An independent tribunal, set up in 1978 with an independent chairman, names the compensation. The PFA sits on that committee. The player is not frozen at the old club while the argument runs.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:10px">
+        <h3>A case from this summer</h3>
+        <p>Stapleton’s move to United in August 1981 is a tribunal fee in the same season: £900,000, against an asking figure of £2,000,000. The tribunal did not have to explain the figure.</p>
+      </div>
+      <div class="note">
+        <h3>On the live contracts sheet today</h3>
+        <p>The Transfers screen still carries a standing paragraph that every man is on a one-season deal and that retain-and-transfer is now in force. That copy belongs to the 1940s and 1950s, not to 1981-82. The game already ends the unpaid “retain” button from 1963, after Eastham, which is the right date for that abuse, but Eastham did not finish the whole system. Freedom of contract, and the tribunal, arrive in 1977-78 (the PFA dates the right to move at the end of a contract, and the appeals committee, to 1978). By the mid-1970s one-year deals were no longer the ordinary term for an established professional; contracts of around three years had become usual.</p>
+        <p>A live build would rewrite the 1980s contracts sheet, allow an out-of-contract man to talk, and, if both clubs claim a fee, send the figure to a tribunal. That is a new mechanic and would need approval before it is wired into money or registrations. No tribunal formula is invented here.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="p-list">
+      <h2>The transfer list</h2>
+      <p>A club may still place a man on the list, to say that it will listen to offers, or withdraw him again. Unwanted men who are not being retained may leave on a free transfer. The live game already has a List / Withdraw button on each contract, a listed flag, and news when a man goes on or comes off.</p>
+      <table>
+        <thead><tr><th>Player</th><th>Pos</th><th>Standing</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>A senior professional, still under contract</td><td>Midfield</td><td><span class="tag warn">Listed</span> Offers will be heard</td><td><button class="act ghost" type="button" disabled>Withdraw</button></td></tr>
+          <tr><td>A man the club will keep</td><td>Full-back</td><td>Not listed</td><td><button class="act" type="button" disabled>List</button></td></tr>
+          <tr><td>Out of contract, terms offered and declined</td><td>Forward</td><td>Free to talk. Compensation may go to the tribunal</td><td><button class="act ghost" type="button" disabled>See tribunal</button></td></tr>
+        </tbody>
+      </table>
+      <p class="sub">Names are not invented for this mock. The rows show the three states the 1980s sheet should distinguish.</p>
+      <p>Incoming offers already appear on the live Transfers screen. A listed man is the one other clubs are most likely to enquire after. That can stay.</p>
+    </section>
+
+    <section class="panel" id="p-loans">
+      <h2>Temporary transfers</h2>
+      <p>The live game has no loan deal for you to offer or accept. Historical notes mention later loan-to-permanent cases, but there is no registration, no term, and no return date.</p>
+      <div class="card">
+        <h3>What can be sourced</h3>
+        <p>After the war, loans were largely off the table again. In 1966 the Football League allowed the “temporary transfer of players,” with restrictions reported at the time as: only two loan transfers per club per season, no transfer fee, a stay of at least three months, and only between clubs in different divisions. A 1967 move, John Docker of Coventry to Torquay United, is cited as an early signing under that rule.</p>
+        <p>FourFourTwo’s history of loans also reports a temporary ban in 1980, when loan transfers of players other than goalkeepers were outlawed. That 1980 point has not been independently confirmed in this pass, and the exact 1981-82 Football League handbook rule has not been read here.</p>
+      </div>
+      <div class="note">
+        <h3>For a live build</h3>
+        <p>Do not wire loans until the 1981-82 handbook (or a contemporaneous League circular) is checked. If temporary transfers were open that season, they should follow the sourced restrictions of the day, not the later “emergency loan” system that grew up after the 2002-03 windows. If the 1980 ban still held in 1981-82, only a goalkeeper could be taken on loan. Either way, this would be a new mechanic and would need approval. Nothing is invented below that line.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="p-deadline">
+      <h2>The deadline, and the rest of the League</h2>
+      <div class="warn-box">The transfer deadline is the last Thursday in March. In 1981-82 that is Thursday 25 March 1982. After it, no new signing can be registered for the rest of the season.</div>
+      <p>The mid-season cut-off goes back to 1911, when it was the second Thursday in March, and was later moved to the fourth Thursday in March. English clubs could deal through the season until that March date. The two transfer windows (summer and January) were not introduced until 2002-03.</p>
+      <p>The live game already uses the last Thursday in March, locks your own professional signings after it, and, since a later fix, also stops AI clubs dealing among themselves once it has passed. Close-season and mid-season dealing up to the deadline stay as they are.</p>
+      <h3>News of other clubs’ business</h3>
+      <p>Rivals already buy and sell among themselves in the news, moving a real man off one club’s books and onto the other’s, for a reported fee, until the deadline. That should stay. A line of the same kind, in the money of 1981, would read like this, using a real fee from this season rather than a made-up one:</p>
+      <div class="news">
+        <div class="when">1 October 1981</div>
+        <p>Manchester United have paid a reported £1,500,000, a British record, for West Bromwich Albion’s midfielder Bryan Robson.</p>
+      </div>
+      <p class="sub">In a United save that move is, of course, a deal you would be offered or would have to make, not a rumour about someone else.</p>
+    </section>
+
+    <section class="panel" id="p-reports">
+      <h2>Scout reports</h2>
+      <p>You can already send a scout, watch a man yourself, and watch him again at any time. On the club sheet the button reads Watch again. On a listed target the scout can go back for another look, and the report is dated. That stays.</p>
+      <p>A report of this era is plain English, not a sheet of marks out of 20. No manager of the day had an attribute card in his desk. The live game already holds the numbers back and gives a star rating and a written read once a man has been seen. The 1980s sheet should keep that voice, and make a second look actually change the note, as it already can.</p>
+      <div class="card">
+        <p class="kicker">A report of the day, in shape only</p>
+        <p>“Went back for another look, midweek. Strong in the tackle, uses the ball simply, and the pace is still there over the first ten yards. I would not rush at the asking price until we have seen him against better company, but there is a player here.”</p>
+        <p class="sub">That paragraph is a specimen of tone, not a report on a named man. Named verdicts in a live build should come from the existing scout-note pool, rewritten only where the 1940s voice would sound wrong in 1981.</p>
+      </div>
+      <div class="card" style="margin-top:10px">
+        <h3>How often a man was watched</h3>
+        <p>Geoff Twentyman’s Liverpool network, in the years around this, watched a great many players, and the best of them three or four times. Even a man who did not impress at first usually got a second look. Twentyman often watched from the terraces rather than from the directors’ box.</p>
+        <p class="sub">Liverpool FC; Liverpool Echo, on Simon Hughes, <i>Secret Diary of a Liverpool Scout</i>; The Athletic.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="p-network">
+      <h2>The scouting network</h2>
+      <p>The live game already lets you hire and let go contacts, pay a weekly retainer, and give a standing brief (a position, and optionally a trait). Specialists are by nation: Scotland, Wales, Ireland, Northern Ireland, or general coverage. There is no assignment by English region, and the contacts themselves are generated names.</p>
+      <h3>Assignments by region, as a sourced option</h3>
+      <p>A chief scout of this decade ran a network of spotters across the British Isles and took their reports in. The regions below are a proposed coverage for the 1980s sheet, modelled on that practice, not an official League list of territories.</p>
+      <table>
+        <thead><tr><th>Coverage</th><th>Standing</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>The North</td><td>To be assigned</td><td>League clubs and the feeder sides north of the Trent.</td></tr>
+          <tr><td>The Midlands</td><td>To be assigned</td><td>A dense patch of League clubs, as a Bristol City chief scout working from Rochdale already knew in the late 1960s.</td></tr>
+          <tr><td>London and the South</td><td>To be assigned</td><td>First Division sides and the Southern non-League clubs.</td></tr>
+          <tr><td>Scotland</td><td>Already offered as a specialty</td><td>Junior and senior game, and the traffic of players south. A real historical weighting, not a new invention.</td></tr>
+          <tr><td>Ireland and Northern Ireland</td><td>Already offered as a specialty</td><td>League of Ireland and Irish League clubs, and the regular traffic across the Irish Sea.</td></tr>
+        </tbody>
+      </table>
+      <h3>Real scouts of the era, as a sourced option</h3>
+      <p>These men are real, and they were doing this work in these years. They are offered as a sourced option for a later live pass (named contacts at the clubs they actually served, or a short historical note), not as staff invented onto your books in 1981.</p>
+      <table>
+        <thead><tr><th>Name</th><th>What is sourced</th></tr></thead>
+        <tbody>
+          <tr><td>Geoff Twentyman</td><td>Liverpool chief scout from 1967 until 1986, working under Shankly, Paisley, Fagan and Dalglish. He built a network of spotters and was credited with finding men such as Ian Rush, Phil Neal and Alan Hansen. Liverpool FC; Liverpool Echo.</td></tr>
+          <tr><td>Tony Collins</td><td>Football League’s first black manager, at Rochdale. Appointed Bristol City chief scout by Alan Dicks after 1967, left City for the last time in 1980, and later scouted for Ron Atkinson and Alex Ferguson at Manchester United. Ferguson recalled him as chief scout when he arrived at Old Trafford in 1986. Bristol City FC; The Guardian, 8 February 2021.</td></tr>
+        </tbody>
+      </table>
+      <p class="sub">A live build should not place either man on a United save’s payroll in 1981 unless his start date at that club is sourced. Collins is documented at United under Atkinson and as chief scout by 1986; the exact month he arrived is not claimed here.</p>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+  var chips = document.querySelectorAll('.chip[data-panel]');
+  function show(id){
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.id==='p-'+id); });
+    chips.forEach(function(c){
+      var on = c.getAttribute('data-panel')===id;
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-pressed', on?'true':'false');
+    });
+  }
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){ show(c.getAttribute('data-panel')); });
+  });
+})();
+</script>
+</body>
+</html>
