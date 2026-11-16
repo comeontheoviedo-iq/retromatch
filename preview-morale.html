@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RetroMatch – Line-up, Morale and Form (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Old+Standard+TT:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3e6c4;
+  --ink:#1a120c;
+  --red:#c0122a;
+  --red-dark:#8e0c1f;
+  --yellow:#ffd000;
+  --muted:#5a4636;
+  --card:#fff8e8;
+  --chip:#ffd000;
+  --grass:#3d6b3a;
+  --grass-dark:#2f542c;
+  --warn:#8e0c1f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#2a1a14;color:var(--ink);font:15px/1.4 Barlow,Helvetica,Arial,sans-serif}
+a{color:var(--red-dark)}
+.wrap{max-width:880px;margin:0 auto;padding:12px 14px 40px}
+.banner{background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;font-weight:700;letter-spacing:.02em}
+.banner b{font-family:Anton,Impact,sans-serif;letter-spacing:.04em;font-weight:400;font-size:18px;margin-right:.4em}
+.mast{background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.mast h1{margin:0;font:400 42px/0.9 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.mast .sub{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;opacity:.95}
+.mast .club{text-align:right}
+.mast .club strong{display:block;font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.03em}
+.sheet{background:var(--paper);border:3px solid #111;border-top:0;padding:12px 14px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 12px/1 Barlow,sans-serif;padding:7px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.chip[aria-pressed="true"],.chip.on{background:#111;color:var(--yellow)}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+.chip.ghost{background:var(--card)}
+.panel{display:none}
+.panel.on{display:block}
+h2{margin:0 0 8px;font:400 28px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
+h3{margin:14px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .mast .club{text-align:left}
+  .mast h1{font-size:34px}
+}
+.card{background:var(--card);border:2px solid #111;padding:8px 10px}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border:2px solid #111}
+th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #c9b48a;vertical-align:middle}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:#111;color:var(--yellow);border-bottom:0}
+tr:last-child td{border-bottom:0}
+tr.xi td{background:#fff3b0}
+tr.out td{background:transparent}
+.note{color:var(--muted);font-size:13px;margin:8px 0 0}
+.src{font-size:12px;color:var(--muted)}
+.foot{margin-top:16px;font-size:12px;color:var(--muted);border-top:2px solid #111;padding-top:8px}
+.ychip{display:inline-block;background:var(--yellow);color:#111;font:700 10px/1 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border:1px solid #111;margin:0 2px 0 0;white-space:nowrap}
+.ychip.low{background:#111;color:var(--yellow)}
+.ychip.warn{background:var(--red);color:#fff;border-color:#111}
+.cap{font-weight:700}
+.pos{font:700 11px/1 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.warn{background:#fff0e8;border:2px solid var(--warn);padding:8px 10px;margin:10px 0 0}
+.warn h3{margin:0 0 4px;color:var(--warn)}
+.warn ul{margin:0;padding-left:18px}
+.okbox{background:var(--card);border:2px solid #111;padding:8px 10px;margin:10px 0 0}
+.lineup-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}
+@media (max-width:720px){ .lineup-grid{grid-template-columns:1fr} }
+.pitch-wrap{background:#111;border:2px solid #111;padding:8px}
+.pitch{
+  position:relative;height:420px;border:2px solid #f3e6c4;overflow:hidden;
+  background:repeating-linear-gradient(180deg,var(--grass) 0 30px,var(--grass-dark) 30px 60px);
+}
+.pitch .half{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.45)}
+.pitch .box-t,.pitch .box-b{
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:54%;height:16%;border:2px solid rgba(255,255,255,.45);
+}
+.pitch .box-t{top:0;border-top:0}
+.pitch .box-b{bottom:0;border-bottom:0}
+.pitch .side-lab{position:absolute;top:33%;transform:none;font:700 9px/1 Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.pitch .side-lab.left{left:6px}
+.pitch .side-lab.right{right:6px}
+.pl{position:absolute;transform:translate(-50%,-50%);width:90px;text-align:center;z-index:2}
+.pl .disc{
+  width:22px;height:22px;border-radius:50%;background:var(--yellow);border:2px solid #111;
+  margin:0 auto 2px;font:700 8px/18px Barlow,sans-serif;color:#111;
+}
+.pl.gk .disc{background:#fff}
+.pl .nm{font:700 11px/1.1 Barlow,sans-serif;color:#fff;text-shadow:0 1px 0 #111,0 0 4px #111}
+.pl .meta{font:700 8px/1.2 Barlow,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#ffe9a8;text-shadow:0 1px 0 #111}
+.xi{list-style:none;margin:0;padding:0}
+.xi li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #d7c6a0}
+.xi .who{display:flex;flex-direction:column}
+.xi .who b{font-size:14px}
+.marks{font:700 12px/1 Barlow,sans-serif;letter-spacing:.08em}
+.marks span{display:inline-block;min-width:1.2em;text-align:center;background:#111;color:var(--yellow);padding:2px 4px;margin-right:2px}
+.paper{
+  background:#f7f1de;border:2px solid #111;padding:14px 16px 16px;
+  font-family:"Old Standard TT",Georgia,serif;
+}
+.paper .masthead{text-align:center;border-bottom:3px solid #111;padding-bottom:6px;margin-bottom:10px}
+.paper .masthead .name{font:400 34px/.9 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.paper .masthead .date{font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.paper h3{font-family:"Old Standard TT",Georgia,serif;font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;border:0;margin:0 0 8px;font-size:26px;line-height:1.1}
+.paper p{margin:0 0 8px;font-size:16px;line-height:1.35}
+.talks{display:grid;gap:6px}
+.talk{border:2px solid #111;background:var(--card);padding:8px 10px;cursor:pointer}
+.talk.on{background:#111;color:var(--yellow)}
+.talk b{display:block;font:700 12px/1.2 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.delta{font-size:13px;color:var(--muted);margin-top:8px}
+.delta b{color:var(--ink)}
+.cap-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px}
+select.cap-pick{border:2px solid #111;background:var(--card);font:700 13px Barlow,sans-serif;padding:5px 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>PREVIEW</b> Line-up, morale and form for the 1980s, mocked on a Manchester United save. This is not the live game. Nothing here changes a save.</div>
+
+  <header class="mast">
+    <div>
+      <div class="sub" id="mast-era">Line-up, Morale and Form · 1981-82</div>
+      <h1>Match!</h1>
+    </div>
+    <div class="club">
+      <strong>Manchester United</strong>
+      <div id="mast-fix">First Division · at Highfield Road</div>
+    </div>
+  </header>
+
+  <div class="sheet">
+    <div class="chips" role="tablist" aria-label="Season">
+      <button class="chip on" id="era-1981" aria-pressed="true">1981-82</button>
+      <button class="chip" id="era-1986" aria-pressed="false">1986-87</button>
+    </div>
+    <div class="chips" role="tablist" aria-label="Line-up, morale and form sheets">
+      <button class="chip on" data-panel="squad" aria-pressed="true">The squad</button>
+      <button class="chip" data-panel="lineup" aria-pressed="false">The line-up</button>
+      <button class="chip" data-panel="form" aria-pressed="false">Form guide</button>
+      <button class="chip" data-panel="dressing" aria-pressed="false">The dressing room</button>
+      <button class="chip" data-panel="papers" aria-pressed="false">The papers</button>
+      <button class="chip" data-panel="leftout" aria-pressed="false">Left out</button>
+    </div>
+
+    <section class="panel on" id="panel-squad">
+      <h2>The squad</h2>
+      <p class="note" id="squad-lead"></p>
+      <div id="squad-table"></div>
+      <p class="note">Form and morale are stored on each man and brought up to date once a week. The chips show a word only, never a decimal. The same words appear on the line-up.</p>
+    </section>
+
+    <section class="panel" id="panel-lineup">
+      <h2>The line-up</h2>
+      <p class="note" id="lineup-lead"></p>
+      <div class="cap-row">
+        <div>Club captain <select class="cap-pick" id="cap-pick"></select></div>
+        <div class="note" id="cap-note" style="margin:0"></div>
+      </div>
+      <div class="lineup-grid">
+        <div>
+          <div class="pitch-wrap"><div class="pitch" id="pitch"></div></div>
+          <p class="note" style="margin-top:6px">Everyday 4-4-2, with last week's form word under each name. This is the shape the game already treats as everyday in these seasons, not a sourced diagram of the afternoon.</p>
+        </div>
+        <div>
+          <h3>Named eleven</h3>
+          <ol class="xi" id="xi-list"></ol>
+          <div id="lineup-warn"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-form">
+      <h2>Form guide</h2>
+      <p class="note">A rolling run of match marks, out of 10, in the manner of <i>Match</i> magazine's Match Facts (from 1979, every player in all four divisions) and of <i>Football Monthly</i>'s Formscope (a mark and a short word). The numbers below are a worked example of that scale, not published marks for these matches.</p>
+      <div id="form-table"></div>
+      <div class="card" style="margin-top:10px">
+        <h3>How form would be read</h3>
+        <p class="note" style="margin-top:0">Last five marks, then a word. 9 is rare, 6 to 8 is the ordinary run, 5 is a poor afternoon. The word on the chip is taken from that run. A man who has not played has no marks yet and shows Fair until he does.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-dressing">
+      <h2>The dressing room</h2>
+      <p class="note" id="dress-lead"></p>
+      <div class="grid">
+        <div class="card">
+          <h3>After the match</h3>
+          <p>The full-time talk already in the 1980s match day, and a proposed nudge to each man's morale as well as the existing next-week form multiplier (held between 0.96 and 1.04).</p>
+          <div class="talks" id="ft-talks"></div>
+          <p class="delta" id="ft-delta"></p>
+        </div>
+        <div class="card">
+          <h3>What moves morale</h3>
+          <p>Updated weekly, in small steps, for your men and for every other club's men under the same rules.</p>
+          <ul>
+            <li>The result, for those who played</li>
+            <li>Being dropped after a run in the side, or recalled to it</li>
+            <li>Games played against a man's place in the side (a regular left out is not the same as a squad man waiting)</li>
+            <li>The wage row, and whether he is on the list or retained</li>
+            <li>The captaincy, given or taken away</li>
+            <li>The half-time and full-time talks, including the existing next-week multiplier</li>
+            <li>A word of praise or criticism in the papers</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-papers">
+      <h2>The papers</h2>
+      <p class="note">Praise and criticism travel through the back pages and the local press, and through the dressing room, not through modern media. The report below uses only the sourced result. The manager's choices are a proposed sheet, not a real quotation.</p>
+      <div class="paper" id="paper-sheet"></div>
+      <h3>A word from the manager</h3>
+      <div class="talks" id="press-talks"></div>
+      <p class="delta" id="press-delta"></p>
+    </section>
+
+    <section class="panel" id="panel-leftout">
+      <h2>Left out</h2>
+      <p class="note">A proposed word with a man who expected to play. The player in this sheet is generated, so no real footballer is given a mood or a speech that was not sourced.</p>
+      <div class="warn">
+        <h3>He wants a word</h3>
+        <p id="leftout-copy"></p>
+      </div>
+      <div class="talks" id="leftout-talks" style="margin-top:10px"></div>
+      <p class="delta" id="leftout-delta"></p>
+    </section>
+
+    <p class="foot">Preview of the proposed line-up, morale and form screens for 1981-82 and 1986-87. Skin is the compact 1980s MATCH! treatment (Anton masthead, Barlow body, yellow chips). No dagger marks and no spaced colons. The 1981-82 eleven is United's starting side at Highfield Road on Saturday 29 August 1981 (mufcinfo; Sky Blue Archive; 11v11). The 1986-87 eleven is the starting side at Highbury on Saturday 23 August 1986, Olsen the named substitute (mufcinfo; manunitedwiki). Martin Buchan is marked club captain in 1981-82 as the established skipper still in that eleven; Bryan Robson is marked club captain in 1986-87 (club captain from 1982). Form-guide marks are a worked example of the Match Facts / Formscope out-of-10 scale, not published ratings. Historical claims are cited in the working-tree note MORALE_FORM_1980s.md. The engine is not changed in this preview.</p>
+  </div>
+</div>
+<script>
+(function(){
+  var era = 1981, panel = "squad", ftTalk = "none", pressTalk = "quiet", leftTalk = "explain";
+
+  function formWord(avg){
+    if (avg == null) return "Fair";
+    if (avg >= 8.5) return "Excellent";
+    if (avg >= 7.5) return "Good";
+    if (avg >= 6) return "Fair";
+    if (avg >= 5) return "Poor";
+    return "Awful";
+  }
+  function formAvg(marks){
+    if (!marks || !marks.length) return null;
+    var s = 0, i;
+    for (i=0;i<marks.length;i++) s += marks[i];
+    return s / marks.length;
+  }
+  function moraleWord(n){
+    if (n >= 9) return "Keen";
+    if (n >= 7) return "Settled";
+    if (n >= 5) return "Unsettled";
+    return "Fed up";
+  }
+  function chipFor(word, kind){
+    var low = (word === "Poor" || word === "Awful" || word === "Unsettled" || word === "Fed up");
+    var warn = (word === "Fed up" || word === "Awful");
+    return '<span class="ychip'+(warn?" warn":low?" low":"")+'">'+(kind?kind+" ":"")+word+"</span>";
+  }
+
+  /* Opening-day form is Fair / Settled. The form-guide marks are a later worked example only. */
+  var S81 = [
+    {name:"Gary Bailey", pos:"Goalkeeper", shirt:1, xi:true, cap:false, marks:[7,6,8,7,7], morale:8},
+    {name:"John Gidman", pos:"Right-back", shirt:2, xi:true, cap:false, marks:[7,7,6,7,6], morale:8},
+    {name:"Arthur Albiston", pos:"Left-back", shirt:3, xi:true, cap:false, marks:[7,8,7,7,8], morale:8},
+    {name:"Ray Wilkins", pos:"Midfield", shirt:4, xi:true, cap:false, marks:[8,7,8,8,7], morale:8},
+    {name:"Gordon McQueen", pos:"Centre-half", shirt:5, xi:true, cap:false, marks:[7,7,8,6,7], morale:7},
+    {name:"Martin Buchan", pos:"Centre-half", shirt:6, xi:true, cap:true, marks:[7,7,6,7,7], morale:8},
+    {name:"Steve Coppell", pos:"Outside-right", shirt:7, xi:true, cap:false, marks:[8,7,8,7,8], morale:8},
+    {name:"Garry Birtles", pos:"Centre-forward", shirt:8, xi:true, cap:false, marks:[6,7,6,5,6], morale:6},
+    {name:"Frank Stapleton", pos:"Centre-forward", shirt:9, xi:true, cap:false, marks:[7,8,7,8,7], morale:8},
+    {name:"Lou Macari", pos:"Forward", shirt:10, xi:true, cap:false, marks:[7,6,7,8,7], morale:7},
+    {name:"Sammy McIlroy", pos:"Midfield", shirt:11, xi:true, cap:false, marks:[7,7,7,6,7], morale:7},
+    {name:"Paddy Roche", pos:"Goalkeeper", shirt:null, xi:false, cap:false, marks:[], morale:7},
+    {name:"Kevin Moran", pos:"Centre-half", shirt:null, xi:false, cap:false, marks:[6,7,6,7,6], morale:6},
+    {name:"Mick Duxbury", pos:"Right-back", shirt:null, xi:false, cap:false, marks:[7,6,7,6,7], morale:7},
+    {name:"Ashley Grimes", pos:"Midfield", shirt:null, xi:false, cap:false, marks:[6,6,5,6,6], morale:6}
+  ];
+  var S86 = [
+    {name:"Chris Turner", pos:"Goalkeeper", shirt:1, xi:true, cap:false, marks:[7,7,6,7,7], morale:8},
+    {name:"Mick Duxbury", pos:"Right-back", shirt:2, xi:true, cap:false, marks:[7,6,7,7,6], morale:7},
+    {name:"Arthur Albiston", pos:"Left-back", shirt:3, xi:true, cap:false, marks:[7,7,7,8,7], morale:8},
+    {name:"Norman Whiteside", pos:"Midfield", shirt:4, xi:true, cap:false, marks:[8,7,8,6,7], morale:8},
+    {name:"Paul McGrath", pos:"Centre-half", shirt:5, xi:true, cap:false, marks:[8,8,7,8,7], morale:8},
+    {name:"Kevin Moran", pos:"Centre-half", shirt:6, xi:true, cap:false, marks:[7,7,6,7,7], morale:7},
+    {name:"Gordon Strachan", pos:"Outside-right", shirt:7, xi:true, cap:false, marks:[8,8,7,8,8], morale:9},
+    {name:"Clayton Blackmore", pos:"Midfield", shirt:8, xi:true, cap:false, marks:[6,7,7,6,7], morale:7},
+    {name:"Frank Stapleton", pos:"Centre-forward", shirt:9, xi:true, cap:false, marks:[7,6,7,7,6], morale:6},
+    {name:"Peter Davenport", pos:"Centre-forward", shirt:10, xi:true, cap:false, marks:[7,7,6,7,8], morale:7},
+    {name:"Colin Gibson", pos:"Left-back", shirt:11, xi:true, cap:false, marks:[7,6,7,6,7], morale:7},
+    {name:"Jesper Olsen", pos:"Outside-left", shirt:12, xi:false, cap:false, sub:true, marks:[7,8,7,7,8], morale:7},
+    {name:"Bryan Robson", pos:"Midfield", shirt:null, xi:false, cap:true, marks:[], morale:7},
+    {name:"Gary Bailey", pos:"Goalkeeper", shirt:null, xi:false, cap:false, marks:[], morale:6}
+  ];
+
+  /* 4-4-2 slot positions, our goal at the bottom */
+  var LAY = {
+    GK:{x:50,y:90},
+    RB:{x:84,y:74}, CB1:{x:62,y:76}, CB2:{x:38,y:76}, LB:{x:16,y:74},
+    RM:{x:84,y:48}, CM1:{x:60,y:50}, CM2:{x:40,y:50}, LM:{x:16,y:48},
+    ST1:{x:62,y:22}, ST2:{x:38,y:22}
+  };
+  var MAP81 = {GK:"Gary Bailey",RB:"John Gidman",CB1:"Gordon McQueen",CB2:"Martin Buchan",LB:"Arthur Albiston",RM:"Steve Coppell",CM1:"Ray Wilkins",CM2:"Sammy McIlroy",LM:"Lou Macari",ST1:"Frank Stapleton",ST2:"Garry Birtles"};
+  var MAP86 = {GK:"Chris Turner",RB:"Mick Duxbury",CB1:"Paul McGrath",CB2:"Kevin Moran",LB:"Arthur Albiston",RM:"Gordon Strachan",CM1:"Norman Whiteside",CM2:"Clayton Blackmore",LM:"Colin Gibson",ST1:"Frank Stapleton",ST2:"Peter Davenport"};
+  var ROLE = {GK:"GK",RB:"RB",CB1:"CH",CB2:"CH",LB:"LB",RM:"OR",CM1:"MF",CM2:"MF",LM:"OL",ST1:"CF",ST2:"CF"};
+
+  function squad(){ return era===1981 ? S81 : S86; }
+  function find(name){ return squad().filter(function(p){ return p.name===name; })[0]; }
+  function shortName(n){ var p=n.split(" "); return p[p.length-1]; }
+  function openingForm(){ return era===1981; } // both use start-of-season words on squad/line-up? We'll show Fair/Settled on opening, and the form guide as the worked example.
+
+  function el(id){ return document.getElementById(id); }
+
+  function renderMast(){
+    if (era===1981){
+      el("mast-era").textContent = "Line-up, Morale and Form · 1981-82";
+      el("mast-fix").textContent = "First Division · at Highfield Road";
+    } else {
+      el("mast-era").textContent = "Line-up, Morale and Form · 1986-87";
+      el("mast-fix").textContent = "First Division · at Highbury";
+    }
+    el("era-1981").className = "chip"+(era===1981?" on":"");
+    el("era-1981").setAttribute("aria-pressed", era===1981?"true":"false");
+    el("era-1986").className = "chip"+(era===1986?" on":"");
+    el("era-1986").setAttribute("aria-pressed", era===1986?"true":"false");
+  }
+
+  function renderSquad(){
+    var lead = era===1981
+      ? "The men on the books in the week of the opening match at Coventry City, Saturday 29 August 1981. Form starts Fair and morale Settled until a run of marks is in. The eleven is the sourced side; the four men below the line were at the club and are not in that eleven."
+      : "The men on the books in the week of the opening match at Arsenal, Saturday 23 August 1986. Bryan Robson is the club captain, and is not in the sourced eleven. Jesper Olsen is the named substitute. Form starts Fair and morale Settled until a run of marks is in, except where a later worked example is shown on the form guide.";
+    el("squad-lead").textContent = lead;
+    var rows = squad().map(function(p){
+      var fw = "Fair", mw = "Settled";
+      /* Opening week: no published run yet, so the chips stay Fair and Settled.
+         Unsettled is reserved for later sheets (form guide / left out), not invented as a historical mood. */
+      if (p.cap) mw = "Settled";
+      var note = [];
+      if (p.cap) note.push("(C)");
+      if (p.sub) note.push("12");
+      return "<tr class='"+(p.xi?"xi":"out")+"'><td>"+p.name+(note.length?" <span class='cap'>"+note.join(" ")+"</span>":"")+"</td><td class='pos'>"+p.pos+"</td><td>"+chipFor(fw,"Form")+"</td><td>"+chipFor(mw,"Morale")+"</td></tr>";
+    }).join("");
+    el("squad-table").innerHTML = "<table><thead><tr><th>Name</th><th>Pos</th><th>Form</th><th>Morale</th></tr></thead><tbody>"+rows+"</tbody></table>";
+  }
+
+  function renderLineup(){
+    var lead = era===1981
+      ? "United's starting eleven at Highfield Road, Saturday 29 August 1981, 3.00pm. No named substitute is recorded for this match."
+      : "United's starting eleven at Highbury, Saturday 23 August 1986. Jesper Olsen is the named substitute, on for Colin Gibson after 81 minutes.";
+    el("lineup-lead").textContent = lead;
+
+    var caps = squad().filter(function(p){ return p.cap || p.xi; });
+    var current = squad().filter(function(p){ return p.cap; })[0];
+    el("cap-pick").innerHTML = squad().map(function(p){
+      return "<option value='"+p.name+"'"+(p.cap?" selected":"")+">"+p.name+"</option>";
+    }).join("");
+    if (current && current.xi){
+      el("cap-note").textContent = current.name+" is in the eleven.";
+    } else if (current){
+      el("cap-note").textContent = current.name+" is club captain and is not in this eleven. The match captain is not invented here.";
+    }
+
+    var map = era===1981 ? MAP81 : MAP86;
+    var html = '<div class="half"></div><div class="box-t"></div><div class="box-b"></div>';
+    html += '<div class="side-lab left">Our left</div><div class="side-lab right">Our right</div>';
+    Object.keys(LAY).forEach(function(slot){
+      var name = map[slot], p = find(name), c = LAY[slot];
+      if (!p) return;
+      var gk = slot==="GK" ? " gk" : "";
+      var star = p.cap ? " (C)" : "";
+      html += '<div class="pl'+gk+'" style="left:'+c.x+'%;top:'+c.y+'%">';
+      html += '<div class="disc">'+ROLE[slot]+'</div>';
+      html += '<div class="nm">'+shortName(p.name)+star+'</div>';
+      html += '<div class="meta">Form Fair</div>';
+      html += '</div>';
+    });
+    el("pitch").innerHTML = html;
+
+    el("xi-list").innerHTML = squad().filter(function(p){ return p.xi || p.sub; }).map(function(p){
+      var sh = p.shirt ? p.shirt+". " : "";
+      var extra = p.cap ? " (C)" : (p.sub ? " (12)" : "");
+      return "<li><div class='who'><b>"+sh+p.name+extra+"</b><span class='pos'>"+p.pos+"</span></div><div>"+chipFor("Fair","Form")+" "+chipFor("Settled","Morale")+"</div></li>";
+    }).join("");
+
+    var leftovers = squad().filter(function(p){ return !p.xi && !p.sub && !p.cap; });
+    var htmlW = "";
+    if (current && !current.xi){
+      htmlW += '<div class="warn"><h3>The captain is not in the eleven</h3><p>'+current.name+' is club captain and is not named today. A match captain would be named on the day. This preview does not invent one.</p></div>';
+    } else {
+      htmlW += '<div class="okbox">The club captain is in the eleven. No man is marked unhappy on this opening sheet.</div>';
+    }
+    if (leftovers.length){
+      htmlW += '<p class="note">Also on the books and not in this eleven: '+leftovers.map(function(p){ return p.name; }).join(", ")+'.</p>';
+    }
+    el("lineup-warn").innerHTML = htmlW;
+  }
+
+  function renderForm(){
+    var rows = squad().filter(function(p){ return p.xi || p.sub || (p.marks && p.marks.length); }).map(function(p){
+      var avg = formAvg(p.marks);
+      var word = formWord(avg);
+      var marks = (p.marks && p.marks.length)
+        ? '<span class="marks">'+p.marks.map(function(m){ return "<span>"+m+"</span>"; }).join("")+"</span>"
+        : "<span class='note'>No marks yet</span>";
+      return "<tr class='"+(p.xi?"xi":"")+"'><td>"+p.name+(p.cap?" <span class='cap'>(C)</span>":"")+"</td><td class='pos'>"+p.pos+"</td><td>"+marks+"</td><td>"+chipFor(word,"Form")+"</td></tr>";
+    }).join("");
+    el("form-table").innerHTML = "<table><thead><tr><th>Name</th><th>Pos</th><th>Last five</th><th>Form</th></tr></thead><tbody>"+rows+"</tbody></table>";
+  }
+
+  function renderDressing(){
+    el("dress-lead").textContent = era===1981
+      ? "After Coventry City 2, Manchester United 1, at Highfield Road. Whitton and Bodak scored for Coventry, Macari for United. Attendance 19,329."
+      : "After Arsenal 1, Manchester United 0, at Highbury. Charlie Nicholas scored after 80 minutes. Attendance 41,382.";
+    var talks = [
+      {k:"proud", t:"A quiet word of thanks", d:"Kind words after a defeat. Well meant, and they may not change much for next week. Next-week multiplier 0.99. Morale on the eleven, up one step at most, still capped."},
+      {k:"demand", t:"The standard is not lowered", d:"A hard dressing-room after a losing afternoon. There is a risk it rattles more than it steadies. Next-week multiplier 0.98. Morale mixed, still held inside the cap."},
+      {k:"none", t:"Say nothing", d:"The result can speak for itself. Next-week multiplier 1.00. Morale is left to the result, the marks and the week."}
+    ];
+    el("ft-talks").innerHTML = talks.map(function(x){
+      return "<div class='talk"+(ftTalk===x.k?" on":"")+"' data-ft='"+x.k+"'><b>"+x.t+"</b>"+x.d+"</div>";
+    }).join("");
+    Array.prototype.forEach.call(el("ft-talks").querySelectorAll(".talk"), function(b){
+      b.addEventListener("click", function(){ ftTalk = b.getAttribute("data-ft"); renderDressing(); });
+    });
+    var chosen = talks.filter(function(x){ return x.k===ftTalk; })[0];
+    el("ft-delta").innerHTML = "Proposed, not a historical speech. The multiplier is the same cap already in the live full-time talk (0.96 to 1.04). <b>"+chosen.t+".</b>";
+  }
+
+  function renderPapers(){
+    if (era===1981){
+      el("paper-sheet").innerHTML = "<div class='masthead'><div class='name'>Monday football</div><div class='date'>Monday 31 August 1981 · First Division</div></div><h3>Sexton's City take the points from United</h3><p>Coventry City 2, Manchester United 1, at Highfield Road. Steve Whitton and Peter Bodak scored for the home side, Lou Macari for United, in front of 19,329. It was Dave Sexton's first League match in the Coventry dugout, and Ron Atkinson's first League match as United manager. Three points for a win were played for the first time this season.</p><p>John Gidman and Frank Stapleton made their United debuts. No public word from the manager is recorded on this sheet.</p>";
+    } else {
+      el("paper-sheet").innerHTML = "<div class='masthead'><div class='name'>Monday football</div><div class='date'>Monday 25 August 1986 · First Division</div></div><h3>Nicholas settles it for Graham's Arsenal</h3><p>Arsenal 1, Manchester United 0, at Highbury. Charlie Nicholas scored after 80 minutes, in front of 41,382. It was George Graham's first League match as Arsenal manager. Jesper Olsen came on for Colin Gibson a minute after the goal. No public word from the manager is recorded on this sheet.</p>";
+    }
+    var talks = [
+      {k:"praise", t:"A word of praise in the papers", d:"A short, public tribute to the side. Morale on the eleven up a step, with a small risk of complacency after a win, and little change after a defeat. Never a quotation invented for a real manager."},
+      {k:"quiet", t:"A quiet word only", d:"Nothing given to the papers. Any praise or blame stays in the dressing room, as with 'say nothing' at full time."},
+      {k:"rebuke", t:"A public rebuke", d:"A hard word in print. Morale down a step for the men who played, and a risk it sits badly with the dressing-room talk. Capped, and available to every club, not only yours."}
+    ];
+    el("press-talks").innerHTML = talks.map(function(x){
+      return "<div class='talk"+(pressTalk===x.k?" on":"")+"' data-pr='"+x.k+"'><b>"+x.t+"</b>"+x.d+"</div>";
+    }).join("");
+    Array.prototype.forEach.call(el("press-talks").querySelectorAll(".talk"), function(b){
+      b.addEventListener("click", function(){ pressTalk = b.getAttribute("data-pr"); renderPapers(); });
+    });
+    el("press-delta").textContent = "The heading is a preview mast, not a real newspaper title. The score, scorers, attendance and debuts are sourced. The manager's choices are a proposed sheet.";
+  }
+
+  function renderLeftOut(){
+    el("leftout-copy").innerHTML = "Nigel Harwood, a midfielder on the books, has not been named in the eleven after a run of games in the side. He asks to see you. He has not gone to the papers.";
+    var talks = [
+      {k:"explain", t:"See him and explain", d:"A private word. Morale steadies a little if he is given a reason and a chance of coming back. No promise is a contract."},
+      {k:"promise", t:"Promise him a game", d:"He comes back into the reckoning for the next side. If he is left out again without a word, morale falls further."},
+      {k:"list", t:"If he asks, put him on the list", d:"The same door already in Club Office. Under freedom of contract he may still have to see out his registration, but he knows you will listen. Morale eases; he is then on the list."}
+    ];
+    el("leftout-talks").innerHTML = talks.map(function(x){
+      return "<div class='talk"+(leftTalk===x.k?" on":"")+"' data-lo='"+x.k+"'><b>"+x.t+"</b>"+x.d+"</div>";
+    }).join("");
+    Array.prototype.forEach.call(el("leftout-talks").querySelectorAll(".talk"), function(b){
+      b.addEventListener("click", function(){ leftTalk = b.getAttribute("data-lo"); renderLeftOut(); });
+    });
+    el("leftout-delta").textContent = "Nigel Harwood is generated (gen true) and is not marked with a dagger. The live game already has an unhappy-player box for a man who wants to leave. This sheet adds the earlier moment, when a regular is first left out.";
+  }
+
+  function showPanel(name){
+    panel = name;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-panel]"), function(b){
+      var on = b.getAttribute("data-panel")===name;
+      b.className = "chip"+(on?" on":"");
+      b.setAttribute("aria-pressed", on?"true":"false");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".panel"), function(p){
+      p.className = "panel"+(p.id==="panel-"+name?" on":"");
+    });
+  }
+
+  function renderAll(){
+    renderMast();
+    renderSquad();
+    renderLineup();
+    renderForm();
+    renderDressing();
+    renderPapers();
+    renderLeftOut();
+  }
+
+  el("era-1981").addEventListener("click", function(){ era = 1981; renderAll(); });
+  el("era-1986").addEventListener("click", function(){ era = 1986; renderAll(); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-panel]"), function(b){
+    b.addEventListener("click", function(){ showPanel(b.getAttribute("data-panel")); });
+  });
+  el("cap-pick").addEventListener("change", function(){
+    squad().forEach(function(p){ p.cap = (p.name===el("cap-pick").value); });
+    renderLineup();
+    renderSquad();
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
