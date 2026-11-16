@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RetroMatch – Squad and Players (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3e6c4; --ink:#1a120c; --red:#c0122a; --red-dark:#8e0c1f;
+  --yellow:#ffd000; --muted:#5a4636; --card:#fff8e8; --chip:#ffd000;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#2a1a14;color:var(--ink);font:15px/1.4 Barlow,Helvetica,Arial,sans-serif}
+a{color:var(--red-dark)}
+.wrap{max-width:920px;margin:0 auto;padding:12px 14px 40px}
+.banner{background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;font-weight:700;letter-spacing:.02em}
+.banner b{font-family:Anton,Impact,sans-serif;letter-spacing:.04em;font-weight:400;font-size:18px;margin-right:.4em}
+.mast{background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.mast h1{margin:0;font:400 42px/0.9 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.mast .sub{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;opacity:.95}
+.mast .club{text-align:right}
+.mast .club strong{display:block;font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.03em}
+.sheet{background:var(--paper);border:3px solid #111;border-top:0;padding:12px 14px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.chip{appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 12px/1 Barlow,sans-serif;padding:7px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.chip[aria-pressed="true"],.chip.on{background:#111;color:var(--yellow)}
+.chip.ghost{background:var(--card)}
+h2{margin:0 0 8px;font:400 26px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
+.note{color:var(--muted);font-size:13px;margin:6px 0 8px}
+.src{font-size:12px;color:var(--muted)}
+.foot{margin-top:16px;font-size:12px;color:var(--muted);border-top:2px solid #111;padding-top:8px}
+.ychip{display:inline-block;background:var(--yellow);color:#111;font:700 10px/1 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border:1px solid #111;margin:0 2px 2px 0;white-space:nowrap}
+.ychip.low{background:#111;color:var(--yellow)}
+.ychip.warn{background:var(--red);color:#fff;border-color:#111}
+.ychip.rise{background:var(--red);color:#fff;border-color:#111}
+.pos{font:700 11px/1 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:2px solid #111}
+th,td{padding:4px 6px;text-align:left;border-bottom:1px solid #c9b48a;vertical-align:middle}
+th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:#111;color:var(--yellow);border-bottom:0;cursor:pointer;user-select:none}
+th:hover{color:#fff}
+tr:last-child td{border-bottom:0}
+tr.selrow{cursor:pointer}
+tr.selrow:hover td{background:#fff3b0}
+tr.selrow.on td{background:#111;color:var(--yellow)}
+tr.selrow.on .pos,tr.selrow.on .gap{color:#ffe9a8}
+.nm{font-weight:700}
+.stars{letter-spacing:.04em;font-size:11px}
+.gap{color:var(--muted);font-style:italic}
+.filters{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 8px}
+.fchip{appearance:none;border:1px solid #111;background:var(--card);color:#111;font:700 10px/1 Barlow,sans-serif;padding:5px 7px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.fchip.on{background:#111;color:var(--yellow)}
+.file{background:var(--card);border:2px solid #111;padding:0;margin-top:12px}
+.file-head{background:#111;color:var(--yellow);padding:8px 10px;display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.file-head h3{margin:0;font:400 28px/0.95 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#fff}
+.file-head .meta{font:700 11px/1.2 Barlow,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);text-align:right}
+.file-body{padding:10px}
+.file-chips{margin:0 0 8px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:0 0 10px}
+@media (max-width:640px){ .facts{grid-template-columns:1fr} .mast .club{text-align:left} .mast h1{font-size:34px} }
+.fact{font-size:14px}
+.fact .k{font:700 10px/1 Barlow,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.fact .v{font-weight:700}
+.attrs{display:grid;grid-template-columns:1fr 1fr;gap:3px 16px;margin:0}
+.attr{display:flex;align-items:center;gap:6px;font-size:12px}
+.attr b{min-width:7.2em;font:700 11px/1 Barlow,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.pips{display:inline-flex;gap:1px}
+.pips i{width:8px;height:8px;background:#d7c6a0;border:1px solid #111;display:block}
+.pips i.on{background:var(--yellow)}
+.attr .n{margin-left:auto;font-weight:700;min-width:2.2em;text-align:right}
+.career{width:100%;margin-top:4px}
+.panel{display:none}
+.panel.on{display:block}
+.blurb{margin:0 0 8px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>Preview</b> Squad and players for 1981-82 and 1986-87. This is not the live game. Nothing here changes a save or the match engine. Figures without a source are marked, or are the game’s own ratings and contract model.</div>
+  <div class="mast">
+    <div>
+      <div class="sub">RetroMatch</div>
+      <h1>Squad and players</h1>
+    </div>
+    <div class="club">
+      <strong id="mast-club">Manchester United</strong>
+      <span class="sub" id="mast-era">1981-82 · 29 August 1981</span>
+    </div>
+  </div>
+  <div class="sheet">
+    <div class="chips" id="era-chips"></div>
+    <div class="chips" id="club-chips"></div>
+    <div class="chips" id="view-chips">
+      <button type="button" class="chip on" data-view="squad" aria-pressed="true">Squad</button>
+      <button type="button" class="chip" data-view="file" aria-pressed="false">Player file</button>
+    </div>
+
+    <div id="panel-squad" class="panel on">
+      <h2 id="squad-title">The squad</h2>
+      <p class="blurb">Click a man for his file. Form and morale are on the chips, as words. The file shows a mark out of 10 when he has one. Contract chips include years left and Listed. A man who wants more money is marked Wants a rise.</p>
+      <div class="filters" id="filters"></div>
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="n">Name</th>
+            <th data-sort="pos">Pos</th>
+            <th data-sort="age">Age</th>
+            <th data-sort="nat">Nat</th>
+            <th data-sort="rep">Rep</th>
+            <th data-sort="form">Form</th>
+            <th data-sort="morale">Morale</th>
+            <th data-sort="contract">Contract</th>
+          </tr>
+        </thead>
+        <tbody id="squad-body"></tbody>
+      </table>
+      <p class="note" id="squad-note"></p>
+    </div>
+
+    <div id="panel-file" class="panel">
+      <div class="file" id="player-file">
+        <div class="file-head"><h3>Player file</h3><div class="meta">Pick a man from the squad</div></div>
+        <div class="file-body"><p class="note">Click a player on the squad page, or use the names under the file once a squad is open.</p></div>
+      </div>
+      <p class="note" id="file-picks"></p>
+    </div>
+
+    <div class="foot">
+      <p class="src">Ages, reputation, ability and wages come from the live v404 start of each season (dates of birth as of 29 August 1981 and 23 August 1986). Contract lengths are the game’s own assignment, not a sourced term for any named man. Form, morale, Listed and Wants a rise are the v404 system; opening words are Fair and Settled. A short run of marks can be shown as a worked example, not a transcription from <i>Match</i> or <i>Shoot!</i>.</p>
+      <p class="src">International caps and goals are senior appearances only, cut at the save date, and only where a match-by-match or dated source was checked this round. Career tables list a complete previous spell when the league figures are sourced; a current spell is listed without a running total if that total would include later seasons. Personality is left as not sourced for every real player. Nationality in 1981 is the live v404 <code>nat</code> field; in 1986 the live squads have no <code>nat</code>, so this preview adds a sourced nationality for the United men only. Gaps are marked, not filled.</p>
+      <p class="src">Sources are listed in <code>SQUAD_PLAYERS_1980s.md</code>. Preview only; <code>index.html</code> and the other preview files were not changed.</p>
+    </div>
+  </div>
+</div>
+<script>
+const DATA = {"eras": {"1981": {"label": "1981-82", "date": "29 August 1981", "year": 1981}, "1986": {"label": "1986-87", "date": "23 August 1986", "year": 1986}}, "clubs": {"1981": {"Manchester United": {"ai": false, "players": [{"n": "Gary Bailey", "pos": "Goalkeeper", "slot": "GK", "age": 23, "rep": 4, "ca": 78, "wage": 543, "nat": "ENG", "natLabel": "England", "caps": 0, "intlGoals": 0, "capsNote": "as of 29 August 1981; senior debut 26 March 1985", "career": [{"club": "Wits University", "apps": null, "goals": null, "years": "to 1978", "complete": false}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1978–", "complete": false}], "yearsLeft": 2, "listed": false, "wantsRise": true, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Gary_Bailey|Manchester_United|1981", "attrs": [["Handling", 17], ["Agility", 16], ["Kicking", 12], ["Positioning", 14], ["Pace", 8], ["Stamina", 8]]}, {"n": "Paddy Roche", "pos": "Goalkeeper", "slot": "GK", "age": 30, "rep": 3, "ca": 73, "wage": 422, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 1, "listed": true, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Paddy_Roche|Manchester_United|1981", "attrs": [["Handling", 17], ["Agility", 16], ["Kicking", 10], ["Positioning", 15], ["Pace", 7], ["Stamina", 9]]}, {"n": "Arthur Albiston", "pos": "Left-Back", "slot": "FB", "age": 24, "rep": 4, "ca": 84, "wage": 543, "nat": "SCO", "natLabel": "Scotland", "caps": 0, "intlGoals": 0, "capsNote": "as of 29 August 1981; Scotland debut 1982", "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Arthur_Albiston|Manchester_United|1981", "attrs": [["Tackling", 18], ["Heading", 12], ["Passing", 14], ["Shooting", 6], ["Pace", 16], ["Stamina", 15], ["Crossing", 18], ["Work rate", 16]]}, {"n": "John Gidman", "pos": "Right-Back", "slot": "FB", "age": 27, "rep": 4, "ca": 86, "wage": 543, "nat": "ENG", "natLabel": "England", "caps": 1, "intlGoals": 0, "capsNote": "as of 29 August 1981 (only cap: 30 March 1977)", "career": [{"club": "Aston Villa", "apps": null, "goals": null, "years": "to 1979", "complete": false}, {"club": "Everton", "apps": null, "goals": null, "years": "1979–1981", "complete": false}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1981–", "complete": false}], "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "John_Gidman|Manchester_United|1981", "attrs": [["Tackling", 18], ["Heading", 11], ["Passing", 14], ["Shooting", 7], ["Pace", 17], ["Stamina", 15], ["Crossing", 19], ["Work rate", 16]]}, {"n": "Gordon McQueen", "pos": "Centre-Half", "slot": "HB", "age": 29, "rep": 4, "ca": 81, "wage": 543, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Gordon_McQueen|Manchester_United|1981", "attrs": [["Tackling", 15], ["Heading", 13], ["Passing", 16], ["Shooting", 10], ["Pace", 10], ["Stamina", 15], ["Crossing", 8], ["Work rate", 17]]}, {"n": "Kevin Moran", "pos": "Centre-Half", "slot": "HB", "age": 25, "rep": 4, "ca": 86, "wage": 543, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Kevin_Moran|Manchester_United|1981", "attrs": [["Tackling", 16], ["Heading", 15], ["Passing", 16], ["Shooting", 11], ["Pace", 12], ["Stamina", 17], ["Crossing", 9], ["Work rate", 17]]}, {"n": "Martin Buchan", "pos": "Centre-Half", "slot": "HB", "age": 32, "rep": 4, "ca": 82, "wage": 543, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": true, "gen": false, "ai": false, "id": "Martin_Buchan|Manchester_United|1981", "attrs": [["Tackling", 14], ["Heading", 14], ["Passing", 16], ["Shooting", 10], ["Pace", 10], ["Stamina", 15], ["Crossing", 9], ["Work rate", 16]]}, {"n": "Jimmy Nicholl", "pos": "Centre-Half", "slot": "HB", "age": 24, "rep": 4, "ca": 78, "wage": 543, "nat": "NIR", "natLabel": "N. Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Jimmy_Nicholl|Manchester_United|1981", "attrs": [["Tackling", 15], ["Heading", 13], ["Passing", 16], ["Shooting", 9], ["Pace", 10], ["Stamina", 15], ["Crossing", 7], ["Work rate", 16]]}, {"n": "Mike Duxbury", "pos": "Right-Back / Centre-Back", "slot": "FB", "age": 21, "rep": 3, "ca": 72, "wage": 422, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Mike_Duxbury|Manchester_United|1981", "attrs": [["Tackling", 15], ["Heading", 10], ["Passing", 12], ["Shooting", 6], ["Pace", 15], ["Stamina", 14], ["Crossing", 16], ["Work rate", 14]]}, {"n": "Nikola Jovanović", "pos": "Centre-Half", "slot": "HB", "age": 28, "rep": 4, "ca": 80, "wage": 543, "nat": "YUG", "natLabel": "Yugoslavia", "caps": null, "intlGoals": null, "capsNote": "Yugoslavia international; career 7 caps, 0 goals, 1979–1982, which crosses this date", "career": [{"club": "Budućnost Titograd", "apps": null, "goals": null, "years": "1972–1975", "complete": false}, {"club": "Red Star Belgrade", "apps": 75, "goals": 1, "years": "1975–1979", "complete": true, "note": "league figures from Wikipedia table"}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1980–", "complete": false, "fee": 300000}], "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Nikola_Jovanović|Manchester_United|1981", "attrs": [["Tackling", 14], ["Heading", 14], ["Passing", 17], ["Shooting", 9], ["Pace", 12], ["Stamina", 14], ["Crossing", 8], ["Work rate", 17]]}, {"n": "Ray Wilkins", "pos": "Centre Midfielder", "slot": "HB", "age": 24, "rep": 4, "ca": 86, "wage": 543, "nat": "ENG", "natLabel": "England", "caps": 42, "intlGoals": 2, "capsNote": "as of 29 August 1981", "career": [{"club": "Chelsea", "apps": 179, "goals": 30, "years": "1973–1979", "complete": true}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1979–", "complete": false}], "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Ray_Wilkins|Manchester_United|1981", "attrs": [["Tackling", 14], ["Heading", 14], ["Passing", 16], ["Shooting", 9], ["Pace", 11], ["Stamina", 15], ["Crossing", 8], ["Work rate", 16]]}, {"n": "Steve Coppell", "pos": "Right Winger", "slot": "FWD", "age": 26, "rep": 4, "ca": 81, "wage": 543, "nat": "ENG", "natLabel": "England", "caps": 33, "intlGoals": 6, "capsNote": "as of 29 August 1981", "career": [{"club": "Tranmere Rovers", "apps": 38, "goals": 13, "years": "1973–1975", "complete": true}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1975–", "complete": false}], "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Steve_Coppell|Manchester_United|1981", "attrs": [["Tackling", 5], ["Heading", 12], ["Passing", 10], ["Shooting", 16], ["Pace", 16], ["Stamina", 13], ["Crossing", 10], ["Work rate", 14]]}, {"n": "Ashley Grimes", "pos": "Centre Midfielder", "slot": "HB", "age": 24, "rep": 4, "ca": 81, "wage": 543, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Ashley_Grimes|Manchester_United|1981", "attrs": [["Tackling", 14], ["Heading", 14], ["Passing", 17], ["Shooting", 9], ["Pace", 12], ["Stamina", 14], ["Crossing", 8], ["Work rate", 17]]}, {"n": "Lou Macari", "pos": "Half-Back", "slot": "HB", "age": 32, "rep": 3, "ca": 77, "wage": 422, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Lou_Macari|Manchester_United|1981", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 16], ["Shooting", 10], ["Pace", 10], ["Stamina", 14], ["Crossing", 7], ["Work rate", 15]]}, {"n": "Sammy McIlroy", "pos": "Centre Midfielder", "slot": "HB", "age": 27, "rep": 3, "ca": 73, "wage": 422, "nat": "NIR", "natLabel": "N. Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Sammy_McIlroy|Manchester_United|1981", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 14], ["Shooting", 9], ["Pace", 11], ["Stamina", 15], ["Crossing", 7], ["Work rate", 14]]}, {"n": "Alan Davies", "pos": "Striker", "slot": "FWD", "age": 19, "rep": 3, "ca": 71, "wage": 422, "nat": "WAL", "natLabel": "Wales", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 1, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Alan_Davies|Manchester_United|1981", "attrs": [["Tackling", 6], ["Heading", 11], ["Passing", 10], ["Shooting", 15], ["Pace", 14], ["Stamina", 12], ["Crossing", 10], ["Work rate", 12]]}, {"n": "Frank Stapleton", "pos": "Striker", "slot": "FWD", "age": 25, "rep": 4, "ca": 83, "wage": 543, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Frank_Stapleton|Manchester_United|1981", "attrs": [["Tackling", 7], ["Heading", 11], ["Passing", 11], ["Shooting", 17], ["Pace", 16], ["Stamina", 13], ["Crossing", 12], ["Work rate", 14]]}, {"n": "Garry Birtles", "pos": "Striker", "slot": "FWD", "age": 25, "rep": 4, "ca": 82, "wage": 543, "nat": "ENG", "natLabel": "England", "caps": 3, "intlGoals": 0, "capsNote": "as of 29 August 1981 (all three in 1980)", "career": [{"club": "Nottingham Forest", "apps": null, "goals": null, "years": "to 1980", "complete": false}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1980–", "complete": false}], "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Garry_Birtles|Manchester_United|1981", "attrs": [["Tackling", 6], ["Heading", 12], ["Passing", 11], ["Shooting", 17], ["Pace", 15], ["Stamina", 14], ["Crossing", 11], ["Work rate", 13]]}, {"n": "Scott McGarvey", "pos": "Striker", "slot": "FWD", "age": 18, "rep": 3, "ca": 76, "wage": 422, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Scott_McGarvey|Manchester_United|1981", "attrs": [["Tackling", 6], ["Heading", 11], ["Passing", 9], ["Shooting", 16], ["Pace", 13], ["Stamina", 12], ["Crossing", 11], ["Work rate", 13]]}]}, "Liverpool": {"ai": true, "players": [{"n": "Bruce Grobbelaar", "pos": "Goalkeeper", "slot": "GK", "age": 23, "rep": 4, "ca": 86, "wage": null, "nat": "ZIM", "natLabel": "Zimbabwe", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Bruce_Grobbelaar|Liverpool|1981", "attrs": [["Handling", 19], ["Agility", 18], ["Kicking", 12], ["Positioning", 15], ["Pace", 9], ["Stamina", 10]]}, {"n": "Steve Ogrizovic", "pos": "Goalkeeper", "slot": "GK", "age": 23, "rep": 4, "ca": 79, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Steve_Ogrizovic|Liverpool|1981", "attrs": [["Handling", 19], ["Agility", 16], ["Kicking", 11], ["Positioning", 15], ["Pace", 8], ["Stamina", 9]]}, {"n": "Alan Kennedy", "pos": "Left-Back", "slot": "FB", "age": 26, "rep": 4, "ca": 84, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Alan_Kennedy|Liverpool|1981", "attrs": [["Tackling", 17], ["Heading", 11], ["Passing", 14], ["Shooting", 7], ["Pace", 16], ["Stamina", 14], ["Crossing", 18], ["Work rate", 15]]}, {"n": "Phil Neal", "pos": "Right-Back", "slot": "FB", "age": 30, "rep": 4, "ca": 79, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Phil_Neal|Liverpool|1981", "attrs": [["Tackling", 16], ["Heading", 11], ["Passing", 13], ["Shooting", 7], ["Pace", 16], ["Stamina", 15], ["Crossing", 17], ["Work rate", 15]]}, {"n": "Alan Hansen", "pos": "Centre-Half", "slot": "HB", "age": 26, "rep": 4, "ca": 85, "wage": null, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Alan_Hansen|Liverpool|1981", "attrs": [["Tackling", 15], ["Heading", 14], ["Passing", 17], ["Shooting", 10], ["Pace", 12], ["Stamina", 17], ["Crossing", 9], ["Work rate", 18]]}, {"n": "Mark Lawrenson", "pos": "Centre-Half", "slot": "HB", "age": 24, "rep": 4, "ca": 86, "wage": null, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Mark_Lawrenson|Liverpool|1981", "attrs": [["Tackling", 15], ["Heading", 14], ["Passing", 18], ["Shooting", 11], ["Pace", 12], ["Stamina", 16], ["Crossing", 9], ["Work rate", 18]]}, {"n": "Phil Thompson", "pos": "Centre-Half", "slot": "HB", "age": 27, "rep": 4, "ca": 85, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Phil_Thompson|Liverpool|1981", "attrs": [["Tackling", 15], ["Heading", 14], ["Passing", 16], ["Shooting", 10], ["Pace", 12], ["Stamina", 16], ["Crossing", 8], ["Work rate", 17]]}, {"n": "Ronnie Whelan", "pos": "Centre Midfielder", "slot": "HB", "age": 19, "rep": 4, "ca": 82, "wage": null, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 1, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Ronnie_Whelan|Liverpool|1981", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 17], ["Shooting", 10], ["Pace", 11], ["Stamina", 15], ["Crossing", 9], ["Work rate", 17]]}, {"n": "Richard Money", "pos": "Centre-Half", "slot": "HB", "age": 25, "rep": 4, "ca": 79, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Richard_Money|Liverpool|1981", "attrs": [["Tackling", 15], ["Heading", 13], ["Passing", 16], ["Shooting", 10], ["Pace", 10], ["Stamina", 15], ["Crossing", 8], ["Work rate", 17]]}, {"n": "Craig Johnston", "pos": "Striker", "slot": "FWD", "age": 21, "rep": 4, "ca": 81, "wage": null, "nat": "AUS", "natLabel": "Australia", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Craig_Johnston|Liverpool|1981", "attrs": [["Tackling", 6], ["Heading", 11], ["Passing", 10], ["Shooting", 18], ["Pace", 16], ["Stamina", 13], ["Crossing", 11], ["Work rate", 13]]}, {"n": "Graeme Souness", "pos": "Centre Midfielder", "slot": "HB", "age": 28, "rep": 4, "ca": 80, "wage": null, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Graeme_Souness|Liverpool|1981", "attrs": [["Tackling", 14], ["Heading", 14], ["Passing", 16], ["Shooting", 10], ["Pace", 11], ["Stamina", 16], ["Crossing", 8], ["Work rate", 17]]}, {"n": "Ray Kennedy", "pos": "Striker", "slot": "FWD", "age": 30, "rep": 4, "ca": 86, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Ray_Kennedy|Liverpool|1981", "attrs": [["Tackling", 8], ["Heading", 12], ["Passing", 10], ["Shooting", 19], ["Pace", 16], ["Stamina", 15], ["Crossing", 12], ["Work rate", 14]]}, {"n": "Sammy Lee", "pos": "Centre Midfielder", "slot": "HB", "age": 22, "rep": 4, "ca": 85, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Sammy_Lee|Liverpool|1981", "attrs": [["Tackling", 16], ["Heading", 15], ["Passing", 17], ["Shooting", 10], ["Pace", 12], ["Stamina", 16], ["Crossing", 8], ["Work rate", 16]]}, {"n": "Terry McDermott", "pos": "Centre Midfielder", "slot": "HB", "age": 29, "rep": 4, "ca": 78, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Terry_McDermott|Liverpool|1981", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 15], ["Shooting", 10], ["Pace", 11], ["Stamina", 15], ["Crossing", 7], ["Work rate", 15]]}, {"n": "Kevin Sheedy", "pos": "Centre Midfielder", "slot": "HB", "age": 21, "rep": 3, "ca": 70, "wage": null, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Kevin_Sheedy|Liverpool|1981", "attrs": [["Tackling", 12], ["Heading", 12], ["Passing", 13], ["Shooting", 9], ["Pace", 9], ["Stamina", 13], ["Crossing", 8], ["Work rate", 14]]}, {"n": "Ian Rush", "pos": "Striker", "slot": "FWD", "age": 19, "rep": 4, "ca": 78, "wage": null, "nat": "WAL", "natLabel": "Wales", "caps": 3, "intlGoals": 0, "capsNote": "as of 29 August 1981 (last cap: England, 20 May 1981)", "career": [{"club": "Chester", "apps": 34, "goals": 14, "years": "1978–1980", "complete": true}, {"club": "Liverpool", "apps": null, "goals": null, "years": "1980–", "complete": false}], "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Ian_Rush|Liverpool|1981", "attrs": [["Tackling", 6], ["Heading", 11], ["Passing", 10], ["Shooting", 17], ["Pace", 15], ["Stamina", 13], ["Crossing", 12], ["Work rate", 14]]}, {"n": "Kenny Dalglish", "pos": "Striker", "slot": "FWD", "age": 30, "rep": 4, "ca": 80, "wage": null, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Kenny_Dalglish|Liverpool|1981", "attrs": [["Tackling", 7], ["Heading", 10], ["Passing", 10], ["Shooting", 17], ["Pace", 14], ["Stamina", 12], ["Crossing", 11], ["Work rate", 14]]}, {"n": "David Fairclough", "pos": "Striker", "slot": "FWD", "age": 24, "rep": 3, "ca": 70, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "David_Fairclough|Liverpool|1981", "attrs": [["Tackling", 6], ["Heading", 9], ["Passing", 8], ["Shooting", 16], ["Pace", 14], ["Stamina", 11], ["Crossing", 9], ["Work rate", 11]]}, {"n": "David Johnson", "pos": "Striker", "slot": "FWD", "age": 29, "rep": 4, "ca": 78, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "David_Johnson|Liverpool|1981", "attrs": [["Tackling", 6], ["Heading", 11], ["Passing", 10], ["Shooting", 17], ["Pace", 15], ["Stamina", 13], ["Crossing", 12], ["Work rate", 14]]}, {"n": "Howard Gayle", "pos": "Winger", "slot": "FWD", "age": 23, "rep": 4, "ca": 78, "wage": null, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Howard_Gayle|Liverpool|1981", "attrs": [["Tackling", 6], ["Heading", 11], ["Passing", 9], ["Shooting", 17], ["Pace", 14], ["Stamina", 12], ["Crossing", 12], ["Work rate", 13]]}]}}, "1986": {"Manchester United": {"ai": false, "players": [{"n": "Chris Turner", "pos": "Goalkeeper", "slot": "GK", "age": 27, "rep": 4, "ca": 77, "wage": 616, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Chris_Turner|Manchester_United|1986", "attrs": [["Handling", 18], ["Agility", 16], ["Kicking", 11], ["Positioning", 15], ["Pace", 7], ["Stamina", 9]]}, {"n": "Gary Walsh", "pos": "Goalkeeper", "slot": "GK", "age": 18, "rep": 3, "ca": 72, "wage": 479, "nat": "ENG", "natLabel": "England", "caps": 0, "intlGoals": 0, "capsNote": "as of 23 August 1986. Later England under-21 caps are not counted here", "career": [{"club": "Manchester United", "apps": 0, "goals": 0, "years": "1986–", "complete": false, "note": "first-team league debut 13 December 1986"}], "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Gary_Walsh|Manchester_United|1986", "attrs": [["Handling", 16], ["Agility", 14], ["Kicking", 10], ["Positioning", 14], ["Pace", 8], ["Stamina", 9]]}, {"n": "Gary Bailey", "pos": "Goalkeeper", "slot": "GK", "age": 28, "rep": 3, "ca": 76, "wage": 479, "nat": "ENG", "natLabel": "England", "caps": 2, "intlGoals": 0, "capsNote": "as of 23 August 1986 (both caps in 1985)", "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Gary_Bailey|Manchester_United|1986", "attrs": [["Handling", 17], ["Agility", 14], ["Kicking", 11], ["Positioning", 15], ["Pace", 7], ["Stamina", 8]]}, {"n": "John Sivebaek", "pos": "Right-Back", "slot": "FB", "age": 24, "rep": 4, "ca": 85, "wage": 616, "nat": "DEN", "natLabel": "Denmark", "caps": null, "intlGoals": null, "capsNote": "Denmark international; figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "John_Sivebaek|Manchester_United|1986", "attrs": [["Tackling", 17], ["Heading", 12], ["Passing", 13], ["Shooting", 7], ["Pace", 16], ["Stamina", 15], ["Crossing", 19], ["Work rate", 15]]}, {"n": "Kevin Moran", "pos": "Centre-Half", "slot": "HB", "age": 30, "rep": 4, "ca": 80, "wage": 616, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Kevin_Moran|Manchester_United|1986", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 17], ["Shooting", 10], ["Pace", 11], ["Stamina", 14], ["Crossing", 9], ["Work rate", 16]]}, {"n": "Arthur Albiston", "pos": "Left-Back", "slot": "FB", "age": 29, "rep": 4, "ca": 85, "wage": 616, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": "Scotland international (career 14 caps, 1982–1986); figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Arthur_Albiston|Manchester_United|1986", "attrs": [["Tackling", 17], ["Heading", 11], ["Passing", 13], ["Shooting", 6], ["Pace", 16], ["Stamina", 14], ["Crossing", 17], ["Work rate", 14]]}, {"n": "Graeme Hogg", "pos": "Centre-Back", "slot": "HB", "age": 22, "rep": 3, "ca": 73, "wage": 479, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 1, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Graeme_Hogg|Manchester_United|1986", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 15], ["Shooting", 9], ["Pace", 11], ["Stamina", 14], ["Crossing", 8], ["Work rate", 15]]}, {"n": "Billy Garton", "pos": "Centre-Back", "slot": "HB", "age": 21, "rep": 3, "ca": 77, "wage": 479, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Billy_Garton|Manchester_United|1986", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 16], ["Shooting", 9], ["Pace", 10], ["Stamina", 15], ["Crossing", 7], ["Work rate", 16]]}, {"n": "Gordon Strachan", "pos": "Centre Midfielder", "slot": "HB", "age": 29, "rep": 4, "ca": 78, "wage": 616, "nat": "SCO", "natLabel": "Scotland", "caps": null, "intlGoals": null, "capsNote": "Scotland international; figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Gordon_Strachan|Manchester_United|1986", "attrs": [["Tackling", 13], ["Heading", 13], ["Passing", 16], ["Shooting", 8], ["Pace", 11], ["Stamina", 15], ["Crossing", 7], ["Work rate", 15]]}, {"n": "Paul McGrath", "pos": "Centre-Back", "slot": "HB", "age": 26, "rep": 4, "ca": 86, "wage": 616, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": "Republic of Ireland international; figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Paul_McGrath|Manchester_United|1986", "attrs": [["Tackling", 15], ["Heading", 14], ["Passing", 16], ["Shooting", 11], ["Pace", 12], ["Stamina", 16], ["Crossing", 8], ["Work rate", 16]]}, {"n": "Bryan Robson", "pos": "Centre Midfielder", "slot": "HB", "age": 29, "rep": 4, "ca": 85, "wage": 616, "nat": "ENG", "natLabel": "England", "caps": 53, "intlGoals": 18, "capsNote": "as of 23 August 1986 (last cap: Morocco, 6 June 1986, World Cup)", "career": [{"club": "West Bromwich Albion", "apps": 198, "goals": 40, "years": "1975–1981", "complete": true}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1981–", "complete": false}], "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": true, "gen": false, "ai": false, "id": "Bryan_Robson|Manchester_United|1986", "attrs": [["Tackling", 16], ["Heading", 14], ["Passing", 17], ["Shooting", 10], ["Pace", 12], ["Stamina", 16], ["Crossing", 9], ["Work rate", 16]]}, {"n": "Mike Duxbury", "pos": "Right-Back / Centre-Back", "slot": "FB", "age": 26, "rep": 4, "ca": 80, "wage": 616, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": "England international (debut after 1981); figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Mike_Duxbury|Manchester_United|1986", "attrs": [["Tackling", 17], ["Heading", 11], ["Passing", 14], ["Shooting", 6], ["Pace", 15], ["Stamina", 15], ["Crossing", 16], ["Work rate", 15]]}, {"n": "Jesper Olsen", "pos": "Left Winger", "slot": "FWD", "age": 25, "rep": 4, "ca": 86, "wage": 616, "nat": "DEN", "natLabel": "Denmark", "caps": null, "intlGoals": null, "capsNote": "Denmark international (career 43 caps, 5 goals, 1980–1990); figure as of 23 August 1986 not yet sourced", "career": [{"club": "Næstved", "apps": 72, "goals": 15, "years": "1977–1981", "complete": true}, {"club": "Ajax", "apps": 85, "goals": 23, "years": "1981–1984", "complete": true}, {"club": "Manchester United", "apps": null, "goals": null, "years": "1984–", "complete": false, "fee": 350000}], "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Jesper_Olsen|Manchester_United|1986", "attrs": [["Tackling", 8], ["Heading", 11], ["Passing", 11], ["Shooting", 19], ["Pace", 15], ["Stamina", 13], ["Crossing", 12], ["Work rate", 15]]}, {"n": "Colin Gibson", "pos": "Left-Back", "slot": "FB", "age": 26, "rep": 4, "ca": 83, "wage": 616, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Colin_Gibson|Manchester_United|1986", "attrs": [["Tackling", 17], ["Heading", 13], ["Passing", 13], ["Shooting", 7], ["Pace", 16], ["Stamina", 16], ["Crossing", 17], ["Work rate", 16]]}, {"n": "Remi Moses", "pos": "Centre Midfielder", "slot": "HB", "age": 25, "rep": 3, "ca": 72, "wage": 479, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 1, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Remi_Moses|Manchester_United|1986", "attrs": [["Tackling", 12], ["Heading", 13], ["Passing", 15], ["Shooting", 8], ["Pace", 9], ["Stamina", 14], ["Crossing", 7], ["Work rate", 14]]}, {"n": "Clayton Blackmore", "pos": "Full-Back", "slot": "FB", "age": 21, "rep": 3, "ca": 76, "wage": 479, "nat": "WAL", "natLabel": "Wales", "caps": null, "intlGoals": null, "capsNote": "Wales international; figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 1, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Clayton_Blackmore|Manchester_United|1986", "attrs": [["Tackling", 15], ["Heading", 11], ["Passing", 12], ["Shooting", 5], ["Pace", 16], ["Stamina", 13], ["Crossing", 15], ["Work rate", 14]]}, {"n": "Liam O'Brien", "pos": "Centre Midfielder", "slot": "HB", "age": 21, "rep": 3, "ca": 75, "wage": 479, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Liam_O'Brien|Manchester_United|1986", "attrs": [["Tackling", 14], ["Heading", 13], ["Passing", 16], ["Shooting", 10], ["Pace", 11], ["Stamina", 15], ["Crossing", 8], ["Work rate", 15]]}, {"n": "Peter Barnes", "pos": "Striker", "slot": "FWD", "age": 29, "rep": 3, "ca": 74, "wage": 479, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": "England international; figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Peter_Barnes|Manchester_United|1986", "attrs": [["Tackling", 6], ["Heading", 11], ["Passing", 9], ["Shooting", 16], ["Pace", 13], ["Stamina", 12], ["Crossing", 11], ["Work rate", 12]]}, {"n": "Peter Davenport", "pos": "Striker", "slot": "FWD", "age": 25, "rep": 4, "ca": 82, "wage": 616, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Peter_Davenport|Manchester_United|1986", "attrs": [["Tackling", 6], ["Heading", 12], ["Passing", 12], ["Shooting", 17], ["Pace", 16], ["Stamina", 12], ["Crossing", 11], ["Work rate", 15]]}, {"n": "Frank Stapleton", "pos": "Striker", "slot": "FWD", "age": 30, "rep": 4, "ca": 81, "wage": 616, "nat": "IRL", "natLabel": "Rep. of Ireland", "caps": null, "intlGoals": null, "capsNote": "Republic of Ireland international; figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Frank_Stapleton|Manchester_United|1986", "attrs": [["Tackling", 7], ["Heading", 12], ["Passing", 11], ["Shooting", 17], ["Pace", 15], ["Stamina", 12], ["Crossing", 11], ["Work rate", 13]]}, {"n": "Norman Whiteside", "pos": "Striker", "slot": "FWD", "age": 21, "rep": 4, "ca": 82, "wage": 616, "nat": "NIR", "natLabel": "N. Ireland", "caps": null, "intlGoals": null, "capsNote": "Northern Ireland international; figure as of 23 August 1986 not yet sourced", "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Norman_Whiteside|Manchester_United|1986", "attrs": [["Tackling", 6], ["Heading", 12], ["Passing", 10], ["Shooting", 18], ["Pace", 15], ["Stamina", 14], ["Crossing", 11], ["Work rate", 15]]}, {"n": "Terry Gibson", "pos": "Striker", "slot": "FWD", "age": 23, "rep": 3, "ca": 76, "wage": 479, "nat": "ENG", "natLabel": "England", "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": false, "id": "Terry_Gibson|Manchester_United|1986", "attrs": [["Tackling", 6], ["Heading", 10], ["Passing", 10], ["Shooting", 15], ["Pace", 15], ["Stamina", 12], ["Crossing", 11], ["Work rate", 12]]}]}, "Liverpool": {"ai": true, "players": [{"n": "Bruce Grobbelaar", "pos": "Goalkeeper", "slot": "GK", "age": 28, "rep": 4, "ca": 84, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Bruce_Grobbelaar|Liverpool|1986", "attrs": [["Handling", 19], ["Agility", 16], ["Kicking", 11], ["Positioning", 16], ["Pace", 8], ["Stamina", 10]]}, {"n": "Mike Hooper", "pos": "Goalkeeper", "slot": "GK", "age": 22, "rep": 4, "ca": 78, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Mike_Hooper|Liverpool|1986", "attrs": [["Handling", 18], ["Agility", 16], ["Kicking", 11], ["Positioning", 16], ["Pace", 8], ["Stamina", 10]]}, {"n": "Alan Hansen", "pos": "Centre-Half", "slot": "HB", "age": 31, "rep": 4, "ca": 82, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Alan_Hansen|Liverpool|1986", "attrs": [["Tackling", 14], ["Heading", 14], ["Passing", 16], ["Shooting", 9], ["Pace", 12], ["Stamina", 15], ["Crossing", 7], ["Work rate", 17]]}, {"n": "Gary Gillespie", "pos": "Centre-Back", "slot": "HB", "age": 26, "rep": 3, "ca": 77, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Gary_Gillespie|Liverpool|1986", "attrs": [["Tackling", 13], ["Heading", 13], ["Passing", 15], ["Shooting", 9], ["Pace", 11], ["Stamina", 15], ["Crossing", 8], ["Work rate", 16]]}, {"n": "Mark Lawrenson", "pos": "Centre-Back", "slot": "HB", "age": 29, "rep": 4, "ca": 84, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Mark_Lawrenson|Liverpool|1986", "attrs": [["Tackling", 15], ["Heading", 14], ["Passing", 17], ["Shooting", 11], ["Pace", 11], ["Stamina", 15], ["Crossing", 8], ["Work rate", 17]]}, {"n": "Barry Venison", "pos": "Right-Back", "slot": "FB", "age": 22, "rep": 4, "ca": 84, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Barry_Venison|Liverpool|1986", "attrs": [["Tackling", 18], ["Heading", 11], ["Passing", 13], ["Shooting", 8], ["Pace", 17], ["Stamina", 15], ["Crossing", 17], ["Work rate", 14]]}, {"n": "Jim Beglin", "pos": "Left-Back", "slot": "FB", "age": 31, "rep": 4, "ca": 83, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Jim_Beglin|Liverpool|1986", "attrs": [["Tackling", 18], ["Heading", 11], ["Passing", 13], ["Shooting", 7], ["Pace", 16], ["Stamina", 15], ["Crossing", 18], ["Work rate", 16]]}, {"n": "Gary Ablett", "pos": "Left-Back / Centre-Back", "slot": "FB", "age": 20, "rep": 3, "ca": 74, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Gary_Ablett|Liverpool|1986", "attrs": [["Tackling", 15], ["Heading", 9], ["Passing", 11], ["Shooting", 5], ["Pace", 14], ["Stamina", 12], ["Crossing", 15], ["Work rate", 12]]}, {"n": "Jan Mølby", "pos": "Centre Midfielder", "slot": "HB", "age": 23, "rep": 4, "ca": 84, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Jan_Mølby|Liverpool|1986", "attrs": [["Tackling", 15], ["Heading", 15], ["Passing", 18], ["Shooting", 9], ["Pace", 11], ["Stamina", 16], ["Crossing", 9], ["Work rate", 18]]}, {"n": "Steve McMahon", "pos": "Left Midfielder", "slot": "HB", "age": 25, "rep": 4, "ca": 79, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Steve_McMahon|Liverpool|1986", "attrs": [["Tackling", 14], ["Heading", 14], ["Passing", 15], ["Shooting", 10], ["Pace", 10], ["Stamina", 15], ["Crossing", 9], ["Work rate", 15]]}, {"n": "Ronnie Whelan", "pos": "Centre Midfielder", "slot": "HB", "age": 24, "rep": 4, "ca": 78, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Ronnie_Whelan|Liverpool|1986", "attrs": [["Tackling", 14], ["Heading", 12], ["Passing", 16], ["Shooting", 9], ["Pace", 11], ["Stamina", 14], ["Crossing", 8], ["Work rate", 15]]}, {"n": "Craig Johnston", "pos": "Striker", "slot": "FWD", "age": 26, "rep": 4, "ca": 84, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Craig_Johnston|Liverpool|1986", "attrs": [["Tackling", 7], ["Heading", 13], ["Passing", 10], ["Shooting", 18], ["Pace", 16], ["Stamina", 14], ["Crossing", 11], ["Work rate", 14]]}, {"n": "John Wark", "pos": "Centre Midfielder", "slot": "HB", "age": 29, "rep": 3, "ca": 77, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "John_Wark|Liverpool|1986", "attrs": [["Tackling", 13], ["Heading", 13], ["Passing", 15], ["Shooting", 9], ["Pace", 11], ["Stamina", 15], ["Crossing", 8], ["Work rate", 16]]}, {"n": "Steve Nicol", "pos": "Right-Back", "slot": "FB", "age": 24, "rep": 3, "ca": 70, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Steve_Nicol|Liverpool|1986", "attrs": [["Tackling", 16], ["Heading", 9], ["Passing", 11], ["Shooting", 6], ["Pace", 13], ["Stamina", 12], ["Crossing", 15], ["Work rate", 13]]}, {"n": "Nigel Spackman", "pos": "Centre Midfielder", "slot": "HB", "age": 25, "rep": 3, "ca": 76, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Nigel_Spackman|Liverpool|1986", "attrs": [["Tackling", 13], ["Heading", 13], ["Passing", 15], ["Shooting", 9], ["Pace", 11], ["Stamina", 15], ["Crossing", 8], ["Work rate", 16]]}, {"n": "Kevin MacDonald", "pos": "Centre Midfielder", "slot": "HB", "age": 21, "rep": 3, "ca": 70, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Kevin_MacDonald|Liverpool|1986", "attrs": [["Tackling", 12], ["Heading", 13], ["Passing", 14], ["Shooting", 9], ["Pace", 9], ["Stamina", 14], ["Crossing", 7], ["Work rate", 15]]}, {"n": "Ian Rush", "pos": "Striker", "slot": "FWD", "age": 24, "rep": 4, "ca": 79, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Ian_Rush|Liverpool|1986", "attrs": [["Tackling", 7], ["Heading", 11], ["Passing", 10], ["Shooting", 16], ["Pace", 15], ["Stamina", 12], ["Crossing", 10], ["Work rate", 13]]}, {"n": "Paul Walsh", "pos": "Striker", "slot": "FWD", "age": 23, "rep": 3, "ca": 75, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Paul_Walsh|Liverpool|1986", "attrs": [["Tackling", 5], ["Heading", 11], ["Passing", 10], ["Shooting", 15], ["Pace", 13], ["Stamina", 12], ["Crossing", 10], ["Work rate", 12]]}, {"n": "Kenny Dalglish", "pos": "Right Winger", "slot": "FWD", "age": 35, "rep": 4, "ca": 84, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 1, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Kenny_Dalglish|Liverpool|1986", "attrs": [["Tackling", 7], ["Heading", 11], ["Passing", 11], ["Shooting", 17], ["Pace", 16], ["Stamina", 13], ["Crossing", 12], ["Work rate", 14]]}, {"n": "John Aldridge", "pos": "Striker", "slot": "FWD", "age": 27, "rep": 3, "ca": 76, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "John_Aldridge|Liverpool|1986", "attrs": [["Tackling", 6], ["Heading", 10], ["Passing", 9], ["Shooting", 17], ["Pace", 15], ["Stamina", 12], ["Crossing", 10], ["Work rate", 12]]}, {"n": "Alan Irvine", "pos": "Striker", "slot": "FWD", "age": 23, "rep": 3, "ca": 76, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 3, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Alan_Irvine|Liverpool|1986", "attrs": [["Tackling", 6], ["Heading", 10], ["Passing", 11], ["Shooting", 16], ["Pace", 14], ["Stamina", 11], ["Crossing", 11], ["Work rate", 13]]}, {"n": "Brian Mooney", "pos": "Winger", "slot": "FWD", "age": 20, "rep": 3, "ca": 70, "wage": null, "nat": null, "natLabel": null, "caps": null, "intlGoals": null, "capsNote": null, "career": null, "yearsLeft": 2, "listed": false, "wantsRise": false, "formMarks": [], "morale": "Settled", "captain": false, "gen": false, "ai": true, "id": "Brian_Mooney|Liverpool|1986", "attrs": [["Tackling", 5], ["Heading", 10], ["Passing", 9], ["Shooting", 14], ["Pace", 14], ["Stamina", 11], ["Crossing", 9], ["Work rate", 12]]}]}}}, "exampleMarks": {"Ray Wilkins": [7, 8, 7], "Steve Coppell": [8, 7, 8], "Bryan Robson": [8, 9, 8], "Gary Walsh": [6, 7], "Nikola Jovanović": [6, 6, 5], "Jesper Olsen": [7, 8, 7], "Ian Rush": [8, 7, 8], "Gary Bailey": [7, 6, 7]}};
+const FILTERS = [
+  ["all","All"],["GK","Goalkeepers"],["FB","Defenders"],["HB","Midfielders"],["FWD","Forwards"],
+  ["intl","Internationals"],["listed","Listed"],["rise","Wants a rise"]
+];
+let era = "1981", club = "Manchester United", view = "squad";
+let filter = "all", sortKey = "pos", sortDir = 1, selected = null, shortRun = false;
+
+const SLOT_ORDER = {GK:0, FB:1, HB:2, FWD:3};
+function posGroup(p){
+  if(p.slot==="GK") return 0;
+  if(/centre-?half|centre-?back|center-?back|sweeper/i.test(p.pos) && !/left-?back|right-?back|full-?back/i.test(p.pos)) return 2;
+  if(p.slot==="FB" || /left-?back|right-?back|full-?back/i.test(p.pos)) return 1;
+  if(/midfield|half-back|wing-half/i.test(p.pos) || p.slot==="HB") return 3;
+  return 4;
+}
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function fee(n){ return "£" + Number(n).toLocaleString("en-GB"); }
+function formOf(p){
+  const marks = shortRun && DATA.exampleMarks[p.n] ? DATA.exampleMarks[p.n] : (p.formMarks||[]);
+  if (!marks.length) return {mark:null, word:"Fair", marks:[]};
+  const mark = marks[marks.length-1];
+  const word = mark>=9?"Excellent":mark>=8?"Good":mark>=6?"Fair":mark>=5?"Poor":"Awful";
+  return {mark, word, marks};
+}
+function chipForm(p){
+  const f = formOf(p);
+  const lab = f.mark==null ? ("Form "+f.word) : ("Form "+f.mark+" "+f.word);
+  const low = (f.word==="Poor"||f.word==="Awful");
+  return '<span class="ychip'+(low?" low":"")+'">'+esc(lab)+"</span>";
+}
+function chipMorale(p){
+  const w = p.morale||"Settled";
+  const low = (w==="Unsettled"||w==="Fed up");
+  return '<span class="ychip'+(low?" low":"")+'">Morale '+esc(w)+"</span>" + (p.wantsRise?' <span class="ychip rise">Wants a rise</span>':"");
+}
+function chipContract(p){
+  let h = "";
+  if (p.listed) h += '<span class="ychip warn">Listed</span> ';
+  if (p.yearsLeft===1) h += '<span class="ychip">Expires at season\'s end</span>';
+  else if (p.yearsLeft>1) h += '<span class="ychip">'+p.yearsLeft+" years left</span>";
+  return h;
+}
+function players(){ return (DATA.clubs[era]&&DATA.clubs[era][club]&&DATA.clubs[era][club].players)||[]; }
+function isIntl(p){ return p.caps!=null ? p.caps>0 : /international/i.test(p.capsNote||""); }
+
+function setEra(e){ era=e; const clubs=Object.keys(DATA.clubs[era]); if(!DATA.clubs[era][club]) club=clubs[0]; selected=null; render(); }
+function setClub(c){ club=c; selected=null; render(); }
+
+function renderChips(){
+  const eraBox=document.getElementById("era-chips");
+  eraBox.innerHTML="";
+  Object.keys(DATA.eras).forEach(k=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="chip"+(k===era?" on":""); b.setAttribute("aria-pressed",k===era);
+    b.textContent=DATA.eras[k].label;
+    b.addEventListener("click",()=>setEra(k));
+    eraBox.appendChild(b);
+  });
+  const clubBox=document.getElementById("club-chips");
+  clubBox.innerHTML="";
+  Object.keys(DATA.clubs[era]).forEach(c=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="chip"+(c===club?" on":""); b.setAttribute("aria-pressed",c===club);
+    const ai=DATA.clubs[era][c].ai;
+    b.textContent=ai? c+" (other club)" : c;
+    b.addEventListener("click",()=>setClub(c));
+    clubBox.appendChild(b);
+  });
+  document.querySelectorAll("#view-chips .chip").forEach(b=>{
+    const on=b.getAttribute("data-view")===view;
+    b.classList.toggle("on",on); b.setAttribute("aria-pressed",on);
+  });
+  document.getElementById("mast-club").textContent=club;
+  document.getElementById("mast-era").textContent=DATA.eras[era].label+" · "+DATA.eras[era].date;
+}
+
+function filtered(){
+  let list=players().slice();
+  function isDef(p){ return p.slot==="FB" || /centre-?half|centre-?back|center-?back|sweeper/i.test(p.pos); }
+  function isMid(p){ return /midfield|half-back|wing-half/i.test(p.pos) || (p.slot==="HB" && !isDef(p)); }
+  function isFwd(p){ return p.slot==="FWD" || /striker|forward|winger/i.test(p.pos); }
+  if(filter==="GK") list=list.filter(p=>p.slot==="GK");
+  else if(filter==="FB") list=list.filter(isDef);
+  else if(filter==="HB") list=list.filter(isMid);
+  else if(filter==="FWD") list=list.filter(isFwd);
+  else if(filter==="intl") list=list.filter(isIntl);
+  else if(filter==="listed") list=list.filter(p=>p.listed);
+  else if(filter==="rise") list=list.filter(p=>p.wantsRise);
+  list.sort((a,b)=>{
+    let cmp=0;
+    if(sortKey==="n") cmp=a.n.localeCompare(b.n);
+    else if(sortKey==="pos") cmp=posGroup(a)-posGroup(b)||(b.rep||0)-(a.rep||0)||a.n.localeCompare(b.n);
+    else if(sortKey==="age") cmp=(a.age||0)-(b.age||0);
+    else if(sortKey==="nat") cmp=(a.natLabel||"ZZZ").localeCompare(b.natLabel||"ZZZ")||a.n.localeCompare(b.n);
+    else if(sortKey==="rep") cmp=(b.rep||0)-(a.rep||0);
+    else if(sortKey==="form"){ const fa=formOf(a).mark||7, fb=formOf(b).mark||7; cmp=fb-fa; }
+    else if(sortKey==="morale") cmp=(a.morale||"").localeCompare(b.morale||"");
+    else if(sortKey==="contract") cmp=(a.yearsLeft||0)-(b.yearsLeft||0);
+    return (cmp||a.n.localeCompare(b.n))*sortDir;
+  });
+  return list;
+}
+
+function renderFilters(){
+  const box=document.getElementById("filters");
+  box.innerHTML="";
+  FILTERS.forEach(([k,lab])=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="fchip"+(filter===k?" on":""); b.textContent=lab;
+    b.addEventListener("click",()=>{ filter=k; render(); });
+    box.appendChild(b);
+  });
+  const run=document.createElement("button");
+  run.type="button"; run.className="fchip"+(shortRun?" on":"");
+  run.textContent=shortRun?"After a short run":"Opening day";
+  run.addEventListener("click",()=>{ shortRun=!shortRun; render(); });
+  box.appendChild(run);
+}
+
+function renderSquad(){
+  const body=document.getElementById("squad-body");
+  body.innerHTML="";
+  const list=filtered();
+  const ai=DATA.clubs[era][club].ai;
+  document.getElementById("squad-title").textContent=ai? club+", the other club" : "The squad";
+  list.forEach(p=>{
+    const tr=document.createElement("tr");
+    tr.className="selrow"+(selected&&selected.id===p.id?" on":"");
+    tr.dataset.id=p.id;
+    const cap=p.captain?" (C)":"";
+    const nat=p.natLabel?esc(p.natLabel):'<span class="gap">Not sourced</span>';
+    tr.innerHTML=
+      '<td class="nm">'+esc(p.n.toUpperCase())+cap+"</td>"+
+      '<td class="pos">'+esc(p.pos)+"</td>"+
+      "<td>"+(p.age!=null?p.age:"—")+"</td>"+
+      "<td>"+nat+"</td>"+
+      '<td class="stars">'+"★".repeat(p.rep||0)+"☆".repeat(5-(p.rep||0))+"</td>"+
+      "<td>"+chipForm(p)+"</td>"+
+      "<td>"+chipMorale(p)+"</td>"+
+      "<td>"+chipContract(p)+"</td>";
+    tr.addEventListener("click",()=>{ selected=p; view="file"; render(); });
+    body.appendChild(tr);
+  });
+  const all=players();
+  const natN=all.filter(p=>p.nat).length;
+  const capsN=all.filter(p=>p.caps!=null).length;
+  const carN=all.filter(p=>p.career&&p.career.length).length;
+  document.getElementById("squad-note").textContent=
+    list.length+" shown, "+all.length+" in this squad. Nationality sourced for "+natN+" of "+all.length+
+    ". Caps as of "+DATA.eras[era].date+" sourced for "+capsN+". Career rows for "+carN+". Personality not sourced.";
+}
+
+function pips(v){
+  let h=""; for(let i=1;i<=20;i+=2){ h+='<i class="'+(v>=i+1?"on":"")+'"></i>'; }
+  return '<span class="pips">'+h+"</span>";
+}
+
+function renderFile(){
+  const el=document.getElementById("player-file");
+  const picks=document.getElementById("file-picks");
+  const names=players();
+  picks.innerHTML="In this squad: "+names.map(p=>'<a href="#" data-id="'+esc(p.id)+'">'+esc(p.n)+"</a>").join(" · ");
+  picks.querySelectorAll("a").forEach(a=>a.addEventListener("click",e=>{
+    e.preventDefault(); selected=names.find(p=>p.id===a.dataset.id); render();
+  }));
+  if(!selected){ selected=names[0]||null; }
+  if(selected && !names.some(p=>p.id===selected.id)) selected=names[0]||null;
+  const p=selected;
+  if(!p){ el.innerHTML='<div class="file-head"><h3>Player file</h3></div><div class="file-body"><p class="note">No player.</p></div>'; return; }
+  const f=formOf(p);
+  const formLab=f.mark==null?f.word:(f.mark+" "+f.word);
+  const nat=p.natLabel||"Not yet sourced";
+  let capsV;
+  if(p.caps==null) capsV='<span class="gap">Not yet sourced</span>'+(p.capsNote? ' <span class="src">('+esc(p.capsNote)+")</span>":"");
+  else if(p.caps===0) capsV="No senior cap"+(p.capsNote? ' <span class="src">('+esc(p.capsNote)+")</span>":"");
+  else capsV=p.caps+" cap"+(p.caps===1?"":"s")+(p.intlGoals!=null?(", "+p.intlGoals+" goal"+(p.intlGoals===1?"":"s")):"")+' <span class="src">('+esc(p.capsNote||("as of "+DATA.eras[era].date))+")</span>";
+  let careerH='<p class="gap" style="margin:0">Career record not yet sourced.</p>';
+  if(p.career&&p.career.length){
+    careerH='<table class="career"><thead><tr><th>Years</th><th>Club</th><th>League apps</th><th>Goals</th></tr></thead><tbody>';
+    p.career.forEach(r=>{
+      const apps=r.apps==null?'<span class="gap">Not split to this date</span>':r.apps;
+      const gl=r.goals==null?"—":r.goals;
+      const feeBit=r.fee? ' <span class="src">('+fee(r.fee)+")</span>":"";
+      careerH+="<tr><td>"+esc(r.years)+"</td><td>"+esc(r.club)+feeBit+"</td><td>"+apps+"</td><td>"+gl+"</td></tr>";
+    });
+    careerH+='</tbody></table><p class="src" style="margin:4px 0 0">League figures only, and only for a completed spell or a sourced nought. A running total is not shown for a current spell if it would include later seasons.</p>';
+  }
+  const wage=p.wage!=null?(fee(p.wage)+' a week <span class="src">(game figure)</span>'):'<span class="gap">Not shown</span>';
+  const attrH=p.attrs.map(([k,v])=>'<div class="attr"><b>'+esc(k)+"</b>"+pips(v)+'<span class="n">'+v+"/20</span></div>").join("");
+  const marksH=f.marks.length?('<div class="fact"><span class="k">Last marks</span><span class="v">'+f.marks.join(" · ")+' <span class="src">(worked example)</span></span></div>'):"";
+  el.innerHTML=
+    '<div class="file-head"><h3>'+esc(p.n)+(p.captain?" (C)":"")+'</h3><div class="meta">'+esc(p.pos)+"<br>"+esc(club)+"<br>"+esc(DATA.eras[era].label)+"</div></div>"+
+    '<div class="file-body">'+
+    '<div class="file-chips">'+chipForm(p)+" "+chipMorale(p)+" "+chipContract(p)+"</div>"+
+    '<div class="facts">'+
+      '<div class="fact"><span class="k">Age</span><span class="v">'+(p.age!=null?p.age:"—")+"</span></div>"+
+      '<div class="fact"><span class="k">Reputation</span><span class="v">'+"★".repeat(p.rep||0)+"☆".repeat(5-(p.rep||0))+"</span></div>"+
+      '<div class="fact"><span class="k">Nationality</span><span class="v">'+(p.natLabel?esc(p.natLabel):'<span class="gap">Not yet sourced</span>')+"</span></div>"+
+      '<div class="fact"><span class="k">International caps</span><span class="v">'+capsV+"</span></div>"+
+      '<div class="fact"><span class="k">Personality</span><span class="v"><span class="gap">Not sourced</span></span></div>'+
+      '<div class="fact"><span class="k">Wage</span><span class="v">'+wage+"</span></div>"+
+      marksH+
+    "</div>"+
+    "<h2 style=\"font-size:18px;margin-top:8px\">Career</h2>"+careerH+
+    "<h2 style=\"font-size:18px;margin-top:12px\">Attributes</h2>"+
+    '<p class="src" style="margin:0 0 6px">The game’s ratings, derived from ability and position. A proposed 1980s set, whole numbers out of 20, not a sourced scouting report.</p>'+
+    '<div class="attrs">'+attrH+"</div>"+
+    "</div>";
+}
+
+function render(){
+  renderChips();
+  renderFilters();
+  document.getElementById("panel-squad").classList.toggle("on", view==="squad");
+  document.getElementById("panel-file").classList.toggle("on", view==="file");
+  renderSquad();
+  if(view==="file") renderFile();
+}
+
+document.getElementById("view-chips").addEventListener("click",e=>{
+  const b=e.target.closest("[data-view]"); if(!b) return;
+  view=b.getAttribute("data-view"); render();
+});
+document.querySelector("#panel-squad thead").addEventListener("click",e=>{
+  const th=e.target.closest("th[data-sort]"); if(!th) return;
+  const k=th.getAttribute("data-sort");
+  if(sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=1; }
+  render();
+});
+
+// Deep links for screenshots: ?era=1981&club=Manchester%20United&player=Ray%20Wilkins&view=file&run=1
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get("era")&&DATA.eras[q.get("era")]) era=q.get("era");
+  if(q.get("club")&&DATA.clubs[era][q.get("club")]) club=q.get("club");
+  if(q.get("run")==="1") shortRun=true;
+  if(q.get("view")) view=q.get("view");
+  if(q.get("player")){
+    const name=q.get("player");
+    selected=players().find(p=>p.n===name)||null;
+    if(selected && !q.get("view")) view="file";
+  }
+})();
+render();
+</script>
+</body>
+</html>
