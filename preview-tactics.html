@@ -14,104 +14,112 @@
   --red:#c0122a;
   --red-dark:#8e0c1f;
   --yellow:#ffd000;
-  --line:#1a120c;
   --muted:#5a4636;
   --card:#fff8e8;
   --chip:#ffd000;
   --grass:#3d6b3a;
   --grass-dark:#2f542c;
+  --warn:#8e0c1f;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#2a1a14;color:var(--ink);font:15px/1.4 Barlow,Helvetica,Arial,sans-serif}
 a{color:var(--red-dark)}
 .wrap{max-width:880px;margin:0 auto;padding:12px 14px 40px}
-.banner{
-  background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;
-  font-weight:700;letter-spacing:.02em;
-}
+.banner{background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;font-weight:700;letter-spacing:.02em}
 .banner b{font-family:Anton,Impact,sans-serif;letter-spacing:.04em;font-weight:400;font-size:18px;margin-right:.4em}
-.mast{
-  background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;
-  display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;
-}
+.mast{background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
 .mast h1{margin:0;font:400 42px/0.9 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase}
 .mast .sub{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;opacity:.95}
 .mast .club{text-align:right}
 .mast .club strong{display:block;font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.03em}
 .sheet{background:var(--paper);border:3px solid #111;border-top:0;padding:12px 14px 18px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
-.chip{
-  appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 13px/1 Barlow,sans-serif;
-  padding:7px 12px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;
-}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 12px/1 Barlow,sans-serif;padding:7px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
 .chip[aria-pressed="true"],.chip.on{background:#111;color:var(--yellow)}
 .chip:disabled{opacity:.45;cursor:not-allowed}
 .chip.ghost{background:var(--card)}
-.chip.rare{background:var(--card)}
 .panel{display:none}
 .panel.on{display:block}
 h2{margin:0 0 8px;font:400 28px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
-h3{margin:16px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+h3{margin:14px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media (max-width:640px){.grid{grid-template-columns:1fr}.mast .club{text-align:left}.mast h1{font-size:34px}}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:640px){
+  .grid,.grid3{grid-template-columns:1fr}
+  .mast .club{text-align:left}
+  .mast h1{font-size:34px}
+}
 .card{background:var(--card);border:2px solid #111;padding:8px 10px}
 .card h3{margin-top:0}
 table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border:2px solid #111}
 th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #c9b48a;vertical-align:top}
 th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:#111;color:var(--yellow);border-bottom:0}
-td.num,th.num{text-align:right;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 tr.hl td{background:#fff3b0}
 .note{color:var(--muted);font-size:13px;margin:8px 0 0}
-.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted #b79a6e;padding:4px 0}
-.row b{font-weight:700}
 .src{font-size:12px;color:var(--muted)}
 .foot{margin-top:16px;font-size:12px;color:var(--muted);border-top:2px solid #111;padding-top:8px}
 .era-lab{font:700 12px/1 Barlow;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
-.style-list{display:grid;gap:8px;margin:8px 0 0}
-.style-item{background:var(--card);border:2px solid #111;padding:8px 10px;cursor:pointer}
-.style-item.on{border-color:#111;background:#111;color:var(--yellow)}
-.style-item.on .src{color:#e6d7a8}
-.style-item .name{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:13px}
-.style-item p{margin:4px 0 0;font-size:13px;line-height:1.35}
+.style-list{display:grid;gap:6px;margin:8px 0 0}
+.style-item{background:var(--card);border:2px solid #111;padding:7px 9px;cursor:pointer}
+.style-item.on{background:#111;color:var(--yellow)}
+.style-item .name{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+.style-item p{margin:3px 0 0;font-size:12px;line-height:1.35}
 .style-item.on p{color:#f3e6c4}
 .pitch-wrap{background:#111;border:2px solid #111;padding:8px}
 .pitch{
-  position:relative;height:280px;background:
-    repeating-linear-gradient(90deg,var(--grass) 0 28px,var(--grass-dark) 28px 56px);
-  border:2px solid #f3e6c4;overflow:hidden;
+  position:relative;height:420px;border:2px solid #f3e6c4;overflow:hidden;
+  background:repeating-linear-gradient(180deg,var(--grass) 0 30px,var(--grass-dark) 30px 60px);
 }
-.pitch:before{
-  content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.45);
-  transform:translateX(-1px);
+.pitch .half{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.45)}
+.pitch .box-t,.pitch .box-b{
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:54%;height:16%;border:2px solid rgba(255,255,255,.45);
 }
-.pitch .box-l,.pitch .box-r{
+.pitch .box-t{top:0;border-top:0}
+.pitch .box-b{bottom:0;border-bottom:0}
+.pitch .side-lab{
   position:absolute;top:50%;transform:translateY(-50%);
-  width:18%;height:52%;border:2px solid rgba(255,255,255,.45);
+  font:700 9px/1 Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);
 }
-.pitch .box-l{left:0;border-left:0}
-.pitch .box-r{right:0;border-right:0}
-.dot{
-  position:absolute;transform:translate(-50%,-50%);
-  width:26px;height:26px;border-radius:50%;background:var(--yellow);border:2px solid #111;
-  font:700 10px/22px Barlow,sans-serif;text-align:center;color:#111;
+.pitch .side-lab.left{left:6px}
+.pitch .side-lab.right{right:6px}
+.pitch .end-lab{
+  position:absolute;left:50%;transform:translateX(-50%);
+  font:700 9px/1 Barlow,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.8);
 }
-.dot.gk{background:#fff}
-.dot-lab{
-  position:absolute;transform:translate(-50%,10px);
-  font:700 9px/1 Barlow,sans-serif;letter-spacing:.04em;text-transform:uppercase;
-  color:#fff;text-shadow:0 1px 0 #111;white-space:nowrap;pointer-events:none;
+.pitch .end-lab.att{top:8px}
+.pitch .end-lab.our{bottom:8px}
+.pl{
+  position:absolute;transform:translate(-50%,-50%);width:86px;text-align:center;z-index:2;
 }
-.bar{
-  background:#111;color:var(--yellow);border:2px solid #111;padding:8px 10px;margin:0 0 10px;
-  display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;
+.pl .disc{
+  width:22px;height:22px;border-radius:50%;background:var(--yellow);border:2px solid #111;
+  margin:0 auto 2px;font:700 8px/18px Barlow,sans-serif;color:#111;
 }
+.pl.gk .disc{background:#fff}
+.pl .nm{font:700 11px/1.1 Barlow,sans-serif;color:#fff;text-shadow:0 1px 0 #111,0 0 4px #111}
+.pl .meta{font:700 8px/1.2 Barlow,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#ffe9a8;text-shadow:0 1px 0 #111}
+.pl .fam{letter-spacing:1px;color:var(--yellow);font-size:8px}
+.warn{background:#fff0e8;border:2px solid var(--warn);padding:8px 10px;margin:10px 0 0}
+.warn h3{margin:0 0 4px;color:var(--warn)}
+.warn ul{margin:0;padding-left:1.1em}
+.warn li{margin:0 0 4px}
+.bar{background:#111;color:var(--yellow);border:2px solid #111;padding:8px 10px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .bar .lab{font:700 12px/1 Barlow;letter-spacing:.14em;text-transform:uppercase;color:#fff}
-.bar .fig{font:400 26px/1 Anton,Impact,sans-serif;letter-spacing:.02em}
-.meter{height:10px;background:#c9b48a;border:2px solid #111;margin-top:6px}
+.bar .fig{font:400 24px/1 Anton,Impact,sans-serif;letter-spacing:.02em}
+.meter{height:8px;background:#c9b48a;border:2px solid #111;margin-top:4px}
 .meter span{display:block;height:100%;background:var(--yellow)}
-.tag{display:inline-block;border:2px solid #111;background:var(--yellow);color:#111;font:700 11px/1 Barlow;letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;margin-left:6px}
+.tag{display:inline-block;border:2px solid #111;background:var(--yellow);color:#111;font:700 10px/1 Barlow;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;margin-left:6px;vertical-align:middle}
 .tag.mute{background:var(--card);color:var(--muted)}
+.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted #b79a6e;padding:4px 0;align-items:center}
+.row b{font-weight:700}
+.take-chips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.take-chips .chip{padding:5px 8px;font-size:11px}
+.load-ok{color:#2a5a28;font-weight:700}
+.load-heavy{color:var(--warn);font-weight:700}
+.legend{font-size:12px;color:var(--muted);margin:6px 0 0}
+select.sheet{border:2px solid #111;background:var(--card);font:700 13px/1.2 Barlow,sans-serif;padding:4px 6px;min-width:140px}
 </style>
 </head>
 <body>
@@ -135,7 +143,6 @@ tr.hl td{background:#fff3b0}
       <button class="chip on" id="era-1981" aria-pressed="true">1981-82</button>
       <button class="chip" id="era-1986" aria-pressed="false">1986-87</button>
     </div>
-
     <div class="chips" role="tablist" aria-label="Tactics and Training sections">
       <button class="chip on" id="tab-tac" aria-pressed="true">Tactics</button>
       <button class="chip" id="tab-trn" aria-pressed="false">Training</button>
@@ -148,22 +155,30 @@ tr.hl td{background:#fff3b0}
       <h3>Formation</h3>
       <div class="chips" id="form-chips" role="tablist" aria-label="Formation"></div>
 
+      <div class="card" style="margin-bottom:10px">
+        <h3 id="pitch-title">4-4-2</h3>
+        <div class="pitch-wrap">
+          <div class="pitch" id="pitch"></div>
+        </div>
+        <p class="legend" id="pitch-legend">Attacking up the board. Our left is on the left, our right is on the right. Familiarity: three pips settled in the job, two bedding in, one new to the role.</p>
+      </div>
+
       <div class="grid">
         <div class="card">
-          <h3 id="pitch-title">4-4-2</h3>
-          <div class="pitch-wrap">
-            <div class="pitch" id="pitch">
-              <div class="box-l"></div>
-              <div class="box-r"></div>
-            </div>
-          </div>
-          <p class="note" id="shirt-legend"></p>
+          <h3>Defensive style</h3>
+          <p class="note">How the side keeps its shape without the ball. Options follow the season and the formation.</p>
+          <div class="style-list" id="def-list"></div>
         </div>
         <div class="card">
-          <h3>Style of play</h3>
-          <p class="note">Styles are those that fit the shape you have picked, and they change with the season. A wrinkle that belongs to another formation stays off this list.</p>
-          <div class="style-list" id="style-list"></div>
+          <h3>Attacking style</h3>
+          <p class="note">How the side plays when it has the ball. A separate choice from the defensive one.</p>
+          <div class="style-list" id="atk-list"></div>
         </div>
+      </div>
+
+      <div class="warn" id="clash-box" hidden>
+        <h3>These choices pull against each other</h3>
+        <ul id="clash-list"></ul>
       </div>
 
       <h3>Approach</h3>
@@ -172,17 +187,13 @@ tr.hl td{background:#fff3b0}
         <button class="chip on" data-app="balanced" aria-pressed="true">Balanced</button>
         <button class="chip" data-app="defensive" aria-pressed="false">Defensive</button>
       </div>
-      <p class="note" id="approach-note">A balanced side takes what comes. Attacking throws men forward and asks for more goals at both ends. Defensive shuts up shop and slows the game, which suits a side that is second-best on paper.</p>
+      <p class="note" id="approach-note"></p>
 
       <div class="grid">
         <div class="card">
-          <h3>Familiarity</h3>
-          <div class="bar">
-            <span class="lab">In this shape</span>
-            <span class="fig" id="fam-fig">Settled</span>
-          </div>
-          <div class="meter" aria-hidden="true"><span id="fam-bar" style="width:92%"></span></div>
-          <p class="note" id="fam-note"></p>
+          <h3>Set-piece takers</h3>
+          <p class="note">Nominated from this eleven, not a claim about who took every kick that season.</p>
+          <div id="setpiece-rows"></div>
         </div>
         <div class="card">
           <h3>Mark him closely</h3>
@@ -193,8 +204,8 @@ tr.hl td{background:#fff3b0}
         </div>
       </div>
 
-      <h3>Coaching courses</h3>
-      <p class="note">The FA's coaching awards were already a settled summer course by the early 1980s. Foreign-system study trips of the 1940s and 1960s are not on this sheet. A shape that is already in ordinary English use does not have to be unlocked abroad.</p>
+      <h3>The next lot</h3>
+      <div class="card" id="opp-card"></div>
     </section>
 
     <section class="panel" id="panel-trn">
@@ -209,11 +220,16 @@ tr.hl td{background:#fff3b0}
       </div>
       <p class="note" id="train-note"></p>
 
+      <h3>Freshness and the week's load</h3>
+      <table>
+        <thead><tr><th>Player</th><th>Job</th><th>Load</th></tr></thead>
+        <tbody id="fresh-body"></tbody>
+      </table>
+      <p class="src" id="fresh-note"></p>
+
       <h3>A sample midweek</h3>
       <table>
-        <thead>
-          <tr><th>Day</th><th>Session</th></tr>
-        </thead>
+        <thead><tr><th>Day</th><th>Session</th></tr></thead>
         <tbody id="week-body"></tbody>
       </table>
       <p class="src">A period-typical diary drawn from cited habits, not a claim that every First Division club kept this exact timetable. Liverpool's work at Melwood was famously built around five-a-sides and pass-and-move. Graham Taylor's Watford rehearsed their pattern of play week in, week out, along with set pieces. Fitness running remained ordinary English midweek work at many other clubs. Individual sides varied.</p>
@@ -229,279 +245,486 @@ tr.hl td{background:#fff3b0}
           <p>Corners, free-kicks and long throws are midweek work, not a separate department. Taylor's Watford treated set pieces as part of the weekly pattern. A week spent on them is meant to sharpen those restarts a little, never to invent a new kind of dead-ball specialist.</p>
         </div>
       </div>
-
-      <h3>Next opponent</h3>
-      <div class="card">
-        <p>The scouting note already lives on this screen. It is drawn from press coverage, the table, and men actually in the other side's squad. A week spent on their danger man is what makes "Mark him closely" worth ticking on a Saturday. The name itself comes from the real fixture list, not a generated one.</p>
-      </div>
     </section>
 
-    <p class="foot">Preview of the proposed Tactics and Training screens for 1981-82 and 1986-87. Skin is the compact 1980s MATCH! treatment (Anton masthead, Barlow body, yellow chips). No dagger marks and no spaced colons. Historical claims about real clubs are cited in the sources note held with the working tree (<span style="white-space:nowrap">TACTICS_TRAINING_1980s.md</span>). Principal sources include Bob Paisley on Liverpool's 4-4-2 and earlier 4-3-3 (quoted via LFChistory / Paul Tomkins); Ian Rush on Melwood five-a-sides (LFChistory); Shankly's pass-and-move training (Liverpool FC / Wikipedia, Melwood and Bob Paisley); Graham Taylor and Oliver Phillips on Watford's direct, well-drilled pattern of play and set-piece work (The Guardian, 19 Jan 2017; Watford Observer); Dave Bassett's more stripped-down direct game at Wimbledon, distinguished from Taylor's by Phillips; Jim Smith's 3-5-2 at Queens Park Rangers from 1985, "the first time a major club side in England had opted for the formation as a first-choice strategy" (The Guardian, 8 Sep 2014); and Carlos Bilardo's Argentina at the 1986 World Cup (FIFA; Wikipedia, Formation).</p>
+    <p class="foot">Preview of the proposed Tactics and Training screens for 1981-82 and 1986-87. Skin is the compact 1980s MATCH! treatment (Anton masthead, Barlow body, yellow chips). No dagger marks and no spaced colons. The 1981-82 eleven is United's starting side at Highfield Road on Saturday 29 August 1981 (mufcinfo). The opening fixture is Coventry City, away, 3.00pm, Dave Sexton in the home dugout (mufcinfo; Sky Blue Archive). Whitton and Bodak, who scored that afternoon, are both in the game's 1981 Coventry squad. The 1986-87 opening fixture is Arsenal away at Highbury on Saturday 23 August 1986 (Wikipedia; mufcinfo), George Graham's first match in charge. 1986-87 names on the pitch are taken from the game's 1986 United squad, not from a sourced opening eleven. Historical claims about real clubs' tactics are cited in the working-tree note TACTICS_TRAINING_1980s.md (Paisley / LFChistory; Rush; Melwood; Taylor and Phillips; Jim Smith at QPR, The Guardian, 8 Sep 2014; Bilardo's Argentina, 1986).</p>
   </div>
 </div>
 <script>
 (function(){
-  var era = 1981, formation = '442', style = 'passmove', approach = 'balanced', train = 'shape', mark = false;
+  var era = 1981, formation = "442", defStyle = "manmark", atkStyle = "passmove", approach = "balanced", train = "shape", mark = false;
+  var setpiece = {corners:"Steve Coppell", freekicks:"Ray Wilkins", penalties:"Frank Stapleton"};
+
+  var P = {
+    bailey:{name:"Gary Bailey", short:"Bailey", nat:"GK", age81:23, age86:28},
+    roche:{name:"Paddy Roche", short:"Roche", nat:"GK", age81:30, age86:35},
+    turner:{name:"Chris Turner", short:"Turner", nat:"GK", age81:22, age86:27},
+    gidman:{name:"John Gidman", short:"Gidman", nat:"RB", age81:27, age86:32},
+    albiston:{name:"Arthur Albiston", short:"Albiston", nat:"LB", age81:24, age86:29},
+    mcqueen:{name:"Gordon McQueen", short:"McQueen", nat:"CB", age81:29, age86:34},
+    buchan:{name:"Martin Buchan", short:"Buchan", nat:"CB", age81:32, age86:37},
+    moran:{name:"Kevin Moran", short:"Moran", nat:"CB", age81:25, age86:30},
+    duxbury:{name:"Mike Duxbury", short:"Duxbury", nat:"RB", age81:21, age86:26},
+    sivebaek:{name:"John Sivebaek", short:"Sivebaek", nat:"RB", age81:19, age86:24},
+    mcgrath:{name:"Paul McGrath", short:"McGrath", nat:"CB", age81:21, age86:26},
+    hogg:{name:"Graeme Hogg", short:"Hogg", nat:"CB", age81:17, age86:22},
+    gibson:{name:"Colin Gibson", short:"Gibson", nat:"LB", age81:16, age86:26},
+    wilkins:{name:"Ray Wilkins", short:"Wilkins", nat:"CM", age81:24, age86:29},
+    macari:{name:"Lou Macari", short:"Macari", nat:"CM", age81:32, age86:37},
+    mcilroy:{name:"Sammy McIlroy", short:"McIlroy", nat:"CM", age81:27, age86:32},
+    coppell:{name:"Steve Coppell", short:"Coppell", nat:"RW", age81:26, age86:31},
+    moses:{name:"Remi Moses", short:"Moses", nat:"CM", age81:20, age86:25},
+    robson:{name:"Bryan Robson", short:"Robson", nat:"CM", age81:24, age86:29},
+    strachan:{name:"Gordon Strachan", short:"Strachan", nat:"CM", age81:24, age86:29},
+    olsen:{name:"Jesper Olsen", short:"Olsen", nat:"LW", age81:20, age86:25},
+    stapleton:{name:"Frank Stapleton", short:"Stapleton", nat:"ST", age81:25, age86:30},
+    birtles:{name:"Garry Birtles", short:"Birtles", nat:"ST", age81:25, age86:30},
+    whiteside:{name:"Norman Whiteside", short:"Whiteside", nat:"ST", age81:16, age86:21},
+    davenport:{name:"Peter Davenport", short:"Davenport", nat:"ST", age81:20, age86:25}
+  };
 
   var FORMS = {
-    '442': {label:'4-4-2', everyday:true, shirts:'1 Goalkeeper, 2 Right-back, 3 Left-back, 4 Midfield, 5 Centre-back, 6 Centre-back, 7 Right wing, 8 Midfield, 9 Striker, 10 Striker, 11 Left wing',
-      dots:[
-        {n:1,x:10,y:50,lab:'GK',gk:1},
-        {n:2,x:28,y:22,lab:'RB'},{n:5,x:28,y:38,lab:'CB'},{n:6,x:28,y:62,lab:'CB'},{n:3,x:28,y:78,lab:'LB'},
-        {n:7,x:55,y:18,lab:'RW'},{n:4,x:52,y:38,lab:'MF'},{n:8,x:52,y:62,lab:'MF'},{n:11,x:55,y:82,lab:'LW'},
-        {n:9,x:80,y:36,lab:'ST'},{n:10,x:80,y:64,lab:'ST'}
-      ]},
-    '433': {label:'4-3-3', everyday:false, shirts:'1 Goalkeeper, 2 Right-back, 3 Left-back, 4 Midfield, 5 Centre-back, 6 Centre-back, 7 Right wing, 8 Midfield, 9 Striker, 10 Midfield, 11 Left wing',
-      dots:[
-        {n:1,x:10,y:50,lab:'GK',gk:1},
-        {n:2,x:28,y:22,lab:'RB'},{n:5,x:28,y:38,lab:'CB'},{n:6,x:28,y:62,lab:'CB'},{n:3,x:28,y:78,lab:'LB'},
-        {n:4,x:50,y:32,lab:'MF'},{n:8,x:48,y:50,lab:'MF'},{n:10,x:50,y:68,lab:'MF'},
-        {n:7,x:80,y:20,lab:'RW'},{n:9,x:84,y:50,lab:'ST'},{n:11,x:80,y:80,lab:'LW'}
-      ]},
-    sweeper: {label:'Sweeper', everyday:false, shirts:'1 Goalkeeper, 2 Right-back, 3 Left-back, 4 Centre-back, 5 Sweeper, 6 Midfield, 7 Right wing, 8 Midfield, 9 Striker, 10 Midfield, 11 Left wing',
-      dots:[
-        {n:1,x:8,y:50,lab:'GK',gk:1},
-        {n:5,x:22,y:50,lab:'SW'},
-        {n:2,x:34,y:22,lab:'RB'},{n:4,x:34,y:40,lab:'CB'},{n:3,x:34,y:78,lab:'LB'},
-        {n:6,x:55,y:30,lab:'MF'},{n:8,x:52,y:50,lab:'MF'},{n:10,x:55,y:70,lab:'MF'},
-        {n:7,x:80,y:22,lab:'RW'},{n:9,x:84,y:50,lab:'ST'},{n:11,x:80,y:78,lab:'LW'}
-      ]},
-    '352': {label:'3-5-2', everyday:false, from:1986, shirts:'1 Goalkeeper, 2 Right wing-back, 3 Left wing-back, 4 Centre-back, 5 Centre-back, 6 Centre-back, 7 Midfield, 8 Midfield, 9 Striker, 10 Striker, 11 Midfield',
-      dots:[
-        {n:1,x:10,y:50,lab:'GK',gk:1},
-        {n:4,x:28,y:28,lab:'CB'},{n:5,x:24,y:50,lab:'CB'},{n:6,x:28,y:72,lab:'CB'},
-        {n:2,x:52,y:14,lab:'RWB'},{n:7,x:50,y:36,lab:'MF'},{n:8,x:48,y:50,lab:'MF'},{n:11,x:50,y:64,lab:'MF'},{n:3,x:52,y:86,lab:'LWB'},
-        {n:9,x:82,y:36,lab:'ST'},{n:10,x:82,y:64,lab:'ST'}
-      ]}
+    "442": {label:"4-4-2", everyday:true, from:1981, blurb:"Two banks of four, the everyday English shape."},
+    "433": {label:"4-3-3", everyday:false, from:1981, blurb:"A back four, three in midfield, three up front."},
+    "442sw": {label:"4-4-2 sweeper", everyday:false, from:1981, blurb:"A 4-4-2 in which one centre-back sits as the sweeper, slightly deeper than his partner."},
+    "433sw": {label:"4-3-3 sweeper", everyday:false, from:1981, blurb:"A 4-3-3 in which one centre-back sits as the sweeper, slightly deeper than his partner."},
+    "1432": {label:"1-4-3-2", everyday:false, from:1981, blurb:"A sweeper behind four defenders, with three midfielders and two strikers. No orthodox wingers."},
+    "352": {label:"3-5-2", everyday:false, from:1986, blurb:"Three at the back, wing-backs pushed on, two up front."},
+    "352sw": {label:"3-5-2 sweeper", everyday:false, from:1986, blurb:"A 3-5-2 with two markers and a sweeper, the shape Jim Smith made first-choice at Queens Park Rangers from 1985."}
   };
 
-  var STYLES = {
-    '442': [
-      {key:'passmove', label:'Pass-and-move',
-        text:'Short, early passes and movement off the ball. Bob Paisley said that after signing Kenny Dalglish, "a 4-4-2 formation with the accent on passing was clearly our most effective line-up." The same simple pass-and-move habit had been drilled at Melwood since Bill Shankly.'},
-      {key:'direct', label:'Direct play',
-        text:'The ball goes forward early, into the channels or onto a target man, with wide men and crosses. Graham Taylor\'s Watford, newly in the First Division in 1981-82, were the outstanding English example. Taylor himself talked of a direct approach as a pass into space, not a kick and rush. From 1986-87, Dave Bassett\'s Wimbledon played a more stripped-down direct game, which Taylor and the Watford writer Oliver Phillips were careful to distinguish from their own.'},
-      {key:'manmark', label:'Man-marking',
-        text:'Each man is given an opponent to pick up and stays with him. Simple to brief, and still the usual way most League sides organised a defence in the early 1980s.'},
-      {key:'offsidetrap', label:'Offside trap',
-        text:'The back line steps up together to catch opposing forwards offside. A regular talking point by this decade. Taylor\'s Watford did not use it; Phillips records that Taylor abhorred the offside game.'},
-      {key:'pressing', label:'Pressing',
-        text:'Close the man on the ball down quickly, so the other side cannot settle. Systematic pressing had been a serious talking point since the 1970s, and it asks more of the side\'s legs than a deeper defence. Taylor\'s own phrase was "getting after the other team."'}
-    ],
-    '433': [
-      {key:'passmove', label:'Pass-and-move',
-        text:'The same short passing game, in a shape with three in midfield and three up front. Paisley noted that Liverpool "had often employed 4-3-3 as well" before settling on 4-4-2 once Dalglish arrived.'},
-      {key:'width', label:'Width from the front three',
-        text:'The wide forwards stay high and stretch the back four, with the midfield three expected to cover the ground. A natural job for this shape, and a poor fit for a narrow midfield.'},
-      {key:'manmark', label:'Man-marking',
-        text:'Each man picks up an opponent and stays with him. Still the ordinary English defensive method in this decade.'},
-      {key:'pressing', label:'Pressing',
-        text:'Close them down quickly, in a shape that already commits three men high up the pitch. It asks a great deal of midfield legs.'}
-    ],
-    sweeper: [
-      {key:'libero', label:'Libero covers',
-        text:'A free man sits behind two (or more) markers and sweeps up what they miss. The idea is well known from Italian football and from Karl Rappan\'s earlier Swiss bolt. It is a minority habit in the Football League, not the everyday English back four.'},
-      {key:'manmark', label:'Markers in front',
-        text:'The men in front of the sweeper pick up their forwards and stay with them. The sweeper is the spare man. This is the natural defensive wrinkle of the shape.'},
-      {key:'counter', label:'Hit them on the break',
-        text:'A packed defence, then out quickly once the ball is won. The sweeper can start the break with a simple pass rather than a hopeful clearance, if the player can do it.'}
-    ],
-    '352': [
-      {key:'wingbacks', label:'Wing-backs for width',
-        text:'The five in midfield include two wing-backs who supply the width, with three men in the middle. Jim Smith used this as Queens Park Rangers\' first-choice shape after he arrived in 1985, with wing-backs, two man-to-man markers and a sweeper.'},
-      {key:'manmark', label:'Two markers and a spare man',
-        text:'Two centre-backs pick up the two strikers; a third covers. Smith\'s QPR and Bilardo\'s Argentina both organised the back three this way, rather than as a flat line.'},
-      {key:'passmove', label:'Play through the middle five',
-        text:'With a packed midfield the ball can be moved short and early through the centre, if the players can pass. Width still has to come from the wing-backs, not from orthodox wingers.'}
-    ]
-  };
+  /* Coordinates: attacking UP. Our left is the left of the board, our right is the right. */
+  function layout(key){
+    if (key==="442") return {
+      GK:{x:50,y:90}, LB:{x:16,y:72}, LCB:{x:38,y:72}, RCB:{x:62,y:72}, RB:{x:84,y:72},
+      LM:{x:16,y:46}, LCM:{x:38,y:48}, RCM:{x:62,y:48}, RM:{x:84,y:46},
+      LST:{x:38,y:20}, RST:{x:62,y:20}
+    };
+    if (key==="433") return {
+      GK:{x:50,y:90}, LB:{x:16,y:72}, LCB:{x:38,y:72}, RCB:{x:62,y:72}, RB:{x:84,y:72},
+      LCM:{x:28,y:50}, CM:{x:50,y:52}, RCM:{x:72,y:50},
+      LW:{x:18,y:20}, ST:{x:50,y:18}, RW:{x:82,y:20}
+    };
+    if (key==="442sw") return {
+      GK:{x:50,y:90},
+      LB:{x:16,y:72}, SW:{x:38,y:78}, CB:{x:62,y:68}, RB:{x:84,y:72},
+      LM:{x:16,y:46}, LCM:{x:38,y:48}, RCM:{x:62,y:48}, RM:{x:84,y:46},
+      LST:{x:38,y:20}, RST:{x:62,y:20}
+    };
+    if (key==="433sw") return {
+      GK:{x:50,y:90},
+      LB:{x:16,y:72}, SW:{x:38,y:78}, CB:{x:62,y:68}, RB:{x:84,y:72},
+      LCM:{x:28,y:50}, CM:{x:50,y:52}, RCM:{x:72,y:50},
+      LW:{x:18,y:20}, ST:{x:50,y:18}, RW:{x:82,y:20}
+    };
+    if (key==="1432") return {
+      GK:{x:50,y:92}, SW:{x:50,y:82},
+      LB:{x:14,y:66}, LCB:{x:38,y:66}, RCB:{x:62,y:66}, RB:{x:86,y:66},
+      LCM:{x:26,y:42}, CM:{x:50,y:44}, RCM:{x:74,y:42},
+      LST:{x:38,y:18}, RST:{x:62,y:18}
+    };
+    if (key==="352") return {
+      GK:{x:50,y:90}, LCB:{x:22,y:74}, CB:{x:50,y:76}, RCB:{x:78,y:74},
+      LWB:{x:12,y:48}, LCM:{x:32,y:48}, CM:{x:50,y:50}, RCM:{x:68,y:48}, RWB:{x:88,y:48},
+      LST:{x:38,y:20}, RST:{x:62,y:20}
+    };
+    return {
+      GK:{x:50,y:92}, SW:{x:50,y:82},
+      LCB:{x:28,y:68}, RCB:{x:72,y:68},
+      LWB:{x:12,y:46}, LCM:{x:32,y:46}, CM:{x:50,y:48}, RCM:{x:68,y:46}, RWB:{x:88,y:46},
+      LST:{x:38,y:18}, RST:{x:62,y:18}
+    };
+  }
 
-  var ZONAL = {key:'zonal', label:'Zonal marking',
-    text:'Defenders hold a zone of the pitch rather than tracking one nominated man all over it. More discussed in England by the mid-1980s as a contrast to strict man-marking, and still a minority habit in the Football League. It sits more naturally with a back four than with a sweeper and markers.'};
+  /* 1981-82 opening XI v Coventry, 29 Aug 1981, assigned to a 4-4-2. Later shapes reshuffle the same squad. */
+  function xiFor(key){
+    if (era>=1986){
+      if (key==="442") return {GK:P.turner, LB:P.albiston, LCB:P.moran, RCB:P.mcgrath, RB:P.sivebaek, LM:P.olsen, LCM:P.moses, RCM:P.robson, RM:P.strachan, LST:P.whiteside, RST:P.stapleton};
+      if (key==="433") return {GK:P.turner, LB:P.albiston, LCB:P.moran, RCB:P.mcgrath, RB:P.sivebaek, LCM:P.moses, CM:P.robson, RCM:P.strachan, LW:P.olsen, ST:P.stapleton, RW:P.whiteside};
+      if (key==="442sw") return {GK:P.turner, SW:P.moran, LB:P.albiston, CB:P.mcgrath, RB:P.sivebaek, LM:P.olsen, LCM:P.moses, RCM:P.robson, RM:P.strachan, LST:P.whiteside, RST:P.stapleton};
+      if (key==="433sw") return {GK:P.turner, SW:P.moran, LB:P.albiston, CB:P.mcgrath, RB:P.sivebaek, LCM:P.moses, CM:P.robson, RCM:P.strachan, LW:P.olsen, ST:P.stapleton, RW:P.whiteside};
+      if (key==="1432") return {GK:P.turner, SW:P.moran, LB:P.albiston, LCB:P.hogg, RCB:P.mcgrath, RB:P.sivebaek, LCM:P.moses, CM:P.robson, RCM:P.strachan, LST:P.whiteside, RST:P.stapleton};
+      if (key==="352") return {GK:P.turner, LCB:P.albiston, CB:P.mcgrath, RCB:P.moran, LWB:P.olsen, LCM:P.moses, CM:P.robson, RCM:P.strachan, RWB:P.sivebaek, LST:P.whiteside, RST:P.stapleton};
+      return {GK:P.turner, SW:P.moran, LCB:P.mcgrath, RCB:P.hogg, LWB:P.olsen, LCM:P.moses, CM:P.robson, RCM:P.strachan, RWB:P.sivebaek, LST:P.whiteside, RST:P.stapleton};
+    }
+    if (key==="442") return {GK:P.bailey, LB:P.albiston, LCB:P.buchan, RCB:P.mcqueen, RB:P.gidman, LM:P.mcilroy, LCM:P.macari, RCM:P.wilkins, RM:P.coppell, LST:P.stapleton, RST:P.birtles};
+    if (key==="433") return {GK:P.bailey, LB:P.albiston, LCB:P.buchan, RCB:P.mcqueen, RB:P.gidman, LCM:P.mcilroy, CM:P.wilkins, RCM:P.macari, LW:P.birtles, ST:P.stapleton, RW:P.coppell};
+    if (key==="442sw") return {GK:P.bailey, SW:P.buchan, LB:P.albiston, CB:P.mcqueen, RB:P.gidman, LM:P.mcilroy, LCM:P.macari, RCM:P.wilkins, RM:P.coppell, LST:P.stapleton, RST:P.birtles};
+    if (key==="433sw") return {GK:P.bailey, SW:P.buchan, LB:P.albiston, CB:P.mcqueen, RB:P.gidman, LCM:P.mcilroy, CM:P.wilkins, RCM:P.macari, LW:P.birtles, ST:P.stapleton, RW:P.coppell};
+    if (key==="1432") return {GK:P.bailey, SW:P.buchan, LB:P.albiston, LCB:P.moran, RCB:P.mcqueen, RB:P.gidman, LCM:P.mcilroy, CM:P.wilkins, RCM:P.macari, LST:P.stapleton, RST:P.birtles};
+    if (key==="352") return {GK:P.bailey, LCB:P.albiston, CB:P.mcqueen, RCB:P.buchan, LWB:P.mcilroy, LCM:P.macari, CM:P.wilkins, RCM:P.coppell, RWB:P.gidman, LST:P.stapleton, RST:P.birtles};
+    return {GK:P.bailey, SW:P.buchan, LCB:P.mcqueen, RCB:P.moran, LWB:P.mcilroy, LCM:P.macari, CM:P.wilkins, RCM:P.coppell, RWB:P.gidman, LST:P.stapleton, RST:P.birtles};
+  }
 
-  var TRAINS = [
-    {key:'fitness', label:'Fitness',
-      note:'Lapping, running and stamina work, still the standard English midweek staple at many clubs. It keeps legs under a man, but a heavy week in a crowded run-in can leave him heavy-legged on Saturday.',
-      feed:'Fitness work is meant to support form and freshness over a season, in small measures. It does not turn a limited player into a different one overnight.'},
-    {key:'ball', label:'Ball work',
-      note:'Passing, control, shooting and five-a-sides. At Liverpool this was the week\'s real work. Ian Rush later said of Melwood, "all we did was five-a-sides," set against the more timed, sectional coaching he found in Italy.',
-      feed:'Ball work slowly sharpens passing and shooting. It pays more when the Saturday shape is itself a passing one, such as pass-and-move in a 4-4-2 or 4-3-3.'},
-    {key:'shape', label:'Pattern of play',
-      note:'Rehearsing the chosen formation, so every man knows his job and his options. Taylor "worked on the pattern of play day after day, every week along with set-pieces" (Oliver Phillips).',
-      feed:'Shape work midweek is meant to help the side settle into the formation, on top of the familiarity that already comes from playing matches in it. A new system still costs a run of results while they learn it.'},
-    {key:'setpieces', label:'Set pieces',
-      note:'Corners, free-kicks and long throws, taken as part of the ordinary midweek, not as a modern specialism. Phillips records that Taylor treated them as weekly work beside the pattern of play.',
-      feed:'A week spent on set pieces is meant to sharpen those restarts a little. It is not a separate goal-machine and should stay a modest effect.'},
-    {key:'opp', label:'The next lot',
-      note:'The week is spent on the coming opponents, and on their danger man in particular. That is the groundwork that makes a "Mark him closely" instruction worth giving on Saturday.',
-      feed:'Preparation blunts their danger man a little. Ticking the match instruction without this week\'s work loosens your own shape for nothing.'}
+  var ROLE = {GK:"GK", LB:"LB", RB:"RB", LCB:"CB", RCB:"CB", CB:"CB", SW:"SW", LM:"LM", RM:"RM", LCM:"CM", RCM:"CM", CM:"CM", LW:"LW", RW:"RW", LST:"ST", RST:"ST", ST:"ST", LWB:"LWB", RWB:"RWB"};
+
+  function ageOf(p){ return era>=1986 ? p.age86 : p.age81; }
+
+  function famFor(slot, p){
+    var nat = p.nat;
+    if (slot==="GK") return nat==="GK" ? 3 : 1;
+    if (slot==="SW") return (nat==="CB") ? 2 : 1;
+    if (slot==="LWB" || slot==="RWB") return (nat==="LB"||nat==="RB"||nat==="LW"||nat==="RW") ? 2 : 1;
+    if (slot==="LW") return (nat==="LW"||nat==="ST"||nat==="CM") ? (nat==="LW"?3:2) : 1;
+    if (slot==="RW") return (nat==="RW") ? 3 : 2;
+    if (slot==="LM") return (nat==="CM"||nat==="LW") ? 3 : 2;
+    if (slot==="RM") return (nat==="RW"||nat==="CM") ? 3 : 2;
+    if ((slot==="LST"||slot==="RST"||slot==="ST") && nat==="ST") return 3;
+    if ((slot==="LCB"||slot==="RCB"||slot==="CB") && nat==="CB") return 3;
+    if (slot==="LB" && nat==="LB") return 3;
+    if (slot==="RB" && nat==="RB") return 3;
+    if ((slot==="LCM"||slot==="RCM"||slot==="CM") && (nat==="CM"||nat==="RW")) return nat==="CM"?3:2;
+    if (formation==="442" && era<1986) return 3;
+    return 2;
+  }
+  function famPips(n){ return "●".repeat(n) + "○".repeat(3-n); }
+  function famWord(n){ return n>=3 ? "Settled" : n===2 ? "Bedding in" : "New to the role"; }
+
+  var FORM_ORDER = ["442","433","442sw","433sw","1432","352","352sw"];
+  function formsForEra(){
+    return FORM_ORDER.filter(function(k){ return era >= FORMS[k].from; });
+  }
+  var DEF = [
+    {key:"manmark", from:1981, label:"Man-marking",
+      text:"Each man is given an opponent to pick up and stays with him. Still the usual English defensive method in the early 1980s.",
+      fits:function(){ return true; }},
+    {key:"zonal", from:1986, label:"Zonal marking",
+      text:"Defenders hold a zone of the pitch rather than tracking one nominated man. More discussed by the mid-1980s, and still a minority habit in the League.",
+      fits:function(f){ return f==="442"||f==="433"; }},
+    {key:"pressing", from:1981, label:"Pressing",
+      text:"Close the man on the ball down quickly, so the other side cannot settle. It asks more of the side's legs than a deeper defence.",
+      fits:function(){ return true; }},
+    {key:"offsidetrap", from:1981, label:"Offside trap",
+      text:"The back line steps up together to catch opposing forwards offside. Taylor's Watford did not use it; Phillips records that Taylor abhorred the offside game.",
+      fits:function(f){ return f==="442"||f==="433"||f==="352"; }},
+    {key:"sitting", from:1981, label:"Deep or sitting",
+      text:"The side sits in and keeps a compact shape, rather than hunting the ball high up the pitch. A natural partner for a sweeper, and a useful approach against a stronger side.",
+      fits:function(){ return true; }}
   ];
-
-  var WEEK = [
-    {day:'Monday', text:'Recovery work and a light run, or a day off after Saturday.'},
-    {day:'Tuesday', text:'Fitness and running, still ordinary English midweek work at many clubs.'},
-    {day:'Wednesday', text:'Ball work and five-a-sides. The Liverpool habit, and a normal midweek method by this decade.'},
-    {day:'Thursday', text:'Pattern of play and set pieces, the side walking through Saturday\'s shape and restarts.'},
-    {day:'Friday', text:'A lighter session ahead of Saturday.'},
-    {day:'Saturday', text:'Match day. Three o\'clock, or 7.45pm if it is a midweek floodlit game.'}
+  var ATK = [
+    {key:"passmove", from:1981, label:"Pass-and-move",
+      text:"Short, early passes and movement off the ball. Paisley said that after signing Kenny Dalglish, a 4-4-2 with the accent on passing was Liverpool's most effective line-up.",
+      fits:function(){ return true; }},
+    {key:"direct", from:1981, label:"Long ball / direct",
+      text:"The ball goes forward early, into the channels or onto a target man, with wide men and crosses. Taylor's Watford were the outstanding English example. From 1986-87, Bassett's Wimbledon played a more stripped-down direct game.",
+      fits:function(f){ return f==="442"||f==="433"||f==="442sw"||f==="352"; }},
+    {key:"counters", from:1981, label:"Quick counters",
+      text:"Win the ball and go forward at once, before the other lot can reset. A natural partner for a sweeper and a sitting defence, and useful in any shape when the side is second-best on paper.",
+      fits:function(){ return true; }},
+    {key:"possession", from:1981, label:"Patient possession",
+      text:"Keep the ball and wait for the opening, rather than going long at the first chance. A minority English habit in this decade, more often talked about than seen as a League default.",
+      fits:function(){ return true; }}
   ];
 
   var APPROACH = {
-    attacking:'Attacking throws men forward. You should score more and concede more. It suits a side that is clearly the better one on the day.',
-    balanced:'A balanced side takes what comes, and is usually the right pick between two evenly matched teams.',
-    defensive:'Defensive shuts up shop and slows the game. Fewer goals help the weaker side, because a draw becomes more likely.'
+    attacking:"Attacking throws men forward. You should score more and concede more. It suits a side that is clearly the better one on the day.",
+    balanced:"A balanced side takes what comes, and is usually the right pick between two evenly matched teams.",
+    defensive:"Defensive shuts up shop and slows the game. Fewer goals help the weaker side, because a draw becomes more likely."
   };
 
-  function formsForEra(){
-    var keys = ['442','433','sweeper'];
-    if (era >= 1986) keys.push('352');
-    return keys;
+  var TRAINS = [
+    {key:"fitness", label:"Fitness",
+      note:"Lapping, running and stamina work, still the standard English midweek staple at many clubs. It keeps legs under a man, but a heavy week in a crowded run-in can leave him heavy-legged on Saturday.",
+      feed:"Fitness work is meant to support form and freshness over a season, in small measures. It does not turn a limited player into a different one overnight.",
+      load:"hard"},
+    {key:"ball", label:"Ball work",
+      note:"Passing, control, shooting and five-a-sides. At Liverpool this was the week's real work. Ian Rush later said of Melwood, \"all we did was five-a-sides,\" set against the more timed, sectional coaching he found in Italy.",
+      feed:"Ball work slowly sharpens passing and shooting. It pays more when the Saturday shape is itself a passing one, such as pass-and-move in a 4-4-2 or 4-3-3.",
+      load:"mid"},
+    {key:"shape", label:"Pattern of play",
+      note:"Rehearsing the chosen formation, so every man knows his job and his options. Taylor \"worked on the pattern of play day after day, every week along with set-pieces\" (Oliver Phillips).",
+      feed:"Shape work midweek is meant to help the side settle into the formation, on top of the familiarity that already comes from playing matches in it. A new system still costs a run of results while they learn it.",
+      load:"mid"},
+    {key:"setpieces", label:"Set pieces",
+      note:"Corners, free-kicks and long throws, taken as part of the ordinary midweek, not as a modern specialism. Phillips records that Taylor treated them as weekly work beside the pattern of play.",
+      feed:"A week spent on set pieces is meant to sharpen those restarts a little. It is not a separate goal-machine and should stay a modest effect.",
+      load:"light"},
+    {key:"opp", label:"The next lot",
+      note:"The week is spent on the coming opponents, and on their danger man in particular. That is the groundwork that makes a \"Mark him closely\" instruction worth giving on Saturday.",
+      feed:"Preparation blunts their danger man a little. Ticking the match instruction without this week's work loosens your own shape for nothing.",
+      load:"mid"}
+  ];
+  var WEEK = [
+    {day:"Monday", text:"Recovery work and a light run, or a day off after Saturday."},
+    {day:"Tuesday", text:"Fitness and running, still ordinary English midweek work at many clubs."},
+    {day:"Wednesday", text:"Ball work and five-a-sides. The Liverpool habit, and a normal midweek method by this decade."},
+    {day:"Thursday", text:"Pattern of play and set pieces, the side walking through Saturday's shape and restarts."},
+    {day:"Friday", text:"A lighter session ahead of Saturday."},
+    {day:"Saturday", text:"Match day. Three o'clock, or 7.45pm if it is a midweek floodlit game."}
+  ];
+
+  function isSweeperForm(f){ return /sw$/.test(f) || f==="1432"; }
+  function listStyles(pool){
+    return pool.filter(function(s){ return era >= s.from; });
   }
-  function stylesFor(){
-    var list = (STYLES[formation] || []).map(function(s){ return s; });
-    if (era >= 1986 && (formation==='442' || formation==='433')){
-      if (!list.some(function(s){ return s.key==='zonal'; })) list = list.concat([ZONAL]);
+
+  function clashes(){
+    var out = [], f = formation, xi = xiFor(f);
+    var ages = [];
+    Object.keys(xi).forEach(function(slot){
+      if (/GK|ST|LST|RST|CM|LCM|RCM|LM|RM|LW|RW/.test(slot) && slot!=="SW") return;
+      if (/LB|RB|CB|LCB|RCB|SW|LWB|RWB/.test(slot)) ages.push({p:xi[slot], age:ageOf(xi[slot]), slot:slot});
+    });
+    var oldBack = ages.filter(function(a){ return a.age>=32; });
+    if (defStyle==="pressing" && oldBack.length){
+      out.push("Pressing asks a great deal of the legs. " + oldBack.map(function(a){ return a.p.short + " is " + a.age; }).join(" and ") + ". A high close-down may suit a younger back line better.");
     }
-    return list;
-  }
-  function intro(){
-    if (era >= 1986) return 'The mid-1980s English game is still mostly 4-4-2. 4-3-3 and a sweeper remain minority options. 3-5-2 is now on the sheet, after Jim Smith made it Queens Park Rangers\' first-choice shape from 1985, and after Argentina won the 1986 World Cup with Carlos Bilardo\'s version. It is not the everyday League shape.';
-    return 'The early-1980s English game is mostly 4-4-2, the everyday shape since England\'s 1966 side. 4-3-3 is also in use (Liverpool had often employed it as well as 4-4-2). A sweeper is a known minority option, better known from Italian football than from the First Division. 4-2-4 is no longer an ordinary League shape and is not offered here.';
-  }
-  function famCopy(){
-    if (formation==='442') return '4-4-2 is the everyday English shape by now, so a new save starts already settled in it. Switching away, and switching back, still costs a run of matches while the side re-learns the other job.';
-    if (formation==='433') return '4-3-3 is in use, but it is not the default. The side will take a run of matches to settle if they have been playing 4-4-2. Midweek pattern-of-play work is meant to help, without removing that cost.';
-    if (formation==='sweeper') return 'A sweeper system is a minority habit in this country. Expect a real teething period while markers and the libero learn the jobs, even with midweek rehearsal.';
-    return '3-5-2 is new to most English dressing rooms in 1986-87. Smith\'s QPR had made it first-choice only the season before. Familiarity should start low and climb only with matches and midweek shape work.';
-  }
-  function famState(){
-    if (formation==='442') return {label:'Settled', pct:92};
-    if (formation==='433') return {label:'Bedding in', pct:58};
-    if (formation==='sweeper') return {label:'New to them', pct:28};
-    return {label:'New to them', pct:22};
+    if (defStyle==="offsidetrap" && isSweeperForm(f)){
+      var sw = xi.SW;
+      out.push("A deep sweeper and a stepped-up offside line pull against each other. " + (sw ? sw.short + ", sitting as the free man, is not a natural last-line trap." : "The free man is asked to sit, and the line is asked to step up."));
+    }
+    if (defStyle==="zonal" && isSweeperForm(f)){
+      out.push("Zonal marking sits more naturally with a flat back four than with a sweeper and markers. The spare man is there to cover men, not a zone.");
+    }
+    if (defStyle==="offsidetrap" && !isSweeperForm(f) && oldBack.length){
+      out.push("The offside trap wants a back line that can step up together. " + oldBack.map(function(a){ return a.p.short; }).join(" and ") + " will not be the quickest over the first yards.");
+    }
+    if ((f==="352"||f==="352sw") && era<1986){
+      out.push("3-5-2 is new to most English dressing rooms before 1986-87.");
+    }
+    if (f==="352"||f==="352sw"){
+      var wb = [];
+      if (xi.LWB && (xi.LWB.nat==="LB"||xi.LWB.nat==="RB"||xi.LWB.nat==="CM")) wb.push(xi.LWB.short + " is a " + (xi.LWB.nat==="CM"?"midfielder":"full-back") + " by trade");
+      if (xi.RWB && (xi.RWB.nat==="LB"||xi.RWB.nat==="RB")) wb.push(xi.RWB.short + " is a full-back by trade");
+      if (wb.length) out.push("The wing-back job asks them to stay high as well as cover. " + wb.join(". ") + ".");
+    }
+    if (f==="433" && xi.LW && xi.LW.nat==="ST"){
+      out.push(xi.LW.short + " is a centre-forward by trade, asked here to play on the left of a front three. The job will take some bedding in.");
+    }
+    if (atkStyle==="direct" && (f==="1432")){
+      out.push("Long ball and width usually want wide men to chase the channels. A 1-4-3-2 has no orthodox wingers, so the ball has to go through the middle or onto the two strikers.");
+    }
+    return out;
   }
 
   function el(id){ return document.getElementById(id); }
 
-  function renderDots(){
-    var pitch = el('pitch');
-    var form = FORMS[formation];
-    var html = '<div class="box-l"></div><div class="box-r"></div>';
-    (form.dots||[]).forEach(function(d){
-      html += '<div class="dot'+(d.gk?' gk':'')+'" style="left:'+d.x+'%;top:'+d.y+'%">'+d.n+'</div>';
-      html += '<div class="dot-lab" style="left:'+d.x+'%;top:'+(d.y+4)+'%">'+d.lab+'</div>';
+  function intro(){
+    if (era>=1986) return "The mid-1980s English game is still mostly 4-4-2. Sweeper variants sit inside that shape, or behind a back four, or in a 3-5-2. 3-5-2 itself is on the sheet after Jim Smith made it Queens Park Rangers' first-choice shape from 1985, and after Argentina won the 1986 World Cup with Carlos Bilardo's version. It is not the everyday League shape.";
+    return "The early-1980s English game is mostly 4-4-2, the everyday shape since England's 1966 side. 4-3-3 is also in use. A sweeper can sit as one of the centre-backs in a 4-4-2 or a 4-3-3, or behind a flat back four in a 1-4-3-2. 3-5-2 is not offered until 1986-87.";
+  }
+
+  function renderPitch(){
+    var lay = layout(formation), xi = xiFor(formation), form = FORMS[formation];
+    var html = '<div class="half"></div><div class="box-t"></div><div class="box-b"></div>';
+    html += '<div class="side-lab left">Our left</div><div class="side-lab right">Our right</div>';
+    html += '<div class="end-lab att">Their goal</div><div class="end-lab our">Our goal</div>';
+    Object.keys(lay).forEach(function(slot){
+      var p = xi[slot], c = lay[slot];
+      if (!p) return;
+      var n = famFor(slot, p), role = ROLE[slot]||slot;
+      var gk = slot==="GK" ? " gk" : "";
+      html += '<div class="pl'+gk+'" style="left:'+c.x+'%;top:'+c.y+'%">';
+      html += '<div class="disc">'+role+'</div>';
+      html += '<div class="nm">'+p.short+'</div>';
+      html += '<div class="meta">'+ageOf(p)+' · <span class="fam" title="'+famWord(n)+'">'+famPips(n)+'</span></div>';
+      html += '</div>';
     });
-    pitch.innerHTML = html;
-    el('pitch-title').innerHTML = form.label + (form.everyday ? '' : ' <span class="tag mute">Minority</span>');
-    el('shirt-legend').textContent = 'Shirt numbers 1-11. ' + form.shirts + '.';
+    el("pitch").innerHTML = html;
+    el("pitch-title").innerHTML = form.label + (form.everyday ? "" : ' <span class="tag mute">Minority</span>');
   }
 
   function renderForms(){
-    var box = el('form-chips');
     var keys = formsForEra();
-    if (keys.indexOf(formation)<0) formation = '442';
-    box.innerHTML = keys.map(function(k){
-      var f = FORMS[k];
+    if (keys.indexOf(formation)<0) formation = "442";
+    el("form-chips").innerHTML = keys.map(function(k){
       var on = k===formation;
-      return '<button class="chip'+(on?' on':'')+'" data-form="'+k+'" aria-pressed="'+(on?'true':'false')+'">'+f.label+'</button>';
-    }).join('');
-    Array.prototype.forEach.call(box.querySelectorAll('.chip'), function(b){
-      b.addEventListener('click', function(){
-        formation = b.getAttribute('data-form');
-        var opts = stylesFor();
-        if (!opts.some(function(s){ return s.key===style; })) style = opts[0].key;
+      return '<button class="chip'+(on?" on":"")+'" data-form="'+k+'" aria-pressed="'+(on?"true":"false")+'">'+FORMS[k].label+'</button>';
+    }).join("");
+    Array.prototype.forEach.call(el("form-chips").querySelectorAll(".chip"), function(b){
+      b.addEventListener("click", function(){
+        formation = b.getAttribute("data-form");
+        var defs = listStyles(DEF), atks = listStyles(ATK);
+        if (!defs.some(function(s){ return s.key===defStyle; })) defStyle = "manmark";
+        if (!atks.some(function(s){ return s.key===atkStyle; })) atkStyle = "passmove";
+        resetSetpieces();
         renderAll();
       });
     });
   }
 
-  function renderStyles(){
-    var box = el('style-list');
-    var opts = stylesFor();
-    if (!opts.some(function(s){ return s.key===style; })) style = opts[0].key;
+  function renderStyleCol(boxId, pool, current, setter){
+    var box = el(boxId);
+    var opts = listStyles(pool);
+    if (!opts.some(function(s){ return s.key===current; })) current = opts[0].key;
     box.innerHTML = opts.map(function(s){
-      var on = s.key===style;
-      return '<div class="style-item'+(on?' on':'')+'" data-style="'+s.key+'" role="button" aria-pressed="'+(on?'true':'false')+'"><div class="name">'+s.label+'</div><p>'+s.text+'</p></div>';
-    }).join('');
-    Array.prototype.forEach.call(box.querySelectorAll('.style-item'), function(item){
-      item.addEventListener('click', function(){
-        style = item.getAttribute('data-style');
+      var on = s.key===current;
+      var poor = s.fits && !s.fits(formation);
+      var body = s.text + (poor ? " A poorer fit for this shape, though it can still be tried." : "");
+      return '<div class="style-item'+(on?" on":"")+'" data-key="'+s.key+'" role="button" aria-pressed="'+(on?"true":"false")+'"><div class="name">'+s.label+(poor?' <span class="tag mute">Poor fit</span>':"")+'</div><p>'+body+'</p></div>';
+    }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll(".style-item"), function(item){
+      item.addEventListener("click", function(){
+        setter(item.getAttribute("data-key"));
         renderAll();
       });
     });
+    return current;
+  }
+
+  function renderClashes(){
+    var list = clashes();
+    var box = el("clash-box");
+    if (!list.length){ box.hidden = true; el("clash-list").innerHTML = ""; return; }
+    box.hidden = false;
+    el("clash-list").innerHTML = list.map(function(t){ return "<li>"+t+"</li>"; }).join("");
+  }
+
+  function resetSetpieces(){
+    var xi = xiFor(formation);
+    var names = {};
+    Object.keys(xi).forEach(function(s){ names[xi[s].name] = xi[s]; });
+    function pick(pref, fallback){
+      for (var i=0;i<pref.length;i++) if (names[pref[i]]) return pref[i];
+      return fallback;
+    }
+    if (era>=1986){
+      setpiece.corners = pick(["Gordon Strachan","Jesper Olsen","Bryan Robson"], "Gordon Strachan");
+      setpiece.freekicks = pick(["Gordon Strachan","Bryan Robson"], "Bryan Robson");
+      setpiece.penalties = pick(["Bryan Robson","Frank Stapleton"], "Bryan Robson");
+    } else {
+      setpiece.corners = pick(["Steve Coppell","Sammy McIlroy","Ray Wilkins"], "Steve Coppell");
+      setpiece.freekicks = pick(["Ray Wilkins","Steve Coppell","Lou Macari"], "Ray Wilkins");
+      setpiece.penalties = pick(["Frank Stapleton","Lou Macari","Ray Wilkins"], "Frank Stapleton");
+    }
+  }
+
+  function renderSetpieces(){
+    var xi = xiFor(formation);
+    var opts = [];
+    Object.keys(xi).forEach(function(s){
+      var n = xi[s].name;
+      if (opts.indexOf(n)<0) opts.push(n);
+    });
+    var rows = [
+      {key:"corners", lab:"Corners"},
+      {key:"freekicks", lab:"Free-kicks"},
+      {key:"penalties", lab:"Penalties"}
+    ];
+    el("setpiece-rows").innerHTML = rows.map(function(r){
+      var optsHtml = opts.map(function(n){
+        return '<option value="'+n+'"'+(setpiece[r.key]===n?' selected':'')+'>'+n+'</option>';
+      }).join("");
+      return '<div class="row"><span>'+r.lab+'</span><select class="sheet" data-sp="'+r.key+'">'+optsHtml+'</select></div>';
+    }).join("");
+    Array.prototype.forEach.call(el("setpiece-rows").querySelectorAll("select"), function(s){
+      s.addEventListener("change", function(){
+        setpiece[s.getAttribute("data-sp")] = s.value;
+      });
+    });
+  }
+
+  function renderOpp(){
+    var box = el("opp-card");
+    if (era>=1986){
+      box.innerHTML = "<p><b>Arsenal</b> · First Division · Saturday 23 August 1986, away at Highbury. The opening fixture of the season.</p>"+
+        "<div class='row'><span>Their manager</span><b>George Graham</b></div>"+
+        "<div class='row'><span>Usual shape of the period</span><b>4-4-2</b></div>"+
+        "<div class='row'><span>Danger men</span><b>Charlie Nicholas, Niall Quinn</b></div>"+
+        "<p class='src'>The fixture is the real opening game (Wikipedia, 1986-87 Manchester United F.C. season; mufcinfo). It was Graham's first match in charge of Arsenal. 4-4-2 is the everyday League shape, not a sourced claim about Arsenal's own wrinkles that afternoon. Nicholas and Quinn are strikers in the game's 1986 Arsenal squad.</p>";
+      return;
+    }
+    box.innerHTML = "<p><b>Coventry City</b> · First Division · Saturday 29 August 1981, 3.00pm, away at Highfield Road. The opening fixture of the season.</p>"+
+      "<div class='row'><span>Their manager</span><b>Dave Sexton</b></div>"+
+      "<div class='row'><span>Usual shape of the period</span><b>4-4-2</b></div>"+
+      "<div class='row'><span>Danger men</span><b>Steve Whitton, Peter Bodak</b></div>"+
+      "<p class='src'>Sexton, once of this club, has them at Highfield Road (mufcinfo). 4-4-2 is the everyday First Division shape, not a sourced claim about Coventry's own wrinkles that afternoon. Whitton, a striker, and Bodak, a winger, both scored in this match and both stand in the game's 1981 Coventry squad. A week spent on them is what makes Mark him closely worth ticking.</p>";
   }
 
   function renderTrain(){
-    var box = el('train-chips');
+    var box = el("train-chips");
     box.innerHTML = TRAINS.map(function(t){
       var on = t.key===train;
-      return '<button class="chip'+(on?' on':'')+'" data-train="'+t.key+'" aria-pressed="'+(on?'true':'false')+'">'+t.label+'</button>';
-    }).join('');
-    Array.prototype.forEach.call(box.querySelectorAll('.chip'), function(b){
-      b.addEventListener('click', function(){
-        train = b.getAttribute('data-train');
-        renderAll();
-      });
+      return '<button class="chip'+(on?" on":"")+'" data-train="'+t.key+'" aria-pressed="'+(on?"true":"false")+'">'+t.label+'</button>';
+    }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll(".chip"), function(b){
+      b.addEventListener("click", function(){ train = b.getAttribute("data-train"); renderAll(); });
     });
     var t = TRAINS.filter(function(x){ return x.key===train; })[0] || TRAINS[2];
-    el('train-fig').textContent = t.label;
-    el('train-note').textContent = t.note;
-    el('feed-note').textContent = t.feed;
-    var highlight = {fitness:'Tuesday', ball:'Wednesday', shape:'Thursday', setpieces:'Thursday', opp:'Thursday'};
-    var hi = highlight[train] || 'Thursday';
-    el('week-body').innerHTML = WEEK.map(function(w){
-      return '<tr'+(w.day===hi?' class="hl"':'')+'><td>'+w.day+'</td><td>'+w.text+'</td></tr>';
-    }).join('');
+    el("train-fig").textContent = t.label;
+    el("train-note").textContent = t.note;
+    el("feed-note").textContent = t.feed;
+    var highlight = {fitness:"Tuesday", ball:"Wednesday", shape:"Thursday", setpieces:"Thursday", opp:"Thursday"};
+    var hi = highlight[train] || "Thursday";
+    el("week-body").innerHTML = WEEK.map(function(w){
+      return "<tr"+(w.day===hi?' class="hl"':"")+"><td>"+w.day+"</td><td>"+w.text+"</td></tr>";
+    }).join("");
+    renderFresh(t);
+  }
+
+  function renderFresh(t){
+    var xi = xiFor(formation), lay = layout(formation);
+    var rows = Object.keys(lay).map(function(slot){
+      var p = xi[slot]; if (!p) return "";
+      var age = ageOf(p), n = famFor(slot, p);
+      var load, cls, label;
+      if (t.load==="hard"){
+        if (age>=32){ label="Heavy"; cls="load-heavy"; load="A hard running week sits heavier on a man of "+age+"."; }
+        else if (age>=29){ label="Full"; cls=""; load="A full week's running. Fresh enough, but not a light one."; }
+        else { label="Worked"; cls="load-ok"; load="Worked hard, still fresh enough for Saturday."; }
+      } else if (t.load==="light"){
+        label="Light"; cls="load-ok"; load="A light week on the legs. Sharpener work, not a slog.";
+      } else {
+        if (age>=32 && n<3){ label="Watch"; cls="load-heavy"; load="Ordinary midweek work, but he is still bedding into a new job at "+age+"."; }
+        else if (age>=32){ label="Care"; cls=""; load="Ordinary midweek work, with a little more care for a man of "+age+". Fresh for Saturday."; }
+        else if (n<3){ label="Worked"; cls=""; load="Ordinary midweek load, with extra shape work as he beds into the job."; }
+        else { label="Ordinary"; cls=""; load="Ordinary midweek load. Fresh for Saturday."; }
+      }
+      return "<tr><td>"+p.name+"</td><td>"+(ROLE[slot]||slot)+" · "+famWord(n)+"</td><td><span class='"+cls+"'>"+label+"</span>. "+load+"</td></tr>";
+    }).join("");
+    el("fresh-body").innerHTML = rows;
+    el("fresh-note").textContent = "A qualitative reading of the week's load against this eleven, not a sourced medical figure. Older men, and men asked to play a job that is new to them, carry the week a little more heavily.";
   }
 
   function renderAll(){
-    el('mast-era').textContent = 'Tactics and Training · ' + (era>=1986?'1986-87':'1981-82');
-    el('form-intro').textContent = intro();
+    el("mast-era").textContent = "Tactics and Training · " + (era>=1986 ? "1986-87" : "1981-82");
+    el("form-intro").textContent = intro();
     renderForms();
-    renderDots();
-    renderStyles();
+    renderPitch();
+    renderStyleCol("def-list", DEF, defStyle, function(k){ defStyle = k; });
+    renderStyleCol("atk-list", ATK, atkStyle, function(k){ atkStyle = k; });
+    renderClashes();
+    el("approach-note").textContent = APPROACH[approach];
+    renderSetpieces();
+    renderOpp();
     renderTrain();
-    var fam = famState();
-    el('fam-fig').textContent = fam.label;
-    el('fam-bar').style.width = fam.pct+'%';
-    el('fam-note').textContent = famCopy();
-    el('approach-note').textContent = APPROACH[approach];
-    el('mark-btn').classList.toggle('on', mark);
-    el('mark-btn').classList.toggle('ghost', !mark);
-    el('mark-btn').setAttribute('aria-pressed', mark?'true':'false');
+    el("mark-btn").classList.toggle("on", mark);
+    el("mark-btn").classList.toggle("ghost", !mark);
+    el("mark-btn").setAttribute("aria-pressed", mark?"true":"false");
   }
 
-  el('era-1981').addEventListener('click', function(){ era = 1981; renderAll(); setEraBtns(); });
-  el('era-1986').addEventListener('click', function(){ era = 1986; renderAll(); setEraBtns(); });
+  el("era-1981").addEventListener("click", function(){ era = 1981; resetSetpieces(); renderAll(); setEraBtns(); });
+  el("era-1986").addEventListener("click", function(){ era = 1986; resetSetpieces(); renderAll(); setEraBtns(); });
   function setEraBtns(){
-    el('era-1981').classList.toggle('on', era===1981);
-    el('era-1981').setAttribute('aria-pressed', era===1981?'true':'false');
-    el('era-1986').classList.toggle('on', era>=1986);
-    el('era-1986').setAttribute('aria-pressed', era>=1986?'true':'false');
+    el("era-1981").classList.toggle("on", era===1981);
+    el("era-1981").setAttribute("aria-pressed", era===1981?"true":"false");
+    el("era-1986").classList.toggle("on", era>=1986);
+    el("era-1986").setAttribute("aria-pressed", era>=1986?"true":"false");
   }
-  [['tab-tac','panel-tac'],['tab-trn','panel-trn']].forEach(function(pair){
-    el(pair[0]).addEventListener('click', function(){
-      ['panel-tac','panel-trn'].forEach(function(id){ el(id).classList.toggle('on', id===pair[1]); });
-      ['tab-tac','tab-trn'].forEach(function(id){
+  [["tab-tac","panel-tac"],["tab-trn","panel-trn"]].forEach(function(pair){
+    el(pair[0]).addEventListener("click", function(){
+      ["panel-tac","panel-trn"].forEach(function(id){ el(id).classList.toggle("on", id===pair[1]); });
+      ["tab-tac","tab-trn"].forEach(function(id){
         var on = id===pair[0];
-        el(id).classList.toggle('on', on);
-        el(id).setAttribute('aria-pressed', on?'true':'false');
+        el(id).classList.toggle("on", on);
+        el(id).setAttribute("aria-pressed", on?"true":"false");
       });
     });
   });
-  Array.prototype.forEach.call(el('approach-chips').querySelectorAll('.chip'), function(b){
-    b.addEventListener('click', function(){
-      approach = b.getAttribute('data-app');
-      Array.prototype.forEach.call(el('approach-chips').querySelectorAll('.chip'), function(x){
+  Array.prototype.forEach.call(el("approach-chips").querySelectorAll(".chip"), function(b){
+    b.addEventListener("click", function(){
+      approach = b.getAttribute("data-app");
+      Array.prototype.forEach.call(el("approach-chips").querySelectorAll(".chip"), function(x){
         var on = x===b;
-        x.classList.toggle('on', on);
-        x.setAttribute('aria-pressed', on?'true':'false');
+        x.classList.toggle("on", on);
+        x.setAttribute("aria-pressed", on?"true":"false");
       });
-      el('approach-note').textContent = APPROACH[approach];
+      el("approach-note").textContent = APPROACH[approach];
     });
   });
-  el('mark-btn').addEventListener('click', function(){ mark = !mark; renderAll(); });
+  el("mark-btn").addEventListener("click", function(){ mark = !mark; renderAll(); });
 
+  resetSetpieces();
   renderAll();
 })();
 </script>
