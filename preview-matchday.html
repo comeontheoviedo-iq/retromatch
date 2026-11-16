@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RetroMatch – Match Day, 1981-82 (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&amp;family=Special+Elite&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3e6c4;
+  --ink:#1a120c;
+  --red:#c0122a;
+  --red-dark:#8e0c1f;
+  --yellow:#ffd000;
+  --muted:#5a4636;
+  --card:#fff8e8;
+  --chip:#ffd000;
+  --navy:#0b1c3a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#2a1a14;color:var(--ink);font:15px/1.4 Barlow,Helvetica,Arial,sans-serif}
+a{color:var(--red-dark)}
+.wrap{max-width:880px;margin:0 auto;padding:12px 14px 40px}
+.banner{background:var(--yellow);color:#111;border:3px solid #111;padding:8px 12px;margin:0 0 12px;font-weight:700;letter-spacing:.02em}
+.banner b{font-family:Anton,Impact,sans-serif;letter-spacing:.04em;font-weight:400;font-size:18px;margin-right:.4em}
+.mast{background:var(--red);color:#fff;border:3px solid #111;padding:10px 14px 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.mast h1{margin:0;font:400 42px/.9 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.mast .sub{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px;opacity:.95}
+.mast .club{text-align:right}
+.mast .club strong{display:block;font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.03em}
+.sheet{background:var(--paper);border:3px solid #111;border-top:0;padding:12px 14px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{appearance:none;border:2px solid #111;background:var(--chip);color:#111;font:700 12px/1 Barlow,sans-serif;padding:7px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.chip[aria-pressed="true"],.chip.on{background:#111;color:var(--yellow)}
+.panel{display:none}
+.panel.on{display:block}
+h2{margin:0 0 8px;font:400 28px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
+h3{margin:14px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:680px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid #111;padding:10px 12px}
+.card p,.note p,li{margin:0 0 8px}
+.card p:last-child,.note p:last-child{margin-bottom:0}
+.kicker{margin:0 0 8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.sub{color:var(--muted);font-size:13px}
+.tag{display:inline-block;background:var(--yellow);border:1.5px solid #111;padding:1px 6px;font:700 10px/1.3 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-right:4px}
+button.act,select{font:700 13px/1 Barlow,sans-serif;border:2px solid #111;background:var(--yellow);padding:7px 10px;text-transform:uppercase;letter-spacing:.04em}
+button.act.ghost{background:var(--card)}
+.row-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.note{background:#fff;border:2px dashed #111;padding:10px 12px;margin-top:12px;font-size:13px}
+.note h3{margin-top:0;font-size:16px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:2px solid #111;margin:8px 0 10px;font-size:14px}
+th,td{border-bottom:1px solid #111;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#111;color:var(--yellow);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+td.num,th.num{text-align:right;white-space:nowrap}
+.xi li{list-style:none;margin:0;padding:3px 0;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;gap:8px}
+.xi{margin:0;padding:0}
+.xi .pos{font-weight:700;letter-spacing:.04em;font-size:11px;text-transform:uppercase;color:var(--muted)}
+
+/* live board */
+.board{background:#111;color:var(--yellow);border:3px solid #111;padding:10px 12px 12px;margin:0 0 10px}
+.board .fixture{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:12px;color:#fff}
+.board .scoreline{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:8px 0 6px}
+.board .side{font:400 22px/1 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase;color:#fff}
+.board .side.r{text-align:right}
+.board .score{font:400 52px/.9 Anton,Impact,sans-serif;color:var(--yellow);letter-spacing:.02em;text-align:center}
+.board .clock{text-align:center;font:700 18px/1 Barlow,sans-serif;color:#fff;letter-spacing:.12em}
+.board .scorers{font-size:12px;color:#ffd000;margin-top:4px;font-weight:700;letter-spacing:.03em}
+.bars{display:grid;gap:6px;margin:8px 0 4px}
+.bar-lab{display:flex;justify-content:space-between;font:700 10px/1 Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.bar{height:14px;background:#3a2a12;border:2px solid #111;display:flex;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--yellow)}
+.bar i.away{background:#c0122a;margin-left:auto}
+.tallies{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.tally{background:#1a120c;border:2px solid #333;padding:6px 8px;text-align:center}
+.tally b{display:block;font:400 22px/1 Anton,Impact,sans-serif;color:var(--yellow)}
+.tally span{font:700 10px/1 Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+
+.ticker{background:var(--navy);color:var(--yellow);border:3px solid #111;padding:8px 10px;margin:0 0 10px;font:700 13px/1.5 "Special Elite",Barlow,monospace;letter-spacing:.02em;min-height:3.2em;overflow:hidden}
+.ticker .lab{color:#fff;font-family:Barlow,sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 4px}
+
+.pop{background:var(--yellow);color:#111;border:3px solid #111;padding:10px 12px;margin:0 0 10px;box-shadow:5px 5px 0 #111}
+.pop .min{font:700 11px/1 Barlow,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.pop p{margin:4px 0 0;font:400 22px/1.1 Anton,Impact,sans-serif;letter-spacing:.02em}
+
+.styles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.style-col .chip{margin:0 6px 6px 0}
+.vidi{background:#0a0a0a;color:#a6ff8f;border:3px solid #111;padding:12px 14px;min-height:220px;font:18px/1.45 "Special Elite",Barlow,monospace}
+.vidi .header{color:var(--yellow);margin:0 0 8px;font-weight:700}
+.vidi p{margin:0 0 4px}
+.ft-banner{border:3px double #111;padding:14px;text-align:center;background:var(--card);margin:0 0 10px}
+.ft-banner .res{font:400 36px/.9 Anton,Impact,sans-serif;letter-spacing:.02em}
+.prog{background:#efe4c4;border:3px solid #111;padding:16px 18px;box-shadow:inset 0 0 0 2px #111}
+.prog .mastline{text-align:center;border-top:4px double #111;border-bottom:4px double #111;padding:8px 0;margin:0 0 10px}
+.prog h1{margin:0;font:400 42px/.9 Anton,Impact,sans-serif;text-transform:uppercase}
+.prog .club{letter-spacing:.4em;font-weight:700;font-size:12px;text-transform:uppercase}
+.prog .vs{text-align:center;font:400 24px/1 Anton,Impact,sans-serif;text-transform:uppercase;margin:8px 0}
+.prog .date{text-align:center;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:11px}
+.talk-msg{margin-top:8px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>PREVIEW</b> Match day for the 1980s, mocked for a First Division Saturday in 1981-82. This is not the live game. Nothing here changes a save.</div>
+  <header class="mast">
+    <div>
+      <div class="sub">Season 1981-82</div>
+      <h1>Match Day</h1>
+    </div>
+    <div class="club">
+      <strong>Manchester United</strong>
+      <div class="sub">First Division · Old Trafford</div>
+    </div>
+  </header>
+  <div class="sheet">
+    <div class="chips" role="tablist" aria-label="Match day preview sheets">
+      <button class="chip on" data-panel="pre" aria-pressed="true">Pre-match</button>
+      <button class="chip" data-panel="live" aria-pressed="false">The game</button>
+      <button class="chip" data-panel="bench" aria-pressed="false">The bench</button>
+      <button class="chip" data-panel="injury" aria-pressed="false">A knock</button>
+      <button class="chip" data-panel="ht" aria-pressed="false">Half-time</button>
+      <button class="chip" data-panel="ft" aria-pressed="false">Full-time</button>
+      <button class="chip" data-panel="vidi" aria-pressed="false">Vidiprinter</button>
+      <button class="chip" data-panel="prog" aria-pressed="false">Programme</button>
+    </div>
+
+    <section class="panel on" id="p-pre">
+      <h2>Before kick-off</h2>
+      <p class="kicker">Old Trafford · three o'clock · the two elevens are up</p>
+      <p>The eleven is pinned, the programme is in the stand, and the board can still be read before a ball is kicked. Kick-off waits on the manager.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>Manchester United</h3>
+          <ol class="xi">
+            <li><span>Gary Bailey</span><span class="pos">Goalkeeper</span></li>
+            <li><span>John Gidman</span><span class="pos">Right-back</span></li>
+            <li><span>Kevin Moran</span><span class="pos">Centre-half</span></li>
+            <li><span>Gordon McQueen</span><span class="pos">Centre-half</span></li>
+            <li><span>Arthur Albiston</span><span class="pos">Left-back</span></li>
+            <li><span>Steve Coppell</span><span class="pos">Right</span></li>
+            <li><span>Bryan Robson</span><span class="pos">Midfield</span></li>
+            <li><span>Remi Moses</span><span class="pos">Midfield</span></li>
+            <li><span>Sammy McIlroy</span><span class="pos">Inside</span></li>
+            <li><span>Frank Stapleton</span><span class="pos">Centre-forward</span></li>
+            <li><span>Lou Macari</span><span class="pos">Forward</span></li>
+          </ol>
+          <p class="sub" style="margin-top:8px">Substitute <span class="tag">One named</span> Mike Duxbury</p>
+        </div>
+        <div class="card">
+          <h3>Arsenal</h3>
+          <ol class="xi">
+            <li><span>Pat Jennings</span><span class="pos">Goalkeeper</span></li>
+            <li><span>John Devine</span><span class="pos">Right-back</span></li>
+            <li><span>David O'Leary</span><span class="pos">Centre-half</span></li>
+            <li><span>Willie Young</span><span class="pos">Centre-half</span></li>
+            <li><span>Kenny Sansom</span><span class="pos">Left-back</span></li>
+            <li><span>Brian Talbot</span><span class="pos">Midfield</span></li>
+            <li><span>John Hollins</span><span class="pos">Midfield</span></li>
+            <li><span>Graham Rix</span><span class="pos">Left</span></li>
+            <li><span>Stewart Robson</span><span class="pos">Midfield</span></li>
+            <li><span>Alan Sunderland</span><span class="pos">Forward</span></li>
+            <li><span>John Hawley</span><span class="pos">Forward</span></li>
+          </ol>
+          <p class="sub" style="margin-top:8px">Substitute <span class="tag">One named</span> Brian McDermott</p>
+        </div>
+      </div>
+      <div class="row-acts">
+        <button class="act" type="button">Programme</button>
+        <button class="act" type="button">Kick off</button>
+        <button class="act ghost" type="button">Back to the lineup</button>
+      </div>
+      <p class="sub">In the live game this panel already compares the two elevens once the side is confirmed, and hides at kick-off. The programme opens as an overlay and stays the home club's issue.</p>
+    </section>
+
+    <section class="panel" id="p-live">
+      <h2>How the game is going</h2>
+      <p class="kicker">A running view, not a stream of every passage of play</p>
+      <div class="board">
+        <div class="fixture"><span>First Division</span><span>Old Trafford</span></div>
+        <div class="scoreline">
+          <div class="side">United<div class="scorers">Stapleton 14, Robson 61</div></div>
+          <div>
+            <div class="score">2-1</div>
+            <div class="clock">63:12</div>
+          </div>
+          <div class="side r">Arsenal<div class="scorers">Sunderland 38</div></div>
+        </div>
+        <div class="bars">
+          <div>
+            <div class="bar-lab"><span>Possession</span><span>54 – 46</span></div>
+            <div class="bar"><i style="width:54%"></i></div>
+          </div>
+          <div>
+            <div class="bar-lab"><span>Territory</span><span>58 – 42</span></div>
+            <div class="bar"><i style="width:58%"></i></div>
+          </div>
+        </div>
+        <div class="tallies">
+          <div class="tally"><b>9 – 6</b><span>Shots</span></div>
+          <div class="tally"><b>5 – 3</b><span>Corners</span></div>
+          <div class="tally"><b>One left</b><span>Substitute</span></div>
+        </div>
+      </div>
+      <div class="pop">
+        <div class="min">61 min · Goal</div>
+        <p>Robson, from a Coppell ball, and Old Trafford is up. United lead again, 2-1.</p>
+      </div>
+      <div class="ticker">
+        <div class="lab">Around the grounds</div>
+        LIVERPOOL 1  IPSWICH 0 &nbsp;·&nbsp; EVERTON 0  WEST HAM 0 &nbsp;·&nbsp; SPURS 2  SUNDERLAND 1 &nbsp;·&nbsp; NOTTM FOREST 1  ASTON VILLA 1 &nbsp;·&nbsp; SOUTHAMPTON …
+      </div>
+      <p class="sub">Commentary is held back for the moments that matter: a goal, a chance, a booking, a knock, the interval. The rest of the afternoon is told by the score, the clock, the bars and the tallies. Other First Division scores tick along the same strip. The names are real First Division clubs of the season; the figures on this preview are a layout for the strip, not a sourced afternoon's results. Pause, speed and sim-to-full-time stay on the board, as they do now.</p>
+    </section>
+
+    <section class="panel" id="p-bench">
+      <h2>From the bench</h2>
+      <p class="kicker">One named substitute in the League, 1981-82, and the two styles can be changed with him</p>
+      <p>Football League matches in 1981-82 allow one named substitute, who may come on for injury or a tactical change. Two named men in the FA Cup and League Cup arrive only in 1986-87, and two in League matches in 1987-88.</p>
+      <div class="styles">
+        <div class="card style-col">
+          <h3>Defensive</h3>
+          <button class="chip on" type="button">Man-marking</button>
+          <button class="chip" type="button">Pressing</button>
+          <button class="chip" type="button">Offside trap</button>
+          <button class="chip" type="button">Sitting deep</button>
+          <p class="sub">The side is man-for-man at the back. A change here is a word from the bench, not a new eleven.</p>
+        </div>
+        <div class="card style-col">
+          <h3>Attacking</h3>
+          <button class="chip" type="button">Pass-and-move</button>
+          <button class="chip on" type="button">Long ball</button>
+          <button class="chip" type="button">Quick counters</button>
+          <button class="chip" type="button">Patient possession</button>
+          <p class="sub">United are going more direct. Zonal marking is not on this list until 1986-87.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:10px">
+        <h3>The substitute</h3>
+        <p>Mike Duxbury is the one named man. He may be sent on now, or held for a knock.</p>
+        <p class="im-row">Send Duxbury on for <select><option>Lou Macari</option><option>Sammy McIlroy</option><option>Remi Moses</option></select> <button class="act" type="button">Send him on</button></p>
+        <p class="sub">The live game already lets you change approach (push, steady, shut up shop) and a tactical wrinkle during a match, and send on the named substitute when the rules allow. Defensive and attacking styles are set before kick-off today, not from this bench.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="p-injury">
+      <h2>A knock in play</h2>
+      <p class="kicker">The named man can still be held, or sent on, when someone cannot continue</p>
+      <div class="pop">
+        <div class="min">71 min · Injury</div>
+        <p>McQueen is down and cannot go on. Duxbury is ready, or United play out the match with ten.</p>
+      </div>
+      <div class="card">
+        <p>Gordon McQueen cannot continue. Send on Mike Duxbury, or play out the match with ten.</p>
+        <div class="row-acts">
+          <button class="act" type="button">Send Duxbury on</button>
+          <button class="act ghost" type="button">Play on with ten</button>
+        </div>
+        <p class="sub" style="margin-top:10px">This choice is already in the live game when a man is hurt and a substitute remains. A second knock, with the one substitute already used, still leaves the side a man short.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="p-ht">
+      <h2>The half-time talk</h2>
+      <p class="kicker">A few words in the dressing-room before the second half</p>
+      <div class="board">
+        <div class="fixture"><span>Half-time</span><span>Old Trafford</span></div>
+        <div class="scoreline">
+          <div class="side">United<div class="scorers">Stapleton 14</div></div>
+          <div>
+            <div class="score">1-1</div>
+            <div class="clock">HT</div>
+          </div>
+          <div class="side r">Arsenal<div class="scorers">Sunderland 38</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <p>Nothing is guaranteed. Rallying a side who are up against it can lift them a touch; the same speech when the game already looks won can go the other way. A calmer word trades a little thrust for shape. Saying nothing is still a choice.</p>
+        <div class="row-acts" id="ht-acts">
+          <button class="act" type="button" data-ht="rally">Rally them</button>
+          <button class="act" type="button" data-ht="calm">Steady them down</button>
+          <button class="act ghost" type="button" data-ht="none">Say nothing new</button>
+        </div>
+        <p class="talk-msg" id="ht-msg"></p>
+      </div>
+    </section>
+
+    <section class="panel" id="p-ft">
+      <h2>Full-time</h2>
+      <p class="kicker">The whistle, a word in the room, then the rest of the afternoon on the printer</p>
+      <div class="ft-banner">
+        <div class="kicker">Full-time · Old Trafford</div>
+        <div class="res">United 2-1 Arsenal</div>
+        <p style="margin:8px 0 0">Stapleton 14, Robson 61 · Sunderland 38</p>
+      </div>
+      <div class="card">
+        <h3>A word after the whistle</h3>
+        <p>The live game already has the half-time talk. A full-time word is proposed here in the same spirit: a few words in the dressing-room, nothing promised for next week unless a later build is approved to give them a real, small effect.</p>
+        <div class="row-acts" id="ft-acts">
+          <button class="act" type="button" data-ft="proud">Tell them they earned it</button>
+          <button class="act" type="button" data-ft="demand">Ask for more next time</button>
+          <button class="act ghost" type="button" data-ft="none">Say nothing new</button>
+        </div>
+        <p class="talk-msg" id="ft-msg"></p>
+      </div>
+    </section>
+
+    <section class="panel" id="p-vidi">
+      <h2>The Vidiprinter</h2>
+      <p class="kicker">The teleprinter stays as it is: the rest of the division, after the whistle</p>
+      <div class="vidi" id="vidi-demo">
+        <p class="header">VIDIPRINTER · FIRST DIVISION</p>
+        <p>UNITED&nbsp;&nbsp;&nbsp;2  ARSENAL&nbsp;&nbsp;&nbsp;1 &nbsp; FT</p>
+        <p>LIVERPOOL&nbsp;1  IPSWICH&nbsp;&nbsp;&nbsp;0 &nbsp; FT</p>
+        <p>EVERTON&nbsp;&nbsp;&nbsp;0  WEST HAM&nbsp;&nbsp;0 &nbsp; FT</p>
+        <p>SPURS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2  SUNDERLAND 1 &nbsp; FT</p>
+        <p>FOREST&nbsp;&nbsp;&nbsp;&nbsp;1  ASTON VILLA 1 &nbsp; FT</p>
+        <p>SOUTHAMPTON 2  COVENTRY&nbsp;&nbsp;2 &nbsp; FT</p>
+        <p>W.B.A.&nbsp;&nbsp;&nbsp;&nbsp;1  NOTTS CO.&nbsp;&nbsp;0 &nbsp; FT</p>
+        <p>MAN CITY&nbsp;&nbsp;3  BIRMINGHAM 1 &nbsp; FT</p>
+        <p>WOLVES&nbsp;&nbsp;&nbsp;&nbsp;0  LEEDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 &nbsp; FT</p>
+        <p>BRIGHTON&nbsp;&nbsp;1  STOKE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 &nbsp; FT</p>
+        <p>SWANSEA&nbsp;&nbsp;2  MIDDLESBRO 1 &nbsp; FT</p>
+      </div>
+      <div class="row-acts">
+        <button class="act ghost" type="button">Slow</button>
+        <button class="act" type="button">Normal</button>
+        <button class="act ghost" type="button">Instant</button>
+        <span class="sub">Click the ticker to finish, as now.</span>
+      </div>
+      <p class="sub">The live printer already runs the rest of the division at full-time, in this teleprinter style, with slow, normal and instant speeds. The proposal keeps that box. Other scores during the match, on the running view, are the new part.</p>
+    </section>
+
+    <section class="panel" id="p-prog">
+      <h2>The programme</h2>
+      <p class="kicker">Still the home club's issue, to be read before kick-off or at the interval</p>
+      <div class="prog">
+        <div class="date">Saturday afternoon · First Division · 1981-82</div>
+        <div class="mastline">
+          <div class="club">Manchester United Football Club</div>
+          <h1>United</h1>
+        </div>
+        <div class="vs">Manchester United <em>v</em> Arsenal</div>
+        <p class="date">Old Trafford</p>
+        <div class="grid" style="margin-top:12px">
+          <div>
+            <h3>The Reds</h3>
+            <p class="sub">1 Bailey · 2 Gidman · 3 Albiston · 4 Moses · 5 Moran · 6 McQueen · 7 Coppell · 8 Robson · 9 Stapleton · 10 Macari · 11 McIlroy</p>
+            <p class="sub">Substitute: Duxbury</p>
+          </div>
+          <div>
+            <h3>Today's visitors</h3>
+            <p class="sub">1 Jennings · 2 Devine · 3 Sansom · 4 Talbot · 5 O'Leary · 6 Young · 7 Hollins · 8 S. Robson · 9 Sunderland · 10 Wark · 11 Rix</p>
+            <p class="sub">Substitute: McDermott</p>
+          </div>
+        </div>
+        <p class="sub" style="margin-top:10px;text-align:center">The live programme is already the home club's, in the style of the season, and this preview does not replace it.</p>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+  var chips = document.querySelectorAll('.chips .chip');
+  chips.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      chips.forEach(function(b){ b.classList.remove('on'); b.setAttribute('aria-pressed','false'); });
+      btn.classList.add('on'); btn.setAttribute('aria-pressed','true');
+      document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('on'); });
+      var panel = document.getElementById('p-'+btn.getAttribute('data-panel'));
+      if (panel) panel.classList.add('on');
+      window.scrollTo(0,0);
+    });
+  });
+  document.querySelectorAll('#p-bench .style-col').forEach(function(col){
+    col.querySelectorAll('.chip').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        col.querySelectorAll('.chip').forEach(function(b){ b.classList.remove('on'); });
+        btn.classList.add('on');
+      });
+    });
+  });
+  var htMsg = document.getElementById('ht-msg');
+  document.querySelectorAll('#ht-acts [data-ht]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var k = btn.getAttribute('data-ht');
+      htMsg.textContent = k==='rally'
+        ? 'A few sharp words get the desired reaction: heads up, ready to go again.'
+        : k==='calm'
+        ? 'A calmer word: shape first, do not chase the game.'
+        : 'Nothing much said: sometimes the team just needs the ten minutes\' rest.';
+    });
+  });
+  var ftMsg = document.getElementById('ft-msg');
+  document.querySelectorAll('#ft-acts [data-ft]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var k = btn.getAttribute('data-ft');
+      ftMsg.textContent = k==='proud'
+        ? 'A quiet word of thanks, and they can enjoy the night.'
+        : k==='demand'
+        ? 'Well won, but the standard is not lowered for next week.'
+        : 'Nothing much added: the result can speak for itself.';
+    });
+  });
+})();
+</script>
+</body>
+</html>
