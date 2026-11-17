@@ -2239,8 +2239,8 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
 .pc-e81 .pc-back .pc-bhead small{display:block;font:800 3cqw/1 var(--f-barlow);letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
 .pc-e81 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:800 7.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;color:#fff}
 .pc-e81 .pc-back .pc-bhead p{margin:.5cqw 0 0;font:700 3.3cqw/1.1 var(--f-barlow);letter-spacing:.08em;text-transform:uppercase;color:var(--mag)}
-.pc-e81 .pc-bodyb{padding:2.4cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
-.pc-e81 .pc-bio{margin:0;font:400 3.45cqw/1.4 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:2cqw;border-left:.7cqw solid var(--mag);min-height:26cqw}
+.pc-e81 .pc-bodyb{padding:2cqw 3.4cqw 1.2cqw;display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.pc-e81 .pc-bio{margin:0;font:400 3.2cqw/1.3 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:1.4cqw 2cqw;border-left:.7cqw solid var(--mag);min-height:0}
 .pc-e81 .pc-bio::before{content:"ACTION FILE";display:block;font:800 3.1cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:1cqw}
 .pc-e81 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);gap:.5cqw;margin:2.2cqw 0 1.4cqw}
 .pc-e81 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;background:#0c1f3d}
@@ -2260,6 +2260,63 @@ body.theme-match #theme-masthead .mt-stripe{height:6px; background:repeating-lin
 .pc-e81 .pc-bfoot{margin:auto 0 0;text-align:center;font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);padding:1.8cqw 2cqw 2.2cqw}
 
 /*PCARD-CSS-END*/
+/* ===== v408 UI ===== */
+#v-squad.v405 .grid2{display:block;}
+#v-squad.v405 .grid2 .scroll-box{margin-bottom:12px;}
+#v-squad.v405 #profile-content{max-width:100%;}
+#v-squad.v405 p.sub{margin-bottom:8px;}
+.v408-clubrow,.v408-picked{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;}
+.v408-clubrow .office-chip,.v408-picked .office-chip{font-size:13px;}
+.v408-picked .office-chip .chip-yellow{margin-left:6px;}
+.pc-spread{display:flex;justify-content:center;align-items:flex-start;gap:22px;width:100%;margin:8px 0 0}
+.pc-leaf{margin:0;flex:0 1 auto;width:min(400px, calc((100% - 22px) / 2))}
+.pc-leaf-card{width:100%;aspect-ratio:2/3;container-type:inline-size;position:relative;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:default;}
+.pc-leaf-card .pc-face{position:absolute;inset:0;transform:none !important;backface-visibility:visible;-webkit-backface-visibility:visible;}
+#pc-turn{display:none;margin:10px auto 0;font:800 13px/1 var(--sans,inherit);letter-spacing:.08em;text-transform:uppercase;background:var(--yellow,#ffd000);color:#111;border:2px solid #111;padding:8px 14px;cursor:pointer;}
+@media (max-width:720px){
+  .pc-spread{flex-direction:column;align-items:center;}
+  .pc-spread[data-show="front"] [data-face="back"],
+  .pc-spread[data-show="back"] [data-face="front"]{display:none}
+  .pc-leaf{width:min(400px,86vw)}
+  #pc-turn{display:block;}
+  .pc-leaf-card{cursor:pointer}
+}
+.pc-e81 table.pc-career{width:100%;border-collapse:collapse;margin:.7cqw 0 0;font:700 3.15cqw/1.2 var(--f-barlow,inherit);color:#fff;background:transparent;}
+.pc-e81 .pc-career th{font:800 2.5cqw/1 var(--f-barlow,inherit);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan,#7ec8e3);text-align:left;padding:.4cqw .8cqw .4cqw 0;background:transparent;color:#7ec8e3;}
+.pc-e81 .pc-career td{padding:.55cqw .8cqw .55cqw 0;border-bottom:.2cqw solid #1a335c;vertical-align:top;background:transparent;color:#fff;font:700 3.05cqw/1.2 var(--f-barlow,inherit);}
+.pc-e81 .pc-career th.num,.pc-e81 .pc-career td.num{text-align:right;padding-right:0}
+.pc-e81 .pc-career tr:last-child td{border-bottom:0}
+.pc-e81 .pc-attrgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6cqw 1cqw;margin:auto 0 1.2cqw}
+.pc-e81 .pc-attrgrid > div{background:#0c1f3d;padding:1cqw 1.3cqw 1.1cqw;min-width:0}
+.pc-e81 .pc-attrgrid b{font:800 2.5cqw/1 var(--f-barlow,inherit);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan,#7ec8e3)}
+.pc-e81 .pc-attrgrid em{float:right;font:800 3.3cqw/1 var(--f-barlow,inherit);font-style:normal;color:var(--yellow,#ffd000)}
+.pc-e81 .pc-attrgrid .pc-pips{display:flex;gap:.28cqw;margin-top:.55cqw}
+.pc-e81 .pc-attrgrid .pc-pips i{width:1.7cqw;height:1.7cqw;background:#1a335c;border-radius:0;display:inline-block}
+.pc-e81 .pc-attrgrid .pc-pips i.pc-on{background:var(--cyan,#7ec8e3)}
+.pc-e81 .pc-attrgrid .pc-pips i.pc-half{background:linear-gradient(90deg,var(--cyan,#7ec8e3) 50%,#1a335c 50%)}
+.pc-e81 .pc-endmark{margin-top:auto;text-align:center;padding:3.2cqw 2cqw 1.6cqw;border-top:.45cqw solid var(--cyan,#7ec8e3)}
+.pc-e81 .pc-endmark b{display:block;font:800 8.4cqw/.9 var(--f-barlow,inherit);font-style:italic;text-transform:uppercase;color:#fff;}
+.pc-e81 .pc-endmark span{display:block;margin-top:1.1cqw;font:800 3cqw/1 var(--f-barlow,inherit);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan,#7ec8e3)}
+.pc-e81 .pc-body-short .v408-facts{margin-top:.6cqw}
+.v408-strip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin:10px 0 0;}
+.v408-wr{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+.v408-wr .office-chip{font-size:13px;}
+.tactics-pitch .pl.v408-hole .dot,.tactics-pitch .pl.v408-adv .dot{outline:2px solid var(--yellow,#ffd000);}
+#substitute-box{margin-top:8px !important;margin-bottom:6px !important;padding:6px 10px;}
+#substitute-box .box-title{font-size:12px;letter-spacing:.08em;margin:0 0 4px;}
+#substitute-box p{margin:2px 0;}
+#substitute-box a.sub{color:inherit;text-decoration:none;font-weight:700;}
+.office-staff{gap:10px;}
+.office-staff-row{align-items:start;padding:10px 12px;}
+.office-staff-row .val + .val,
+#club-trainer-duty,#club-secretary-duty,#club-assistant-duty{display:block;margin-top:4px;font-weight:400;}
+#v408-tr-tabs,#v408-table-tabs{margin:0 0 12px;}
+.v408-selected{margin:10px 0 0;padding:8px 10px;border:2px solid var(--ink,#111);background:var(--card,#fff8e8);}
+.v408-res{display:inline-block;margin:0 12px 6px 0;}
+.cup-round-tab{font-family:inherit;font-size:12px;padding:4px 8px;cursor:pointer;border:2px solid var(--ink,#111);background:#fff8e8;color:var(--ink,#111);}
+.cup-round-tab.on,.cup-round-tab[aria-pressed="true"]{background:var(--ink,#111);color:var(--yellow,#ffd000);}
+#data-report-box{display:none !important;}
+
 </style>
 <!--THEME-CSS-END-->
 <style id="v359-type-scale">
@@ -4109,7 +4166,6 @@ body.theme-turnstile #halftime-talk-box .matchctl button.primary, body.theme-tur
       </div>
     </div>
     <a class="navlink" data-view="match"><span class="hot">M</span>ATCH DAY</a>
-    <a href="#" id="data-report-link" class="navlink">Data</a>
   </div>
   <div id="data-report-box" class="box" style="display:none; margin:8px 12px; font-size:13px;"></div>
 
@@ -4498,6 +4554,159 @@ body.theme-match .chip-yellow.rise{background:var(--ink);color:var(--yellow);}
 #office-wire-tray .wire-head{font-weight:700;}
 #loans-box select, #scout-region-box select{font-size:14px;max-width:220px;}
 </style>
+<style id="v408-chip-skin">
+/* v408 : the Match weekly theme flattens every button into a blue underlined text link.
+   Selectable chips, tabs, filters, cup rounds and scout actions keep the yellow/ink
+   selected-button look approved for this version. */
+html body.theme-match .pc-e81 .pc-bio,
+html body.theme-shoot .pc-e81 .pc-bio,
+html body .pc-e81 .pc-bio{
+  min-height:0 !important;
+  padding:1.4cqw 2cqw !important;
+  font:400 3.2cqw/1.3 var(--f-osw) !important;
+}
+
+html body.theme-match .pc-e81 .pc-person,
+html body.theme-match .pc-e81 .pc-caps,
+html body.theme-shoot .pc-e81 .pc-person,
+html body.theme-shoot .pc-e81 .pc-caps,
+html body .pc-e81 .pc-person,
+html body .pc-e81 .pc-caps{
+  font:700 3.2cqw/1.25 var(--f-barlow,inherit) !important;
+  color:#071428 !important;
+  margin:.7cqw 0 0 !important;
+  letter-spacing:.02em !important;
+  text-transform:none !important;
+  background:transparent !important;
+  padding:0 !important;
+}
+html body.theme-match .pc-e81 table.pc-career,
+html body.theme-shoot .pc-e81 table.pc-career,
+html body .pc-e81 table.pc-career{
+  width:100% !important;
+  font:700 2.5cqw/1.15 var(--f-barlow,inherit) !important;
+  background:transparent !important;
+  color:#071428 !important;
+  border-collapse:collapse !important;
+  margin:.4cqw 0 0 !important;
+  box-shadow:none !important;
+}
+html body.theme-match .pc-e81 table.pc-career th,
+html body.theme-shoot .pc-e81 table.pc-career th,
+html body .pc-e81 table.pc-career th{
+  font:800 2.15cqw/1 var(--f-barlow,inherit) !important;
+  letter-spacing:.1em !important;
+  text-transform:uppercase !important;
+  color:#0c1f3d !important;
+  background:#0c1f3d !important;
+  color:#7ec8e3 !important;
+  padding:.2cqw .45cqw !important;
+  border:0 !important;
+}
+html body.theme-match .pc-e81 table.pc-career td,
+html body.theme-shoot .pc-e81 table.pc-career td,
+html body .pc-e81 table.pc-career td,
+html body.theme-match .pc-e81 table.pc-career tbody tr:nth-child(even) td,
+html body.theme-match .pc-e81 table.pc-career tbody tr:nth-child(odd) td,
+html body.theme-match .pc-e81 table.pc-career tbody tr:hover td{
+  font:700 2.5cqw/1.15 var(--f-barlow,inherit) !important;
+  color:#071428 !important;
+  background:transparent !important;
+  padding:.25cqw .45cqw !important;
+  border:0 !important;
+  border-bottom:.15cqw solid #d8d0b8 !important;
+}
+html body.theme-match .pc-e81 .v408-facts div,
+html body .pc-e81 .v408-facts div{padding:.7cqw 0 .5cqw !important;}
+html body.theme-match .pc-e81 .v408-facts b,
+html body .pc-e81 .v408-facts b{font-size:3.4cqw !important;}
+html body.theme-match .pc-e81 .pc-attrgrid{flex-shrink:0;}
+html body.theme-match .pc-e81 .pc-tiles,
+html body.theme-match .pc-e81 .pc-tiles div,
+html body.theme-match .pc-e81 .pc-tiles b,
+html body.theme-match .pc-e81 .pc-tiles span{
+  font-family:var(--f-barlow,inherit) !important;
+}
+html body.theme-match .pc-e81 .v408-facts{
+  margin:.8cqw 0 0 !important;
+  gap:.5cqw !important;
+}
+html body.theme-match button.office-chip,
+html body.theme-match .office-chips > button,
+html body.theme-match button.v405-fchip,
+html body.theme-match button.cup-round-tab,
+html body.theme-match button#pc-turn,
+html body.theme-match a.go,
+html body.theme-match button.go{
+  font-family:Barlow,Helvetica,Arial,sans-serif !important;
+  font-size:13px !important;
+  font-weight:700 !important;
+  letter-spacing:.06em !important;
+  text-transform:uppercase !important;
+  background:var(--yellow,#ffd000) !important;
+  color:var(--ink,#111) !important;
+  border:2px solid var(--ink,#111) !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  min-height:0 !important;
+  padding:7px 12px !important;
+  text-decoration:none !important;
+  text-underline-offset:0 !important;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+}
+html body.theme-match button.v405-fchip{
+  font-size:10px !important;
+  padding:5px 7px !important;
+  background:var(--paper,#f3e6c4) !important;
+  border-width:1px !important;
+}
+html body.theme-match button.cup-round-tab{
+  font-size:12px !important;
+  padding:4px 8px !important;
+  background:#fff8e8 !important;
+}
+html body.theme-match a.go,
+html body.theme-match button.go{
+  display:inline-block;
+  font-size:12px !important;
+  padding:5px 8px !important;
+  margin:0 2px 4px 0;
+}
+html body.theme-match button.office-chip.on,
+html body.theme-match button.office-chip[aria-pressed="true"],
+html body.theme-match .office-chips > button.on,
+html body.theme-match button.v405-fchip.on,
+html body.theme-match button.cup-round-tab.on,
+html body.theme-match button.cup-round-tab[aria-pressed="true"]{
+  background:var(--ink,#111) !important;
+  color:var(--yellow,#ffd000) !important;
+  text-decoration:none !important;
+  border-color:var(--ink,#111) !important;
+}
+html body.theme-match button.office-chip:hover:not(:disabled),
+html body.theme-match .office-chips > button:hover:not(:disabled),
+html body.theme-match button.v405-fchip:hover:not(:disabled),
+html body.theme-match button.cup-round-tab:hover:not(:disabled),
+html body.theme-match button#pc-turn:hover:not(:disabled),
+html body.theme-match a.go:hover,
+html body.theme-match button.go:hover:not(:disabled){
+  color:var(--ink,#111) !important;
+  background:var(--yellow,#ffd000) !important;
+  text-decoration:none !important;
+}
+html body.theme-match button.office-chip.on:hover:not(:disabled),
+html body.theme-match button.office-chip[aria-pressed="true"]:hover:not(:disabled),
+html body.theme-match .office-chips > button.on:hover:not(:disabled),
+html body.theme-match button.v405-fchip.on:hover:not(:disabled),
+html body.theme-match button.cup-round-tab.on:hover:not(:disabled),
+html body.theme-match button.cup-round-tab[aria-pressed="true"]:hover:not(:disabled){
+  background:var(--ink,#111) !important;
+  color:var(--yellow,#ffd000) !important;
+}
+</style>
+
     <div class="view" id="v-transfers">
       <h1>Transfers</h1>
       <p class="sub">CLOSE-SEASON &amp; MID-SEASON DEALINGS : SUBJECT TO THE BOARD'S FUNDS</p>
@@ -21334,7 +21543,15 @@ function renderFormationSheet(){
       box.parentNode.insertBefore(host, box.nextSibling);
     }
     host.style.display = '';
+    if (!document.getElementById('v408-tactics-wr')){
+      var wrHost = document.createElement('div');
+      wrHost.id = 'v408-tactics-wr';
+      wrHost.className = 'box';
+      wrHost.style.marginTop = '10px';
+      host.parentNode.insertBefore(wrHost, host.nextSibling);
+    }
     if (typeof renderTacticsPitch==='function') renderTacticsPitch();
+    if (typeof renderWrinkleBox==='function') renderWrinkleBox();
   } else {
     box.classList.remove('office-chips');
     var hideP = document.getElementById('tactics-pitch');
@@ -21428,10 +21645,13 @@ function renderStyleOptions(){
     if (typeof ensureEraStyle==='function') ensureEraStyle();
     var defs = (typeof eraDefStylesForYear==='function') ? eraDefStylesForYear(year) : eraDefStyleOptions(year, tactics.formation);
     var atks = (typeof eraAtkStylesForYear==='function') ? eraAtkStylesForYear(year) : eraAtkStyleOptions(year, tactics.formation);
+    var defO = defs.find(function(o){ return o.key===tactics.defStyle; }) || defs[0] || {label:'',desc:''};
+    var atkO = atks.find(function(o){ return o.key===tactics.atkStyle; }) || atks[0] || {label:'',desc:''};
     box.innerHTML = '<div class="style-split">'+
       renderStyleCol80s(defs, tactics.defStyle, 'DEFENSIVE STYLE', 'How the side keeps its shape without the ball.', tactics.formation)+
       renderStyleCol80s(atks, tactics.atkStyle, 'ATTACKING STYLE', 'How the side plays when it has the ball.', tactics.formation)+
-      '</div>';
+      '</div>'+
+      '<div class="v408-selected"><div class="k" style="font-weight:700;margin-bottom:4px;">Selected</div>Defending with <b>'+escTacticsTxt(defO.label)+'</b>. Attacking with <b>'+escTacticsTxt(atkO.label)+'</b>. '+escTacticsTxt(defO.desc||'')+' '+escTacticsTxt(atkO.desc||'')+' <p class="sub" style="margin:6px 0 0;">Training is a single weekly choice. You can change the week\'s work on the Training screen.</p></div>';
     box.querySelectorAll('button[data-style]').forEach(function(b){
       b.addEventListener('click', function(){
         var k = b.getAttribute('data-style');
@@ -21527,22 +21747,52 @@ function wrinkleBonusFor(oppName){
   return 1 + clamp(0.11 - seen*0.04, 0, 0.11);
 }
 function renderWrinkleBox(){
-  var box = document.getElementById('wrinkle-box'); if (!box) return;
+  var boxes = ['wrinkle-box','v408-tactics-wr'].map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  if (!boxes.length) return;
+  var box = boxes[0];
   var wrinkleOpts = (typeof wrinkleOptionsForEra === 'function') ? wrinkleOptionsForEra() : wrinkleSlotOptions;
-  var opts = '<option value="">NONE: PLAY IT STRAIGHT</option>' + wrinkleOpts.map(function(o){
-    return '<option value="'+o.slot+'"'+(tacticalWrinkle && tacticalWrinkle.slot===o.slot?' selected':'')+'>'+o.label.toUpperCase()+'</option>';
-  }).join('');
+  var shape = (typeof eraPitchShapeKey==='function') ? eraPitchShapeKey() : '';
+  var formW = (typeof v408FormationWrinkles==='function') ? v408FormationWrinkles(shape) : [];
   var chosen = tacticalWrinkle ? wrinkleOpts.find(function(o){return o.slot===tacticalWrinkle.slot;}) : null;
-  box.innerHTML = '<div class="box-title" style="margin-left:0;">TACTICAL WRINKLE</div>'+
-    '<select id="wrinkle-select" style="font-size:16px;">'+opts+'</select>'+
-    '<p class="sub" style="margin-top:8px;">'+(chosen ? chosen.desc : "Play the shape straight, every number doing the job it's numbered for.")+'</p>'+
-    (chosen ? '<p class="sub">Freshest against a side that hasn\'t faced it from us before, fading out as the division catches on and passes the word round.</p>' : '');
-  document.getElementById('wrinkle-select').addEventListener('change', function(){
-    tacticalWrinkle = this.value ? {slot:this.value} : null;
-    renderWrinkleBox();
+  var board = (typeof v408BoardWrinkle==='string' || v408BoardWrinkle) ? v408BoardWrinkle : null;
+  var formChosen = formW.find(function(w){ return w.key===board; }) || null;
+  var html = '<div class="box-title" style="margin-left:0;">TACTICAL WRINKLE</div>';
+  html += '<div class="v408-wr">';
+  html += '<button type="button" class="office-chip'+((!tacticalWrinkle && !board)?' on':'')+'" data-wr="" aria-pressed="'+((!tacticalWrinkle && !board)?'true':'false')+'">Play it straight</button>';
+  formW.forEach(function(w){
+    var on = board===w.key;
+    html += '<button type="button" class="office-chip'+(on?' on':'')+'" data-wr="form:'+w.key+'" aria-pressed="'+(on?'true':'false')+'">'+w.label+'</button>';
+  });
+  wrinkleOpts.forEach(function(o){
+    if (formW.some(function(w){ return w.slot===o.slot; }) && board) return;
+    var on = !board && tacticalWrinkle && tacticalWrinkle.slot===o.slot;
+    html += '<button type="button" class="office-chip'+(on?' on':'')+'" data-wr="slot:'+o.slot+'" aria-pressed="'+(on?'true':'false')+'">'+o.label+'</button>';
+  });
+  html += '</div>';
+  var desc = formChosen ? formChosen.desc : (chosen ? chosen.desc : "Play the shape straight, every number doing the job it's numbered for.");
+  html += '<p class="sub" style="margin-top:8px;">'+desc+'</p>';
+  if (chosen && !formChosen) html += '<p class="sub">Freshest against a side that hasn\'t faced it from us before, fading out as the division catches on and passes the word round.</p>';
+  boxes.forEach(function(box){
+  box.innerHTML = html;
+  box.querySelectorAll('button[data-wr]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var v = b.getAttribute('data-wr') || '';
+      if (!v){ tacticalWrinkle = null; v408BoardWrinkle = null; }
+      else if (v.indexOf('form:')===0){
+        var k = v.slice(5);
+        v408BoardWrinkle = k;
+        var fw = formW.find(function(w){ return w.key===k; });
+        tacticalWrinkle = (fw && fw.slot) ? {slot:fw.slot} : null;
+      } else if (v.indexOf('slot:')===0){
+        v408BoardWrinkle = null;
+        tacticalWrinkle = {slot:v.slice(5)};
+      }
+      renderWrinkleBox();
+      if (typeof renderTacticsPitch==='function') renderTacticsPitch();
+    });
+  });
   });
 }
-
 /* ---------- STUDY TRIP ABROAD: real tactical schools an English manager
    could plausibly have known of or seen in 1946 ---------- */
 var studyDestinations = [
@@ -21876,7 +22126,7 @@ function renderEraTrainingFoci(){
   }
   if (host){
     host.style.display = 'flex';
-    host.innerHTML = foci.map(function(f){
+    host.innerHTML = '<p class="sub" style="flex-basis:100%;margin:0 0 6px;">Training is a single weekly choice. Pick a button to change the week\'s work.</p>'+foci.map(function(f){
       var on = training.focus===f.key;
       return '<button type="button" class="office-chip'+(on?' on':'')+'" data-train="'+f.key+'" aria-pressed="'+(on?'true':'false')+'">'+f.label+'</button>';
     }).join('');
@@ -23530,7 +23780,7 @@ function renderScoutBriefBox(){
     box.innerHTML = '<p class="sub">SEND A SCOUT LOOKING FOR A SPECIFIC KIND OF PLAYER : A POSITION, AND OPTIONALLY A TRAIT YOU WANT HIM STRONG IN.</p>'+
       '<select id="brief-pos" style="font-size:15px;">'+posOpts+'</select> '+
       '<select id="brief-attr" style="font-size:15px;">'+attrOpts+'</select> '+
-      '<button id="brief-send" style="padding:2px 10px;font-size:15px;">SEND INSTRUCTION</button>';
+      '<button type="button" id="brief-send" class="office-chip">SEND INSTRUCTION</button>';
     document.getElementById('brief-send').addEventListener('click', function(){
       var pos = document.getElementById('brief-pos').value;
       var attr = document.getElementById('brief-attr').value || null;
@@ -24805,7 +25055,7 @@ function renderSquad(){
   }
   if (typeof v404IsEighties==='function' && v404IsEighties()){
     var sub = document.querySelector('#v-squad > p.sub');
-    if (sub) sub.textContent = 'Click a player for his file. Form and morale are on the chips, as words. The file and the form guide show the last marks out of 10.';
+    if (sub) sub.textContent = 'Click a man for his Action File. Form and morale are on the chips.';
   }
   var body = document.getElementById('squad-body'); body.innerHTML='';
   var ordered = squad.slice().sort(function(a,b){
@@ -24886,7 +25136,8 @@ var PCARD_SOURCED_SKIN = {
   'Clyde Best':'D2', 'Ade Coker':'D2', 'Chris Kamara':'D1',  'Garry Thompson':'D1', 'Tony Daley':'D1', 'Mark Walters':'D1', 'David Rocastle':'D2',
   'Michael Thomas':'D1', 'Paul Canoville':'D2', 'Terry Connor':'D1', 'Chris Whyte':'D1',
   'Winston White':'D2', 'Tony Cunningham':'D2', 'Ian Benjamin':'D1',
-  'Howard Gayle':'D2'
+  'Howard Gayle':'D2',
+  'Paul McGrath':'D1'
 };
 function pcardNormName(n){
   return String(n||'').replace(/†/g,'').replace(/\s+/g,' ').trim();
@@ -24902,6 +25153,8 @@ function pcardSkinHex(p){
   var key = p && p.skinTone;
   if (key && PCARD_SKIN_PALETTE[key]) return PCARD_SKIN_PALETTE[key];
   if (key && /^#([0-9a-fA-F]{6})$/.test(key)) return key;
+  var look = (typeof v408Look==='function') ? v408Look(p) : null;
+  if (look && look.skin && PCARD_SKIN_PALETTE[look.skin]) return PCARD_SKIN_PALETTE[look.skin];
   var sourced = pcardSourcedSkinKey(p);
   if (sourced) return PCARD_SKIN_PALETTE[sourced] || PCARD_SKIN_DEFAULT;
   if (p && p.gen){
@@ -24928,10 +25181,15 @@ function pcardSil(p, kit, goalie, hairHex, style){
     else if (kit.type === 'hoops'){ def += '<pattern id="'+id+'" width="10" height="28" patternUnits="userSpaceOnUse"><rect width="10" height="28" fill="'+c1+'"/><rect y="14" width="10" height="14" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
     else if (kit.type === 'halves'){ def += '<linearGradient id="'+id+'" x1="0" x2="1" y1="0" y2="0"><stop offset=".5" stop-color="'+c1+'"/><stop offset=".5" stop-color="'+c2+'"/></linearGradient>'; shirt = 'url(#'+id+')'; }
     else if (kit.type === 'quarters'){ def += '<pattern id="'+id+'" width="200" height="240" patternUnits="userSpaceOnUse"><rect width="200" height="240" fill="'+c1+'"/><rect x="100" width="100" height="195" fill="'+c2+'"/><rect y="195" width="100" height="45" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+    else if (kit.type === 'pinstripes'){ def += '<pattern id="'+id+'" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="'+c1+'"/><rect x="8" width="2" height="10" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+    else if (kit.type === 'tbar'){ def += '<pattern id="'+id+'" width="200" height="240" patternUnits="userSpaceOnUse"><rect width="100" height="240" fill="'+c1+'"/><rect x="100" width="100" height="240" fill="'+c2+'"/><rect x="88" width="24" height="240" fill="'+(kit.bar||'#1b2a4a')+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+
   }
   var hair = {slick:'M67 98C62 62 82 50 102 50C126 50 140 68 133 100C130 80 120 70 102 70C86 70 74 78 67 98Z',
               side:'M66 100C60 60 84 48 104 49C128 50 142 70 134 102C131 82 116 66 98 70C84 73 72 82 66 100Z',
-              wave:'M64 102C56 62 80 44 104 46C130 48 146 70 136 104C133 84 126 66 104 64C84 64 70 76 64 102Z'}[style] || '';
+              wave:'M64 102C56 62 80 44 104 46C130 48 146 70 136 104C133 84 126 66 104 64C84 64 70 76 64 102Z',
+              short:'M70 100C64 72 80 54 100 54C122 54 136 72 130 100C126 82 114 70 100 70C86 70 74 82 70 100Z',
+              perm:'M58 100C50 66 70 42 100 42C132 42 150 66 142 102C138 84 128 66 118 68C122 86 116 102 108 108C104 90 100 78 94 88C88 76 80 82 76 96C70 82 64 88 58 100Z'}[style] || '';
   var collar = goalie
     ? '<path d="M78 166C84 190 116 190 122 166L118 150C108 160 92 160 82 150Z" fill="'+kit.collar+'"/><path d="M80 154C90 166 110 166 120 154" fill="none" stroke="#0003" stroke-width="3"/>'
     : '<path d="M84 160L100 190L116 160L108 156L100 172L92 156Z" fill="'+kit.collar+'"/><path d="M84 160L100 190L116 160" fill="none" stroke="#0003" stroke-width="2"/>';
@@ -24939,11 +25197,22 @@ function pcardSil(p, kit, goalie, hairHex, style){
   if (!goalie && kit.sleeves){
     sleeveBit = '<path d="M-4 240C-4 214 6 198 24 188L40 222Z" fill="'+kit.sleeves+'"/><path d="M204 240C204 214 194 198 176 188L160 222Z" fill="'+kit.sleeves+'"/>';
   }
+  var yoke = '';
+  if (!goalie && kit.type === 'panels'){
+    yoke = '<path d="M24 188C40 168 70 160 76 166L124 166C130 160 160 168 176 188L160 222L40 222Z" fill="'+c2+'" opacity="0.98"/>';
+  }
+  if (!goalie && kit.type === 'band'){
+    yoke = '<path d="M20 196H180L176 210H24Z" fill="'+(kit.band||c2)+'"/>';
+  }
+  var mo = '';
+  if (typeof v408Look==='function' && v408Look(p).mo){
+    mo = '<path d="M84 116C90 121 96 122 100 120C104 122 110 121 116 116C110 120 90 120 84 116Z" fill="'+hairHex+'"/>';
+  }
   return '<svg viewBox="0 0 200 240" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Silhouette of a footballer in the club shirt"><defs>'+def+'<linearGradient id="'+id+'g" x1="0" x2="1"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>'
-    + '<path d="'+body+'" fill="'+shirt+'"/>' + sleeveBit + '<path d="'+body+'" fill="url(#'+id+'g)"/>'
+    + '<path d="'+body+'" fill="'+shirt+'"/>' + yoke + sleeveBit + '<path d="'+body+'" fill="url(#'+id+'g)"/>'
     + '<path d="M86 128L86 160C92 172 108 172 114 160L114 128Z" fill="'+skin+'"/><path d="M86 140C96 152 106 152 114 140L114 128L86 128Z" fill="#00000026"/>'
     + '<ellipse cx="68" cy="106" rx="5.5" ry="9" fill="'+skin+'"/><ellipse cx="132" cy="106" rx="5.5" ry="9" fill="'+skin+'"/><ellipse cx="100" cy="102" rx="33" ry="40" fill="'+skin+'"/>'
-    + '<path d="'+hair+'" fill="'+hairHex+'"/>' + collar + '</svg>';
+    + '<path d="'+hair+'" fill="'+hairHex+'"/>' + mo + collar + '</svg>';
 }
 function pcardEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function pcardInt(v){ var n = Math.round(Number(v)); return isFinite(n) ? n : 0; }
@@ -25028,7 +25297,8 @@ function pcardHtml(p){
   var idx = Math.max(0, order.findIndex(function(x){ return x.id === p.id; })) + 1, total = squad.length;
   var cp = (typeof clubProfiles !== 'undefined' && clubProfiles[ourClubName]) || null;
   var label = (cp && cp.colours) || (sco && typeof clubColoursSCO !== 'undefined' && clubColoursSCO[ourClubName]) || '';
-  var club = pcardKit(label), goalie = /goalkeeper/i.test(p.pos);
+  var eraKit = (typeof v408EraKitFor==='function') ? v408EraKitFor(p.club||ourClubName) : null;
+  var club = eraKit || pcardKit(label), goalie = /goalkeeper/i.test(p.pos);
   var kit = club;
   if (goalie){ var gc = club.c1 === '#2f6b3a' ? '#f0a81c' : '#2f6b3a'; kit = {type:'plain', c1:gc, c2:gc, sleeves:null, collar:gc}; }
   var h = pcardHash(p.n + '|' + p.id);
@@ -25036,14 +25306,15 @@ function pcardHtml(p){
   var darkHairs = ['#1c1612','#2a1b14','#4a3220','#6b4a2b'];
   var skinHex = (typeof pcardSkinHex==='function') ? pcardSkinHex(p) : '#dfae88';
   var deepSkin = /^(#8d5a36|#6b3f24|#4e2c18|#a86b3c)$/i.test(skinHex);
-  var hairHex = p.age >= 36 && (h % 3 === 0) ? '#a8a8a8' : (deepSkin ? darkHairs[h % darkHairs.length] : hairs[h % hairs.length]);
-  var style = ['slick','side','wave'][(h >>> 3) % 3];
+  var hairHex = (typeof v408HairHex==='function') ? v408HairHex(p) : (p.age >= 36 && (h % 3 === 0) ? '#a8a8a8' : (deepSkin ? darkHairs[h % darkHairs.length] : hairs[h % hairs.length]));
+  var style = (typeof v408HairStyle==='function') ? v408HairStyle(p) : ['slick','side','wave'][(h >>> 3) % 3];
   var t59 = [['#f2b632','#e08a1e'],['#ff8a3d','#e2552b'],['#8fc7e6','#4f93bd'],['#9ad08a','#4f9a5a'],['#e8a0b4','#c4607f']][(h >>> 5) % 5];
   var t66 = [['#d9a441','#efc76d'],['#e4b7a3','#f1d1c2'],['#9fc3d6','#c3dbe7'],['#b7d3a0','#d6e8c6'],['#cdb3d6','#e3d2ea']][(h >>> 7) % 5];
   var t70 = [['#e0002a','#7a1020'],['#1650d0','#0b1c4a'],['#2f6b3a','#14331c'],['#f0a81c','#8a5a08'],['#7e1f3a','#3a0e1c']][(h >>> 9) % 5];
   var t81 = [['#1650d0','#071428'],['#e0002a','#3a0010'],['#0b6b5a','#042824'],['#5b2a7a','#1c0a28'],['#c9a227','#3a2c08']][(h >>> 11) % 5];
-  var attrs = []; if (p.handling) attrs.push(['Handling', pcardInt(p.handling)]);
-  attrs.push(['Shooting', pcardInt(p.shooting)],['Passing', pcardInt(p.passing)],['Tackling', pcardInt(p.tackling)],['Heading', pcardInt(p.heading)],['Pace', pcardInt(p.pace)],['Stamina', pcardInt(p.stamina)]);
+  var attrSrc = (p.attrs && typeof p.attrs.shooting==='number') ? p.attrs : p;
+  var attrs = []; if (attrSrc.handling) attrs.push(['Handling', pcardInt(attrSrc.handling)]);
+  attrs.push(['Shooting', pcardInt(attrSrc.shooting)],['Passing', pcardInt(attrSrc.passing)],['Tackling', pcardInt(attrSrc.tackling)],['Heading', pcardInt(attrSrc.heading)],['Pace', pcardInt(attrSrc.pace)],['Stamina', pcardInt(attrSrc.stamina)]);
   var best = attrs.slice().sort(function(a,b){ return b[1] - a[1]; })[0];
   var top = squad.slice().sort(function(a,b){ return (b.goalsSeason||0) - (a.goalsSeason||0); })[0];
   var flash = pcardFlash(p, top);
@@ -25130,6 +25401,491 @@ function showProfile(id, targetId){
   pcardWire(el);
 }
 /*PCARD-JS-END*/
+/* ===== v408 : Action File centrepiece, live player data, UI polish. No match-engine change. ===== */
+var V408_HAIR = { black:'#1c1612', dark:'#2a1b14', brown:'#4a3220', auburn:'#a3441c', ginger:'#c4622a', blond:'#c79a52', fair:'#d4b07a', grey:'#a8a8a8' };
+/* Home shirts for 1981-82 and 1986-87 First Division, read from Historical Football Kits
+   kit drawings (Wayback Machine; the live historicalkits.co.uk domain is no longer that site).
+   Colours and patterns only: sponsor marks are not reproduced. */
+function v408K(type,c1,c2,extra){
+  var o={type:type||'plain', c1:c1, c2:c2||'#f4f0e6', sleeves:null, collar:c2||'#f4f0e6', known:true};
+  if (extra) Object.keys(extra).forEach(function(k){ o[k]=extra[k]; });
+  if (o.collar==null) o.collar=o.c2;
+  return o;
+}
+var RED='#b32323', WHT='#f4f0e6', BLU='#1f527f', RYL='#2457a6', SKY='#7fb7e0', NAVY='#1b2a4a',
+    CLARET='#7e1f3a', LBLUE='#8eb4e0', GOLD='#c9a227', YEL='#f2d21b', GRN='#2f6b3a',
+    BLK='#1c1c1c', AMBER='#f0a81c', TAN='#f28a1a';
+var V408_ERA_KITS = {
+  1981:{
+    "Arsenal": v408K('plain',RED,WHT,{sleeves:WHT,collar:WHT,label:'Red, white sleeves'}),
+    "Aston Villa": v408K('plain',CLARET,LBLUE,{sleeves:LBLUE,collar:LBLUE,label:'Claret, light blue sleeves'}),
+    "Birmingham City": v408K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+    "Brighton & Hove Albion": v408K('plain',RYL,RYL,{collar:WHT,label:'Blue, blue shorts'}),
+    "Coventry City": v408K('tbar',SKY,WHT,{bar:NAVY,collar:WHT,label:'Sky blue and white, navy bar (Talbot shirt)'}),
+    "Everton": v408K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+    "Ipswich Town": v408K('pinstripes',RYL,WHT,{collar:RYL,label:'Blue with white pinstripes'}),
+    "Leeds United": v408K('pinstripes',WHT,RYL,{c3:GOLD,collar:WHT,label:'White, with blue and gold pinstripes'}),
+    "Liverpool": v408K('plain',RED,RED,{collar:RED,label:'Red, red shorts'}),
+    "Manchester City": v408K('plain',SKY,SKY,{collar:WHT,label:'Sky blue, sky blue shorts'}),
+    "Manchester United": v408K('plain',RED,WHT,{collar:WHT,label:'Red, white collar, white shorts'}),
+    "Middlesbrough": v408K('plain',RED,RED,{collar:WHT,label:'Red, red shorts'}),
+    "Nottingham Forest": v408K('pinstripes',RED,WHT,{collar:WHT,label:'Red with white pinstripes, white shorts'}),
+    "Notts County": v408K('stripes',BLK,WHT,{collar:WHT,label:'Black and white stripes'}),
+    "Southampton": v408K('stripes',RED,WHT,{collar:WHT,label:'Red and white stripes, black shorts'}),
+    "Stoke City": v408K('stripes',RED,WHT,{collar:WHT,label:'Red and white stripes, white shorts'}),
+    "Sunderland": v408K('panels',WHT,RED,{collar:RED,label:'White with red shoulders, red shorts'}),
+    "Swansea City": v408K('plain',WHT,WHT,{collar:WHT,label:'White'}),
+    "Tottenham Hotspur": v408K('plain',WHT,NAVY,{collar:WHT,label:'White, navy shorts'}),
+    "West Bromwich Albion": v408K('stripes',NAVY,WHT,{collar:WHT,label:'Navy and white stripes, white shorts'}),
+    "West Ham United": v408K('plain',CLARET,LBLUE,{sleeves:LBLUE,collar:LBLUE,label:'Claret, light blue sleeves'}),
+    "Wolverhampton Wanderers": v408K('plain',GOLD,BLK,{collar:BLK,label:'Old gold, black shorts'})
+  },
+  1986:{
+    "Arsenal": v408K('plain',RED,WHT,{sleeves:WHT,collar:WHT,label:'Red, white sleeves'}),
+    "Aston Villa": v408K('band',CLARET,WHT,{band:LBLUE,collar:WHT,label:'Claret, pale chest band, white shorts'}),
+    "Charlton Athletic": v408K('pinstripes',RED,WHT,{collar:WHT,label:'Red with white pinstripes, white shorts'}),
+    "Chelsea": v408K('plain',RYL,RYL,{collar:WHT,label:'Blue, blue shorts'}),
+    "Coventry City": v408K('stripes',SKY,WHT,{collar:WHT,label:'Sky blue and white stripes, white shorts'}),
+    "Everton": v408K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+    "Leicester City": v408K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+    "Liverpool": v408K('plain',RED,RED,{collar:WHT,label:'Red, red shorts, white collar'}),
+    "Luton Town": v408K('plain',WHT,NAVY,{collar:TAN,label:'White, navy shorts, orange trim'}),
+    "Manchester City": v408K('plain',SKY,SKY,{collar:WHT,label:'Sky blue, sky blue shorts'}),
+    "Manchester United": v408K('plain',RED,WHT,{collar:WHT,label:'Red, white collar, white shorts'}),
+    "Newcastle United": v408K('stripes',BLK,WHT,{collar:WHT,label:'Black and white stripes, black shorts'}),
+    "Norwich City": v408K('panels',YEL,GRN,{collar:GRN,label:'Yellow with green shoulders, green shorts'}),
+    "Nottingham Forest": v408K('plain',RED,WHT,{collar:WHT,label:'Red, white shorts'}),
+    "Oxford United": v408K('plain',YEL,NAVY,{collar:YEL,label:'Yellow, navy shorts'}),
+    "Queens Park Rangers": v408K('hoops',RYL,WHT,{collar:WHT,trim:RED,label:'Blue and white hoops, white shorts'}),
+    "Sheffield Wednesday": v408K('stripes',RYL,WHT,{collar:WHT,label:'Blue and white stripes, blue shorts'}),
+    "Southampton": v408K('panels',WHT,RED,{collar:RED,label:'White with red shoulders, black shorts'}),
+    "Tottenham Hotspur": v408K('plain',WHT,NAVY,{collar:WHT,label:'White, navy trim (1985-86 shirt, continued: no separate 1986-87 drawing on the Historical Kits page)'}),
+    "Watford": v408K('plain',YEL,RED,{collar:BLK,label:'Yellow, red shorts, black trim'}),
+    "West Ham United": v408K('plain',CLARET,WHT,{sleeves:WHT,collar:WHT,label:'Claret, white shorts'}),
+    "Wimbledon": v408K('plain',RYL,YEL,{collar:YEL,label:'Blue, yellow trim, blue shorts'})
+  }
+};
+/* Appearance: only filled where reasonably determinable from well-known contemporary photographs
+   and public profiles. hairSource/skinSource are data flags, never printed in the UI. */
+var V408_LOOK = {
+  "Ray Wilkins":      {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Remi Moses":       {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Bryan Robson":     {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+  "Steve Coppell":    {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+  "Gary Bailey":      {skin:'L1', hair:'blond', style:'slick', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Gordon McQueen":   {skin:'L2', hair:'dark',  style:'perm', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Martin Buchan":    {skin:'L2', hair:'dark',  style:'slick', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Frank Stapleton":  {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+  "Garry Birtles":    {skin:'L1', hair:'fair',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+  "Lou Macari":       {skin:'L2', hair:'dark',  style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Sammy McIlroy":    {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+  "Arthur Albiston":  {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "John Gidman":      {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Kevin Moran":      {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+  "Paddy Roche":      {skin:'L2', hair:'dark',  style:'slick', mo:false, hairSource:'gen', skinSource:'default'},
+  "Norman Whiteside": {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Gordon Strachan":  {skin:'L2', hair:'ginger',style:'wave', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Jesper Olsen":     {skin:'L1', hair:'blond', style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "John Sivebaek":    {skin:'L1', hair:'fair',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Paul McGrath":     {skin:'D1', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Chris Turner":     {skin:'L2', hair:'dark',  style:'slick', mo:false, hairSource:'gen', skinSource:'default'},
+  "Mike Duxbury":     {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Graeme Hogg":      {skin:'L2', hair:'dark',  style:'side', mo:false, hairSource:'gen', skinSource:'default'},
+  "Kenny Dalglish":   {skin:'L2', hair:'auburn',style:'wave', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Ian Rush":         {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+  "John Barnes":      {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Luther Blissett":  {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Viv Anderson":     {skin:'D1', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Cyrille Regis":    {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+  "Garth Crooks":     {skin:'D1', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'}
+};
+
+var V408_CARD_FACTS = {
+  wilkins:{born:"14 September 1956", from:"Hillingdon", height:"5 ft 8 in"},
+  moses:{born:"14 November 1960", from:"Manchester", height:"5 ft 6 in", prev:"West Bromwich Albion"},
+  coppell:{born:"9 July 1955", from:"Liverpool", height:"5 ft 8 in", honour81:"FA Cup winner, 1977"},
+  gidman:{born:"10 January 1954", from:"Liverpool", honour81:"League Cup winner, 1977"},
+  birtles:{born:"27 July 1956", from:"Nottingham", honour81:"European Cup winner, 1979 and 1980"},
+  bailey:{born:"9 August 1958", from:"Ipswich", prev:"Wits University"},
+  roche:{born:"4 January 1951", from:"Dublin", height:"6 ft 1 in"},
+  mcqueen:{born:"26 June 1952", height:"6 ft 3 in", honour81:"First Division champion, 1973-74"},
+  buchan:{born:"6 March 1949", from:"Aberdeen", height:"5 ft 10 in", honour81:"FA Cup winner, 1977"},
+  stapleton:{born:"10 July 1956", from:"Dublin", height:"6 ft 0 in", honour81:"FA Cup winner, 1979", honour86:"FA Cup winner, 1983 and 1985"},
+  macari:{born:"7 June 1949", honour81:"FA Cup winner, 1977"},
+  mcilroy:{born:"2 August 1954", from:"Belfast", height:"5 ft 10 in", honour81:"FA Cup winner, 1977"},
+  albiston:{born:"14 July 1957", from:"Edinburgh", height:"5 ft 7 in", honour81:"FA Cup winner, 1977", honour86:"FA Cup winner, 1983 and 1985"},
+  moran:{born:"29 April 1956", from:"Dublin", height:"5 ft 11 in", prev:"Bohemians", honour86:"FA Cup winner, 1983 and 1985"},
+  robson:{born:"11 January 1957", from:"Chester-le-Street", height:"5 ft 9 in", honour86:"FA Cup winner, 1983 and 1985"},
+  whiteside:{born:"7 May 1965", from:"Belfast", height:"6 ft 2 in", honour86:"FA Cup winner, 1983 and 1985"},
+  mcgrath:{born:"4 December 1959", height:"6 ft 0 in", honour86:"FA Cup winner, 1985"},
+  strachan:{born:"9 February 1957", from:"Edinburgh", height:"5 ft 6 in", honour86:"FA Cup winner, 1985"},
+  olsen:{born:"20 March 1961", from:"Faxe, Denmark", honour86:"FA Cup winner, 1985"},
+  sivebaek:{born:"25 October 1961", from:"Vejle, Denmark", height:"6 ft 0 in", prev:"Vejle"},
+  turner:{born:"15 September 1958", from:"Sheffield", prev:"Sunderland"},
+  duxbury:{born:"1 September 1959", from:"Accrington", height:"5 ft 9 in", honour86:"FA Cup winner, 1983 and 1985"},
+  hogg:{born:"17 June 1964", from:"Aberdeen", height:"6 ft 1 in"},
+  dalglish:{born:"4 March 1951", from:"Glasgow", height:"5 ft 8 in", honour81:"European Cup winner, 1981", honour:"European Cup winner, 1981"},
+  rush:{born:"20 October 1961", from:"St Asaph", honour86:"League and FA Cup winner, 1986"},
+  barnes:{born:"7 November 1963", from:"Kingston, Jamaica"},
+  blissett:{born:"1 February 1958", from:"Falmouth, Jamaica", height:"5 ft 11 in", prev:"AC Milan"},
+  anderson:{born:"29 July 1956", from:"Clifton, Nottingham", honour:"European Cup winner, 1979 and 1980"},
+  regis:{born:"9 February 1958", from:"Maripasoula, French Guiana", height:"6 ft 0 in", prev:"West Bromwich Albion"},
+  crooks:{born:"10 March 1958", from:"Stoke-on-Trent", honour81:"FA Cup winner, 1981"}
+};
+
+function v408SeasonYear(){
+  if (typeof seasonStartYear==='function'){ try { var y=seasonStartYear(); if (y) return y; } catch(e){} }
+  if (typeof gameEra==='string'){
+    if (/1986/.test(gameEra)) return 1986;
+    if (/1981/.test(gameEra)) return 1981;
+  }
+  return 0;
+}
+function v408Look(p){
+  var n = (p && (p.n||p.name)) || '';
+  return (typeof V408_LOOK==='object' && V408_LOOK[n]) || {};
+}
+function v408HairHex(p){
+  var look = v408Look(p);
+  if (look.hair && V408_HAIR[look.hair]) return V408_HAIR[look.hair];
+  var key = (p && (p.n||p.name)) || '';
+  var h = (typeof pcardHash==='function') ? pcardHash(key+'|hair') : 1;
+  var hairs = [V408_HAIR.dark, V408_HAIR.brown, V408_HAIR.black, V408_HAIR.blond];
+  if (p && p.age>=36 && (h%3===0)) return '#a8a8a8';
+  return hairs[h % hairs.length];
+}
+function v408HairStyle(p){
+  var look = v408Look(p);
+  if (look.style) return look.style;
+  var key = (p && (p.n||p.name)) || '';
+  var h = (typeof pcardHash==='function') ? pcardHash(key+'|style') : 2;
+  return ['slick','side','wave'][(h>>>3)%3];
+}
+function v408EraKitFor(club){
+  var y = v408SeasonYear();
+  var year = y>=1986?1986:(y>=1981?1981:0);
+  if (!year || !V408_ERA_KITS[year]) return null;
+  return V408_ERA_KITS[year][club] || null;
+}
+function v408FactsFor(p){
+  if (!p) return null;
+  var n = p.n||p.name||'';
+  var map = {
+    'Ray Wilkins':'wilkins','Gary Bailey':'bailey','Paddy Roche':'roche','Bryan Robson':'robson',
+    'Steve Coppell':'coppell','Arthur Albiston':'albiston','Martin Buchan':'buchan','Gordon McQueen':'mcqueen',
+    'Sammy McIlroy':'mcilroy','Lou Macari':'macari','John Gidman':'gidman','Kevin Moran':'moran',
+    'Remi Moses':'moses','Norman Whiteside':'whiteside','Gordon Strachan':'strachan','Jesper Olsen':'olsen',
+    'Paul McGrath':'mcgrath','Mike Duxbury':'duxbury','Chris Turner':'turner','Frank Stapleton':'stapleton',
+    'Garry Birtles':'birtles','John Sivebaek':'sivebaek','Graeme Hogg':'hogg',
+    'Kenny Dalglish':'dalglish','Ian Rush':'rush','John Barnes':'barnes','Luther Blissett':'blissett',
+    'Viv Anderson':'anderson','Cyrille Regis':'regis','Garth Crooks':'crooks'
+  };
+  var k = map[n];
+  return (k && V408_CARD_FACTS[k]) || null;
+}
+function v408FormatDob(yyyymmdd){
+  var s=String(yyyymmdd||'');
+  if (!/^\d{8}$/.test(s)) return '';
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var d=parseInt(s.slice(6,8),10), m=parseInt(s.slice(4,6),10), y=s.slice(0,4);
+  if (!d || !m || m>12) return '';
+  return d+' '+months[m-1]+' '+y;
+}
+function v408Born(p, club){
+  var f = v408FactsFor(p);
+  if (f && f.born) return f.born;
+  if (typeof realDobFor==='function'){
+    var dob = realDobFor(p.n||p.name, club);
+    if (dob) return v408FormatDob(dob);
+  }
+  return '';
+}
+function v408AttrsOf(p){
+  return (p && p.attrs && typeof p.attrs.shooting==='number') ? p.attrs : p;
+}
+function v408IsGK(p){
+  return !!(p && (p.slot==='GK' || /goalkeeper/i.test(p.pos||'')));
+}
+var v408BrowseClub = null;
+var v408BoardWrinkle = null;
+function v408EnsureIds(arr, club){
+  if (!arr) return;
+  arr.forEach(function(p,i){
+    if (p && p.id==null) p.id = 'v408-'+String(club||'club')+'-'+i;
+  });
+}
+function v408FirstDivClubs(){
+  var year = v408SeasonYear()>=1986 ? 1986 : 1981;
+  var src = (year>=1986 && typeof SQUADS_1986==='object') ? SQUADS_1986 : (typeof SQUADS_1981==='object' ? SQUADS_1981 : null);
+  if (!src) return [];
+  return Object.keys(src).sort();
+}
+function v408FindById(id){
+  var club = (typeof ourClubName!=='undefined') ? ourClubName : '';
+  if (typeof squad!=='undefined' && squad){
+    var hit = squad.find(function(x){ return x.id===id; });
+    if (hit) return {p:hit, club:club};
+  }
+  if (typeof clubSquads==='object' && clubSquads){
+    var keys = Object.keys(clubSquads);
+    for (var i=0;i<keys.length;i++){
+      var arr = clubSquads[keys[i]]||[];
+      var found = arr.find(function(x){ return x.id===id || ('v408-'+keys[i]+'-'+arr.indexOf(x))===id; });
+      if (found) return {p:found, club:keys[i]};
+    }
+  }
+  return null;
+}
+function v408CapsLine(p){
+  if (!p || p.caps==null || p.caps===undefined || p.caps===0) return '';
+  var nat = '';
+  if (p.nat && typeof v405NatLabel==='function') nat = v405NatLabel(p.nat, false);
+  else if (p.nation) nat = p.nation;
+  var t = p.caps+' cap'+(p.caps===1?'':'s');
+  if (p.intlGoals!=null) t += ', '+p.intlGoals+' goal'+(p.intlGoals===1?'':'s');
+  if (nat) t = nat+' — '+t;
+  return t;
+}
+function v408CareerRows(p){
+  return (p && p.career && p.career.length) ? p.career : [];
+}
+function v408SpreadHtml(p, club){
+  var era81 = v408SeasonYear()>=1986 ? '1986-87' : '1981-82';
+  var goalie = v408IsGK(p);
+  var eraKit = v408EraKitFor(club);
+  var kit, clubKit;
+  if (eraKit){
+    clubKit = eraKit;
+    kit = eraKit;
+  } else {
+    var cp = (typeof clubProfiles!=='undefined' && clubProfiles[club]) || null;
+    var label = (cp && cp.colours) || '';
+    clubKit = (typeof pcardKit==='function') ? pcardKit(label) : {type:'plain',c1:'#8a8f96',c2:'#f4f0e6',sleeves:null,collar:'#f4f0e6'};
+    kit = clubKit;
+  }
+  if (goalie){
+    var gc = (clubKit.c1==='#2f6b3a') ? '#f0a81c' : '#2f6b3a';
+    kit = {type:'plain', c1:gc, c2:gc, sleeves:null, collar:gc};
+  }
+  var hairHex = v408HairHex(p);
+  var hairStyle = v408HairStyle(p);
+  var sil = (typeof pcardSil==='function') ? pcardSil(p, kit, goalie, hairHex, hairStyle) : '';
+  var sw = '<span class="pc-sw" aria-hidden="true"><i style="background:'+clubKit.c1+'"></i><i style="background:'+(clubKit.c2||clubKit.c1)+'"></i></span>';
+  var name = v405Esc(p.n||p.name||'');
+  var pos = v405Esc((typeof displayPosOf==='function')?displayPosOf(p):(p.pos||''));
+  var age = (p.age!=null?p.age:'');
+  var apps = (p.apps||0);
+  var goals = (p.goalsSeason||0);
+  var fit = function(base, maxch){ var n=String(p.n||p.name||'').length; return +(base*Math.min(1, maxch/Math.max(1,n))).toFixed(2); };
+  var front = '<div class="pc-card pc-e81 pc-front pc-face" data-face="front"><div class="pc-ribbon"><span>Action File</span><small>'+era81+'</small></div><div class="pc-portrait">'+sil+'</div>'
+    + '<div class="pc-nameplate"><h3 style="font-size:'+fit(9.4,15)+'cqw">'+name+'</h3></div><div class="pc-meta"><div class="pc-club">'+sw+v405Esc(club||'')+'</div><div class="pc-pos">'+pos+'</div></div>'
+    + '<div class="pc-tiles"><div><b>'+age+'</b><span>Age</span></div><div><b>'+apps+'</b><span>Apps</span></div><div><b>'+(goals||'—')+'</b><span>Goals</span></div></div></div>';
+  var facts = v408FactsFor(p) || {};
+  var career = v408CareerRows(p);
+  var attrs = v408AttrsOf(p);
+  var attrKeys = v408IsGK(p)
+    ? [['handling','Handling'],['shooting','Shooting'],['passing','Passing'],['tackling','Tackling'],['heading','Heading'],['pace','Pace'],['stamina','Stamina']]
+    : [['shooting','Shooting'],['passing','Passing'],['tackling','Tackling'],['heading','Heading'],['pace','Pace'],['stamina','Stamina']];
+  var attrRows = '';
+  var hasAttrs = attrs && typeof attrs.shooting==='number';
+  if (hasAttrs){
+    attrRows = '<div class="pc-attrgrid">'+attrKeys.map(function(k){
+      var v = Math.round(Number(attrs[k[0]]||0));
+      var pips = (typeof pcardPips==='function') ? pcardPips(v) : '';
+      return '<div><b>'+k[1]+'</b><em>'+v+'</em>'+pips+'</div>';
+    }).join('')+'</div>';
+  }
+  var shortBack = !career.length && !hasAttrs;
+  var flavour = 'A First Division Action File for '+era81+'.';
+  if (v408FirstDivClubs().indexOf(club)<0) flavour = 'An Action File for '+era81+'.';
+  var back = '<div class="pc-card pc-e81 pc-back pc-face" data-face="back"><div class="pc-bhead"><small>Action File</small><h3 style="font-size:'+fit(7,17)+'cqw">'+name+'</h3></div>';
+  back += '<div class="pc-bodyb'+(shortBack?' pc-body-short':'')+'">';
+  if (!career.length) back += '<p class="pc-bio">'+v405Esc(flavour)+'</p>';
+  if (p.personality) back += '<p class="pc-person">Personality · '+v405Esc(p.personality)+'</p>';
+  var cap = v408CapsLine(p);
+  if (cap) back += '<p class="pc-caps">'+v405Esc(cap)+'</p>';
+  var tiles = [];
+  var born = v408Born(p, club);
+  if (born) tiles.push(['Born', born]);
+  if (facts.from) tiles.push(['From', facts.from]);
+  if (facts.height) tiles.push(['Height', facts.height]);
+  var honour = facts.honour || (v408SeasonYear()>=1986 ? (facts.honour86||facts.honour) : facts.honour81) || facts.honour81;
+  if (honour) tiles.push(['Honour', honour]);
+  else if (facts.prev && !career.length) tiles.push(['Previously', facts.prev]);
+  if (tiles.length){
+    back += '<div class="pc-tiles v408-facts">'+tiles.map(function(t){
+      return '<div><b>'+v405Esc(t[1])+'</b><span>'+v405Esc(t[0])+'</span></div>';
+    }).join('')+'</div>';
+  }
+  if (career.length){
+    back += '<table class="pc-career"><thead><tr><th>Years</th><th>Club</th><th class="num">Apps</th><th class="num">Goals</th></tr></thead><tbody>';
+    career.forEach(function(r){
+      var appsC = (r.apps==null?'—':String(r.apps));
+      var gl = (r.goals==null?'—':String(r.goals));
+      back += '<tr><td>'+v405Esc(r.years||'')+'</td><td>'+v405Esc(r.club||'')+'</td><td class="num">'+appsC+'</td><td class="num">'+gl+'</td></tr>';
+    });
+    back += '</tbody></table><p class="pc-caps" style="margin-top:.6cqw">League figures only.</p>';
+  }
+  back += attrRows;
+  if (shortBack){
+    back += '<div class="pc-endmark"><b>Action File</b><span>First Division · '+era81+'</span></div>';
+  }
+  back += '</div></div>';
+  return '<div class="pc-spread" data-show="front"><div class="pc-leaf"><div class="pc-leaf-card" data-face="front">'+front+'</div></div><div class="pc-leaf"><div class="pc-leaf-card" data-face="back">'+back+'</div></div></div>'
+    + '<button type="button" id="pc-turn">Turn over</button>';
+}
+function v408WireSpread(root){
+  if (!root) return;
+  var spread = root.querySelector('.pc-spread');
+  if (!spread) return;
+  var turn = function(){ spread.setAttribute('data-show', spread.getAttribute('data-show')==='back'?'front':'back'); };
+  Array.prototype.forEach.call(root.querySelectorAll('.pc-leaf-card'), function(c){
+    c.addEventListener('click', function(){ if (window.matchMedia && window.matchMedia('(max-width:720px)').matches) turn(); });
+  });
+  var btn = root.querySelector('#pc-turn');
+  if (btn) btn.addEventListener('click', function(e){ e.preventDefault(); turn(); });
+}
+function v408ApplyBoardWrinkle(coords, shape, wr){
+  var out = coords.map(function(xy){ return [xy[0], xy[1]]; });
+  if (!wr) return out;
+  /* Slot order [GK,RB,LB,RH,CH,LH,OR,IR,CF,IL,OL]. Attacking up the board (smaller y is further forward). Visual only. */
+  if (wr==='hole' && (shape==='442'||shape==='442sweeper'||shape==='424'||shape==='diamond')){
+    out[9][1] = Math.min(40, (out[9][1]||22)+14);
+  }
+  if ((shape==='433'||shape==='433sweeper')){
+    if (wr==='twohold'){ out[3][1]=Math.min(64,out[3][1]+6); out[7][1]=Math.min(64,out[7][1]+6); out[9][1]=Math.max(34,out[9][1]-10); }
+    if (wr==='onehold'){ out[9][1]=Math.min(64,out[9][1]+12); out[3][1]=Math.max(40,out[3][1]-8); out[7][1]=Math.max(40,out[7][1]-8); }
+  }
+  return out;
+}
+function v408FormationWrinkles(shape){
+  var out = [];
+  if (shape==='442'||shape==='442sweeper'||shape==='424'||shape==='diamond'){
+    out.push({key:'hole', label:'Striker in the hole', desc:'One of the two strikers drops off, in the hole. Shown on the board.', slot:'CENTRE-FORWARD'});
+  }
+  if (shape==='433'||shape==='433sweeper'){
+    out.push({key:'twohold', label:'Two holding, one advanced', desc:'Two of the midfield three sit and keep the shape. The third steps on. Shown on the board.', slot:null});
+    out.push({key:'onehold', label:'One holding, two advanced', desc:'One man sits at the base of the midfield three. The other two push on. Shown on the board.', slot:null});
+  }
+  return out;
+}
+function v408InstallTransferTabs(){
+  var view = document.getElementById('v-transfers');
+  if (!view) return;
+  if (!document.getElementById('v408-tr-tabs')){
+    var bar = document.createElement('div');
+    bar.id = 'v408-tr-tabs';
+    bar.className = 'office-chips';
+    var sub = view.querySelector('h1');
+    if (sub && sub.nextSibling) view.insertBefore(bar, sub.nextSibling);
+    else view.insertBefore(bar, view.firstChild);
+  }
+  if (!window.v408TrTab) window.v408TrTab = 'office';
+  var tabs = [
+    {k:'office', lab:'The office'},
+    {k:'scouts', lab:'Scouts'},
+    {k:'business', lab:'Business'},
+    {k:'contracts', lab:'Contracts'}
+  ];
+  var barEl = document.getElementById('v408-tr-tabs');
+  barEl.innerHTML = tabs.map(function(t){
+    return '<button type="button" class="office-chip'+(window.v408TrTab===t.k?' on':'')+'" data-tr="'+t.k+'" aria-pressed="'+(window.v408TrTab===t.k?'true':'false')+'">'+t.lab+'</button>';
+  }).join('');
+  barEl.querySelectorAll('button').forEach(function(b){
+    b.onclick = function(){ window.v408TrTab = b.getAttribute('data-tr'); v408InstallTransferTabs(); };
+  });
+  var boxes = view.querySelectorAll(':scope > .box, :scope > #deadline-box, :scope > #office-wire-tray, :scope > #loans-box, :scope > #negotiation-box');
+  Array.prototype.forEach.call(view.children, function(el){
+    if (el.id==='v408-tr-tabs' || el.tagName==='H1' || (el.classList && el.classList.contains('sub') && el.tagName==='P' && el.previousElementSibling && el.previousElementSibling.tagName==='H1')) return;
+    if (el.tagName==='P' && el.classList.contains('sub') && el.previousElementSibling && (el.previousElementSibling.tagName==='H1' || el.previousElementSibling.id==='v408-tr-tabs')) return;
+    var title = '';
+    var tEl = el.querySelector && el.querySelector('.box-title');
+    if (tEl) title = (tEl.textContent||'').toUpperCase();
+    if (el.id==='deadline-box' || el.id==='office-wire-tray') title = 'OFFICE';
+    if (el.id==='loans-box') title = 'LOANS';
+    if (el.id==='negotiation-box') title = 'NEGOTIATION';
+    var tab = 'business';
+    if (/TELEX|FAX|WIRE|OFFICE|INCOMING OFFER|DEADLINE/.test(title) || el.id==='deadline-box' || el.id==='office-wire-tray' || /OFFERS-BODY|offers-body/.test(el.id||'') || /INCOMING OFFERS/.test(title)) tab = 'office';
+    if (/SCOUT|BLACK BOOK/.test(title)) tab = 'scouts';
+    if (/CONTRACT/.test(title)) tab = 'contracts';
+    if (/LOAN|YOUTH|GROUND-STAFF|NEGOTIAT|FOR SALE|BUSINESS/.test(title) || el.id==='loans-box' || el.id==='negotiation-box') {
+      if (/SCOUT/.test(title)) tab = 'scouts';
+      else if (/CONTRACT/.test(title)) tab = 'contracts';
+      else if (/INCOMING|TELEX|WIRE/.test(title)) tab = 'office';
+      else tab = 'business';
+    }
+    el.style.display = (window.v408TrTab===tab) ? '' : 'none';
+  });
+}
+function v408InstallLeagueChips(){
+  var view = document.getElementById('v-table');
+  if (!view) return;
+  if (!document.getElementById('v408-table-tabs')){
+    var bar = document.createElement('div');
+    bar.id = 'v408-table-tabs';
+    bar.className = 'office-chips';
+    var h1 = view.querySelector('h1');
+    if (h1 && h1.nextSibling) view.insertBefore(bar, h1.nextSibling);
+    else view.insertBefore(bar, view.firstChild);
+  }
+  var sections = [];
+  var own = document.getElementById('own-division-box');
+  var ownLab = (document.getElementById('table-division-label') && document.getElementById('table-division-label').textContent) || 'Our division';
+  ownLab = String(ownLab).split(' : ')[0] || 'Our division';
+  var ownSlot = null;
+  if (own){
+    sections.push({k:'own', lab:ownLab, el:own});
+    var anc = own.parentElement;
+    while (anc && anc.id !== 'v-table'){
+      if (anc.id && anc.id.indexOf('slot-')===0 && anc.id.indexOf('-content')<0){ ownSlot = anc; break; }
+      anc = anc.parentElement;
+    }
+  }
+  [['slot-first','First Division'],['slot-second','Second Division'],['slot-thirdsouth','Third Division (South)'],['slot-thirdnorth','Third Division (North)']].forEach(function(pair){
+    var el = document.getElementById(pair[0]);
+    if (!el) return;
+    if (ownSlot && (el===ownSlot || el.contains(own))) return;
+    var content = document.getElementById(pair[0]+'-content') || el;
+    var has = content && content.textContent && content.textContent.replace(/\s+/g,'').length>0;
+    var title = el.querySelector('.box-title');
+    if (has) sections.push({k:pair[0], lab:(title&&title.textContent)||pair[1], el:el});
+  });
+  var nl = document.getElementById('nonleague-block');
+  if (nl && nl.style.display!=='none'){
+    var nlHas = (nl.textContent||'').replace(/\s+/g,'').length>40;
+    if (nlHas) sections.push({k:'nonleague', lab:'Non-league', el:nl});
+  }
+  if (!window.v408TableTab) window.v408TableTab = 'own';
+  if (!sections.some(function(s){ return s.k===window.v408TableTab; })) window.v408TableTab = (sections[0]&&sections[0].k) || 'own';
+  var barEl = document.getElementById('v408-table-tabs');
+  var html = sections.map(function(s){
+    return '<button type="button" class="office-chip'+(window.v408TableTab===s.k?' on':'')+'" data-tb="'+s.k+'" aria-pressed="'+(window.v408TableTab===s.k?'true':'false')+'">'+v405Esc(s.lab)+'</button>';
+  }).join('');
+  var abroadOn = false;
+  try { abroadOn = (typeof worldAvailable==='function' && worldAvailable()); } catch (e) { abroadOn = false; }
+  if (abroadOn){
+    html += '<button type="button" class="office-chip'+(window.v408TableTab==='abroad'?' on':'')+'" data-tb="abroad">Other leagues</button>';
+  }
+  barEl.innerHTML = html;
+  barEl.querySelectorAll('button').forEach(function(b){
+    b.onclick = function(){
+      var k = b.getAttribute('data-tb');
+      if (k==='abroad'){ if (typeof gotoView==='function') gotoView('abroad'); return; }
+      window.v408TableTab = k;
+      v408InstallLeagueChips();
+    };
+  });
+  sections.forEach(function(s){
+    if (s.el) s.el.style.display = (window.v408TableTab===s.k) ? '' : 'none';
+  });
+  if (ownSlot) ownSlot.style.display = (window.v408TableTab==='own') ? '' : 'none';
+  if (own && window.v408TableTab==='own') own.style.display = '';
+  var champ = document.getElementById('reigning-champions-box');
+  if (champ) champ.style.display = (window.v408TableTab==='own') ? '' : 'none';
+}
+
+
+
 renderSquad();
 
 /* ---------- LINEUP VIEW ---------- */
@@ -26309,9 +27065,13 @@ function renderTable(){
   if (gihTh) gihTh.style.display = (typeof showGamesInHandCol==='function' && showGamesInHandCol()) ? '' : 'none';
   var legendEl = document.getElementById('table-zone-legend'); if (legendEl) legendEl.textContent = tableZoneLegend();
   var resultsEl = document.getElementById('table-results-text');
-  if (resultsEl) resultsEl.textContent = (ourDivisionLastLines&&ourDivisionLastLines.length) ? ourDivisionLastLines.join(', ') : 'NO MATCHES PLAYED YET THIS SEASON.';
+  if (resultsEl){
+    var rlines = (ourDivisionLastLines&&ourDivisionLastLines.length) ? ourDivisionLastLines : [];
+    resultsEl.innerHTML = rlines.length ? rlines.map(function(l){ return '<span class="v408-res">'+String(l).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>'; }).join('') : 'NO MATCHES PLAYED YET THIS SEASON.';
+  }
   if (typeof renderRunInPanel==='function') renderRunInPanel();
   renderTopScorers();
+  if (typeof v408InstallLeagueChips==='function') v408InstallLeagueChips();
 }
 function rivalMarksmanName(rivalName){
   var seed = 0; for (var i=0;i<rivalName.length;i++) seed += rivalName.charCodeAt(i);
@@ -26728,6 +27488,7 @@ function renderTacticsPitch(){
   el.setAttribute('data-shape', shape);
   var lbls = (ERA_PITCH_LBLS && ERA_PITCH_LBLS[shape]) || ERA_PITCH_LBL;
   var coords = ERA_PITCH[shape] || ERA_PITCH['442'];
+  if (typeof v408ApplyBoardWrinkle==='function') coords = v408ApplyBoardWrinkle(coords, shape, v408BoardWrinkle);
   var slots = (typeof lineupSlots!=='undefined' && lineupSlots) ? lineupSlots : [];
   var h = '<div class="ln half"></div><div class="ln circ"></div><div class="ln penT"></div><div class="ln penB"></div><div class="ln sixT"></div><div class="ln sixB"></div>';
   h += '<div class="side-lab left">Our left</div><div class="side-lab right">Our right</div><div class="end-lab att">Their goal</div><div class="end-lab our">Our goal</div>';
@@ -34699,7 +35460,9 @@ function gotoView(name){
   if (name==='transferhistory') renderTransferHistory();
   if (name==='abroad') renderAbroad(); /* v330 */
   if (name==='europe') renderEurope();
-  if (name==='tactics'){ try{ lastSheetSig=''; if (typeof renderFormationSheet==='function') renderFormationSheet(); renderUnlockedFormations(); renderStyleOptions(); styleTacticsNote(); }catch(e){} }
+  if (name==='tactics'){ try{ lastSheetSig=''; if (typeof renderFormationSheet==='function') renderFormationSheet(); renderUnlockedFormations(); renderStyleOptions(); styleTacticsNote(); if (typeof renderWrinkleBox==='function') renderWrinkleBox(); if (typeof renderTacticsPitch==='function') renderTacticsPitch(); }catch(e){} }
+  if (name==='transfers' && typeof v408InstallTransferTabs==='function') v408InstallTransferTabs();
+  if (name==='table' && typeof v408InstallLeagueChips==='function') v408InstallLeagueChips();
   if (name==='lineup'){ try{ if (typeof updateLineupEraBlurb==='function') updateLineupEraBlurb(); if (typeof eraPitchRender==='function') eraPitchRender(); if (typeof renderTacticsExtras80s==='function') renderTacticsExtras80s(); }catch(e){} }
   if (name==='club'){ if (typeof renderClub==='function') renderClub(); if (typeof renderBoardGuidance==='function') renderBoardGuidance(); }
   if (typeof refreshMenuGroupActiveState === 'function') refreshMenuGroupActiveState();
@@ -56507,7 +57270,7 @@ function v405EnsureSquadDom(){
   }
   view.classList.add('v405');
   var sub = view.querySelector('p.sub');
-  if (sub) sub.textContent = 'Click a player for his file. Form and morale are on the chips, as words. The file and the form guide show the last marks out of 10.';
+  if (sub) sub.textContent = 'Click a man for his Action File. Form and morale are on the chips.';
   var grid = view.querySelector('.grid2');
   if (grid && !document.getElementById('v405-filters')){
     var box = document.createElement('div');
@@ -56517,6 +57280,12 @@ function v405EnsureSquadDom(){
   }
   var filt = document.getElementById('v405-filters');
   if (filt) filt.style.display = '';
+  if (!document.getElementById('v408-clubrow')){
+    var crow = document.createElement('div');
+    crow.id = 'v408-clubrow';
+    crow.className = 'v408-clubrow';
+    if (filt && filt.parentNode) filt.parentNode.insertBefore(crow, filt.nextSibling);
+  }
   var table = view.querySelector('.scroll-box table');
   if (table){
     var thead = table.querySelector('thead');
@@ -56536,6 +57305,38 @@ function v405EnsureSquadDom(){
       });
     }
   }
+}
+function v408RenderClubBrowser(){
+  var row = document.getElementById('v408-clubrow');
+  if (!row || typeof v408FirstDivClubs!=='function') return;
+  if (!v405IsEighties()){ row.style.display='none'; return; }
+  row.style.display='';
+  var mine = (typeof ourClubName!=='undefined') ? ourClubName : '';
+  if (!v408BrowseClub) v408BrowseClub = mine;
+  var clubs = v408FirstDivClubs();
+  row.innerHTML = clubs.map(function(c){
+    return '<button type="button" class="office-chip'+(v408BrowseClub===c?' on':'')+'" data-club="'+v405Esc(c)+'" aria-pressed="'+(v408BrowseClub===c?'true':'false')+'">'+v405Esc(c)+'</button>';
+  }).join('');
+  Array.prototype.forEach.call(row.querySelectorAll('button'), function(b){
+    b.onclick = function(){
+      var c = b.getAttribute('data-club');
+      v408BrowseClub = c;
+      if (c===mine){
+        v405RenderSquad();
+        if (v405SelectedId) showProfile(v405SelectedId, 'profile-content');
+        return;
+      }
+      if (typeof ensureClubSquad==='function') ensureClubSquad(c);
+      var arr = (typeof clubSquads==='object' && clubSquads[c]) || [];
+      if (typeof v408EnsureIds==='function') v408EnsureIds(arr, c);
+      v408RenderClubBrowser();
+      var first = arr[0];
+      if (first){
+        if (typeof ensureV405Player==='function') ensureV405Player(first, c);
+        showProfile(first.id, 'profile-content');
+      }
+    };
+  });
 }
 function v405FormRank(p){ return (typeof formMarkOf==='function') ? formMarkOf(p) : (p.form||0); }
 function v405MoraleRank(p){ return (typeof p.morale==='number') ? p.morale : 0; }
@@ -56595,6 +57396,7 @@ function v405RenderSquad(){
   if (typeof squad==='undefined') return;
   v405EnsureSquadDom();
   v405RenderFilters();
+  if (typeof v408RenderClubBrowser==='function') v408RenderClubBrowser();
   var body = document.getElementById('squad-body');
   if (!body) return;
   body.innerHTML = '';
@@ -56628,15 +57430,13 @@ function v405Pips(v){
   return out+'</span>';
 }
 function v405CapsText(p){
-  if (p.caps==null || p.caps===undefined) return '<span class="v405-gap">Not yet sourced</span>';
-  if (p.caps===0) return 'No senior cap'+(p.capsNote? ' <span class="v405-src">('+v405Esc(p.capsNote)+')</span>':'');
+  if (p.caps==null || p.caps===undefined || p.caps===0) return '';
   var t = p.caps+' cap'+(p.caps===1?'':'s');
   if (p.intlGoals!=null) t += ', '+p.intlGoals+' goal'+(p.intlGoals===1?'':'s');
-  t += ' <span class="v405-src">('+v405Esc(p.capsNote||('as of '+v405CutDateLabel()))+')</span>';
   return t;
 }
 function v405CareerHtml(p){
-  if (!p.career || !p.career.length) return '<p class="v405-gap" style="margin:0">Career record not yet sourced.</p>';
+  if (!p.career || !p.career.length) return '';
   var h = '<table class="v405-career"><thead><tr><th>Years</th><th>Club</th><th>League apps</th><th>Goals</th></tr></thead><tbody>';
   p.career.forEach(function(r){
     var apps = (r.apps==null?'—':String(r.apps));
@@ -56644,7 +57444,7 @@ function v405CareerHtml(p){
     var fee = r.fee ? ' <span class="v405-src">(fee £'+Number(r.fee).toLocaleString('en-GB')+')</span>' : '';
     h += '<tr><td>'+v405Esc(r.years||'')+'</td><td>'+v405Esc(r.club||'')+fee+'</td><td>'+apps+'</td><td>'+gl+'</td></tr>';
   });
-  h += '</tbody></table><p class="v405-src" style="margin:4px 0 0">League figures only, and only for a completed spell or a sourced nought. A running total is not shown for a current spell if it would include later seasons.</p>';
+  h += '</tbody></table><p class="v405-src" style="margin:4px 0 0">League figures only, and only for a completed spell. A running total is not shown for a current spell if it would include later seasons.</p>';
   return h;
 }
 function v405Esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -56660,53 +57460,31 @@ function v405AttrRows(p){
   }).join('')+'</div>';
 }
 function v405ShowProfile(id, targetId){
-  var p = squad.find(function(x){ return x.id===id; });
+  var found = (typeof v408FindById==='function') ? v408FindById(id) : null;
+  var p = found ? found.p : ((typeof squad!=='undefined') ? squad.find(function(x){ return x.id===id; }) : null);
+  var club = found ? found.club : (typeof ourClubName!=='undefined' ? ourClubName : '');
   var el = document.getElementById(targetId);
   if (!p || !el) return;
   if (typeof ensurePlayerFormMorale==='function') ensurePlayerFormMorale(p);
-  ensureV405Player(p, ourClubName);
+  if (typeof ensureV405Player==='function') ensureV405Player(p, club);
   v405SelectedId = id;
   var formWord = (typeof formWordOf==='function') ? formWordOf(p) : '';
   var formMark = (typeof formMarkOf==='function') ? formMarkOf(p) : '';
   var morWord = (typeof moraleWordOf==='function') ? moraleWordOf(p) : '';
-  var natV = p.nat ? v405NatLabel(p.nat, false) : '<span class="v405-gap">Not yet sourced</span>';
-  var wage = (typeof formatClubPounds==='function') ? formatClubPounds(p.wage) : ('£'+Number(p.wage||0).toLocaleString('en-GB'));
   var chips = '';
-  if (typeof formChipHtml==='function') chips += formChipHtml(p, true);
-  if (typeof moraleChipHtml==='function') chips += moraleChipHtml(p, true);
+  if (formWord) chips += '<span class="chip-yellow">Form '+v405Esc(formWord)+(formMark!=='' && formMark!=null?(' '+formMark+'/10'):'')+'</span>';
+  else if (typeof formChipHtml==='function') chips += formChipHtml(p, true);
+  if (morWord) chips += '<span class="chip-yellow">Morale '+v405Esc(morWord)+'</span>';
+  else if (typeof moraleChipHtml==='function') chips += moraleChipHtml(p, true);
   if (typeof riseChipHtml==='function') chips += riseChipHtml(p);
-  chips += ' '+v405ContractChips(p);
-  var cap = (typeof captainId!=='undefined' && p.id===captainId) ? 'Club captain' : '';
-  var html = '<div class="v405-file">'+
-    '<div class="v405-file-head"><h3>'+v405Esc(p.n)+'</h3><div class="meta">'+v405Esc((typeof displayPosUpper==='function')?displayPosUpper(p):p.pos)+
-    (p.age!=null?('<br>Age '+p.age):'')+(cap?('<br>'+cap):'')+'</div></div>'+
-    '<div class="v405-file-body">'+
-    '<div class="file-chips">'+chips+'</div>'+
-    '<div class="v405-facts">'+
-      '<div class="fact"><span class="k">Nationality</span><span class="v">'+natV+'</span></div>'+
-      '<div class="fact"><span class="k">International caps</span><span class="v">'+v405CapsText(p)+'</span></div>'+
-      '<div class="fact"><span class="k">Personality</span><span class="v">'+v405Esc(p.personality||'')+'</span></div>'+
-      '<div class="fact"><span class="k">Wage</span><span class="v">'+wage+'</span></div>'+
-      '<div class="fact"><span class="k">This season</span><span class="v">'+(p.apps||0)+' app'+(p.apps===1?'':'s')+', '+(p.goalsSeason||0)+' goal'+(p.goalsSeason===1?'':'s')+'</span></div>'+
-      '<div class="fact"><span class="k">Form</span><span class="v">'+v405Esc(formWord)+(formMark!=='' && formMark!=null?(' '+formMark+'/10'):'')+'</span></div>'+
-      '<div class="fact"><span class="k">Morale</span><span class="v">'+v405Esc(morWord)+'</span></div>'+
-      '<div class="fact"><span class="k">Reputation</span><span class="v">'+((typeof stars==='function')?stars(p.rep):'')+'</span></div>'+
-    '</div>'+
-    '<h2 class="v405-h">Attributes</h2>'+v405AttrRows(p)+
-    '<h2 class="v405-h">Career</h2>'+v405CareerHtml(p)+
-    '</div></div>';
-  if (p.seasonHistory && p.seasonHistory.length){
-    html += '<div class="box pc-seasons" style="margin-top:8px;"><div class="box-title">SEASON-BY-SEASON RECORD</div>'
-      + '<div class="scroll-box" style="max-height:140px;"><table><thead><tr><th>Season</th><th>Club</th><th class="num">Apps</th><th class="num">Goals</th><th class="num">Rep</th></tr></thead><tbody>'
-      + p.seasonHistory.map(function(h){
-          return '<tr><td>'+h.label+'</td><td>'+(h.club||'').toUpperCase()+'</td><td class="num">'+h.apps+'</td><td class="num">'+h.goals+'</td><td class="num">'+h.rep+'</td></tr>';
-        }).join('')
-      + '</tbody></table></div></div>';
-  }
+  if (typeof v405ContractChips==='function') chips += ' '+v405ContractChips(p);
+  var html = (typeof v408SpreadHtml==='function') ? v408SpreadHtml(p, club) : '';
+  html += '<div class="v408-strip">'+chips+'</div>';
   el.innerHTML = html;
+  if (typeof v408WireSpread==='function') v408WireSpread(el);
 }
 
-var RETROMATCH_VERSION = 'v407'; /* v405 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v408'; /* v408 : 1980s Action File centrepiece on the Squad screen, wired to live attributes, caps, personality and league careers (no invented careers); Data tab and unsourced wording removed; formation wrinkles on the pitch are visual only; transfers and league tables use section buttons; styles show the selected pair and point to the week's training. No match-engine change. v407 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
