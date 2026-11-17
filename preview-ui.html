@@ -6,7 +6,7 @@
 <title>RetroMatch – 1980s screens (preview)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Barlow+Condensed:wght@400;700;800&family=Oswald:wght@500;700&family=Abril+Fatface&family=Zilla+Slab:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#f3e6c4;--ink:#1a120c;--red:#c0122a;--red-dark:#8e0c1f;--yellow:#ffd000;--muted:#5a4636;--card:#fff8e8;--chip:#ffd000;--grass:#3d6b3a;--grass-dark:#2f542c;--warn:#8e0c1f}
 *{box-sizing:border-box}
@@ -81,7 +81,7 @@ tr.hl td{background:#fff3b0}
 .train-how h3{color:var(--yellow);margin:0 0 6px}
 .train-how p{margin:0 0 6px}
 .train-how p:last-child{margin:0}
-.file-grid{display:grid;grid-template-columns:280px 1fr;gap:12px;align-items:start}
+.file-grid{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
 .sticker{background:#fff;border:3px solid #111;padding:8px 8px 10px;box-shadow:4px 4px 0 #111;position:relative}
 .sticker:before{content:"";position:absolute;inset:-6px;border:2px dashed #bbb;pointer-events:none}
 .sticker .clubbar{background:var(--red);color:#fff;text-align:center;padding:6px 4px 4px;font:400 16px/1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
@@ -96,6 +96,283 @@ tr.hl td{background:#fff3b0}
 .staff-line{margin:0 0 10px;padding:8px 10px;background:var(--card);border:2px solid #111}
 .staff-line .who{font-weight:700}
 .staff-line .duty{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+
+/* restored era player cards (v323/v363/v407) */
+/* v323 : era player cards (everything is pc- prefixed and scoped to .pc-stage so no game or theme rule can reach it) */
+.pc-stage{--f-abril:'Abril Fatface','Didot',Georgia,serif;--f-std:'Old Standard TT','Century Schoolbook',Georgia,serif;--f-osw:'Oswald','Arial Narrow',Arial,sans-serif;--f-black:'UnifrakturMaguntia','Old English Text MT',Georgia,serif;--f-alfa:'Alfa Slab One','Rockwell','Roboto Slab',Georgia,serif;--f-kau:'Kaushan Script','Brush Script MT',cursive;--f-bask:'Libre Baskerville','Baskerville',Georgia,serif;--f-barlow:'Barlow Condensed','Arial Narrow',Impact,sans-serif;--f-zilla:'Zilla Slab','Rockwell',Georgia,serif;
+  display:flex;flex-direction:column;align-items:center;margin:6px 0 4px;text-transform:none;letter-spacing:normal;text-shadow:none;white-space:normal}
+.pc-stage *,.pc-stage *::before,.pc-stage *::after{box-sizing:border-box}
+.pc-stage .pc-card{width:min(280px,100%);outline-offset:3px}
+.pc-stage .pc-card:focus-visible{outline:2px solid #f2b632}
+.pc-stage .pc-hint{margin-top:5px;font:400 11px/1 var(--f-std);font-style:italic;opacity:.75;text-align:center}
+.pc-stage h3,.pc-stage p,.pc-stage dl,.pc-stage dt,.pc-stage dd,.pc-stage em,.pc-stage b,.pc-stage span,.pc-stage small,.pc-stage div{text-transform:none}
+.pc-stage .pc-series,.pc-stage .pc-pos,.pc-stage .pc-foot,.pc-stage .pc-ribbon,.pc-stage .pc-badge span,.pc-stage .pc-tiles span,.pc-stage .pc-rec span,.pc-stage .pc-stats dt,.pc-stage .pc-sumrow,.pc-stage .pc-bfoot,.pc-stage .pc-bhead small,.pc-stage .pc-bhead h3,.pc-stage .pc-nameplate h3{text-transform:uppercase}
+.pc-stage.pc-e46 .pc-nameplate h3,.pc-stage.pc-e46 .pc-bhead h3,.pc-stage.pc-e46 .pc-series b,.pc-stage.pc-e46 .pc-bhead small,.pc-stage .pc-sumrow b{text-transform:none}
+.pc-stage .pc-pos{max-width:92%;text-align:center;white-space:normal}
+.pc-stage .pc-nameplate h3,.pc-stage .pc-bhead h3{white-space:nowrap}
+.pc-stage .pc-bhead p{text-transform:none}
+.pc-notes{text-align:center}
+
+.pc-card{width:min(300px,86vw);aspect-ratio:2/3;container-type:inline-size;perspective:1400px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;display:block}
+.pc-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.3,.7,.2,1)}
+.pc-card.pc-flipped .pc-inner{transform:rotateY(180deg)}
+.pc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column;font-size:4cqw}
+.pc-face.pc-back{transform:rotateY(180deg)}
+@media (prefers-reduced-motion:reduce){.pc-inner{transition:none}}
+.pc-portrait svg{display:block;width:100%;height:100%}
+.pc-stars{display:inline-flex;gap:.5cqw;vertical-align:middle}
+.pc-stars i{width:3.4cqw;height:3.4cqw;background:currentColor;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.pc-stars i.pc-off{opacity:.22}
+.pc-pips{display:inline-flex;gap:.6cqw;vertical-align:middle}
+.pc-pips i{display:block}
+
+/* ============ 1946-50  CIGARETTE CARD ============ */
+.pc-e46 .pc-face{background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .24  0 0 0 0 .12  0 0 0 .5 0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='.38'/></svg>"),
+  radial-gradient(120% 90% at 30% 20%,#f8edcf 0%,#f0e0b8 60%,#e3cf9f 100%);
+  color:#2a1a12;border-radius:5.2cqw;box-shadow:0 1px 0 #fff6 inset,0 10px 26px #0009,0 2px 4px #0006;--ink:#5c1b12;padding:7cqw 7.5cqw 6cqw;align-items:stretch}
+.pc-e46 .pc-face::before{content:"";position:absolute;inset:2.7cqw;border:1.1cqw double var(--ink);border-radius:3.4cqw;pointer-events:none}
+.pc-e46 .pc-face::after{content:"";position:absolute;inset:4.9cqw;border:.25cqw solid #5c1b1255;border-radius:1.6cqw;pointer-events:none}
+.pc-e46 .pc-corner{position:absolute;width:8cqw;height:8cqw;color:var(--ink);z-index:2}
+.pc-e46 .pc-corner.pc-tl{left:3.6cqw;top:3.6cqw}.pc-e46 .pc-corner.pc-tr{right:3.6cqw;top:3.6cqw;transform:scaleX(-1)}
+.pc-e46 .pc-corner.pc-bl{left:3.6cqw;bottom:3.6cqw;transform:scaleY(-1)}.pc-e46 .pc-corner.pc-br{right:3.6cqw;bottom:3.6cqw;transform:scale(-1)}
+.pc-e46 .pc-series{text-align:center;font:500 3.2cqw/1.1 var(--f-osw);letter-spacing:.24em;text-transform:uppercase;color:var(--ink);margin:0 4cqw 2.4cqw}
+.pc-e46 .pc-series b{display:block;font:400 6.6cqw/1.05 var(--f-abril);letter-spacing:.02em;text-transform:none;margin-top:.8cqw}
+.pc-e46 .pc-portrait{flex:1;min-height:0;position:relative;border-radius:34cqw 34cqw 2.4cqw 2.4cqw;overflow:hidden;border:.9cqw solid var(--ink);outline:.35cqw solid var(--ink);outline-offset:.8cqw;
+  background:repeating-conic-gradient(from 0deg at 50% 78%,#f3e4bd 0 5deg,#e9d3a0 5deg 10deg);margin:0 3cqw}
+.pc-e46 .pc-portrait svg{filter:sepia(.5) saturate(1.25) contrast(.97)}
+.pc-e46 .pc-portrait::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 8cqw #5c1b1255;pointer-events:none}
+.pc-e46 .pc-nameplate{text-align:center;margin:3.4cqw 0 0}
+.pc-e46 .pc-nameplate h3{margin:0;font:400 8.4cqw/1 var(--f-abril);color:#1d120d;letter-spacing:.01em}
+.pc-e46 .pc-meta{display:flex;flex-direction:column;align-items:center;gap:.9cqw;margin-top:1.8cqw}
+.pc-e46 .pc-club{font:italic 400 4.6cqw/1.1 var(--f-std);color:#3b2a20;display:flex;align-items:center;gap:1.6cqw}
+.pc-e46 .pc-sw{display:inline-flex;border:.3cqw solid var(--ink);border-radius:.4cqw;overflow:hidden}
+.pc-e46 .pc-sw i{display:block;width:3cqw;height:3cqw}
+.pc-e46 .pc-pos{font:500 3.2cqw/1 var(--f-osw);letter-spacing:.22em;text-transform:uppercase;color:#f3e6c8;background:var(--ink);padding:1.2cqw 3.2cqw 1.1cqw;border-radius:.6cqw}
+.pc-e46 .pc-foot{margin-top:2.6cqw;text-align:center;font:500 3.3cqw/1 var(--f-osw);letter-spacing:.2em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:2cqw}
+.pc-e46 .pc-foot::before,.pc-e46 .pc-foot::after{content:"";flex:1;border-top:.3cqw solid var(--ink);border-bottom:.3cqw solid var(--ink);height:.9cqw}
+/* 46 back */
+.pc-e46 .pc-back .pc-bhead{text-align:center;margin-top:1.4cqw}
+.pc-e46 .pc-back .pc-bhead small{display:block;font:400 4.8cqw/1 var(--f-black);color:var(--ink)}
+.pc-e46 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:400 6.8cqw/1.05 var(--f-abril);color:#1d120d}
+.pc-e46 .pc-back .pc-bhead p{margin:1cqw 0 0;font:italic 400 3.8cqw/1.1 var(--f-std);color:#3b2a20}
+.pc-e46 .pc-rule{height:1.2cqw;border-top:.3cqw solid var(--ink);border-bottom:.3cqw solid var(--ink);margin:2.4cqw 0}
+.pc-e46 .pc-bio{margin:0;font:400 3.75cqw/1.38 var(--f-std);text-align:justify;hyphens:auto;color:#2a1a12}
+.pc-e46 .pc-bio::first-letter{font:400 8.4cqw/.8 var(--f-abril);float:left;margin:.7cqw 1cqw 0 0;color:var(--ink)}
+.pc-e46 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);margin:2.6cqw 0 1.2cqw;border:.3cqw solid var(--ink);border-radius:.8cqw}
+.pc-e46 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;border-left:.3cqw solid var(--ink)}
+.pc-e46 .pc-rec div:first-child{border-left:0}
+.pc-e46 .pc-rec b{display:block;font:400 4.7cqw/1 var(--f-abril);color:#1d120d}
+.pc-e46 .pc-rec span{font:500 2.6cqw/1 var(--f-osw);letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.pc-e46 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.4cqw;row-gap:.95cqw;align-items:center;margin-top:1.2cqw}
+.pc-e46 .pc-stats dt{font:500 3cqw/1 var(--f-osw);letter-spacing:.16em;text-transform:uppercase;color:#3b2a20}
+.pc-e46 .pc-stats dd{margin:0;display:contents}
+.pc-e46 .pc-stats em{font:italic 400 3.2cqw/1 var(--f-std);color:#3b2a20;min-width:3.6cqw;text-align:right}
+.pc-e46 .pc-pips{gap:.8cqw}
+.pc-e46 .pc-pips i{width:2.8cqw;height:2.8cqw;border-radius:50%;border:.35cqw solid var(--ink);background:transparent}
+.pc-e46 .pc-pips i.pc-on{background:var(--ink)}
+.pc-e46 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.pc-e46 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2.2cqw;padding-top:1.6cqw;border-top:.3cqw dotted var(--ink);font:500 3cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#3b2a20;gap:1cqw}
+.pc-e46 .pc-sumrow b{font:400 3.7cqw var(--f-std);letter-spacing:0;text-transform:none;color:#1d120d;font-weight:700}
+.pc-e46 .pc-sumrow .pc-stars{color:var(--ink)}
+.pc-e46 .pc-bfoot{margin-top:auto;text-align:center;font:italic 400 2.9cqw/1.1 var(--f-std);color:#5c3b30;padding-top:1.4cqw}
+
+/* ============ 1959  TRADE / GUM CARD ============ */
+.pc-e59 .pc-face{background:#fbf6e6;border-radius:2.4cqw;box-shadow:0 10px 24px #0008,0 2px 3px #0006;padding:0;border:3.6cqw solid var(--c1b);--red:#b32323;--navy:#1f3550}
+.pc-e59 .pc-face::after{content:"";position:absolute;inset:0;border:.9cqw solid #fbf6e6;pointer-events:none;border-radius:0}
+.pc-e59 .pc-ribbon{background:var(--red);color:#ffd45e;display:flex;justify-content:space-between;align-items:center;padding:2.4cqw 3.4cqw 2cqw;font:400 5.6cqw/1 var(--f-alfa);letter-spacing:.02em;text-transform:uppercase;text-shadow:.35cqw .35cqw 0 #00000055}
+.pc-e59 .pc-ribbon small{font:500 3.4cqw var(--f-osw);letter-spacing:.14em;color:#fbf6e6;text-shadow:none}
+.pc-e59 .pc-portrait{flex:1;min-height:0;position:relative;margin:3cqw 3.6cqw 0;background:
+  radial-gradient(circle at 50% 38%,#ffffff55 0 20%,transparent 21%),
+  radial-gradient(#00000026 22%,transparent 24%) 0 0/2.6cqw 2.6cqw,
+  linear-gradient(180deg,var(--tint) 0%,var(--tint2) 100%);border:1cqw solid #fff;box-shadow:1.4cqw 1.4cqw 0 var(--navy);overflow:hidden}
+.pc-e59 .pc-portrait::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(112deg,transparent 0 5cqw,#ffffff22 5cqw 8cqw);pointer-events:none}
+.pc-e59 .pc-badge{position:absolute;right:2.2cqw;top:2.2cqw;z-index:3;width:14cqw;height:14cqw;background:#ffd45e;color:var(--red);display:grid;place-items:center;text-align:center;clip-path:polygon(50% 0,60% 14%,77% 7%,80% 25%,98% 28%,89% 44%,100% 58%,84% 66%,86% 84%,68% 82%,59% 98%,50% 85%,41% 98%,32% 82%,14% 84%,16% 66%,0 58%,11% 44%,2% 28%,20% 25%,23% 7%,40% 14%);font:400 3.4cqw/1 var(--f-alfa)}
+.pc-e59 .pc-badge span{display:block;font-size:6cqw;line-height:.95}
+.pc-e59 .pc-flash{position:absolute;left:1.6cqw;bottom:2.4cqw;z-index:3;font:400 6.4cqw/1 var(--f-kau);color:#fff;text-shadow:.45cqw .45cqw 0 var(--red),-.1cqw -.1cqw 0 var(--red);transform:rotate(-5deg)}
+.pc-e59 .pc-nameplate{margin:3.4cqw 3cqw 0;background:var(--navy);color:#fff;text-align:center;padding:1.8cqw 1cqw 1.5cqw;transform:skewX(-4deg);border-bottom:1cqw solid var(--red)}
+.pc-e59 .pc-nameplate h3{margin:0;font:400 7.4cqw/1 var(--f-alfa);transform:skewX(4deg);text-transform:uppercase;letter-spacing:.01em}
+.pc-e59 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin:2.2cqw 4cqw 0;gap:2cqw}
+.pc-e59 .pc-club{font:italic 400 3.9cqw/1.1 var(--f-bask);color:#1a1714;display:flex;align-items:center;gap:1.4cqw}
+.pc-e59 .pc-sw{display:inline-flex;border:.4cqw solid #1a1714}.pc-e59 .pc-sw i{display:block;width:3cqw;height:3cqw}
+.pc-e59 .pc-pos{font:500 3.3cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--red);padding:1.3cqw 2.4cqw}
+.pc-e59 .pc-foot{margin:2.2cqw 3.6cqw 2.6cqw;text-align:center;font:500 3cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#4c453b;border-top:.4cqw solid #1a1714;padding-top:1.6cqw}
+.pc-e59 .pc-corner{display:none}
+/* 59 back */
+.pc-e59 .pc-back{background:#f1e9d0;padding:0}
+.pc-e59 .pc-back .pc-bhead{background:var(--navy);color:#fff;padding:2.4cqw 3.4cqw 2cqw;border-bottom:1cqw solid var(--red)}
+.pc-e59 .pc-back .pc-bhead small{display:block;font:500 3cqw/1 var(--f-osw);letter-spacing:.16em;text-transform:uppercase;color:#ffd45e}
+.pc-e59 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:400 6.6cqw/1.05 var(--f-alfa);text-transform:uppercase}
+.pc-e59 .pc-back .pc-bhead p{margin:.4cqw 0 0;font:italic 400 3.5cqw/1.1 var(--f-bask);color:#d6e3ee}
+.pc-e59 .pc-bodyb{padding:2.6cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
+.pc-e59 .pc-bio{margin:0;font:italic 400 3.45cqw/1.42 var(--f-bask);color:#1a1714;position:relative;padding:2.4cqw 2.4cqw 2.2cqw 2.4cqw;min-height:34cqw;background:#fff9e0;border-left:1.1cqw solid var(--red)}
+.pc-e59 .pc-bio::before{content:"DID YOU KNOW?";display:block;font:400 3.4cqw/1 var(--f-alfa);font-style:normal;color:var(--red);margin-bottom:1.2cqw;letter-spacing:.04em}
+.pc-e59 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2cqw;margin:2.4cqw 0 1.4cqw}
+.pc-e59 .pc-rec div{background:var(--navy);color:#fff;text-align:center;padding:1.4cqw 0 1.1cqw}
+.pc-e59 .pc-rec b{display:block;font:400 4.8cqw/1 var(--f-alfa);color:#ffd45e}
+.pc-e59 .pc-rec span{font:500 2.6cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase}
+.pc-e59 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.2cqw;row-gap:1.9cqw;align-items:center;margin-top:2cqw}
+.pc-e59 .pc-stats dt{font:500 3.1cqw/1 var(--f-osw);letter-spacing:.12em;text-transform:uppercase;color:#1a1714}
+.pc-e59 .pc-stats dd{margin:0;display:contents}
+.pc-e59 .pc-stats em{font:400 3.4cqw/1 var(--f-alfa);color:var(--red);min-width:4cqw;text-align:right}
+.pc-e59 .pc-pips{gap:.5cqw}
+.pc-e59 .pc-pips i{width:3.1cqw;height:3.4cqw;background:#d9ceae;transform:skewX(-14deg)}
+.pc-e59 .pc-pips i.pc-on{background:var(--red)}
+.pc-e59 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--red) 50%,#d9ceae 50%)}
+.pc-e59 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:500 3cqw/1 var(--f-osw);letter-spacing:.12em;text-transform:uppercase;color:#1a1714;gap:1cqw}
+.pc-e59 .pc-sumrow b{font:400 3.6cqw var(--f-alfa);color:var(--navy);letter-spacing:0}
+.pc-e59 .pc-sumrow .pc-stars{color:var(--red)}
+.pc-e59 .pc-bfoot{margin:auto 0 2.4cqw;text-align:center;font:500 2.7cqw/1 var(--f-osw);letter-spacing:.14em;text-transform:uppercase;color:#4c453b;border-top:.4cqw solid #1a1714;padding-top:1.4cqw}
+
+/* ============ 1966-67  STICKER-ALBUM / PROGRAMME ============ */
+.pc-e66 .pc-face{background:#fff;border-radius:4.4cqw;box-shadow:0 0 0 .8cqw #fff,0 0 0 1cqw #0002,0 10px 22px #0008;padding:3.4cqw;--navy:#1b2236;--red:#a82414;--cream:#efe5c9}
+.pc-e66 .pc-face::after{display:none}
+.pc-e66 .pc-corner{display:none}
+.pc-e66 .pc-ribbon{background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:2.4cqw 3cqw 2.1cqw;font:800 4.8cqw/1 var(--f-barlow);letter-spacing:.1em;text-transform:uppercase;border-radius:2.2cqw 2.2cqw 0 0}
+.pc-e66 .pc-ribbon small{font:700 3.6cqw var(--f-barlow);letter-spacing:.14em;color:#efe5c9}
+.pc-e66 .pc-portrait{flex:1;min-height:0;position:relative;background:var(--tint66);overflow:hidden}
+.pc-e66 .pc-portrait::before{content:"";position:absolute;width:86%;aspect-ratio:1;left:7%;top:6%;border-radius:50%;background:var(--tint66b)}
+.pc-e66 .pc-portrait svg{position:relative}
+.pc-e66 .pc-badge{position:absolute;left:0;top:0;z-index:3;background:var(--red);color:#fff;font:800 9cqw/1 var(--f-barlow);padding:1.6cqw 3.2cqw 1.4cqw;border-radius:0 0 3cqw 0;letter-spacing:.02em}
+.pc-e66 .pc-badge span{font-size:3cqw;font-weight:700;letter-spacing:.14em;display:block;color:#efe5c9;text-transform:uppercase;line-height:1;margin-bottom:.4cqw}
+.pc-e66 .pc-flash{display:none}
+.pc-e66 .pc-nameplate{margin:2.4cqw 0 0}
+.pc-e66 .pc-nameplate h3{margin:0;font:800 10cqw/.95 var(--f-barlow);color:var(--navy);text-transform:uppercase;letter-spacing:.01em}
+.pc-e66 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin-top:1.4cqw;gap:2cqw}
+.pc-e66 .pc-club{font:400 4.2cqw/1.1 var(--f-zilla);color:#3b4157;display:flex;align-items:center;gap:1.4cqw}
+.pc-e66 .pc-sw{display:inline-flex;border-radius:50%;overflow:hidden;width:4cqw;height:4cqw;box-shadow:0 0 0 .35cqw var(--navy)}.pc-e66 .pc-sw i{display:block;flex:1}
+.pc-e66 .pc-pos{font:700 3.6cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--red);padding:1.3cqw 3cqw;border-radius:5cqw}
+.pc-e66 .pc-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4cqw;margin-top:2.2cqw}
+.pc-e66 .pc-tiles div{background:var(--cream);text-align:center;padding:1.3cqw 0 1cqw;border-radius:1.4cqw}
+.pc-e66 .pc-tiles b{display:block;font:800 5.4cqw/1 var(--f-barlow);color:var(--navy)}
+.pc-e66 .pc-tiles span{font:700 2.8cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.pc-e66 .pc-foot{margin-top:2cqw;text-align:center;font:700 2.9cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:#7b7f90;padding-bottom:.6cqw}
+/* 66 back */
+.pc-e66 .pc-back{background:var(--cream);padding:3.4cqw}
+.pc-e66 .pc-back .pc-bhead{background:var(--navy);color:#fff;padding:2.6cqw 3.2cqw 2.4cqw;border-radius:2.2cqw 2.2cqw 0 0}
+.pc-e66 .pc-back .pc-bhead small{display:block;font:700 3.2cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:#ffb3a3}
+.pc-e66 .pc-back .pc-bhead h3{margin:.8cqw 0 0;font:800 8.4cqw/.95 var(--f-barlow);text-transform:uppercase}
+.pc-e66 .pc-back .pc-bhead p{margin:.8cqw 0 0;font:italic 400 3.6cqw/1.1 var(--f-zilla);color:#d9d4c2}
+.pc-e66 .pc-bodyb{background:#f6efd9;padding:2.6cqw 3.2cqw 0;flex:1;min-height:0;display:flex;flex-direction:column;border-radius:0 0 2.2cqw 2.2cqw}
+.pc-e66 .pc-bio{margin:0;min-height:26cqw;font:400 3.6cqw/1.4 var(--f-zilla);color:#1b2236}
+.pc-e66 .pc-bio::before{content:"Pen portrait";display:block;font:800 3.4cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:1cqw}
+.pc-e66 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);margin:2.4cqw 0 1.6cqw;border-top:.5cqw solid var(--navy);border-bottom:.5cqw solid var(--navy)}
+.pc-e66 .pc-rec div{text-align:center;padding:1.4cqw 0 1.1cqw}
+.pc-e66 .pc-rec b{display:block;font:800 5.2cqw/1 var(--f-barlow);color:var(--navy)}
+.pc-e66 .pc-rec span{font:700 2.7cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:var(--red)}
+.pc-e66 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.4cqw;row-gap:2cqw;align-items:center;margin-top:2cqw}
+.pc-e66 .pc-stats dt{font:700 3.3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--navy)}
+.pc-e66 .pc-stats dd{margin:0;display:contents}
+.pc-e66 .pc-stats em{font:800 3.8cqw/1 var(--f-barlow);color:var(--red);font-style:normal;min-width:4cqw;text-align:right}
+.pc-e66 .pc-pips{gap:.7cqw}
+.pc-e66 .pc-pips i{width:3cqw;height:3cqw;border-radius:50%;background:#d8cfb0}
+.pc-e66 .pc-pips i.pc-on{background:var(--navy)}
+.pc-e66 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--navy) 50%,#d8cfb0 50%)}
+.pc-e66 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:700 3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--navy);gap:1cqw}
+.pc-e66 .pc-sumrow b{font:800 3.8cqw var(--f-barlow);color:var(--red);letter-spacing:.04em}
+.pc-e66 .pc-sumrow .pc-stars{color:var(--red)}
+.pc-e66 .pc-bfoot{margin:auto 0 2.4cqw;text-align:center;font:700 2.7cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:#7b7f90}
+
+
+/* ============ 1970-81  COLOUR ACTION CARD ============ */
+.pc-e70 .pc-face{background:#f4ecd4;border-radius:1.2cqw;box-shadow:0 0 0 1.2cqw #111,0 10px 22px #0008;padding:0;--ink:#161616;--yellow:#ffe200;--red:#e0002a;--navy:#0b1c4a}
+.pc-e70 .pc-face::after{content:"";position:absolute;inset:0;border:.9cqw solid #111;pointer-events:none}
+.pc-e70 .pc-corner{display:none}
+.pc-e70 .pc-ribbon{background:var(--yellow);color:#111;display:flex;justify-content:space-between;align-items:center;padding:2.2cqw 3.2cqw 1.8cqw;font:800 5.2cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;border-bottom:1.1cqw solid #111}
+.pc-e70 .pc-ribbon small{font:700 3.4cqw var(--f-barlow);letter-spacing:.14em;color:#111}
+.pc-e70 .pc-portrait{flex:1;min-height:0;position:relative;margin:0;background:var(--tint70);overflow:hidden;border-bottom:1.1cqw solid #111}
+.pc-e70 .pc-portrait::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-18deg,transparent 0 7cqw,#00000018 7cqw 8cqw);pointer-events:none}
+.pc-e70 .pc-portrait svg{position:relative;filter:saturate(1.15) contrast(1.05)}
+.pc-e70 .pc-badge{position:absolute;left:0;bottom:0;z-index:3;background:#111;color:var(--yellow);font:800 8.4cqw/1 var(--f-barlow);padding:1.4cqw 3cqw 1.2cqw;letter-spacing:.02em}
+.pc-e70 .pc-badge span{font-size:2.8cqw;font-weight:700;letter-spacing:.16em;display:block;color:#fff;text-transform:uppercase;line-height:1;margin-bottom:.3cqw}
+.pc-e70 .pc-flash{display:none}
+.pc-e70 .pc-nameplate{margin:0;background:var(--red);color:#fff;text-align:left;padding:2cqw 3.2cqw 1.7cqw;transform:skewX(-6deg);border-bottom:1.1cqw solid #111}
+.pc-e70 .pc-nameplate h3{margin:0;font:800 8.8cqw/.95 var(--f-barlow);transform:skewX(6deg);text-transform:uppercase;letter-spacing:.01em;text-shadow:.35cqw .35cqw 0 #00000055}
+.pc-e70 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin:2cqw 3.2cqw 0;gap:2cqw}
+.pc-e70 .pc-club{font:700 3.8cqw/1.1 var(--f-barlow);letter-spacing:.06em;text-transform:uppercase;color:#111;display:flex;align-items:center;gap:1.4cqw}
+.pc-e70 .pc-sw{display:inline-flex;border:.45cqw solid #111}.pc-e70 .pc-sw i{display:block;width:3cqw;height:3cqw}
+.pc-e70 .pc-pos{font:800 3.2cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:#111;background:var(--yellow);padding:1.2cqw 2.4cqw;border:.4cqw solid #111}
+.pc-e70 .pc-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:2cqw 0 0;border-top:1.1cqw solid #111}
+.pc-e70 .pc-tiles div{text-align:center;padding:1.4cqw 0 1.1cqw;border-left:.5cqw solid #111;background:#fff8dc}
+.pc-e70 .pc-tiles div:first-child{border-left:0}
+.pc-e70 .pc-tiles b{display:block;font:800 5.4cqw/1 var(--f-barlow);color:#111}
+.pc-e70 .pc-tiles span{font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.pc-e70 .pc-foot{margin:0;text-align:center;font:800 2.8cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:#111;background:var(--yellow);padding:1.6cqw 2cqw;border-top:1.1cqw solid #111}
+.pc-e70 .pc-back{background:#f4ecd4;padding:0}
+.pc-e70 .pc-back .pc-bhead{background:#111;color:var(--yellow);padding:2.4cqw 3.2cqw 2cqw;border-bottom:1.1cqw solid var(--yellow)}
+.pc-e70 .pc-back .pc-bhead small{display:block;font:800 3cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:#fff}
+.pc-e70 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:800 7.2cqw/.95 var(--f-barlow);text-transform:uppercase;color:#fff}
+.pc-e70 .pc-back .pc-bhead p{margin:.5cqw 0 0;font:700 3.4cqw/1.1 var(--f-barlow);letter-spacing:.06em;text-transform:uppercase;color:var(--yellow)}
+.pc-e70 .pc-bodyb{padding:2.4cqw 3.2cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
+.pc-e70 .pc-bio{margin:0;font:400 3.5cqw/1.4 var(--f-zilla);color:#161616;background:#fff8dc;padding:2cqw;border-left:1.2cqw solid var(--red);min-height:28cqw}
+.pc-e70 .pc-bio::before{content:"FACT FILE";display:block;font:800 3.2cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:1cqw}
+.pc-e70 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);margin:2.2cqw 0 1.4cqw;border:.5cqw solid #111}
+.pc-e70 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;border-left:.5cqw solid #111;background:#fff}
+.pc-e70 .pc-rec div:first-child{border-left:0}
+.pc-e70 .pc-rec b{display:block;font:800 5cqw/1 var(--f-barlow);color:#111}
+.pc-e70 .pc-rec span{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.pc-e70 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.2cqw;row-gap:1.6cqw;align-items:center;margin-top:1.6cqw}
+.pc-e70 .pc-stats dt{font:800 3.1cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:#111}
+.pc-e70 .pc-stats dd{margin:0;display:contents}
+.pc-e70 .pc-stats em{font:800 3.6cqw/1 var(--f-barlow);font-style:normal;color:var(--red);min-width:4cqw;text-align:right}
+.pc-e70 .pc-pips{gap:.55cqw}
+.pc-e70 .pc-pips i{width:3cqw;height:3cqw;background:#ddd4b0;border:.3cqw solid #111}
+.pc-e70 .pc-pips i.pc-on{background:var(--yellow)}
+.pc-e70 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--yellow) 50%,#ddd4b0 50%)}
+.pc-e70 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:800 2.9cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:#111;gap:1cqw;border-top:.5cqw solid #111;padding-top:1.6cqw}
+.pc-e70 .pc-sumrow b{font:800 3.6cqw var(--f-barlow);color:var(--red);letter-spacing:0}
+.pc-e70 .pc-sumrow .pc-stars{color:var(--red)}
+.pc-e70 .pc-bfoot{margin:auto 0 0;text-align:center;font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:#111;background:var(--yellow);padding:1.5cqw 2cqw;border-top:1.1cqw solid #111}
+
+/* ============ 1981-87  ACTION FILE / TV-SPORT CARD ============ */
+.pc-e81 .pc-face{background:#071428;border-radius:1.6cqw;box-shadow:0 0 0 .6cqw #7ee0ff,0 10px 24px #000a;padding:0;--ink:#071428;--cyan:#7ee0ff;--mag:#ff3d7a;--yellow:#ffe200}
+.pc-e81 .pc-face::after{content:"";position:absolute;inset:1.1cqw;border:.45cqw solid var(--cyan);pointer-events:none;border-radius:.8cqw}
+.pc-e81 .pc-corner{display:none}
+.pc-e81 .pc-ribbon{background:transparent;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;padding:2.6cqw 3.6cqw 1.6cqw;font:800 5cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase}
+.pc-e81 .pc-ribbon small{font:700 3.2cqw var(--f-barlow);letter-spacing:.16em;color:#fff}
+.pc-e81 .pc-portrait{flex:1;min-height:0;position:relative;margin:0 3.2cqw;background:var(--tint81);overflow:hidden;border:.45cqw solid #fff;clip-path:polygon(0 0,100% 0,100% 86%,0 100%)}
+.pc-e81 .pc-portrait::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 3cqw,#00000022 3cqw 3.4cqw);pointer-events:none}
+.pc-e81 .pc-portrait svg{position:relative;filter:saturate(1.2) contrast(1.08)}
+.pc-e81 .pc-badge{position:absolute;right:0;top:0;z-index:3;background:var(--mag);color:#fff;font:800 8cqw/1 var(--f-barlow);padding:1.4cqw 2.8cqw 1.2cqw;letter-spacing:.02em;clip-path:polygon(12% 0,100% 0,100% 100%,0 100%)}
+.pc-e81 .pc-badge span{font-size:2.6cqw;font-weight:700;letter-spacing:.16em;display:block;color:var(--yellow);text-transform:uppercase;line-height:1;margin-bottom:.3cqw}
+.pc-e81 .pc-flash{display:none}
+.pc-e81 .pc-nameplate{margin:1.6cqw 3.2cqw 0;background:transparent;color:#fff;text-align:left;padding:0}
+.pc-e81 .pc-nameplate h3{margin:0;font:800 9.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;letter-spacing:-.02em;color:#fff;text-shadow:.4cqw .4cqw 0 var(--mag)}
+.pc-e81 .pc-meta{display:flex;justify-content:space-between;align-items:center;margin:1.4cqw 3.2cqw 0;gap:2cqw}
+.pc-e81 .pc-club{font:700 3.6cqw/1.1 var(--f-barlow);letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:1.4cqw}
+.pc-e81 .pc-sw{display:inline-flex;border:.35cqw solid #fff;border-radius:.3cqw;overflow:hidden}.pc-e81 .pc-sw i{display:block;width:2.8cqw;height:2.8cqw}
+.pc-e81 .pc-pos{font:800 3cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:#071428;background:var(--cyan);padding:1.1cqw 2.2cqw}
+.pc-e81 .pc-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.6cqw;margin:2cqw 3.2cqw 0}
+.pc-e81 .pc-tiles div{text-align:center;padding:1.2cqw 0 1cqw;background:#0c1f3d;border-bottom:.45cqw solid var(--cyan)}
+.pc-e81 .pc-tiles b{display:block;font:800 5.2cqw/1 var(--f-barlow);color:#fff}
+.pc-e81 .pc-tiles span{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-foot{margin:1.8cqw 0 0;text-align:center;font:800 2.7cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);padding:1.6cqw 2cqw 2.2cqw}
+.pc-e81 .pc-back{background:#071428;padding:0;color:#fff}
+.pc-e81 .pc-back .pc-bhead{background:#0c1f3d;color:#fff;padding:2.6cqw 3.4cqw 2.2cqw;border-bottom:.5cqw solid var(--cyan)}
+.pc-e81 .pc-back .pc-bhead small{display:block;font:800 3cqw/1 var(--f-barlow);letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:800 7.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;color:#fff}
+.pc-e81 .pc-back .pc-bhead p{margin:.5cqw 0 0;font:700 3.3cqw/1.1 var(--f-barlow);letter-spacing:.08em;text-transform:uppercase;color:var(--mag)}
+.pc-e81 .pc-bodyb{padding:2.4cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
+.pc-e81 .pc-bio{margin:0;font:400 3.45cqw/1.4 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:2cqw;border-left:.7cqw solid var(--mag);min-height:26cqw}
+.pc-e81 .pc-bio::before{content:"ACTION FILE";display:block;font:800 3.1cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:1cqw}
+.pc-e81 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);gap:.5cqw;margin:2.2cqw 0 1.4cqw}
+.pc-e81 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;background:#0c1f3d}
+.pc-e81 .pc-rec b{display:block;font:800 5cqw/1 var(--f-barlow);color:#fff}
+.pc-e81 .pc-rec span{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-stats{display:grid;grid-template-columns:auto 1fr auto;column-gap:2.2cqw;row-gap:1.5cqw;align-items:center;margin-top:1.4cqw}
+.pc-e81 .pc-stats dt{font:800 3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-stats dd{margin:0;display:contents}
+.pc-e81 .pc-stats em{font:800 3.6cqw/1 var(--f-barlow);font-style:normal;color:var(--yellow);min-width:4cqw;text-align:right}
+.pc-e81 .pc-pips{gap:.5cqw}
+.pc-e81 .pc-pips i{width:2.8cqw;height:2.8cqw;background:#1a335c;border-radius:0}
+.pc-e81 .pc-pips i.pc-on{background:var(--cyan)}
+.pc-e81 .pc-pips i.pc-half{background:linear-gradient(90deg,var(--cyan) 50%,#1a335c 50%)}
+.pc-e81 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:800 2.8cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:#fff;gap:1cqw;border-top:.4cqw solid var(--cyan);padding-top:1.5cqw}
+.pc-e81 .pc-sumrow b{font:800 3.5cqw var(--f-barlow);color:var(--yellow);letter-spacing:0}
+.pc-e81 .pc-sumrow .pc-stars{color:var(--yellow)}
+.pc-e81 .pc-bfoot{margin:auto 0 0;text-align:center;font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);padding:1.8cqw 2cqw 2.2cqw}
+
+/*PCARD-CSS-END*/
 </style>
 </head>
 <body>
@@ -444,18 +721,268 @@ tr.hl td{background:#fff3b0}
     el("panel-transfers").innerHTML = "<h2>Transfers</h2><p class='note'>The old single transfers screen is split. For sale, enquiries, the office, and scouts each have their own tab. Actions are buttons, not blue links.</p><p class='era-lab'>Section</p><div class='chips' id='tr-tabs'>"+tabBar+"</div>"+body;
     el("tr-tabs").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ trTab=b.getAttribute("data-tr"); renderAll(); }); });
   }
-  var FILE_81 = ["wilkins","coppell","gidman","birtles","bailey","roche","mcqueen","buchan","stapleton","macari","mcilroy","albiston","moran"];
-  var FILE_86 = ["robson","stapleton","whiteside","mcgrath","strachan","olsen","sivebaek","turner","albiston","moran","moses","duxbury"];
-  function stickerHTML(p){
-    var age = era>=1986 ? p.age86 : p.age81;
-    var season = era>=1986 ? "1986-87" : "1981-82";
-    var ini = (p.name||"").split(" ").map(function(w){ return w.charAt(0); }).join("");
-    return '<div class="sticker"><div class="clubbar">Manchester United</div><div class="pic"><div class="no">'+esc(ini)+'</div><div class="mono">'+season+'</div></div><div class="nmbar">'+esc(p.name)+'</div><div class="posbar">'+esc(p.pos)+(age?(" · age "+age):"")+"</div></div>";
+  /* ---- v323/v363/v390 era cards, adapted for this preview. Skin is 1981+ Action File. ---- */
+  var PCARD_SKIN_DEFAULT = '#dfae88';
+  var PCARD_SKIN_PALETTE = { L1:'#f1d0b0', L2:'#dfae88', L3:'#c9956c', M1:'#c68654', M2:'#a86b3c', D1:'#8d5a36', D2:'#6b3f24', D3:'#4e2c18' };
+  var HAIR = { black:'#1c1612', dark:'#2a1b14', brown:'#4a3220', auburn:'#a3441c', ginger:'#c4622a', blond:'#c79a52', fair:'#d4b07a', grey:'#a8a8a8' };
+  /* Home shirts for 1981-82 and 1986-87 First Division, read from Historical Football Kits
+     kit drawings (Wayback Machine; the live historicalkits.co.uk domain is no longer that site).
+     Colours and patterns only: sponsor marks are not reproduced. */
+  function K(type,c1,c2,extra){
+    var o={type:type||'plain', c1:c1, c2:c2||'#f4f0e6', sleeves:null, collar:c2||'#f4f0e6', known:true};
+    if (extra) Object.keys(extra).forEach(function(k){ o[k]=extra[k]; });
+    if (o.collar==null) o.collar=o.c2;
+    return o;
   }
+  var RED='#b32323', WHT='#f4f0e6', BLU='#1f527f', RYL='#2457a6', SKY='#7fb7e0', NAVY='#1b2a4a',
+      CLARET='#7e1f3a', LBLUE='#8eb4e0', GOLD='#c9a227', YEL='#f2d21b', GRN='#2f6b3a',
+      BLK='#1c1c1c', AMBER='#f0a81c', TAN='#f28a1a';
+  var ERA_KITS = {
+    1981:{
+      "Arsenal": K('plain',RED,WHT,{sleeves:WHT,collar:WHT,label:'Red, white sleeves'}),
+      "Aston Villa": K('plain',CLARET,LBLUE,{sleeves:LBLUE,collar:LBLUE,label:'Claret, light blue sleeves'}),
+      "Birmingham City": K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+      "Brighton & Hove Albion": K('plain',RYL,RYL,{collar:WHT,label:'Blue, blue shorts'}),
+      "Coventry City": K('tbar',SKY,WHT,{bar:NAVY,collar:WHT,label:'Sky blue and white, navy bar (Talbot shirt)'}),
+      "Everton": K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+      "Ipswich Town": K('pinstripes',RYL,WHT,{collar:RYL,label:'Blue with white pinstripes'}),
+      "Leeds United": K('pinstripes',WHT,RYL,{c3:GOLD,collar:WHT,label:'White, with blue and gold pinstripes'}),
+      "Liverpool": K('plain',RED,RED,{collar:RED,label:'Red, red shorts'}),
+      "Manchester City": K('plain',SKY,SKY,{collar:WHT,label:'Sky blue, sky blue shorts'}),
+      "Manchester United": K('plain',RED,WHT,{collar:WHT,label:'Red, white collar, white shorts'}),
+      "Middlesbrough": K('plain',RED,RED,{collar:WHT,label:'Red, red shorts'}),
+      "Nottingham Forest": K('pinstripes',RED,WHT,{collar:WHT,label:'Red with white pinstripes, white shorts'}),
+      "Notts County": K('stripes',BLK,WHT,{collar:WHT,label:'Black and white stripes'}),
+      "Southampton": K('stripes',RED,WHT,{collar:WHT,label:'Red and white stripes, black shorts'}),
+      "Stoke City": K('stripes',RED,WHT,{collar:WHT,label:'Red and white stripes, white shorts'}),
+      "Sunderland": K('panels',WHT,RED,{collar:RED,label:'White with red shoulders, red shorts'}),
+      "Swansea City": K('plain',WHT,WHT,{collar:WHT,label:'White'}),
+      "Tottenham Hotspur": K('plain',WHT,NAVY,{collar:WHT,label:'White, navy shorts'}),
+      "West Bromwich Albion": K('stripes',NAVY,WHT,{collar:WHT,label:'Navy and white stripes, white shorts'}),
+      "West Ham United": K('plain',CLARET,LBLUE,{sleeves:LBLUE,collar:LBLUE,label:'Claret, light blue sleeves'}),
+      "Wolverhampton Wanderers": K('plain',GOLD,BLK,{collar:BLK,label:'Old gold, black shorts'})
+    },
+    1986:{
+      "Arsenal": K('plain',RED,WHT,{sleeves:WHT,collar:WHT,label:'Red, white sleeves'}),
+      "Aston Villa": K('band',CLARET,WHT,{band:LBLUE,collar:WHT,label:'Claret, pale chest band, white shorts'}),
+      "Charlton Athletic": K('pinstripes',RED,WHT,{collar:WHT,label:'Red with white pinstripes, white shorts'}),
+      "Chelsea": K('plain',RYL,RYL,{collar:WHT,label:'Blue, blue shorts'}),
+      "Coventry City": K('stripes',SKY,WHT,{collar:WHT,label:'Sky blue and white stripes, white shorts'}),
+      "Everton": K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+      "Leicester City": K('plain',RYL,WHT,{collar:WHT,label:'Blue, white shorts'}),
+      "Liverpool": K('plain',RED,RED,{collar:WHT,label:'Red, red shorts, white collar'}),
+      "Luton Town": K('plain',WHT,NAVY,{collar:TAN,label:'White, navy shorts, orange trim'}),
+      "Manchester City": K('plain',SKY,SKY,{collar:WHT,label:'Sky blue, sky blue shorts'}),
+      "Manchester United": K('plain',RED,WHT,{collar:WHT,label:'Red, white collar, white shorts'}),
+      "Newcastle United": K('stripes',BLK,WHT,{collar:WHT,label:'Black and white stripes, black shorts'}),
+      "Norwich City": K('panels',YEL,GRN,{collar:GRN,label:'Yellow with green shoulders, green shorts'}),
+      "Nottingham Forest": K('plain',RED,WHT,{collar:WHT,label:'Red, white shorts'}),
+      "Oxford United": K('plain',YEL,NAVY,{collar:YEL,label:'Yellow, navy shorts'}),
+      "Queens Park Rangers": K('hoops',RYL,WHT,{collar:WHT,trim:RED,label:'Blue and white hoops, white shorts'}),
+      "Sheffield Wednesday": K('stripes',RYL,WHT,{collar:WHT,label:'Blue and white stripes, blue shorts'}),
+      "Southampton": K('panels',WHT,RED,{collar:RED,label:'White with red shoulders, black shorts'}),
+      "Tottenham Hotspur": K('plain',WHT,NAVY,{collar:WHT,label:'White, navy trim (1985-86 shirt, continued: no separate 1986-87 drawing on the Historical Kits page)'}),
+      "Watford": K('plain',YEL,RED,{collar:BLK,label:'Yellow, red shorts, black trim'}),
+      "West Ham United": K('plain',CLARET,WHT,{sleeves:WHT,collar:WHT,label:'Claret, white shorts'}),
+      "Wimbledon": K('plain',RYL,YEL,{collar:YEL,label:'Blue, yellow trim, blue shorts'})
+    }
+  };
+  /* Appearance: only filled where reasonably determinable from well-known contemporary photographs
+     and public profiles. hairSource/skinSource are data flags, never printed in the UI. */
+  var LOOK = {
+    "Ray Wilkins":      {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Remi Moses":       {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Bryan Robson":     {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+    "Steve Coppell":    {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+    "Gary Bailey":      {skin:'L1', hair:'blond', style:'slick', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Gordon McQueen":   {skin:'L2', hair:'dark',  style:'perm', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Martin Buchan":    {skin:'L2', hair:'dark',  style:'slick', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Frank Stapleton":  {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+    "Garry Birtles":    {skin:'L1', hair:'fair',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+    "Lou Macari":       {skin:'L2', hair:'dark',  style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Sammy McIlroy":    {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+    "Arthur Albiston":  {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "John Gidman":      {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Kevin Moran":      {skin:'L2', hair:'dark',  style:'side', mo:true,  skinSource:'photo', hairSource:'photo'},
+    "Paddy Roche":      {skin:'L2', hair:'dark',  style:'slick', mo:false, hairSource:'gen', skinSource:'default'},
+    "Norman Whiteside": {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Gordon Strachan":  {skin:'L2', hair:'ginger',style:'wave', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Jesper Olsen":     {skin:'L1', hair:'blond', style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "John Sivebaek":    {skin:'L1', hair:'fair',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Paul McGrath":     {skin:'D1', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Chris Turner":     {skin:'L2', hair:'dark',  style:'slick', mo:false, hairSource:'gen', skinSource:'default'},
+    "Mike Duxbury":     {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Graeme Hogg":      {skin:'L2', hair:'dark',  style:'side', mo:false, hairSource:'gen', skinSource:'default'},
+    "Kenny Dalglish":   {skin:'L2', hair:'auburn',style:'wave', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Ian Rush":         {skin:'L2', hair:'dark',  style:'side', mo:false, skinSource:'photo', hairSource:'photo'},
+    "John Barnes":      {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Luther Blissett":  {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Viv Anderson":     {skin:'D1', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Cyrille Regis":    {skin:'D2', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'},
+    "Garth Crooks":     {skin:'D1', hair:'black', style:'short', mo:false, skinSource:'photo', hairSource:'photo'}
+  };
+
+  function pcardHash(str){ var h = 7; for (var i=0; i<str.length; i++) h = (h*31 + str.charCodeAt(i)) >>> 0; return h; }
+  function pcardLook(p){
+    return LOOK[p.name] || {skin:null, hair:null, style:null, mo:false, skinSource:'default', hairSource:'gen'};
+  }
+  function pcardSkinHex(p){
+    var look = pcardLook(p);
+    if (look.skin && PCARD_SKIN_PALETTE[look.skin]) return PCARD_SKIN_PALETTE[look.skin];
+    return PCARD_SKIN_DEFAULT;
+  }
+  function pcardHairHex(p){
+    var look = pcardLook(p);
+    if (look.hair && HAIR[look.hair]) return HAIR[look.hair];
+    var h = pcardHash(p.name+'|hair');
+    var hairs = [HAIR.dark, HAIR.brown, HAIR.black, HAIR.blond];
+    return hairs[h % hairs.length];
+  }
+  function pcardHairStyle(p){
+    var look = pcardLook(p);
+    if (look.style) return look.style;
+    var h = pcardHash(p.name+'|style');
+    return ['slick','side','wave'][(h>>>3)%3];
+  }
+  var pcardUid = 0;
+  function pcardSil(p, kit, goalie, hairHex, style){
+    var id = 'pcs' + (++pcardUid), skin = pcardSkinHex(p), shirt = kit.c1, def = '', c1 = kit.c1, c2 = kit.c2;
+    var body = 'M-4 240C-4 198 32 178 76 166L124 166C168 178 204 198 204 240Z';
+    if (!goalie){
+      if (kit.type === 'stripes'){ def += '<pattern id="'+id+'" width="26" height="10" patternUnits="userSpaceOnUse"><rect width="26" height="10" fill="'+c1+'"/><rect x="13" width="13" height="10" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+      else if (kit.type === 'pinstripes'){ def += '<pattern id="'+id+'" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="'+c1+'"/><rect x="8" width="2" height="10" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+      else if (kit.type === 'hoops'){ def += '<pattern id="'+id+'" width="10" height="28" patternUnits="userSpaceOnUse"><rect width="10" height="28" fill="'+c1+'"/><rect y="14" width="10" height="14" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+      else if (kit.type === 'halves'){ def += '<linearGradient id="'+id+'" x1="0" x2="1" y1="0" y2="0"><stop offset=".5" stop-color="'+c1+'"/><stop offset=".5" stop-color="'+c2+'"/></linearGradient>'; shirt = 'url(#'+id+')'; }
+      else if (kit.type === 'quarters'){ def += '<pattern id="'+id+'" width="200" height="240" patternUnits="userSpaceOnUse"><rect width="200" height="240" fill="'+c1+'"/><rect x="100" width="100" height="195" fill="'+c2+'"/><rect y="195" width="100" height="45" fill="'+c2+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+      else if (kit.type === 'tbar'){ def += '<pattern id="'+id+'" width="200" height="240" patternUnits="userSpaceOnUse"><rect width="100" height="240" fill="'+c1+'"/><rect x="100" width="100" height="240" fill="'+c2+'"/><rect x="88" width="24" height="240" fill="'+(kit.bar||'#1b2a4a')+'"/></pattern>'; shirt = 'url(#'+id+')'; }
+    }
+    var hairs = {
+      slick:'M67 98C62 62 82 50 102 50C126 50 140 68 133 100C130 80 120 70 102 70C86 70 74 78 67 98Z',
+      side:'M66 100C60 60 84 48 104 49C128 50 142 70 134 102C131 82 116 66 98 70C84 73 72 82 66 100Z',
+      wave:'M64 102C56 62 80 44 104 46C130 48 146 70 136 104C133 84 126 66 104 64C84 64 70 76 64 102Z',
+      short:'M70 100C64 72 80 54 100 54C122 54 136 72 130 100C126 82 114 70 100 70C86 70 74 82 70 100Z',
+      perm:'M58 100C50 66 70 42 100 42C132 42 150 66 142 102C138 84 128 66 118 68C122 86 116 102 108 108C104 90 100 78 94 88C88 76 80 82 76 96C70 82 64 88 58 100Z'
+    };
+    var hairPath = hairs[style] || hairs.side;
+    var collar = goalie
+      ? '<path d="M78 166C84 190 116 190 122 166L118 150C108 160 92 160 82 150Z" fill="'+kit.collar+'"/><path d="M80 154C90 166 110 166 120 154" fill="none" stroke="#0003" stroke-width="3"/>'
+      : '<path d="M84 160L100 190L116 160L108 156L100 172L92 156Z" fill="'+kit.collar+'"/><path d="M84 160L100 190L116 160" fill="none" stroke="#0003" stroke-width="2"/>';
+    var sleeveBit = '';
+    if (!goalie && kit.sleeves){
+      sleeveBit = '<path d="M-4 240C-4 214 6 198 24 188L40 222Z" fill="'+kit.sleeves+'"/><path d="M204 240C204 214 194 198 176 188L160 222Z" fill="'+kit.sleeves+'"/>';
+    }
+    var yoke = '';
+    if (!goalie && kit.type === 'panels'){
+      yoke = '<path d="M24 188C40 168 70 160 76 166L124 166C130 160 160 168 176 188L160 222L40 222Z" fill="'+c2+'" opacity="0.98"/>';
+    }
+    if (!goalie && kit.type === 'band'){
+      yoke = '<path d="M20 196H180L176 210H24Z" fill="'+(kit.band||c2)+'"/>';
+    }
+    var mo = '';
+    if (pcardLook(p).mo){
+      mo = '<path d="M84 116C90 121 96 122 100 120C104 122 110 121 116 116C110 120 90 120 84 116Z" fill="'+hairHex+'"/>';
+    }
+    return '<svg viewBox="0 0 200 240" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Illustrated footballer in the club shirt"><defs>'+def+'<linearGradient id="'+id+'g" x1="0" x2="1"><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>'
+      + '<path d="'+body+'" fill="'+shirt+'"/>' + yoke + sleeveBit + '<path d="'+body+'" fill="url(#'+id+'g)"/>'
+      + '<path d="M86 128L86 160C92 172 108 172 114 160L114 128Z" fill="'+skin+'"/><path d="M86 140C96 152 106 152 114 140L114 128L86 128Z" fill="#00000026"/>'
+      + '<ellipse cx="68" cy="106" rx="5.5" ry="9" fill="'+skin+'"/><ellipse cx="132" cy="106" rx="5.5" ry="9" fill="'+skin+'"/><ellipse cx="100" cy="102" rx="33" ry="40" fill="'+skin+'"/>'
+      + '<path d="'+hairPath+'" fill="'+hairHex+'"/>' + mo + collar + '</svg>';
+  }
+  function pcardEsc(s){ return String(s==null?"":s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function pcardInt(v){ var n = Math.round(Number(v)); return isFinite(n) ? n : 0; }
+  function pcardPips(v){ v = pcardInt(v); var h = '', f = Math.floor(v/2), hf = v % 2; for (var i=0; i<10; i++) h += '<i class="'+(i<f ? 'pc-on' : (i===f && hf ? 'pc-half' : ''))+'"></i>'; return '<span class="pc-pips" aria-hidden="true">'+h+'</span>'; }
+  function kitFor(p){
+    var year = era>=1986 ? 1986 : 1981;
+    var club = p.club || 'Manchester United';
+    var table = ERA_KITS[year] || {};
+    var kit = table[club];
+    if (!kit) kit = {type:'plain', c1:'#8a8f96', c2:'#f4f0e6', sleeves:null, collar:'#f4f0e6', known:false, label:club};
+    var goalie = /goalkeeper/i.test(p.pos||'');
+    if (goalie){
+      var gc = kit.c1 === '#2f6b3a' ? '#f0a81c' : '#2f6b3a';
+      return {kit:{type:'plain', c1:gc, c2:gc, sleeves:null, collar:gc, known:false, gkGeneric:true}, goalie:true, clubKit:kit};
+    }
+    return {kit:kit, goalie:false, clubKit:kit};
+  }
+  function pcardBioPreview(p){
+    var pos = String(p.pos||'player').toLowerCase();
+    var club = p.club || 'Manchester United';
+    var age = era>=1986 ? p.age86 : p.age81;
+    var s = [];
+    s.push(p.name + ' is a ' + pos + ', ' + age + ' years old, on the books at ' + club + '.');
+    if (p.personality) s.push('Personality · ' + p.personality + '.');
+    var cap = capsLine(p);
+    if (cap) s.push(cap);
+    s.push('He has yet to play for the first team this season.');
+    return s.join(' ');
+  }
+  function pcardHtml(p, idx, total, list){
+    var year = era>=1986 ? 1986 : 1981;
+    var seasonTxt = year===1986 ? '1986-87' : '1981-82';
+    var kinfo = kitFor(p);
+    var kit = kinfo.kit, clubKit = kinfo.clubKit, goalie = kinfo.goalie;
+    var hairHex = pcardHairHex(p), style = pcardHairStyle(p);
+    var h = pcardHash(p.name+'|tint');
+    var t81 = [['#1650d0','#071428'],['#e0002a','#3a0010'],['#0b6b5a','#042824'],['#5b2a7a','#1c0a28'],['#c9a227','#3a2c08']][(h>>>11)%5];
+    var attrs = [];
+    if (p.attrs){
+      if (p.attrs.handling) attrs.push(['Handling', pcardInt(p.attrs.handling)]);
+      ['shooting','passing','tackling','heading','pace','stamina'].forEach(function(k){
+        if (p.attrs[k]!=null) attrs.push([k.charAt(0).toUpperCase()+k.slice(1), pcardInt(p.attrs[k])]);
+      });
+    }
+    var best = attrs.length ? attrs.slice().sort(function(a,b){ return b[1]-a[1]; })[0] : null;
+    var posTxt = pcardEsc(p.pos), clubTxt = pcardEsc(p.club||'Manchester United');
+    var sw = '<span class="pc-sw" aria-hidden="true"><i style="background:'+clubKit.c1+'"></i><i style="background:'+(clubKit.c2||clubKit.c1)+'"></i></span>';
+    var sil = pcardSil(p, kit, goalie, hairHex, style);
+    var age = era>=1986 ? p.age86 : p.age81;
+    var fit = function(base, maxch){ var n = p.name.length; return +(base * Math.min(1, maxch / n)).toFixed(2); };
+    var nameBig = pcardEsc(p.name);
+    var front = '<div class="pc-ribbon"><span>Action File</span><small>'+seasonTxt+'</small></div><div class="pc-portrait"><div class="pc-badge"><span>No.</span>'+idx+'</div>'+sil+'</div>'
+      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(9.4,15)+'cqw">'+nameBig+'</h3></div><div class="pc-meta"><div class="pc-club">'+sw+clubTxt+'</div><div class="pc-pos">'+posTxt+'</div></div>'
+      + '<div class="pc-tiles"><div><b>'+age+'</b><span>Age</span></div><div><b>0</b><span>Apps</span></div><div><b>—</b><span>Goals</span></div></div>'
+      + '<div class="pc-foot">File '+idx+' of '+total+'</div>';
+    var kick = 'Action File';
+    var bhead = '<div class="pc-bhead"><small>'+kick+'</small><h3 style="font-size:'+fit(7.4,17)+'cqw">'+nameBig+'</h3><p>'+clubTxt+', '+posTxt.toLowerCase()+'</p></div>';
+    var rec = '<div class="pc-rec"><div><b>'+age+'</b><span>Age</span></div><div><b>0</b><span>Apps</span></div><div><b>—</b><span>Goals</span></div></div>';
+    var stats = attrs.length ? ('<dl class="pc-stats">'+attrs.map(function(a){ return '<dt>'+a[0]+'</dt><dd>'+pcardPips(a[1])+'<em>'+a[1]+'</em></dd>'; }).join('')+'</dl>') : '';
+    var bio = '<p class="pc-bio">'+pcardEsc(pcardBioPreview(p))+'</p>';
+    var back = bhead + '<div class="pc-bodyb">'+bio+rec+stats+'<div class="pc-bfoot">Action File '+seasonTxt+' · No. '+idx+' of '+total+'</div></div>';
+    var style_ = '--c1:'+kit.c1+';--c1b:'+clubKit.c1+';--tint81:'+t81[0]+';--tint81b:'+t81[1];
+    return '<div class="pc-stage pc-e81" data-nocase="1" data-era="81"><div class="pc-card" role="button" tabindex="0" aria-pressed="false" aria-label="'+pcardEsc(p.name+', '+(p.pos||'')+', '+(p.club||'')+'. Card '+idx+' of '+total+'. Press to turn over.')+'" style="'+style_+'">'
+      + '<div class="pc-inner"><div class="pc-face pc-front">'+front+'</div><div class="pc-face pc-back">'+back+'</div></div></div>'
+      + '<div class="pc-hint">Click the card to turn it over</div></div>';
+  }
+  function pcardWire(root){
+    Array.prototype.forEach.call(root.querySelectorAll('.pc-card'), function(c){
+      function flip(){ var on = c.classList.toggle('pc-flipped'); c.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+      c.addEventListener('click', flip);
+      c.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } });
+    });
+  }
+
+  /* Guest First Division men, for club colours and appearance on the Squad screen. */
+  P.dalglish = {id:"dalglish", name:"Kenny Dalglish", short:"Dalglish", pos:"Striker", club:"Liverpool", nation:"Scotland", caps:78, goals:null, capsNote:"as of 29 August 1981. Goals unsourced", caps86:100, goals86:null, capsNote86:"as of 23 August 1986. Goals unsourced", age81:30, age86:35, personality:"Composed", no:7};
+  P.rush = {id:"rush", name:"Ian Rush", short:"Rush", pos:"Striker", club:"Liverpool", nation:"Wales", caps:3, goals:0, capsNote:"as of 29 August 1981. Last cap 20 May 1981, England", caps86:28, goals86:12, capsNote86:"as of 23 August 1986. Last cap 21 April 1986", age81:19, age86:24, personality:"Sharp", no:9};
+  P.barnes = {id:"barnes", name:"John Barnes", short:"Barnes", pos:"Left midfielder", club:"Watford", nation:"England", caps:null, capsLabel:"England international", age81:17, age86:22, personality:"Tricky", no:11};
+  P.blissett = {id:"blissett", name:"Luther Blissett", short:"Blissett", pos:"Striker", club:"Watford", nation:"England", caps:null, capsLabel:"England international", age81:23, age86:28, personality:"Direct", no:9};
+  P.anderson = {id:"anderson", name:"Viv Anderson", short:"Anderson", pos:"Right-back", club:"Nottingham Forest", nation:"England", caps:null, capsLabel:"England international", age81:25, age86:30, personality:"Attacking", no:2};
+  P.regis = {id:"regis", name:"Cyrille Regis", short:"Regis", pos:"Striker", club:"West Bromwich Albion", nation:"England", caps:null, capsLabel:"England international", age81:23, age86:28, personality:"Powerful", no:9};
+  P.crooks = {id:"crooks", name:"Garth Crooks", short:"Crooks", pos:"Striker", club:"Tottenham Hotspur", nation:"England", caps:null, capsLabel:"England international", age81:23, age86:28, personality:"Sharp", no:9};
+
+  var FILE_81 = ["wilkins","moses","coppell","gidman","birtles","bailey","roche","mcqueen","buchan","stapleton","macari","mcilroy","albiston","moran"];
+  var FILE_86 = ["robson","stapleton","whiteside","mcgrath","strachan","olsen","sivebaek","turner","albiston","moran","moses","duxbury"];
+  var GUEST_81 = ["dalglish","anderson","regis","crooks"];
+  var GUEST_86 = ["rush","barnes","blissett","anderson","regis"];
+
+  function stickerHTML(p, idx, total){ return pcardHtml(p, idx, total); }
+
+
   function fileBody(p){
     var line = capsLine(p);
+    var club = p.club || "Manchester United";
     var html = "<h3>"+esc(p.name)+"</h3><p>";
-    html += esc(p.pos) + (p.personality ? ". Personality · "+esc(p.personality) : "") + ".</p>";
+    html += esc(p.pos) + " · " + esc(club) + (p.personality ? ". Personality · "+esc(p.personality) : "") + ".</p>";
     if (line) html += "<p>"+esc(line)+"</p>";
     if (p.career && p.career.length){
       html += "<h3>Career</h3><table><thead><tr><th>Years</th><th>Club</th><th class='num'>Apps</th><th class='num'>Gls</th></tr></thead><tbody>";
@@ -475,16 +1002,29 @@ tr.hl td{background:#fff3b0}
     }
     return html;
   }
+
   function renderSquad(){
-    var list = (era>=1986 ? FILE_86 : FILE_81).map(function(id){ return P[id]; });
+    Object.keys(P).forEach(function(id){ if (!P[id].club) P[id].club = "Manchester United"; });
+    /* Anderson and Regis change club between the two seasons. */
+    P.anderson.club = era>=1986 ? "Arsenal" : "Nottingham Forest";
+    P.regis.club = era>=1986 ? "Coventry City" : "West Bromwich Albion";
+    var ours = (era>=1986 ? FILE_86 : FILE_81).map(function(id){ return P[id]; });
+    var guests = (era>=1986 ? GUEST_86 : GUEST_81).map(function(id){ return P[id]; });
+    var list = ours.concat(guests);
     if (!list.some(function(p){ return p.id===fileId; })) fileId = list[0].id;
     var p = P[fileId];
-    var chips = list.map(function(x){ return '<button type="button" class="chip'+(fileId===x.id?" on":"")+'" data-file="'+x.id+'" aria-pressed="'+(fileId===x.id?"true":"false")+'">'+esc(x.short)+"</button>"; }).join("");
-    el("panel-squad").innerHTML = "<h2>Squad</h2><p class='note'>Player profiles are era cigarette-card and Panini-sticker fronts, merged with the file data already in v405 and v406: nationality, cut-date caps where sourced, personality, career clubs, and attributes. There is no typographic likeness of a face, only a number and a season on a red ground. Missing facts are simply omitted. A known international without a cut-date figure is written as, for example, 'Scotland international', with no number.</p>"+
-      "<p class='era-lab'>Player</p><div class='chips' id='file-chips'>"+chips+"</div>"+
-      "<div class='file-grid'>"+stickerHTML(p)+"<div class='file-body card'>"+fileBody(p)+"</div></div>";
-    el("file-chips").querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ fileId=b.getAttribute("data-file"); renderAll(); }); });
+    var idx = list.findIndex(function(x){ return x.id===fileId; }) + 1;
+    var ourChips = ours.map(function(x){ return '<button type="button" class="chip'+(fileId===x.id?" on":"")+'" data-file="'+x.id+'" aria-pressed="'+(fileId===x.id?"true":"false")+'">'+esc(x.short)+"</button>"; }).join("");
+    var guestChips = guests.map(function(x){ return '<button type="button" class="chip'+(fileId===x.id?" on":"")+'" data-file="'+x.id+'" aria-pressed="'+(fileId===x.id?"true":"false")+'">'+esc(x.short)+"</button>"; }).join("");
+    el("panel-squad").innerHTML = "<h2>Squad</h2><p class='note'>Player files are the era collectable card from the live game (v323 / v363, last rich design still in v407): for 1981-82 and 1986-87 that is the Action File, not the 1970s colour-sticker skin. Click the card to turn it over. The portrait is an illustrated stand-in in the club's home shirt of the season, with sourced skin and hair where those can reasonably be read from well-known photographs. Missing facts are omitted. A known international without a cut-date figure is written as, for example, 'Scotland international', with no number.</p>"+
+      "<p class='era-lab'>Manchester United</p><div class='chips' id='file-chips'>"+ourChips+"</div>"+
+      "<p class='era-lab'>Also in the First Division</p><div class='chips' id='guest-chips'>"+guestChips+"</div>"+
+      "<div class='file-grid'>"+pcardHtml(p, idx, list.length)+"<div class='file-body card'>"+fileBody(p)+"</div></div>";
+    function bind(sel){ el(sel).querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ fileId=b.getAttribute("data-file"); renderAll(); }); }); }
+    bind("file-chips"); bind("guest-chips");
+    pcardWire(el("panel-squad"));
   }
+
   function renderStaff(){
     el("panel-staff").innerHTML =
       "<h2>Staff</h2>"+
