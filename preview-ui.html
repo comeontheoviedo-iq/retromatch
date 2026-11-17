@@ -32,7 +32,7 @@ button,select{font:inherit;color:inherit}
 h2{margin:0 0 8px;font:400 28px/1 Anton,Impact,sans-serif;letter-spacing:.03em;text-transform:uppercase;border-bottom:3px solid #111;padding-bottom:4px}
 h3{margin:14px 0 6px;font:400 18px/1.1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media (max-width:640px){.grid{grid-template-columns:1fr}.mast .club{text-align:left}.mast h1{font-size:34px}.file-grid{grid-template-columns:1fr !important}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}.mast .club{text-align:left}.mast h1{font-size:34px}}
 .card{background:var(--card);border:2px solid #111;padding:8px 10px}
 .card h3{margin-top:0}
 table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border:2px solid #111}
@@ -81,7 +81,19 @@ tr.hl td{background:#fff3b0}
 .train-how h3{color:var(--yellow);margin:0 0 6px}
 .train-how p{margin:0 0 6px}
 .train-how p:last-child{margin:0}
-.file-grid{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+.pc-spread{display:flex;justify-content:center;align-items:flex-start;gap:22px;width:100%;margin:8px 0 0}
+.pc-leaf{margin:0;flex:0 1 auto;width:min(400px, calc((100% - 22px) / 2))}
+.pc-leaf-card{width:100%;aspect-ratio:2/3;container-type:inline-size;position:relative;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;display:block;cursor:default}
+.pc-leaf-card .pc-face{position:absolute;inset:0;transform:none !important;backface-visibility:visible;-webkit-backface-visibility:visible;overflow:hidden}
+.pc-tools{display:none;justify-content:center;margin:10px 0 0}
+@media (max-width:720px){
+  .pc-spread[data-show="front"] [data-face="back"],
+  .pc-spread[data-show="back"] [data-face="front"]{display:none}
+  .pc-leaf{width:min(400px,86vw)}
+  .pc-tools{display:flex}
+  .pc-leaf-card{cursor:pointer}
+}
+
 .sticker{background:#fff;border:3px solid #111;padding:8px 8px 10px;box-shadow:4px 4px 0 #111;position:relative}
 .sticker:before{content:"";position:absolute;inset:-6px;border:2px dashed #bbb;pointer-events:none}
 .sticker .clubbar{background:var(--red);color:#fff;text-align:center;padding:6px 4px 4px;font:400 16px/1 Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:uppercase}
@@ -348,16 +360,45 @@ tr.hl td{background:#fff3b0}
 .pc-e81 .pc-tiles span{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan)}
 .pc-e81 .pc-foot{margin:1.8cqw 0 0;text-align:center;font:800 2.7cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);padding:1.6cqw 2cqw 2.2cqw}
 .pc-e81 .pc-back{background:#071428;padding:0;color:#fff}
-.pc-e81 .pc-back .pc-bhead{background:#0c1f3d;color:#fff;padding:2.6cqw 3.4cqw 2.2cqw;border-bottom:.5cqw solid var(--cyan)}
-.pc-e81 .pc-back .pc-bhead small{display:block;font:800 3cqw/1 var(--f-barlow);letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
-.pc-e81 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:800 7.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;color:#fff}
+.pc-e81 .pc-back .pc-bhead{background:#0c1f3d;color:#fff;padding:2cqw 3.4cqw 1.6cqw;border-bottom:.5cqw solid var(--cyan)}
+.pc-e81 .pc-back .pc-bhead small{display:block;font:800 2.8cqw/1 var(--f-barlow);letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-back .pc-bhead h3{margin:.45cqw 0 0;font:800 7cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;color:#fff}
 .pc-e81 .pc-back .pc-bhead p{margin:.5cqw 0 0;font:700 3.3cqw/1.1 var(--f-barlow);letter-spacing:.08em;text-transform:uppercase;color:var(--mag)}
-.pc-e81 .pc-bodyb{padding:2.4cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
-.pc-e81 .pc-bio{margin:0;font:400 3.6cqw/1.4 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:2cqw;border-left:.7cqw solid var(--mag);min-height:0}
-.pc-e81 .pc-facts{display:grid;grid-template-columns:auto 1fr;column-gap:2.6cqw;row-gap:1.7cqw;align-items:baseline;margin:2.6cqw 0 0}
-.pc-e81 .pc-facts dt{font:800 3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
-.pc-e81 .pc-facts dd{margin:0;font:700 3.7cqw/1.2 var(--f-barlow);color:#fff}
-.pc-e81 .pc-bio::before{content:"ACTION FILE";display:block;font:800 3.1cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:1cqw}
+.pc-e81 .pc-bodyb{padding:1.8cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0;background-image:repeating-linear-gradient(180deg,transparent 0 3.2cqw,#7ee0ff0c 3.2cqw 3.45cqw)}
+.pc-e81 .pc-bio{margin:0;font:400 3.4cqw/1.3 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:1.4cqw 1.6cqw;border-left:.7cqw solid var(--mag);min-height:0}
+.pc-e81 .pc-bio::before{content:"ACTION FILE";display:block;font:800 2.8cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:.6cqw}
+.pc-e81 .pc-person{margin:1.3cqw 0 0;font:800 3.6cqw/1.2 var(--f-barlow);color:#fff;letter-spacing:.02em}
+.pc-e81 .pc-caps{margin:.5cqw 0 0;font:400 3.3cqw/1.3 var(--f-osw);color:#e8eef8}
+.pc-e81 .pc-facts{display:grid;grid-template-columns:1fr 1fr;gap:1cqw 1.4cqw;margin:1.5cqw 0 0}
+.pc-e81 .pc-facts > div{background:#0c1f3d;padding:1cqw 1.3cqw 1.1cqw}
+.pc-e81 .pc-facts .wide{grid-column:1/-1}
+.pc-e81 .pc-facts dt{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin:0 0 .35cqw}
+.pc-e81 .pc-facts dd{margin:0;font:700 3.5cqw/1.2 var(--f-barlow);color:#fff}
+.pc-e81 .pc-seclab{margin:1.6cqw 0 0;font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 table.pc-career{width:100%;border-collapse:collapse;margin:.7cqw 0 0;font:700 3.15cqw/1.2 var(--f-barlow);color:#fff;background:transparent;border:0}
+.pc-e81 .pc-career th{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);text-align:left;padding:.2cqw .8cqw .55cqw 0;border-bottom:.3cqw solid var(--cyan);background:transparent}
+.pc-e81 .pc-career td{padding:.55cqw .8cqw .55cqw 0;border-bottom:.2cqw solid #1a335c;vertical-align:top;background:transparent;color:#fff;font-size:inherit}
+.pc-e81 .pc-career th.num,.pc-e81 .pc-career td.num{text-align:right;padding-right:0}
+.pc-e81 .pc-career tr:last-child td{border-bottom:0}
+.pc-e81 .pc-attrgrid{display:grid;grid-template-columns:1fr 1fr;gap:1cqw 1.4cqw;margin:.8cqw 0 0}
+.pc-e81 .pc-attrgrid > div{background:#0c1f3d;padding:1cqw 1.3cqw 1.1cqw;min-width:0}
+.pc-e81 .pc-attrgrid b{font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-attrgrid em{float:right;font:800 3.3cqw/1 var(--f-barlow);font-style:normal;color:var(--yellow)}
+.pc-e81 .pc-attrgrid .pc-pips{display:flex;gap:.28cqw;margin-top:.55cqw}
+.pc-e81 .pc-attrgrid .pc-pips i{width:1.7cqw;height:1.7cqw;background:#1a335c;border-radius:0}
+.pc-e81 .pc-attrgrid .pc-pips i.pc-on{background:var(--cyan)}
+.pc-e81 .pc-attrgrid .pc-pips i.pc-half{background:linear-gradient(90deg,var(--cyan) 50%,#1a335c 50%)}
+.pc-e81 .pc-body-short .pc-bio{padding:2cqw 1.8cqw;font-size:3.8cqw}
+.pc-e81 .pc-body-short .pc-person{font-size:4.6cqw;margin-top:2.2cqw}
+.pc-e81 .pc-body-short .pc-caps{font-size:3.8cqw;line-height:1.35}
+.pc-e81 .pc-body-short .pc-facts{grid-template-columns:1fr 1fr;gap:1.4cqw;margin-top:2.2cqw}
+.pc-e81 .pc-body-short .pc-facts > div{padding:2cqw 1.6cqw;display:block}
+.pc-e81 .pc-body-short .pc-facts dt{font-size:2.8cqw;margin-bottom:.5cqw}
+.pc-e81 .pc-body-short .pc-facts dd{font-size:4.2cqw}
+.pc-e81 .pc-endmark{margin-top:auto;text-align:center;padding:3.2cqw 2cqw 1.6cqw;border-top:.45cqw solid var(--cyan)}
+.pc-e81 .pc-endmark b{display:block;font:800 8.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;color:#fff;text-shadow:.35cqw .35cqw 0 var(--mag);letter-spacing:-.02em}
+.pc-e81 .pc-endmark span{display:block;margin-top:1.1cqw;font:800 3cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-body-short .pc-bfoot{margin-top:0}
 .pc-e81 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);gap:.5cqw;margin:2.2cqw 0 1.4cqw}
 .pc-e81 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;background:#0c1f3d}
 .pc-e81 .pc-rec b{display:block;font:800 5cqw/1 var(--f-barlow);color:#fff}
@@ -373,7 +414,7 @@ tr.hl td{background:#fff3b0}
 .pc-e81 .pc-sumrow{display:flex;justify-content:space-between;align-items:center;margin-top:2cqw;font:800 2.8cqw/1 var(--f-barlow);letter-spacing:.12em;text-transform:uppercase;color:#fff;gap:1cqw;border-top:.4cqw solid var(--cyan);padding-top:1.5cqw}
 .pc-e81 .pc-sumrow b{font:800 3.5cqw var(--f-barlow);color:var(--yellow);letter-spacing:0}
 .pc-e81 .pc-sumrow .pc-stars{color:var(--yellow)}
-.pc-e81 .pc-bfoot{margin:auto 0 0;text-align:center;font:800 2.6cqw/1 var(--f-barlow);letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);padding:1.8cqw 2cqw 2.2cqw}
+.pc-e81 .pc-bfoot{margin:auto 0 0;text-align:center;font:800 2.5cqw/1 var(--f-barlow);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);padding:1.4cqw 2cqw 2cqw}
 
 /*PCARD-CSS-END*/
 </style>
@@ -541,6 +582,7 @@ tr.hl td{background:#fff3b0}
       if (Object.prototype.hasOwnProperty.call(p, "capsLabel86")) label = p.capsLabel86;
     }
     if (typeof caps==="number"){
+      if (caps===0) return "";
       var g = (goals==null) ? "" : (goals===1 ? ", 1 goal" : ", "+goals+" goals");
       var n = caps===1 ? "1 cap" : caps+" caps";
       var nte = note ? " ("+note+")" : "";
@@ -908,13 +950,13 @@ tr.hl td{background:#fff3b0}
     return {kit:kit, goalie:false, clubKit:kit};
   }
 
-  /* Card-back facts the panel does not already show. Dates follow the club-scoped
-     game register where it agrees with Wikidata; places and heights from Wikidata
-     (P19, P2048) only where a reference is present and no conflicting source was
-     found. Heights are shown in feet and inches. Honours are cut-date accurate
-     (29 August 1981 / 23 August 1986) and taken from the relevant final or title.
-     A previous club is shown only when there is no career table and no honour.
-     Missing items are omitted. */
+  /* Extra card-back facts (born, place, height, honour, previous club). Dates follow
+     the club-scoped game register where it agrees with Wikidata; places and heights
+     from Wikidata (P19, P2048) only where a reference is present and no conflicting
+     source was found. Heights are shown in feet and inches. Honours are cut-date
+     accurate (29 August 1981 / 23 August 1986) and taken from the relevant final
+     or title. A previous club is shown only when there is no career table and no
+     honour. Missing items are omitted. */
   var CARD_FACTS = {
     wilkins:{born:"14 September 1956", from:"Hillingdon", height:"5 ft 8 in"},
     moses:{born:"14 November 1960", from:"Manchester", height:"5 ft 6 in", prev:"West Bromwich Albion"},
@@ -962,41 +1004,97 @@ tr.hl td{background:#fff3b0}
     return "A First Division Action File for " + (era>=1986 ? "1986-87" : "1981-82") + ".";
   }
 
-  function pcardHtml(p, idx, total, list){
-    var year = era>=1986 ? 1986 : 1981;
-    var seasonTxt = year===1986 ? '1986-87' : '1981-82';
+  function cardAttrRows(p){
+    var attrs = [];
+    if (!p.attrs) return attrs;
+    if (p.attrs.handling!=null) attrs.push(["Handling", pcardInt(p.attrs.handling)]);
+    ["shooting","passing","tackling","heading","pace","stamina"].forEach(function(k){
+      if (p.attrs[k]!=null) attrs.push([k.charAt(0).toUpperCase()+k.slice(1), pcardInt(p.attrs[k])]);
+    });
+    return attrs;
+  }
+  function pcardFrontHTML(p, idx, total, kit, clubKit, sil, t81){
+    var seasonTxt = era>=1986 ? "1986-87" : "1981-82";
+    var posTxt = pcardEsc(p.pos), clubTxt = pcardEsc(p.club||"Manchester United");
+    var sw = '<span class="pc-sw" aria-hidden="true"><i style="background:'+clubKit.c1+'"></i><i style="background:'+(clubKit.c2||clubKit.c1)+'"></i></span>';
+    var age = era>=1986 ? p.age86 : p.age81;
+    var fit = function(base, maxch){ var n = p.name.length; return +(base * Math.min(1, maxch / n)).toFixed(2); };
+    return '<div class="pc-ribbon"><span>Action File</span><small>'+seasonTxt+'</small></div><div class="pc-portrait"><div class="pc-badge"><span>No.</span>'+idx+'</div>'+sil+'</div>'
+      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(9.4,15)+'cqw">'+pcardEsc(p.name)+'</h3></div><div class="pc-meta"><div class="pc-club">'+sw+clubTxt+'</div><div class="pc-pos">'+posTxt+'</div></div>'
+      + '<div class="pc-tiles"><div><b>'+age+'</b><span>Age</span></div><div><b>0</b><span>Apps</span></div><div><b>—</b><span>Goals</span></div></div>'
+      + '<div class="pc-foot">File '+idx+' of '+total+'</div>';
+  }
+  function pcardBackHTML(p, idx, total){
+    var seasonTxt = era>=1986 ? "1986-87" : "1981-82";
+    var fit = function(base, maxch){ var n = p.name.length; return +(base * Math.min(1, maxch / n)).toFixed(2); };
+    var html = '<div class="pc-bhead"><small>Action File</small><h3 style="font-size:'+fit(7,17)+'cqw">'+pcardEsc(p.name)+'</h3></div>';
+    var attrRows = cardAttrRows(p);
+    var shortBack = !(p.career && p.career.length) && !attrRows.length;
+    html += '<div class="pc-bodyb'+(shortBack?" pc-body-short":"")+'">';
+    html += '<p class="pc-bio">'+pcardEsc(pcardFlavour(p))+'</p>';
+    if (p.personality) html += '<p class="pc-person">Personality · '+pcardEsc(p.personality)+'</p>';
+    var cap = capsLine(p);
+    if (cap) html += '<p class="pc-caps">'+pcardEsc(cap)+'</p>';
+    var factRows = cardFactRows(p);
+    if (factRows.length){
+      html += '<dl class="pc-facts">';
+      factRows.forEach(function(r){
+        var wide = (r[0]==="Honour" || r[0]==="Previously") ? ' class="wide"' : "";
+        html += "<div"+wide+"><dt>"+pcardEsc(r[0])+"</dt><dd>"+pcardEsc(r[1])+"</dd></div>";
+      });
+      html += "</dl>";
+    }
+    if (p.career && p.career.length){
+      html += '<h4 class="pc-seclab">Career</h4><table class="pc-career"><thead><tr><th>Years</th><th>Club</th><th class="num">Apps</th><th class="num">Gls</th></tr></thead><tbody>';
+      p.career.forEach(function(c){
+        html += "<tr><td>"+pcardEsc(c.years)+"</td><td>"+pcardEsc(c.club)+"</td><td class=\"num\">"+(c.apps==null?"":c.apps)+"</td><td class=\"num\">"+(c.gls==null?"":c.gls)+"</td></tr>";
+      });
+      html += "</tbody></table>";
+    }
+    if (attrRows.length){
+      html += '<h4 class="pc-seclab">Attributes</h4><div class="pc-attrgrid">';
+      attrRows.forEach(function(a){
+        html += "<div><b>"+a[0]+"</b><em>"+a[1]+"</em>"+pcardPips(a[1])+"</div>";
+      });
+      html += "</div>";
+    }
+    if (shortBack) html += '<div class="pc-endmark" aria-hidden="true"><b>Action File</b><span>First Division · '+seasonTxt+"</span></div>";
+    html += '<div class="pc-bfoot">Action File '+seasonTxt+" · No. "+idx+" of "+total+"</div>";
+    html += "</div>";
+    return html;
+  }
+  function pcardHtml(p, idx, total){
     var kinfo = kitFor(p);
     var kit = kinfo.kit, clubKit = kinfo.clubKit, goalie = kinfo.goalie;
     var hairHex = pcardHairHex(p), style = pcardHairStyle(p);
-    var h = pcardHash(p.name+'|tint');
-    var t81 = [['#1650d0','#071428'],['#e0002a','#3a0010'],['#0b6b5a','#042824'],['#5b2a7a','#1c0a28'],['#c9a227','#3a2c08']][(h>>>11)%5];
-    var posTxt = pcardEsc(p.pos), clubTxt = pcardEsc(p.club||'Manchester United');
-    var sw = '<span class="pc-sw" aria-hidden="true"><i style="background:'+clubKit.c1+'"></i><i style="background:'+(clubKit.c2||clubKit.c1)+'"></i></span>';
+    var h = pcardHash(p.name+"|tint");
+    var t81 = [["#1650d0","#071428"],["#e0002a","#3a0010"],["#0b6b5a","#042824"],["#5b2a7a","#1c0a28"],["#c9a227","#3a2c08"]][(h>>>11)%5];
     var sil = pcardSil(p, kit, goalie, hairHex, style);
-    var age = era>=1986 ? p.age86 : p.age81;
-    var fit = function(base, maxch){ var n = p.name.length; return +(base * Math.min(1, maxch / n)).toFixed(2); };
-    var nameBig = pcardEsc(p.name);
-    var front = '<div class="pc-ribbon"><span>Action File</span><small>'+seasonTxt+'</small></div><div class="pc-portrait"><div class="pc-badge"><span>No.</span>'+idx+'</div>'+sil+'</div>'
-      + '<div class="pc-nameplate"><h3 style="font-size:'+fit(9.4,15)+'cqw">'+nameBig+'</h3></div><div class="pc-meta"><div class="pc-club">'+sw+clubTxt+'</div><div class="pc-pos">'+posTxt+'</div></div>'
-      + '<div class="pc-tiles"><div><b>'+age+'</b><span>Age</span></div><div><b>0</b><span>Apps</span></div><div><b>—</b><span>Goals</span></div></div>'
-      + '<div class="pc-foot">File '+idx+' of '+total+'</div>';
-    var kick = 'Action File';
-    var bhead = '<div class="pc-bhead"><small>'+kick+'</small><h3 style="font-size:'+fit(7.4,17)+'cqw">'+nameBig+'</h3></div>';
-    var bio = '<p class="pc-bio">'+pcardEsc(pcardFlavour(p))+'</p>';
-    var factRows = cardFactRows(p);
-    var facts = factRows.length ? ('<dl class="pc-facts">'+factRows.map(function(r){ return '<dt>'+pcardEsc(r[0])+'</dt><dd>'+pcardEsc(r[1])+'</dd>'; }).join('')+'</dl>') : '';
-    var back = bhead + '<div class="pc-bodyb">'+bio+facts+'<div class="pc-bfoot">Action File '+seasonTxt+' · No. '+idx+' of '+total+'</div></div>';
-    var style_ = '--c1:'+kit.c1+';--c1b:'+clubKit.c1+';--tint81:'+t81[0]+';--tint81b:'+t81[1];
-    return '<div class="pc-stage pc-e81" data-nocase="1" data-era="81"><div class="pc-card" role="button" tabindex="0" aria-pressed="false" aria-label="'+pcardEsc(p.name+', '+(p.pos||'')+', '+(p.club||'')+'. Card '+idx+' of '+total+'. Press to turn over.')+'" style="'+style_+'">'
-      + '<div class="pc-inner"><div class="pc-face pc-front">'+front+'</div><div class="pc-face pc-back">'+back+'</div></div></div>'
-      + '<div class="pc-hint">Click the card to turn it over</div></div>';
+    var style_ = "--c1:"+kit.c1+";--c1b:"+clubKit.c1+";--tint81:"+t81[0]+";--tint81b:"+t81[1];
+    var front = pcardFrontHTML(p, idx, total, kit, clubKit, sil, t81);
+    var back = pcardBackHTML(p, idx, total);
+    return '<div class="pc-spread" id="pc-spread" data-show="front">'
+      + '<div class="pc-stage pc-e81 pc-leaf" data-face="front" data-nocase="1" data-era="81"><div class="pc-leaf-card" style="'+style_+'"><div class="pc-face pc-front">'+front+"</div></div></div>"
+      + '<div class="pc-stage pc-e81 pc-leaf" data-face="back" data-nocase="1" data-era="81"><div class="pc-leaf-card" style="'+style_+'"><div class="pc-face pc-back pc-back-flat">'+back+"</div></div></div>"
+      + "</div>"
+      + '<div class="pc-tools"><button type="button" class="chip" id="pc-turn" aria-pressed="false">Turn over</button></div>';
   }
   function pcardWire(root){
-    Array.prototype.forEach.call(root.querySelectorAll('.pc-card'), function(c){
-      function flip(){ var on = c.classList.toggle('pc-flipped'); c.setAttribute('aria-pressed', on ? 'true' : 'false'); }
-      c.addEventListener('click', flip);
-      c.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } });
+    var spread = root.querySelector(".pc-spread");
+    if (!spread) return;
+    function turn(){
+      var next = spread.getAttribute("data-show")==="back" ? "front" : "back";
+      spread.setAttribute("data-show", next);
+      var btn = root.querySelector("#pc-turn");
+      if (btn) btn.setAttribute("aria-pressed", next==="back" ? "true" : "false");
+    }
+    Array.prototype.forEach.call(root.querySelectorAll(".pc-leaf-card"), function(c){
+      c.addEventListener("click", function(){
+        if (window.matchMedia("(max-width:720px)").matches) turn();
+      });
     });
+    var btn = root.querySelector("#pc-turn");
+    if (btn) btn.addEventListener("click", function(){ turn(); });
   }
 
   /* Guest First Division men, for club colours and appearance on the Squad screen. */
@@ -1012,33 +1110,6 @@ tr.hl td{background:#fff3b0}
   var FILE_86 = ["robson","stapleton","whiteside","mcgrath","strachan","olsen","sivebaek","turner","albiston","moran","moses","duxbury"];
   var GUEST_81 = ["dalglish","anderson","regis","crooks"];
   var GUEST_86 = ["rush","barnes","blissett","anderson","regis"];
-
-  function stickerHTML(p, idx, total){ return pcardHtml(p, idx, total); }
-
-
-  function fileBody(p){
-    var line = capsLine(p);
-    var html = "<h3>"+esc(p.name)+"</h3>";
-    if (p.personality) html += "<p>Personality · "+esc(p.personality)+".</p>";
-    if (line) html += "<p>"+esc(line)+"</p>";
-    if (p.career && p.career.length){
-      html += "<h3>Career</h3><table><thead><tr><th>Years</th><th>Club</th><th class='num'>Apps</th><th class='num'>Gls</th></tr></thead><tbody>";
-      p.career.forEach(function(c){
-        html += "<tr><td>"+esc(c.years)+"</td><td>"+esc(c.club)+"</td><td class='num'>"+(c.apps==null?"":c.apps)+"</td><td class='num'>"+(c.gls==null?"":c.gls)+"</td></tr>";
-      });
-      html += "</tbody></table>";
-    }
-    if (p.attrs){
-      html += "<h3>Attributes</h3><div class='attr'>";
-      Object.keys(p.attrs).forEach(function(k){
-        var n = p.attrs[k], pip = "";
-        for (var i=0;i<Math.round(n/2);i++) pip += "●";
-        html += "<div><b>"+k.charAt(0).toUpperCase()+k.slice(1)+"</b> "+n+" <span class='pip'>"+pip+"</span></div>";
-      });
-      html += "</div>";
-    }
-    return html;
-  }
 
   function renderSquad(){
     Object.keys(P).forEach(function(id){ if (!P[id].club) P[id].club = "Manchester United"; });
@@ -1056,7 +1127,7 @@ tr.hl td{background:#fff3b0}
     el("panel-squad").innerHTML = "<h2>Squad</h2>"+
       "<p class='era-lab'>Manchester United</p><div class='chips' id='file-chips'>"+ourChips+"</div>"+
       "<p class='era-lab'>Also in the First Division</p><div class='chips' id='guest-chips'>"+guestChips+"</div>"+
-      "<div class='file-grid'>"+pcardHtml(p, idx, list.length)+"<div class='file-body card'>"+fileBody(p)+"</div></div>";
+      pcardHtml(p, idx, list.length);
     function bind(sel){ el(sel).querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(){ fileId=b.getAttribute("data-file"); renderAll(); }); }); }
     bind("file-chips"); bind("guest-chips");
     pcardWire(el("panel-squad"));
