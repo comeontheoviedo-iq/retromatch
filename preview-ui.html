@@ -353,7 +353,10 @@ tr.hl td{background:#fff3b0}
 .pc-e81 .pc-back .pc-bhead h3{margin:.6cqw 0 0;font:800 7.4cqw/.9 var(--f-barlow);font-style:italic;text-transform:uppercase;color:#fff}
 .pc-e81 .pc-back .pc-bhead p{margin:.5cqw 0 0;font:700 3.3cqw/1.1 var(--f-barlow);letter-spacing:.08em;text-transform:uppercase;color:var(--mag)}
 .pc-e81 .pc-bodyb{padding:2.4cqw 3.4cqw 0;display:flex;flex-direction:column;flex:1;min-height:0}
-.pc-e81 .pc-bio{margin:0;font:400 3.45cqw/1.4 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:2cqw;border-left:.7cqw solid var(--mag);min-height:26cqw}
+.pc-e81 .pc-bio{margin:0;font:400 3.6cqw/1.4 var(--f-osw);color:#e8eef8;background:#0c1f3d;padding:2cqw;border-left:.7cqw solid var(--mag);min-height:0}
+.pc-e81 .pc-facts{display:grid;grid-template-columns:auto 1fr;column-gap:2.6cqw;row-gap:1.7cqw;align-items:baseline;margin:2.6cqw 0 0}
+.pc-e81 .pc-facts dt{font:800 3cqw/1 var(--f-barlow);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.pc-e81 .pc-facts dd{margin:0;font:700 3.7cqw/1.2 var(--f-barlow);color:#fff}
 .pc-e81 .pc-bio::before{content:"ACTION FILE";display:block;font:800 3.1cqw/1 var(--f-barlow);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:1cqw}
 .pc-e81 .pc-rec{display:grid;grid-template-columns:repeat(4,1fr);gap:.5cqw;margin:2.2cqw 0 1.4cqw}
 .pc-e81 .pc-rec div{text-align:center;padding:1.3cqw 0 1cqw;background:#0c1f3d}
@@ -904,18 +907,61 @@ tr.hl td{background:#fff3b0}
     }
     return {kit:kit, goalie:false, clubKit:kit};
   }
-  function pcardBioPreview(p){
-    var pos = String(p.pos||'player').toLowerCase();
-    var club = p.club || 'Manchester United';
-    var age = era>=1986 ? p.age86 : p.age81;
-    var s = [];
-    s.push(p.name + ' is a ' + pos + ', ' + age + ' years old, on the books at ' + club + '.');
-    if (p.personality) s.push('Personality · ' + p.personality + '.');
-    var cap = capsLine(p);
-    if (cap) s.push(cap);
-    s.push('He has yet to play for the first team this season.');
-    return s.join(' ');
+
+  /* Card-back facts the panel does not already show. Dates follow the club-scoped
+     game register where it agrees with Wikidata; places and heights from Wikidata
+     (P19, P2048) only where a reference is present and no conflicting source was
+     found. Heights are shown in feet and inches. Honours are cut-date accurate
+     (29 August 1981 / 23 August 1986) and taken from the relevant final or title.
+     A previous club is shown only when there is no career table and no honour.
+     Missing items are omitted. */
+  var CARD_FACTS = {
+    wilkins:{born:"14 September 1956", from:"Hillingdon", height:"5 ft 8 in"},
+    moses:{born:"14 November 1960", from:"Manchester", height:"5 ft 6 in", prev:"West Bromwich Albion"},
+    coppell:{born:"9 July 1955", from:"Liverpool", height:"5 ft 8 in", honour81:"FA Cup winner, 1977"},
+    gidman:{born:"10 January 1954", from:"Liverpool", honour81:"League Cup winner, 1977"},
+    birtles:{born:"27 July 1956", from:"Nottingham", honour81:"European Cup winner, 1979 and 1980"},
+    bailey:{born:"9 August 1958", from:"Ipswich", prev:"Wits University"},
+    roche:{born:"4 January 1951", from:"Dublin", height:"6 ft 1 in"},
+    mcqueen:{born:"26 June 1952", height:"6 ft 3 in", honour81:"First Division champion, 1973-74"},
+    buchan:{born:"6 March 1949", from:"Aberdeen", height:"5 ft 10 in", honour81:"FA Cup winner, 1977"},
+    stapleton:{born:"10 July 1956", from:"Dublin", height:"6 ft 0 in", honour81:"FA Cup winner, 1979", honour86:"FA Cup winner, 1983 and 1985"},
+    macari:{born:"7 June 1949", honour81:"FA Cup winner, 1977"},
+    mcilroy:{born:"2 August 1954", from:"Belfast", height:"5 ft 10 in", honour81:"FA Cup winner, 1977"},
+    albiston:{born:"14 July 1957", from:"Edinburgh", height:"5 ft 7 in", honour81:"FA Cup winner, 1977", honour86:"FA Cup winner, 1983 and 1985"},
+    moran:{born:"29 April 1956", from:"Dublin", height:"5 ft 11 in", prev:"Bohemians", honour86:"FA Cup winner, 1983 and 1985"},
+    robson:{born:"11 January 1957", from:"Chester-le-Street", height:"5 ft 9 in", honour86:"FA Cup winner, 1983 and 1985"},
+    whiteside:{born:"7 May 1965", from:"Belfast", height:"6 ft 2 in", honour86:"FA Cup winner, 1983 and 1985"},
+    mcgrath:{born:"4 December 1959", height:"6 ft 0 in", honour86:"FA Cup winner, 1985"},
+    strachan:{born:"9 February 1957", from:"Edinburgh", height:"5 ft 6 in", honour86:"FA Cup winner, 1985"},
+    olsen:{born:"20 March 1961", from:"Faxe, Denmark", honour86:"FA Cup winner, 1985"},
+    sivebaek:{born:"25 October 1961", from:"Vejle, Denmark", height:"6 ft 0 in", prev:"Vejle"},
+    turner:{born:"15 September 1958", from:"Sheffield", prev:"Sunderland"},
+    duxbury:{born:"1 September 1959", from:"Accrington", height:"5 ft 9 in", honour86:"FA Cup winner, 1983 and 1985"},
+    hogg:{born:"17 June 1964", from:"Aberdeen", height:"6 ft 1 in"},
+    dalglish:{born:"4 March 1951", from:"Glasgow", height:"5 ft 8 in", honour81:"European Cup winner, 1981", honour:"European Cup winner, 1981"},
+    rush:{born:"20 October 1961", from:"St Asaph", honour86:"League and FA Cup winner, 1986"},
+    barnes:{born:"7 November 1963", from:"Kingston, Jamaica"},
+    blissett:{born:"1 February 1958", from:"Falmouth, Jamaica", height:"5 ft 11 in", prev:"AC Milan"},
+    anderson:{born:"29 July 1956", from:"Clifton, Nottingham", honour:"European Cup winner, 1979 and 1980"},
+    regis:{born:"9 February 1958", from:"Maripasoula, French Guiana", height:"6 ft 0 in", prev:"West Bromwich Albion"},
+    crooks:{born:"10 March 1958", from:"Stoke-on-Trent", honour81:"FA Cup winner, 1981"}
+  };
+  function cardFactRows(p){
+    var f = CARD_FACTS[p.id] || {};
+    var rows = [];
+    if (f.born) rows.push(["Born", f.born]);
+    if (f.from) rows.push(["From", f.from]);
+    if (f.height) rows.push(["Height", f.height]);
+    var honour = era>=1986 ? (f.honour86 || f.honour) : (f.honour81 || f.honour);
+    if (honour) rows.push(["Honour", honour]);
+    else if (f.prev && !(p.career && p.career.length)) rows.push(["Previously", f.prev]);
+    return rows;
   }
+  function pcardFlavour(p){
+    return "A First Division Action File for " + (era>=1986 ? "1986-87" : "1981-82") + ".";
+  }
+
   function pcardHtml(p, idx, total, list){
     var year = era>=1986 ? 1986 : 1981;
     var seasonTxt = year===1986 ? '1986-87' : '1981-82';
@@ -924,14 +970,6 @@ tr.hl td{background:#fff3b0}
     var hairHex = pcardHairHex(p), style = pcardHairStyle(p);
     var h = pcardHash(p.name+'|tint');
     var t81 = [['#1650d0','#071428'],['#e0002a','#3a0010'],['#0b6b5a','#042824'],['#5b2a7a','#1c0a28'],['#c9a227','#3a2c08']][(h>>>11)%5];
-    var attrs = [];
-    if (p.attrs){
-      if (p.attrs.handling) attrs.push(['Handling', pcardInt(p.attrs.handling)]);
-      ['shooting','passing','tackling','heading','pace','stamina'].forEach(function(k){
-        if (p.attrs[k]!=null) attrs.push([k.charAt(0).toUpperCase()+k.slice(1), pcardInt(p.attrs[k])]);
-      });
-    }
-    var best = attrs.length ? attrs.slice().sort(function(a,b){ return b[1]-a[1]; })[0] : null;
     var posTxt = pcardEsc(p.pos), clubTxt = pcardEsc(p.club||'Manchester United');
     var sw = '<span class="pc-sw" aria-hidden="true"><i style="background:'+clubKit.c1+'"></i><i style="background:'+(clubKit.c2||clubKit.c1)+'"></i></span>';
     var sil = pcardSil(p, kit, goalie, hairHex, style);
@@ -943,11 +981,11 @@ tr.hl td{background:#fff3b0}
       + '<div class="pc-tiles"><div><b>'+age+'</b><span>Age</span></div><div><b>0</b><span>Apps</span></div><div><b>—</b><span>Goals</span></div></div>'
       + '<div class="pc-foot">File '+idx+' of '+total+'</div>';
     var kick = 'Action File';
-    var bhead = '<div class="pc-bhead"><small>'+kick+'</small><h3 style="font-size:'+fit(7.4,17)+'cqw">'+nameBig+'</h3><p>'+clubTxt+', '+posTxt.toLowerCase()+'</p></div>';
-    var rec = '<div class="pc-rec"><div><b>'+age+'</b><span>Age</span></div><div><b>0</b><span>Apps</span></div><div><b>—</b><span>Goals</span></div></div>';
-    var stats = attrs.length ? ('<dl class="pc-stats">'+attrs.map(function(a){ return '<dt>'+a[0]+'</dt><dd>'+pcardPips(a[1])+'<em>'+a[1]+'</em></dd>'; }).join('')+'</dl>') : '';
-    var bio = '<p class="pc-bio">'+pcardEsc(pcardBioPreview(p))+'</p>';
-    var back = bhead + '<div class="pc-bodyb">'+bio+rec+stats+'<div class="pc-bfoot">Action File '+seasonTxt+' · No. '+idx+' of '+total+'</div></div>';
+    var bhead = '<div class="pc-bhead"><small>'+kick+'</small><h3 style="font-size:'+fit(7.4,17)+'cqw">'+nameBig+'</h3></div>';
+    var bio = '<p class="pc-bio">'+pcardEsc(pcardFlavour(p))+'</p>';
+    var factRows = cardFactRows(p);
+    var facts = factRows.length ? ('<dl class="pc-facts">'+factRows.map(function(r){ return '<dt>'+pcardEsc(r[0])+'</dt><dd>'+pcardEsc(r[1])+'</dd>'; }).join('')+'</dl>') : '';
+    var back = bhead + '<div class="pc-bodyb">'+bio+facts+'<div class="pc-bfoot">Action File '+seasonTxt+' · No. '+idx+' of '+total+'</div></div>';
     var style_ = '--c1:'+kit.c1+';--c1b:'+clubKit.c1+';--tint81:'+t81[0]+';--tint81b:'+t81[1];
     return '<div class="pc-stage pc-e81" data-nocase="1" data-era="81"><div class="pc-card" role="button" tabindex="0" aria-pressed="false" aria-label="'+pcardEsc(p.name+', '+(p.pos||'')+', '+(p.club||'')+'. Card '+idx+' of '+total+'. Press to turn over.')+'" style="'+style_+'">'
       + '<div class="pc-inner"><div class="pc-face pc-front">'+front+'</div><div class="pc-face pc-back">'+back+'</div></div></div>'
@@ -980,9 +1018,8 @@ tr.hl td{background:#fff3b0}
 
   function fileBody(p){
     var line = capsLine(p);
-    var club = p.club || "Manchester United";
-    var html = "<h3>"+esc(p.name)+"</h3><p>";
-    html += esc(p.pos) + " · " + esc(club) + (p.personality ? ". Personality · "+esc(p.personality) : "") + ".</p>";
+    var html = "<h3>"+esc(p.name)+"</h3>";
+    if (p.personality) html += "<p>Personality · "+esc(p.personality)+".</p>";
     if (line) html += "<p>"+esc(line)+"</p>";
     if (p.career && p.career.length){
       html += "<h3>Career</h3><table><thead><tr><th>Years</th><th>Club</th><th class='num'>Apps</th><th class='num'>Gls</th></tr></thead><tbody>";
@@ -1016,7 +1053,7 @@ tr.hl td{background:#fff3b0}
     var idx = list.findIndex(function(x){ return x.id===fileId; }) + 1;
     var ourChips = ours.map(function(x){ return '<button type="button" class="chip'+(fileId===x.id?" on":"")+'" data-file="'+x.id+'" aria-pressed="'+(fileId===x.id?"true":"false")+'">'+esc(x.short)+"</button>"; }).join("");
     var guestChips = guests.map(function(x){ return '<button type="button" class="chip'+(fileId===x.id?" on":"")+'" data-file="'+x.id+'" aria-pressed="'+(fileId===x.id?"true":"false")+'">'+esc(x.short)+"</button>"; }).join("");
-    el("panel-squad").innerHTML = "<h2>Squad</h2><p class='note'>Player files are the era collectable card from the live game (v323 / v363, last rich design still in v407): for 1981-82 and 1986-87 that is the Action File, not the 1970s colour-sticker skin. Click the card to turn it over. The portrait is an illustrated stand-in in the club's home shirt of the season, with sourced skin and hair where those can reasonably be read from well-known photographs. Missing facts are omitted. A known international without a cut-date figure is written as, for example, 'Scotland international', with no number.</p>"+
+    el("panel-squad").innerHTML = "<h2>Squad</h2>"+
       "<p class='era-lab'>Manchester United</p><div class='chips' id='file-chips'>"+ourChips+"</div>"+
       "<p class='era-lab'>Also in the First Division</p><div class='chips' id='guest-chips'>"+guestChips+"</div>"+
       "<div class='file-grid'>"+pcardHtml(p, idx, list.length)+"<div class='file-body card'>"+fileBody(p)+"</div></div>";
@@ -1093,7 +1130,8 @@ tr.hl td{background:#fff3b0}
       "<div class='card' style='margin-top:8px'><h3>European Championship</h3><p>The finals are staged in a summer. They are not in progress in the opening week of an English season.</p></div>";
   }
   function renderFoot(){
-    el("foot").innerHTML = "Preview only, based on the live v407 game. There is no DATA tab. Caps and nationality follow the v406 cut dates (29 August 1981 and 23 August 1986). Missing facts are hidden, not labelled unsourced. A known international without a figure is written as a nationality plus 'international'.";
+    el("foot").innerHTML = "";
+    el("foot").style.display = "none";
   }
   function renderAll(){
     if (era<1986 && formation==="352") formation = "442";
