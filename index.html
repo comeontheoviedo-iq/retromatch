@@ -5242,7 +5242,7 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
             <button type="button" class="im-chip" id="im-defensive">Shut up shop</button>
           </span>
         </p>
-        <p class="sub im-row" id="im-wrinkle-row">Tactical wrinkle: <select id="im-wrinkle" class="im-chip"></select></p>
+        <p class="sub im-row" id="im-wrinkle-row">Plan: <select id="im-wrinkle" class="im-chip"></select></p>
         <div id="v401-style-hold"></div>
       </div>
       <div class="box" id="halftime-talk-box" style="display:none; margin-top:14px;">
@@ -21839,7 +21839,10 @@ function styleCtxForUs(){
     oppApproach: live && live.oppApproach,
     oppAtkStyle: oppSt && oppSt.atkStyle,
     ballWork: typeof training==='object' && training && training.focus==='ball',
-    forUs: true,
+    forUs: true, live: true,
+    oppDefStyle: oppSt && oppSt.defStyle,
+    formation: tactics && tactics.formation,
+    oppXI: live && live.oppSquad,
     wrinkle: (typeof v410ActiveWrinkleKey==='function') ? v410ActiveWrinkleKey('us', typeof ourClubName==='string'?ourClubName:null) : null
   };
 }
@@ -21852,7 +21855,10 @@ function styleCtxForOpp(ost){
     oppApproach: tactics && tactics.approach,
     oppAtkStyle: tactics && tactics.atkStyle,
     ballWork: ost && ost.trainingFocus==='ball',
-    wrinkleClub: oppName,
+    wrinkleClub: oppName, live: true,
+    oppDefStyle: tactics && tactics.defStyle,
+    formation: (typeof clubFormation==='function' && oppName) ? clubFormation(oppName) : null,
+    oppXI: live && live.ourXI,
     wrinkle: (typeof v410ActiveWrinkleKey==='function' && oppName) ? v410ActiveWrinkleKey('club', oppName) : null
   };
 }
@@ -21930,6 +21936,285 @@ function styleChanceShare(spec, ctx){
   var r = styleGoalRates(spec, ctx||{});
   return r.gf / (r.gf + r.ga);
 }
+/* ===== v427 : PLANS (the old "tactical wrinkles", renamed on screen). Each plan now:
+   - is worth something modest but real : about +0.04 to +0.08 points a game on its own when the right man is in the role (a little more with pattern-of-play training)
+     and the opponent's shape suits it, up to about +0.12 for a good set together (PLAN_PTS_CAP);
+   - depends on the man asked to do it (attacking full-backs need pace and stamina, the striker in the hole a creative
+     player, the target man heading and strength : there is no strength rating in the game, so tackling and stamina stand in);
+   - depends on the other side's shape and plans (an overlapping full-back against a side with wingers high is caught out;
+     the striker in the hole is smothered by a holding midfielder or a sweeper; wingers high feed on attacking full-backs);
+   - changes the kind of chance (more crosses for a target man and wide men, more through-balls for a man in the hole) and
+     who scores them;
+   - carries a cost (attacking plans leave space; full-backs without the legs tire late; holding plans give up a little going forward).
+   The computer managers use exactly the same rules, and pick plans their players suit. ===== */
+var PLAN_PTS_CAP = 0.12, PLAN_ONE_CAP = 0.10, PLAN_RATIO_CAP = Math.exp(PLAN_PTS_CAP / 0.94); /* 0.94 points a game per unit of log(for/against), from a Poisson check at 1.25 goals each side */
+var V427_PLAN = {
+  /* r : role, A : attributes and weights, G : log goals-for at full fit, C : log goals-against, cr / tb : share of open-play chances moved to crosses / through-balls, atk : the fit scales G (attacking) or C (defensive) */
+  lback:{r:'overlap', A:{pace:.5, stamina:.5}, G:.0625, C:.0200, cr:.012, atk:1}, rback:{r:'overlap', A:{pace:.5, stamina:.5}, G:.0625, C:.0200, cr:.012, atk:1},
+  lfb:{r:'overlap', A:{pace:.5, stamina:.5}, G:.0625, C:.0200, cr:.012, atk:1}, rfb:{r:'overlap', A:{pace:.5, stamina:.5}, G:.0625, C:.0200, cr:.012, atk:1},
+  lover:{r:'overlap', A:{pace:.5, stamina:.5}, G:.0625, C:.0200, cr:.012, atk:1}, rover:{r:'overlap', A:{pace:.5, stamina:.5}, G:.0625, C:.0200, cr:.012, atk:1},
+  hole:{r:'creator', A:{passing:.65, shooting:.35}, G:.0750, C:.0075, tb:.025, atk:1}, tip:{r:'creator', A:{passing:.65, shooting:.35}, G:.0688, C:.0125, tb:.020, atk:1},
+  nine:{r:'creator', A:{passing:.6, heading:.4}, G:.0500, C:.0037, tb:.015, atk:1}, ifdrop:{r:'creator', A:{passing:.7, shooting:.3}, G:.0500, C:.0050, tb:.015, atk:1},
+  target:{r:'target', A:{heading:.6, tackling:.2, stamina:.2}, G:.0725, C:.0000, cr:.025, atk:1},
+  lhigh:{r:'widehigh', A:{pace:.6, passing:.4}, G:.0562, C:.0187, cr:.015, atk:1}, rhigh:{r:'widehigh', A:{pace:.6, passing:.4}, G:.0562, C:.0187, cr:.015, atk:1},
+  linside:{r:'inside', A:{passing:.5, shooting:.5}, G:.0438, C:.0100, tb:.008, atk:1}, rinside:{r:'inside', A:{passing:.5, shooting:.5}, G:.0438, C:.0100, tb:.008, atk:1},
+  onehold:{r:'b2b', A:{stamina:.5, passing:.5}, G:.0500, C:.0200, tb:.008, atk:1},
+  libero:{r:'libero', A:{passing:.6, pace:.4}, G:.0438, C:.0150, tb:.008, atk:1}, swup:{r:'libero', A:{passing:.6, pace:.4}, G:.0438, C:.0150, tb:.008, atk:1},
+  ltuck:{r:'tuck', A:{stamina:.5, tackling:.5}, G:-.0100, C:-.0500, atk:0}, rtuck:{r:'tuck', A:{stamina:.5, tackling:.5}, G:-.0100, C:-.0500, atk:0},
+  ltrack:{r:'track', A:{stamina:.6, tackling:.4}, G:-.0125, C:-.0525, atk:0}, rtrack:{r:'track', A:{stamina:.6, tackling:.4}, G:-.0125, C:-.0525, atk:0},
+  cmsit:{r:'holder', A:{tackling:.7, passing:.3}, G:-.0150, C:-.0562, atk:0}, twohold:{r:'holder', A:{tackling:.7, stamina:.3}, G:-.0200, C:-.0625, atk:0},
+  base:{r:'holder', A:{tackling:.7, passing:.3}, G:-.0150, C:-.0562, atk:0},
+  deep:{r:'deepsw', A:{tackling:.6, heading:.4}, G:-.0175, C:-.0562, atk:0}, swdeep:{r:'deepsw', A:{tackling:.6, heading:.4}, G:-.0175, C:-.0562, atk:0},
+  lwbdeep:{r:'wbdeep', A:{tackling:.6, pace:.4}, G:-.0125, C:-.0500, atk:0}, rwbdeep:{r:'wbdeep', A:{tackling:.6, pace:.4}, G:-.0125, C:-.0500, atk:0},
+  lshut:{r:'shuttle', A:{stamina:.6, pace:.4}, G:.0050, C:-.0375, atk:0}, rshut:{r:'shuttle', A:{stamina:.6, pace:.4}, G:.0050, C:-.0375, atk:0},
+  marker:{r:'marker', A:{tackling:.6, pace:.4}, G:-.0050, C:-.0562, atk:0}
+};
+var V427_ROLE_WORD = {overlap:'pace and stamina', creator:'a creative player, a passer with a shot in him', target:'heading and strength', widehigh:'pace and a decent ball in',
+  inside:'passing and a shot', b2b:'legs and passing', libero:'a passer with pace', tuck:'stamina and a tackle', track:'stamina and a tackle', holder:'a tackler who keeps it simple',
+  deepsw:'a tackler who is good in the air', wbdeep:'a tackler with pace', shuttle:'stamina and pace', marker:'a tackler with pace'};
+function v427Val(p, a){ if (!p) return 10; var v = p[a]; if (typeof v !== 'number' && p.attrs) v = p.attrs[a]; return typeof v === 'number' ? v : 10; }
+function v427Score(p, A){ var s = 0, w = 0; Object.keys(A).forEach(function(k){ s += v427Val(p, k) * A[k]; w += A[k]; }); return w ? s / w : 10; }
+function v427Fit(s){ return Math.max(-0.5, Math.min(1.4, (s - 9) / 4)); } /* 1-20 ratings : a 13 in the right places is a proper fit (1.0), a 9 is no use at all */
+function v427IsFwd(p){ return p && (p.slot === 'FWD' || /forward|striker|winger|outside|inside-(left|right)/i.test(p.pos || '')); }
+function v427IsBack(p){ return p && (p.slot === 'FB' || /back|centre-half|centre half|sweeper|stopper/i.test(p.pos || '')); }
+function v427IsCB(p){ return p && (/centre-half|centre half|centre-back|sweeper|stopper/i.test(p.pos || '') || (!p.pos && p.slot === 'HB')); }
+/* the man in the role : ours from the team sheet (the marker the plan moves), theirs by position */
+function v427RoleMan(xi, o, side){
+  xi = (xi || []).filter(function(p){ return p && p.slot !== 'GK' && !/goalkeeper/i.test(p.pos || ''); });
+  if (!xi.length) return null;
+  var d = V427_PLAN[o.k] || {}, A = d.A || {passing:1};
+  if (side === 'us' && typeof lineupSlots !== 'undefined' && lineupSlots && lineupSlots.length === 11 && o.m){
+    var idx = parseInt(Object.keys(o.m)[0], 10), sl = lineupSlots[idx];
+    if (sl && sl.playerId != null){ var hit = xi.filter(function(p){ return p.id === sl.playerId; })[0]; if (hit) return hit; }
+  }
+  var L = /^l/.test(o.k) || o.s === 'L', R = /^r/.test(o.k) || o.s === 'R';
+  var pool;
+  if (d.r === 'overlap' || d.r === 'wbdeep'){
+    pool = xi.filter(function(p){ return new RegExp((L ? 'left' : 'right') + '[- ](back|wing-back)', 'i').test(p.pos || ''); });
+    if (!pool.length){ var fbs = xi.filter(function(p){ return p.slot === 'FB'; }); pool = fbs.length ? [fbs[L ? Math.min(1, fbs.length - 1) : 0]] : []; }
+  } else if (d.r === 'widehigh' || d.r === 'inside' || d.r === 'tuck' || d.r === 'track' || d.r === 'shuttle'){
+    pool = xi.filter(function(p){ return new RegExp((L ? '(left|outside-left)' : '(right|outside-right)'), 'i').test(p.pos || '') && !/back/i.test(p.pos || ''); });
+    if (!pool.length) pool = xi.filter(function(p){ return p.slot === 'FWD' || p.slot === 'HB'; });
+  } else if (d.r === 'creator' || d.r === 'target'){
+    pool = xi.filter(v427IsFwd);
+  } else if (d.r === 'deepsw' || d.r === 'libero' || d.r === 'marker'){
+    pool = xi.filter(v427IsCB);
+  } else {
+    pool = xi.filter(function(p){ return /midfield|half/i.test(p.pos || '') || (!p.pos && p.slot === 'HB'); });
+  }
+  if (!pool.length) pool = xi;
+  return pool.slice().sort(function(a, b){ return v427Score(b, A) - v427Score(a, A); })[0];
+}
+/* what the other side is doing : their shape, plans and men */
+function v427OppFacts(shape, keys, xi){
+  var k = keys || [], has = function(list){ return list.some(function(x){ return k.indexOf(x) >= 0; }); };
+  var sweeper = /sweeper|1432/.test(shape || '');
+  var fwds = (xi || []).filter(v427IsFwd), cbs = (xi || []).filter(v427IsCB);
+  var star = fwds.slice().sort(function(a, b){ return (b.ca || 0) - (a.ca || 0); })[0] || null;
+  var fAvg = fwds.length ? fwds.reduce(function(s, p){ return s + (p.ca || 0); }, 0) / fwds.length : 0;
+  return {
+    holder: has(['cmsit', 'twohold', 'base', 'onehold']) || sweeper, sweeper: sweeper,
+    wingHigh: has(['lhigh', 'rhigh']) || shape === '424' || shape === '433' || shape === '433sweeper',
+    overlap: has(['lback', 'rback', 'lfb', 'rfb', 'lover', 'rover']),
+    narrow: shape === 'diamond' || shape === '1432' || has(['ltuck', 'rtuck', 'linside', 'rinside']),
+    creator: has(['hole', 'tip', 'nine', 'ifdrop']), target: has(['target']),
+    back5: has(['lwbdeep', 'rwbdeep', 'ltrack', 'rtrack']),
+    cbHead: cbs.length ? cbs.reduce(function(s, p){ return s + v427Val(p, 'heading'); }, 0) / cbs.length : 10,
+    fastest: fwds.reduce(function(m, p){ return Math.max(m, v427Val(p, 'pace')); }, 0),
+    passing: (xi || []).length ? xi.reduce(function(s, p){ return s + v427Val(p, 'passing'); }, 0) / xi.length : 10,
+    star: star, danger: star ? Math.max(0.3, Math.min(1.5, ((star.ca || 0) - fAvg) / 6 + 0.6)) : 0.6
+  };
+}
+/* one plan's effect for a side : {lg, la, man, fit, oppG, oppA, why} */
+function v427PlanOne(o, side, man, of, ctx){
+  var d = V427_PLAN[o.k]; if (!d) return {lg:Math.log(o.gf || 1), la:Math.log(o.ga || 1), man:man, fit:1, oppG:1, oppA:1, d:{}};
+  var fit = man ? v427Fit(v427Score(man, d.A)) : 0.3, oG = 1, oA = 1, cost = 1;
+  of = of || {};
+  switch (d.r){
+    case 'overlap': oA *= of.wingHigh ? 1.8 : 1; oG *= of.narrow ? 1.35 : (of.back5 ? 0.7 : 1);
+      if (man && (ctx.minute || 0) >= 70 && v427Val(man, 'stamina') < 13) cost *= 1.6; break; /* no legs left late : caught upfield */
+    case 'creator': oG *= of.holder ? 0.5 : (of.sweeper ? 0.7 : 1.25); break;
+    case 'target': oG *= Math.max(0.4, Math.min(1.6, 1 + (v427Val(man, 'heading') - (of.cbHead || 10)) / 8)) * (of.sweeper ? 0.85 : 1); break;
+    case 'widehigh': oG *= of.overlap ? 1.5 : (of.back5 ? 0.7 : 1); break;
+    case 'inside': oG *= of.narrow ? 0.7 : 1.1; break;
+    case 'b2b': oG *= of.holder ? 0.8 : 1.1; break;
+    case 'tuck': oA *= (of.creator || of.narrow) ? 1.3 : 0.85; break;
+    case 'track': case 'wbdeep': case 'shuttle': oA *= (of.overlap || of.wingHigh) ? 1.35 : 0.8; break;
+    case 'holder': oA *= of.creator ? 1.4 : 0.85; break;
+    case 'deepsw': oA *= of.target ? 1.3 : (of.wingHigh ? 0.9 : 1); break;
+    case 'marker': oA *= of.danger || 0.6;
+      if (ctx.defStyle === 'manmark') oA *= 1.25; else if (ctx.defStyle === 'zonal') oA *= 0.6; /* v427 : the three marking ideas are one job */
+      if (ctx.markClosely) oA *= 0.6; /* the same man is already being marked closely : most of it is counted once */
+      break;
+  }
+  var lg, la;
+  if (d.atk){ lg = d.G * fit * oG; la = d.C * cost * oA; }
+  else { var b = Math.max(0.2, fit); lg = d.G * oG; la = d.C * b * oA; }
+  var net = lg - la, mx = PLAN_ONE_CAP / 0.94; if (net > mx){ var sc = mx / net; lg *= sc; la *= sc; } /* one plan on its own is never worth more than 0.10 a game */
+  return {lg:lg, la:la, man:man, fit:fit, oppG:oG, oppA:oA, d:d};
+}
+/* everything about a side's plans in this match (or the next one, off the pitch) */
+function v427PlanSide(side, opts){
+  opts = opts || {};
+  var us = side === 'us', L = (typeof live !== 'undefined' && live) ? live : null;
+  var ck = null;
+  if (L && !opts.club){ /* the same match state gives the same answer : worked out once per passage */
+    ck = side+'|'+L.minute+'|'+L.usScore+'|'+L.oppScore+'|'+(L.ourXI||[]).map(function(p){ return p && p.id; }).join(',')+'|'+(L.oppSquad||[]).length+'|'+JSON.stringify(typeof wrinkleSets==='object'?wrinkleSets:{})+'|'+(tactics&&tactics.defStyle)+'|'+(typeof training==='object'&&training?training.focus:'')+'|'+(typeof markCloselyThisMatch!=='undefined'&&markCloselyThisMatch?1:0);
+    if (L._v427 && L._v427[side] && L._v427[side].k === ck) return L._v427[side].v;
+  }
+  var res = v427PlanSideRaw(side, opts, us, L);
+  if (ck){ L._v427 = L._v427 || {}; L._v427[side] = {k:ck, v:res}; }
+  return res;
+}
+function v427PlanSideRaw(side, opts, us, L){
+  var key = (typeof v410ActiveWrinkleKey === 'function') ? (us ? v410ActiveWrinkleKey('us', typeof ourClubName === 'string' ? ourClubName : null) : v410ActiveWrinkleKey('club', opts.club || (L && L.f && L.f.opp))) : null;
+  var out = {gf:1, ga:1, items:[], cr:0, tb:0, pts:0, capped:false};
+  if (!key || typeof key !== 'object' || !key.keys || !key.keys.length) return out;
+  var oppClub = opts.club || (L && L.f && L.f.opp) || ((typeof fixtures !== 'undefined' && fixtures && fixtures[fixtureIdx]) ? fixtures[fixtureIdx].opp : null);
+  var ourXI = (L && L.ourXI) || ((typeof lineup !== 'undefined' && typeof squad !== 'undefined') ? lineup.map(function(id){ return squad.find(function(p){ return p.id === id; }); }).filter(Boolean) : []);
+  var oppXI = (L && L.oppSquad) || ((typeof clubSquads !== 'undefined' && oppClub && clubSquads[oppClub]) ? clubSquads[oppClub].slice().sort(function(a, b){ return (b.ca || 0) - (a.ca || 0); }).slice(0, 11) : []);
+  var myXI = us ? ourXI : oppXI, theirXI = us ? oppXI : ourXI;
+  var theirKey = (typeof v410ActiveWrinkleKey === 'function') ? (us ? (oppClub ? v410ActiveWrinkleKey('club', oppClub) : null) : v410ActiveWrinkleKey('us', typeof ourClubName === 'string' ? ourClubName : null)) : null;
+  var theirShape = us ? ((typeof rmWrShapeOf === 'function' && typeof clubFormation === 'function' && oppClub) ? rmWrShapeOf(clubFormation(oppClub)) : '') : (typeof rmWrUsShape === 'function' ? rmWrUsShape() : '');
+  var of = v427OppFacts(theirShape, theirKey && theirKey.keys, theirXI);
+  var ctx = {minute:L ? L.minute : 0,
+    defStyle: us ? (typeof tactics === 'object' && tactics ? tactics.defStyle : null) : ((typeof clubTacticsStyles === 'function' && oppClub) ? (clubTacticsStyles(oppClub) || {}).defStyle : null),
+    markClosely: us && typeof markCloselyThisMatch !== 'undefined' && !!markCloselyThisMatch && typeof scoutingPrep !== 'undefined' && scoutingPrep && scoutingPrep.oppName === oppClub};
+  var opts2 = rmWrOptions(key.shape).filter(function(o){ return key.keys.indexOf(o.k) >= 0; });
+  var fam = key.fam == null ? 1 : key.fam;
+  var parts = opts2.map(function(o){ var r = v427PlanOne(o, side, v427RoleMan(myXI, o, side), of, ctx); r.o = o; r.lg *= fam; r.la *= fam; return r; });
+  parts.sort(function(a, b){ return (Math.abs(b.lg) + Math.abs(b.la)) - (Math.abs(a.lg) + Math.abs(a.la)); });
+  var W = [1, .75, .55, .42, .33, .27, .22, .18], lg = 0, la = 0;
+  parts.forEach(function(p, i){ var w = W[Math.min(i, W.length - 1)]; p.w = w; lg += p.lg * w; la += p.la * w;
+    out.cr += ((p.d && p.d.cr) || 0) * Math.max(0, p.fit) * fam; out.tb += ((p.d && p.d.tb) || 0) * Math.max(0, p.fit) * fam; });
+  var gf = Math.exp(lg), ga = Math.exp(la), vol = Math.sqrt(gf * ga), r = gf / ga;
+  if (vol > 1.03) vol = 1.03; if (vol < 0.97) vol = 0.97;
+  if (r > PLAN_RATIO_CAP){ r = PLAN_RATIO_CAP; out.capped = true; } if (r < 1 / PLAN_RATIO_CAP){ r = 1 / PLAN_RATIO_CAP; out.capped = true; }
+  out.gf = vol * Math.sqrt(r); out.ga = vol / Math.sqrt(r);
+  out.pts = 0.94 * Math.log(r);
+  out.items = parts; out.facts = of; out.oppClub = oppClub;
+  return out;
+}
+/* the plan man most likely to score from it (the striker in the hole, the target man), for the scorer pick */
+function v427PlanFinisher(side, route){
+  if (typeof live === 'undefined' || !live) return null;
+  var P = v427PlanSide(side), best = null;
+  P.items.forEach(function(it){ if (!it.man || it.fit <= 0) return;
+    var r = it.d && it.d.r;
+    if (route === 'cross' && r === 'target') best = it;
+    else if (route === 'through' && (r === 'creator' || r === 'inside') && !best) best = it;
+    else if (route === 'open' && (r === 'creator' || r === 'target') && !best) best = it; });
+  if (!best) return null;
+  var xi = side === 'us' ? live.ourXI : live.oppSquad;
+  if (xi.indexOf(best.man) < 0) return null;
+  return {man:best.man, q:Math.min(0.45, 0.25 + 0.15 * best.fit)};
+}
+/* the man the other side is marking out of the game (marker plan, or Mark him closely) */
+function v427MarkedMan(side){
+  if (typeof live === 'undefined' || !live) return null;
+  var markers = v427PlanSide(side === 'us' ? 'opp' : 'us').items.filter(function(it){ return it.d && it.d.r === 'marker'; });
+  var closely = side === 'opp' && typeof markCloselyThisMatch !== 'undefined' && markCloselyThisMatch;
+  if (!markers.length && !closely) return null;
+  var xi = side === 'us' ? live.ourXI : live.oppSquad;
+  var f = xi.filter(v427IsFwd).sort(function(a, b){ return (b.ca || 0) - (a.ca || 0); })[0];
+  return f || null;
+}
+/* ---------- styles : the side effects. Card and injury shares between the sides (the total number of cards and knocks is unchanged). */
+var V427_CARD_W = {pressing:.25, manmark:.12, sitting:.05, zonal:-.08, offsidetrap:-.05};
+var V427_APPR_CARD_W = {attacking:.05, defensive:.08};
+function v427SideStyles(side){
+  if (side === 'us') return {def: tactics && tactics.defStyle, atk: tactics && tactics.atkStyle, appr: tactics && tactics.approach, xi: live && live.ourXI};
+  var st = (typeof clubTacticsStyles === 'function' && live && live.f) ? (clubTacticsStyles(live.f.opp) || {}) : {};
+  return {def: st.defStyle, atk: st.atkStyle, appr: live && live.oppApproach, xi: live && live.oppSquad};
+}
+function v427CardShareUs(){
+  if (typeof live === 'undefined' || !live || !(typeof isEightiesTacticsYear === 'function' && isEightiesTacticsYear())) return 0.5;
+  var w = function(s){ return 1 + (V427_CARD_W[s.def] || 0) + (V427_APPR_CARD_W[s.appr] || 0); };
+  var a = w(v427SideStyles('us')), b = w(v427SideStyles('opp'));
+  return a / (a + b);
+}
+function v427InjuryShareUs(){
+  if (typeof live === 'undefined' || !live || !(typeof isEightiesTacticsYear === 'function' && isEightiesTacticsYear())) return 0.5;
+  var w = function(s, o){ var x = 1; if (s.def === 'pressing') x += .2; if (s.appr === 'attacking') x += .05;
+    if (o.def === 'manmark') x += .1; /* being kicked */ if (typeof sideStaminaAvg === 'function' && sideStaminaAvg(s.xi) < 11) x += .15; return x; };
+  var us = v427SideStyles('us'), op = v427SideStyles('opp');
+  var a = w(us, op), b = w(op, us);
+  return a / (a + b);
+}
+/* the computer manager changes his approach in the match : chasing late, protecting a lead. No dice : the same match state gives the same call. */
+function v427AiApproachUpdate(){
+  if (typeof live === 'undefined' || !live || !live.f || live.f.isFriendly) return;
+  if (!live.oppApproachKO) live.oppApproachKO = live.oppApproach || 'balanced';
+  var m = live.minute || 0, d = (live.oppScore || 0) - (live.usScore || 0), was = live.oppApproach, now = was;
+  if (m >= 70 && (d === -1 || d === -2)) now = 'attacking';
+  else if (m >= 78 && d === 1) now = (live.oppApproachKO === 'attacking') ? 'balanced' : 'defensive';
+  else if (m >= 60 && d >= 2 && was === 'attacking') now = 'balanced';
+  else if (d === 0 && was !== live.oppApproachKO && m < 85) now = live.oppApproachKO;
+  if (now !== was){
+    live.oppApproach = now;
+    var o = live.f.opp, sh = (typeof RETRO_ERA_COMMENTARY !== 'undefined' && RETRO_ERA_COMMENTARY.shortOf) ? RETRO_ERA_COMMENTARY.shortOf(o) : o;
+    var t = now === 'attacking' ? sh + ' are throwing men forward now, chasing the game.' : now === 'defensive' ? sh + ' have pulled men back behind the ball to hold on.' : sh + ' have settled down again, no need to chase it now.';
+    if (typeof addLine === 'function') addLine('', t);
+    live.oppApproachLog = (live.oppApproachLog || []).concat([{min:m, appr:now}]);
+  }
+}
+/* the plan effect for display : an honest "about +0.05 points a game" */
+function v427PtsText(x){ var v = Math.round(x * 100) / 100; if (Math.abs(v) < 0.005) return 'about level'; return (v > 0 ? '+' : '\u2212') + Math.abs(v).toFixed(2) + ' points a game'; }
+function v427ItemNote(it){
+  if (!it || !it.d || !it.d.r) return '';
+  var nm = it.man ? String(it.man.n).split(' ').slice(-1)[0] : 'nobody suited';
+  var fitW = it.fit >= 0.9 ? 'suits it well' : it.fit >= 0.4 ? 'can do the job' : it.fit >= 0 ? 'is not really made for it' : 'is the wrong man for it';
+  return nm + ' ' + fitW + ' (needs ' + (V427_ROLE_WORD[it.d.r] || 'the right man') + ')';
+}
+function v427SweeperShape(f){ return /sweeper|1432/.test(String(f || '')) || f === 'catenaccio'; }
+function v427Side(team){ return team === ourClubName ? 'us' : 'opp'; }
+/* through-balls against crosses : counters and the man in the hole make more through-balls, a target man and wide men more crosses. The number of chances is unchanged. */
+function v427TbEnd(team){
+  var base = (typeof sideHasCounters === 'function' && sideHasCounters(team)) ? 0.20 : 0.13;
+  if (typeof live === 'undefined' || !live) return base;
+  var P = v427PlanSide(v427Side(team)), sh = Math.max(-0.05, Math.min(0.05, P.tb - P.cr));
+  return Math.max(0.08, Math.min(0.23, base + sh));
+}
+function v427PlanPair(team, pair, route){
+  if (!pair || !pair[1]) return pair;
+  var fin = v427PlanFinisher(v427Side(team), route);
+  if (!fin || !fin.man || fin.man.n === pair[1].n) return pair;
+  if (Math.random() >= fin.q) return pair;
+  if (pair[0] && fin.man.n === pair[0].n) return [pair[1], pair[0]];
+  return [pair[0], fin.man];
+}
+function v427GoalScorer(team){
+  var p = scorerFor(team), side = v427Side(team);
+  var fin = v427PlanFinisher(side, 'open');
+  if (fin && fin.man && p && fin.man.n !== p.n && Math.random() < fin.q * 0.5) p = fin.man;
+  var marked = v427MarkedMan(side);
+  if (marked && p && marked.n === p.n && Math.random() < 0.45){ var p2 = scorerFor(team); if (p2) p = p2; } /* marked out of it : someone else gets the goal */
+  return p;
+}
+/* Mark him closely, read with the defensive style : man-markers do it best, a zonal side least */
+function v427MarkStyleMult(){ var d = (typeof tactics === 'object' && tactics) ? tactics.defStyle : null; return d === 'manmark' ? 1.15 : d === 'zonal' ? 0.7 : 1; }
+/* one option on its own, for the panels : about how many points a game, and whether the man in the role suits it */
+function v427PlanPreview(shape){
+  var out = {};
+  try {
+    var key = {shape:shape, keys:rmWrOptions(shape).map(function(o){ return o.k; }), fam:rmWrFam(typeof training === 'object' && training ? training.focus : null)};
+    var L = (typeof live !== 'undefined' && live) ? live : null;
+    var oppClub = (L && L.f && L.f.opp) || ((typeof fixtures !== 'undefined' && fixtures && fixtures[fixtureIdx]) ? fixtures[fixtureIdx].opp : null);
+    var ourXI = (L && L.ourXI) || ((typeof lineup !== 'undefined') ? lineup.map(function(id){ return squad.find(function(p){ return p.id === id; }); }).filter(Boolean) : []);
+    var oppXI = (L && L.oppSquad) || ((typeof clubSquads !== 'undefined' && oppClub && clubSquads[oppClub]) ? clubSquads[oppClub].slice().sort(function(a, b){ return (b.ca || 0) - (a.ca || 0); }).slice(0, 11) : []);
+    var tk = (oppClub && typeof v410ActiveWrinkleKey === 'function') ? v410ActiveWrinkleKey('club', oppClub) : null;
+    var of = v427OppFacts((oppClub && typeof clubFormation === 'function') ? rmWrShapeOf(clubFormation(oppClub)) : '', tk && tk.keys, oppXI);
+    var ctx = {minute:L ? L.minute : 0, defStyle:tactics && tactics.defStyle, markClosely:typeof markCloselyThisMatch !== 'undefined' && !!markCloselyThisMatch};
+    rmWrOptions(shape).forEach(function(o){
+      var r = v427PlanOne(o, 'us', v427RoleMan(ourXI, o, 'us'), of, ctx);
+      var lr = (r.lg - r.la) * key.fam;
+      out[o.k] = {pts:0.94 * lr, note:v427ItemNote(r), item:r};
+    });
+    out._opp = oppClub;
+  } catch(e){}
+  return out;
+}
+
 function styleGoalRates(spec, ctx){
   /* Early-era keys (direct / combination / arsenal / traditional) stay at 1 : their effect already lives in wmShapeEdge and the existing synergy multipliers.
      v397 : 1980s defensive and attacking styles combine, then the product is capped. */
@@ -21941,8 +22226,34 @@ function styleGoalRates(spec, ctx){
     atkK = only;
   }
   var d = styleRateOne(defK), a = styleRateOne(atkK);
+  /* v427 : a style that does not suit the shape works at half strength; the offside trap with a sweeper does not work at all */
+  if (ctx.formation && (typeof isEightiesTacticsYear!=='function' || isEightiesTacticsYear())){
+    var fitOf = function(list, k){ var o = (list||[]).filter(function(x){ return x.key===k; })[0]; return !o || !o.fits || o.fits(ctx.formation); };
+    var half = function(r){ return {gf:1+((r.gf||1)-1)*0.5, ga:1+((r.ga||1)-1)*0.5, tempoTighten:r.tempoTighten}; };
+    if (defK==='offsidetrap' && v427SweeperShape(ctx.formation)) d = {gf:1, ga:1};
+    else if (defK && typeof ERA_DEF_STYLES!=='undefined' && !fitOf(ERA_DEF_STYLES, defK)) d = half(d);
+    if (atkK && typeof ERA_ATK_STYLES!=='undefined' && !fitOf(ERA_ATK_STYLES, atkK)) a = half(a);
+  }
   var gf = (d.gf||1)*(a.gf||1);
   var ga = (d.ga||1)*(a.ga||1);
+  /* v427 : the defensive styles' costs. Pressing needs legs (a tired press late leaves gaps) and is played through by good passers;
+     the offside trap is beaten by pace; man-marking pays most against a side with one danger man. */
+  if (ctx.live){
+    var oxi = ctx.oppXI || [], mn = ctx.minute || 0;
+    if (defK==='pressing'){
+      if (mn >= 60 && sideStaminaAvg(ctx.xi) < 13){ ga *= 1.045; gf *= 0.99; }
+      if (oxi.length && oxi.reduce(function(t,p){ return t+v427Val(p,'passing'); },0)/oxi.length >= 13) ga *= 1.01;
+    }
+    if (defK==='offsidetrap' && d.ga !== 1){
+      var fast = oxi.filter(v427IsFwd).reduce(function(m,p){ return Math.max(m, v427Val(p,'pace')); }, 0);
+      if (fast >= 16) ga *= 1.05; else if (fast >= 14) ga *= 1.025;
+    }
+    if (defK==='manmark'){
+      var fw = oxi.filter(v427IsFwd), fa = fw.length ? fw.reduce(function(t,p){ return t+(p.ca||0); },0)/fw.length : 0;
+      var st = fw.reduce(function(m,p){ return Math.max(m, p.ca||0); }, 0);
+      if (fw.length && st - fa >= 6) ga *= 0.975;
+    }
+  }
   var tempoTighten = Math.min(d.tempoTighten||1, a.tempoTighten||1);
   if (atkK==='passmove'){
     var ball = ctx.ballWork;
@@ -21953,7 +22264,7 @@ function styleGoalRates(spec, ctx){
   if (atkK==='counters'){
     if (ctx.home===false) gf *= 1.03;
     var oppAp = ctx.oppApproach, oppAtk = ctx.oppAtkStyle;
-    if (oppAp==='attacking' || oppAtk==='passmove' || oppAtk==='pressing' || oppAtk==='longball') gf *= 1.025;
+    if (oppAp==='attacking' || oppAtk==='passmove' || ctx.oppDefStyle==='pressing' || oppAtk==='longball') gf *= 1.025; /* v427 : pressing is a defensive style : the old check read the attacking one and never fired */
   }
   if (spec.trainingFocus==='setpieces'){ gf *= 1.008; ga *= 0.996; }
   var wrKey = ctx.wrinkle || null;
@@ -21961,7 +22272,7 @@ function styleGoalRates(spec, ctx){
     if (ctx.wrinkleClub) wrKey = v410ActiveWrinkleKey('club', ctx.wrinkleClub);
     else if (ctx.forUs) wrKey = v410ActiveWrinkleKey('us', typeof ourClubName==='string'?ourClubName:null);
   }
-  if (wrKey && typeof v410WrinkleGoalRates==='function'){
+  if (wrKey && typeof v410WrinkleGoalRates==='function' && !(ctx.live && typeof wrKey==='object')){ /* v427 : in a live match plans are worked out on their own (v427PlanSide); the background results keep the old small figures */
     if (!(ctx.forUs && wrKey==='hole')){ /* 'hole' string only reaches here in pre-1966 eras, where wrinkleBonusFor carries it */
       var wr = v410WrinkleGoalRates(wrKey);
       gf *= (wr.gf||1); ga *= (wr.ga||1);
@@ -22133,8 +22444,9 @@ function renderStyleCol80s(opts, current, title, lead, formation){
   h += opts.map(function(o){
     var on = current===o.key;
     var poor = o.fits && !o.fits(formation);
-    var desc = o.desc + (poor ? ' A poorer fit for this shape, though it can still be tried.' : '');
-    return '<button type="button" class="office-chip'+(on?' on':'')+'" data-style="'+o.key+'" aria-pressed="'+(on?'true':'false')+'">'+o.label+'</button>'+
+    var blocked = o.key==='offsidetrap' && typeof v427SweeperShape==='function' && v427SweeperShape(formation);
+    var desc = o.desc + (blocked ? ' Not with a sweeper: the free man sits behind the line, so there is no line to step up. It does nothing in this shape.' : poor ? ' A poorer fit for this shape: it works at half strength.' : '');
+    return '<button type="button" class="office-chip'+(on?' on':'')+'" data-style="'+o.key+'" aria-pressed="'+(on?'true':'false')+'"'+(blocked && !on ? ' disabled aria-disabled="true"' : '')+'>'+o.label+'</button>'+
       '<input type="radio" name="style-'+title+'" value="'+o.key+'"'+(on?' checked':'')+' class="sr-only-radio">'+
       '<p class="sub" style="margin:2px 0 8px;">'+desc+'</p>';
   }).join('');
@@ -22238,7 +22550,7 @@ var wrinkleSlotOptions = [
   {slot:'INSIDE-RIGHT', label:'No.8 sits withdrawn', desc:"The inside-right plays deeper than his number suggests, orchestrating from behind the front three rather than in close support of the centre-forward."},
   {slot:'INSIDE-LEFT', label:'No.10 sits withdrawn', desc:"Same idea from the left : the inside-forward drops into space behind the front line instead of alongside the centre-forward."},
   {slot:'OUTSIDE-RIGHT', label:'No.7 tucks inside', desc:"The outside-right abandons the touchline for the inside-forward channel, leaving the marking full-back with open grass and nobody to follow."},
-  {slot:'OUTSIDE-LEFT', label:'No.11 tucks inside', desc:"The outside-left drifts infield rather than hugging the line, the same wrinkle from the other flank."},
+  {slot:'OUTSIDE-LEFT', label:'No.11 tucks inside', desc:"The outside-left drifts infield rather than hugging the line, the same idea from the other flank."},
   {slot:'RIGHT-HALF', label:'No.4 pushes forward', desc:"The right-half joins the attack as an auxiliary forward rather than sitting in support : the old Scottish Combination idea taken further."},
   {slot:'LEFT-HALF', label:'No.6 pushes forward', desc:"The left-half does the same from his side : an extra man arriving late that a marker briefed on numbers, not men, won't expect."}
 ];
@@ -22408,7 +22720,9 @@ function rmWrAiKeys(club, shape){
     if (st.atkStyle==='counters' || st.defStyle==='sitting') return cau ? 0.3 : 0;
     return att ? 0.05 : 0;
   };
-  var ranked = opts.map(function(o){ return {o:o, r:h('v418wrpick|'+club+'|'+o.k+'|'+y) - lean(o)}; }).sort(function(a, b){ return a.r - b.r; });
+  var sq = (typeof clubSquads !== 'undefined' && clubSquads[club]) ? clubSquads[club].slice().sort(function(a, b){ return (b.ca||0) - (a.ca||0); }).slice(0, 11) : [];
+  var fitOf = function(o){ if (!sq.length || typeof V427_PLAN === 'undefined' || !V427_PLAN[o.k]) return 0; var m = v427RoleMan(sq, o, 'opp'); return m ? Math.max(-0.5, v427Fit(v427Score(m, V427_PLAN[o.k].A))) : 0; };
+  var ranked = opts.map(function(o){ return {o:o, r:h('v418wrpick|'+club+'|'+o.k+'|'+y) - lean(o) - 0.3*fitOf(o)}; }).sort(function(a, b){ return a.r - b.r; }); /* v427 : the computer picks plans its players suit */
   var out = [], ex = {};
   ranked.forEach(function(x){ if (out.length >= n) return; if (x.o.ex && ex[x.o.ex]) return; if (x.o.ex) ex[x.o.ex] = 1; out.push(x.o.k); });
   return out;
@@ -22443,17 +22757,17 @@ function renderWrinkleBox(){
   rmWrMigrateOld();
   var shape = rmWrUsShape(), opts = rmWrOptions(shape);
   if (wrinkleSets && wrinkleSets[shape]) rmWrSet(shape, wrinkleSets[shape]);
-  var html = '<div class="box-title" style="margin-left:0;" data-rmwr-shape="'+shape+'">TACTICAL WRINKLES &middot; '+((typeof ERA_SHAPE_NAME!=='undefined' && ERA_SHAPE_NAME[shape]) || '')+'</div>';
+  var html = '<div class="box-title" style="margin-left:0;" data-rmwr-shape="'+shape+'">PLANS &middot; '+((typeof ERA_SHAPE_NAME!=='undefined' && ERA_SHAPE_NAME[shape]) || '')+'</div>';
   if (!opts.length){
-    html += '<p class="sub" style="margin-top:6px;">No wrinkles worked out for '+((typeof ERA_SHAPE_NAME!=='undefined' && ERA_SHAPE_NAME[shape]) || 'this shape')+' yet. The shape is played straight.</p>';
+    html += '<p class="sub" style="margin-top:6px;">No plans worked out for '+((typeof ERA_SHAPE_NAME!=='undefined' && ERA_SHAPE_NAME[shape]) || 'this shape')+' yet. The shape is played straight.</p>';
     boxes.forEach(function(b){ b.innerHTML = html; });
     return;
   }
   var act = rmWrActive(shape);
   var fam = rmWrFam(typeof training==='object' && training ? training.focus : null);
-  var c = rmWrRates(act, fam);
+  var c = rmWrRates(act, fam), P427 = v427PlanSide('us'), PV = v427PlanPreview(shape);
   html += '<div class="rmwr-top"><button type="button" class="office-chip'+(act.length?'':' on')+'" data-rmwr="" aria-pressed="'+(act.length?'false':'true')+'">Play it straight</button>';
-  html += '<span class="rmwr-edge">Net edge <b>'+(Math.abs(c.gap)<0.05?'0.0':(c.gap>0?'+':'')+c.gap.toFixed(1))+'</b> of '+(typeof TACTICAL_EXTRAS_CAP==='number'?TACTICAL_EXTRAS_CAP:3.5)+' &middot; For '+rmWrPct(c.gf)+' &middot; Against '+rmWrPct(c.ga)+'</span></div>';
+  html += '<span class="rmwr-edge">'+(act.length ? 'Together <b>'+v427PtsText(P427.pts)+'</b>'+(P427.oppClub ? ' against '+P427.oppClub : '')+(P427.capped ? ', at the limit of '+PLAN_PTS_CAP.toFixed(2) : ', limit '+PLAN_PTS_CAP.toFixed(2)) : 'No plans on. A good one is worth about 0.03 to 0.10 points a game; '+PLAN_PTS_CAP.toFixed(2)+' is the most a set can add')+'</span></div>'; /* v427 : honest figures, points a game, for the men in the roles and the next opponent */
   html += '<div class="rmwr-cols">';
   [['L','Left'],['C','Middle'],['R','Right']].forEach(function(sd){
     html += '<div class="rmwr-col"><h4>'+sd[1]+'</h4>';
@@ -22462,12 +22776,13 @@ function renderWrinkleBox(){
     list.forEach(function(o){
       var on = act.indexOf(o) >= 0;
       var rival = o.ex ? opts.filter(function(x){ return x.ex===o.ex && x.k!==o.k; }).map(function(x){ return x.l; }) : [];
-      html += '<button type="button" class="office-chip rmwr-opt'+(on?' on':'')+'" data-rmwr="'+o.k+'" aria-pressed="'+(on?'true':'false')+'">'+o.l+'<small>'+o.d+'</small><span class="fx">For '+rmWrPct(o.gf)+' &middot; Against '+rmWrPct(o.ga)+'</span>'+(rival.length?'<span class="x">Not with: '+rival.join(', ')+'</span>':'')+'</button>';
+      var pv = PV[o.k] || {pts:0, note:''};
+    html += '<button type="button" class="office-chip rmwr-opt'+(on?' on':'')+'" data-rmwr="'+o.k+'" aria-pressed="'+(on?'true':'false')+'">'+o.l+'<small>'+o.d+'</small><span class="fx">On its own '+v427PtsText(pv.pts)+'. '+pv.note+'.</span>'+(rival.length?'<span class="x">Not with: '+rival.join(', ')+'</span>':'')+'</button>';
     });
     html += '</div>';
   });
   html += '</div>';
-  html += '<p class="sub rmwr-note">'+(rmWrBox.note ? rmWrBox.note : (fam<1 ? 'Switch on as many as you like. Each extra one adds less, and the total edge is capped. Pattern-of-play training gets the full effect; otherwise they run at 80%.' : 'Pattern-of-play training this week: wrinkles at full effect. Each extra one adds less, and the total edge is capped.'))+'</p>';
+  html += '<p class="sub rmwr-note">'+(rmWrBox.note ? rmWrBox.note : ((fam<1 ? 'Switch on as many as you like. Each extra one adds less, and plans together are limited to about '+PLAN_PTS_CAP.toFixed(2)+' points a game. Pattern-of-play training gets the full effect; otherwise they run at 80%.' : 'Pattern-of-play training this week, so plans are at full effect. Each extra one adds less, and plans together are limited to about '+PLAN_PTS_CAP.toFixed(2)+' points a game.')+' The figures depend on the man in each role and on the other side\'s shape and plans: attacking full-backs need pace and stamina, the striker in the hole a creative player, the target man heading and strength. Attacking plans leave space behind; holding plans give up a little going forward.'+(opts.some(function(o){ return o.mark; }) ? ' Marking is one job: the man-marker plan, Mark him closely and the man-marking style all work on their best forward and count once together. With zonal marking the marker plan is worth less.' : '')))+'</p>';
   rmWrBox.note = '';
   boxes.forEach(function(box){
     box.innerHTML = html;
@@ -22551,7 +22866,7 @@ function renderWrinkleBoxPre66(){
   var chosen = tacticalWrinkle ? wrinkleOpts.find(function(o){return o.slot===tacticalWrinkle.slot;}) : null;
   var board = (typeof v408BoardWrinkle==='string' || v408BoardWrinkle) ? v408BoardWrinkle : null;
   var formChosen = formW.find(function(w){ return w.key===board; }) || null;
-  var html = '<div class="box-title" style="margin-left:0;">TACTICAL WRINKLE</div>';
+  var html = '<div class="box-title" style="margin-left:0;">TACTICAL PLAN</div>';
   html += '<div class="v408-wr">';
   html += '<button type="button" class="office-chip'+((!tacticalWrinkle && !board)?' on':'')+'" data-wr="" aria-pressed="'+((!tacticalWrinkle && !board)?'true':'false')+'">Play it straight</button>';
   formW.forEach(function(w){
@@ -22911,7 +23226,7 @@ function eraTrainingFoci(year){
   return [
     {key:'stamina', label:'FITNESS', note:"Lapping, running and stamina work, still the standard English midweek staple at many clubs."},
     {key:'ball', label:'BALL WORK', note:"Passing, control, shooting and five-a-sides. At Liverpool this was the week's real work."},
-    {key:'continental', label:'PATTERN OF PLAY', note:"Rehearsing the chosen formation, so every man knows his job and his options. Taylor worked on the pattern of play day after day, every week along with set-pieces (Oliver Phillips)."},
+    {key:'continental', label:'PATTERN OF PLAY', note:"Rehearsing the chosen formation, so every man knows his job and his options. Taylor worked on the pattern of play day after day, every week along with set-pieces (Oliver Phillips). A week of it puts your plans at full effect."},
     {key:'setpieces', label:'SET PIECES', note:"Corners, free-kicks and long throws, taken as part of the ordinary midweek, not as a modern specialism."},
     {key:'opp', label:'THE NEXT LOT', note:"The week is spent on the coming opponents, and on their danger man in particular."}
   ];
@@ -23011,7 +23326,7 @@ function refreshTrainingNote(){
     note.innerHTML = '<p class="sub">Fitness and running this week, still the standard English midweek staple at many clubs.</p>';
   } else if (training.focus==='continental' && typeof isEightiesTacticsYear==='function' && isEightiesTacticsYear()){
     var wsh = training.continentalWeeks;
-    if (wsh < 2) note.innerHTML = '<p class="sub">Pattern of play this week, so every man knows his job and his options in the Saturday shape.</p>';
+    if (wsh < 2) note.innerHTML = '<p class="sub">Pattern of play this week, so every man knows his job and his options in the Saturday shape, and the plans are at full effect.</p>';
     else note.innerHTML = '<p class="sub">'+weeksText(wsh,true)+' IN : the side is settling into the pattern of play.</p>';
   } else {
     note.innerHTML = '<p class="sub">Back to the standard English method : fitness and discipline, the way it\'s always been done here.</p>';
@@ -28683,7 +28998,7 @@ function renderTacticsPitch(){
     if (el.parentNode) el.parentNode.insertBefore(leg, el.nextSibling);
   }
   leg.style.display = '';
-  leg.textContent = 'Attacking up the board, shirt numbers 1 to 11 as picked. Our left is on the left, our right is on the right. Familiarity: three pips settled in the job, two bedding in, one new to the role.'+(L.moved.length ? ' The arrow shows where the wrinkle moves '+L.moved.map(function(k){ return 'No.'+(k+1); }).join(' and ')+' from.' : '');
+  leg.textContent = 'Attacking up the board, shirt numbers 1 to 11 as picked. Our left is on the left, our right is on the right. Familiarity: three pips settled in the job, two bedding in, one new to the role.'+(L.moved.length ? ' The arrow shows where the plan moves '+L.moved.map(function(k){ return 'No.'+(k+1); }).join(' and ')+' from.' : '');
   if (!renderTacticsPitch._deep){
     renderTacticsPitch._deep = true;
     try { if (typeof renderTacticsExtras80s==='function') renderTacticsExtras80s(true); }
@@ -36878,7 +37193,7 @@ var helpTexts = {
   week: ["This is your weekly check-in. Midweek (Wednesday) is when anything in motion : negotiations, scout trips, study trips : gets resolved and reported. Saturday is match day.", "Naming your side moves you straight on to match day, same as a real Friday team-sheet pinned on the board : you only get sent back to Lineup if a late fitness failure forces a change before kick-off."],
   squad: ["The 1946-47 Aldershot squad is real, sourced from 11v11.com. Attributes are generated from a reputation-driven ability model, not researched figures. Form is temporary and moves match to match; underlying ability barely changes.", "Star rating is out of 5, and reflects a player's standing for THIS level of football (Third Division South), not against the world game.", "APPEARANCES and goals shown on a player's profile are both for the current season only (like most published period stats of the day), league and cup, and reset when a new season begins : pre-season friendlies and trial matches don't count toward either.", "PLAYER-MANAGER (P-M): a genuinely common arrangement at this level in this era, if you registered yourself as one at setup. He's selected exactly like any other man in the squad, ages and declines as a player year on year the same as anyone else, draws no separate playing wage on top of his manager's salary, and will typically hang up his own boots (management carries on regardless) sometime in his late 30s or early 40s, same as a real player-manager's legs generally went before his eye for the game did."],
   lineup: ["No substitutes existed until the real 1965-66 season (Keith Peacock, Charlton Athletic away at Bolton, 21 August 1965, genuinely was the first man in Football League history to come off the bench) : before that season, if a man goes down injured mid-match you simply carry a knock or finish with ten if one happened. From 1965-66 on, a SUBSTITUTE box appears on this screen : name one man from outside your eleven, and he can be sent on, but only if a named player is actually forced off by injury mid-match, not as a tactical change -- the real first-season rule, not the freer any-reason substitution that only arrived in 1967-68.", "A player away on international duty for the Home Championship can't be selected that week. The same goes for a man with real weeks of injury left, or matches of a suspension left to serve : shown in red with how long he's out for, and automatically dropped from your eleven the moment news rules him out, even if he was already picked. Most knocks are a week or two, longer ones rarer, and sendings-off (no cards existed yet : the referee simply ordered a man off) are meant to be rare, notable events with a short ban, not a routine occurrence.", "You now set a shirt-number 1-11 formation order in the box below team selection, the same convention (goalkeeper through outside-left) held under WM and every other system of the day even as the actual on-field roles changed : it feeds the matchday programme and gives a modest scoring edge to whoever you've put at centre-forward specifically. Swapping players within the SAME line (a second good forward playing inside-forward instead of centre-forward, say) is free : it was always fluid in this era, and fitting more of your genuinely better men into the eleven, whatever shirt they wear, already strengthens the side on its own. Moving a man OUT of his natural line entirely (a half-back sent into the forward line, a forward dropped into defence, anyone but a keeper put in goal) is a real gamble now : it costs something in general play, more specifically at the back, matching how a real manager would only try it in a genuine pinch. A bold selection like that gets its own line in the Friday team news, too.", "TACTICAL WRINKLE: markers in this era were briefed on numbers, not men : send one number out to do a different job to what it implies and the man supposed to pick him up can end up marking nobody. Hidegkuti's deep-lying No.9 doing exactly that to England at Wembley in 1953 is the famous real case. It's worth most the first time a given opponent meets it and fades as the division works it out, so it's not something to leave switched on and forgotten."],
-  tactics: ["Formation and approach both feed directly into the match engine's strength calculation : they aren't cosmetic. WM asks more of players unfamiliar with it; an attacking approach boosts your scoring but weakens your defence, and vice versa for defensive.", "2-3-5 and WM each come with a genuine style-of-play choice underneath them, not one fixed way of playing the shape. For 2-3-5: English Direct (the ball goes early and directly out to the winger, who crosses with little buildup) versus Scottish Combination (the ball is worked through the inside-forwards first, and the winger's cross is the end of that combination, not the start of the move) : both real and well-documented. For WM: the Arsenal Model versus a looser WM. Wing play specifically is part of that WM split : Chapman genuinely ran his two Highbury wingers differently, Joe Hulme an orthodox touchline crosser on the right, Cliff Bastin cutting inside onto his stronger foot to shoot on the left (he's Arsenal's record scorer largely because of it) : that's a real, documented Chapman wrinkle, not my invention. The looser-WM option (both wingers kept out wide, no Bastin-style cutting inside) is my own plausible extrapolation for a less well-drilled lower-division side, not a documented club system, and the help text says so because it should.", "There is no separate winger position, so a specific player can't literally 'be your Bastin' : the wing-play difference between styles shows up in the flavour text and in a small shift to the strength/defence numbers, not as an individual player role.", "A Study Trip Abroad can unlock a real historical tactical system (Danubian, Metodo, La Maquina) as a further formation option. these are NOT free upgrades: in 1946-50 they were older ideas than the WM, and England beat nearly every continental side it met. Each costs the side while it is learned (10 matches, 18 for La Maquina), each has a real trade-off (Danubian concedes more, Metodo scores less and struggles to chase a game, La Maquina leaks goals and needs several elite forwards), and any upside depends on how well your XI passes. With an ordinary English squad they lose you points; with a very technical one they are roughly break-even, with a small edge from 1949-50. The Tactics screen shows the learning progress and your XI's passing figure.", "PUSH-AND-RUN (from 1949-50): a week watching Arthur Rowe's Tottenham unlocks a way of playing the WM with short, quick passing and movement. It is not a formation: it only works under WM, and it pays off in proportion to your players' passing.", "These aren't just strength modifiers : Danubian and Metodo pull a wing-half into the scoring more often (the real deep-lying-forward idea of the day), so does Scottish Combination and the looser WM (half-backs joining the attack), and La Maquina's constant rotation means almost anyone outfield can turn up with a goal, not just your forward line.", "The scouting report box names the opposition's danger man for the coming match. Spending the week working on him gives a small edge against them specifically : generated, not from any real scouting record."],
+  tactics: ["Formation and approach both feed directly into the match engine's strength calculation : they aren't cosmetic. WM asks more of players unfamiliar with it; an attacking approach boosts your scoring but weakens your defence, and vice versa for defensive.", "2-3-5 and WM each come with a genuine style-of-play choice underneath them, not one fixed way of playing the shape. For 2-3-5: English Direct (the ball goes early and directly out to the winger, who crosses with little buildup) versus Scottish Combination (the ball is worked through the inside-forwards first, and the winger's cross is the end of that combination, not the start of the move) : both real and well-documented. For WM: the Arsenal Model versus a looser WM. Wing play specifically is part of that WM split : Chapman genuinely ran his two Highbury wingers differently, Joe Hulme an orthodox touchline crosser on the right, Cliff Bastin cutting inside onto his stronger foot to shoot on the left (he's Arsenal's record scorer largely because of it) : that's a real, documented Chapman plan, not my invention. The looser-WM option (both wingers kept out wide, no Bastin-style cutting inside) is my own plausible extrapolation for a less well-drilled lower-division side, not a documented club system, and the help text says so because it should.", "There is no separate winger position, so a specific player can't literally 'be your Bastin' : the wing-play difference between styles shows up in the flavour text and in a small shift to the strength/defence numbers, not as an individual player role.", "A Study Trip Abroad can unlock a real historical tactical system (Danubian, Metodo, La Maquina) as a further formation option. these are NOT free upgrades: in 1946-50 they were older ideas than the WM, and England beat nearly every continental side it met. Each costs the side while it is learned (10 matches, 18 for La Maquina), each has a real trade-off (Danubian concedes more, Metodo scores less and struggles to chase a game, La Maquina leaks goals and needs several elite forwards), and any upside depends on how well your XI passes. With an ordinary English squad they lose you points; with a very technical one they are roughly break-even, with a small edge from 1949-50. The Tactics screen shows the learning progress and your XI's passing figure.", "PUSH-AND-RUN (from 1949-50): a week watching Arthur Rowe's Tottenham unlocks a way of playing the WM with short, quick passing and movement. It is not a formation: it only works under WM, and it pays off in proportion to your players' passing.", "These aren't just strength modifiers : Danubian and Metodo pull a wing-half into the scoring more often (the real deep-lying-forward idea of the day), so does Scottish Combination and the looser WM (half-backs joining the attack), and La Maquina's constant rotation means almost anyone outfield can turn up with a goal, not just your forward line.", "The scouting report box names the opposition's danger man for the coming match. Spending the week working on him gives a small edge against them specifically : generated, not from any real scouting record."],
   training: ["Training nudges attributes slowly over the season, not overnight. The Continental approach draws board scepticism at first but pays off in passing ability if you stick with it.", "those training gains count on a Saturday: each player gets a small match bonus from what training has added to the attributes that matter in his position, up to +5 ability. Half of it wears off each summer, so a method keeps paying only while you stick with it.", "TACTICAL FIT: a passing-and-shape method (Continental training, or the River Plate Tempo brought back from Uruguay) is only as good as what your TACTICS actually let the side do with it on a Saturday. A side playing English Direct under the Pyramid, or the tightly-drilled Arsenal Model, works against this kind of training; Scottish Combination, Danubian, Metodo and La Maquina all reward it properly. Individual technique (the Brazilian trip) is far less formation-dependent, since ball skill helps whatever you ask a man to do with it, though it still suffers a little under the most rigid, least individual-minded system.", "A STUDY TRIP ABROAD sends you, the manager, personally : Austria, Italy and Argentina unlock a genuine new FORMATION for TACTICS. Brazil and Uruguay are different : Bert Symons, the trainer, goes instead, so it doesn't take you away from the club, and what comes back is a new TRAINING method, not a formation.", "FA COACHING BADGES (from 1946-47, Walter Winterbottom's new FA scheme): a summer residential course, bookable May to August under STUDY TRIP, with an exam at the end. Preliminary first, then the Full badge. You go yourself, so it uses the same slot as your own study trips. A pass lifts your MANAGER REPUTATION and makes every week's training gains a little bigger (about 8% with the Preliminary, 15% with the Full). The course length, fee, pass rate and effects are the game's own numbers : the real ones aren't on record."],
   club: ["Finances: the crowd for a League match starts from the HOME club's real 1946-47 average gate (all 88 clubs, from one secondary source: Liverpool 45,732, Newcastle 49,379, Cardiff 28,604, Aldershot 4,677, Accrington 3,976), adjusted if that club has since gone up or down a division, then moved by the visitors' size, your RECENT FORM at home, a LOCAL DERBY (+20%), a marquee signing's first home games, and a little day-to-day variation : those adjustments are the game's own figures, not sourced. The ground's era capacity only caps the crowd (Cup ties can pack a ground out); those capacities are estimates from record crowds, not documented figures. Admission is the real 1946 minimum of 1s3d, averaged up to about 1s6d a head for seats. Gate money is effectively your only regular income, as it nearly was for real clubs of the day, so a big club's gates make it far richer. Entertainments Duty: 27% of every gross gate goes to the Treasury before the gate is split. That is an interpolated figure (about 29% in 1945, a quarter to a fifth by 1956, from Hansard), not the real banded rate schedule. League gates are split from one pot: after duty a 4% Football League levy is taken (3% from 1985-86), then, until the 1983 AGM abolished it, the visitors take 20% of what remains and the home club keeps the rest. From 1983-84 the home club keeps the receipts less the levy. Those shares are sourced (Dobson & Goddard 2014, citing Inglis; the 1983 AGM; the 1985 Heathrow agreement). Manchester United play at Maine Road (as Manchester City's tenants) until August 1949, then back at Old Trafford. Wages are capped at the real maximum wage: £12/week in-season from 1947-48 after the 1947 National Arbitration Tribunal award; for 1946-47 the cap is taken as £10, an estimate, not sourced. Transfer fees follow the real 1946-50 levels and rise each season with the real British record (£14,000 in 1946, £20,000 for Lawton in Nov 1947, £26,500 for Quigley in Dec 1949): a star First Division man costs £10,000-20,000 or more, a good Third Division player £1,000-3,000, a fringe or ageing man a few hundred. Those bands are an inference from about ten sourced fees. Starting bank balances depend on the club's division and size (a big First Division club £20,000-50,000, a Third Division club £500-4,000). No real 1946-50 club balance was found, so these are the game's own calibration. Ground upkeep is a weekly charge that follows the size of the ground and the costs of the day, and away travel is paid when the side goes on the road. Other clubs' money: every League club now has its own bank balance on the same starting scale as yours, earns gates on the same crowd model less the same duty, pays an estimated weekly wage bill (their players have no individual wages, so it is a season figure from the research, about £3,500 in the Third Division to £9,000 at the top), and pays or receives real transfer fees. A club that can't afford a fee won't bid for it. Click a club to see its estimated finances.", "Staff: a dedicated chief scout was rare at this level in 1946 : most Third Division managers scouted personally.", "Foreign players: a real 1931 Football League ruling required two years' residency before a non-British-born professional was eligible, an effective ban that held until 1978. Home Nations, Ireland and the Commonwealth are exempt. The transfer market enforces that ban in England until 1978-79. From 1978-79 the League is open, with a two-foreign-player work-permit cap, and real overseas players can be offered to you before their real moves.", "RESERVES: a genuine regional competition, not a flat aggregate line -- the real Football Combination (South/Midlands/Wales, Arsenal and Portsmouth won its two 1946-47 sections) or the real Central League (North/Midlands, reserve-teams-only, Manchester United's 1946-47 title), whichever your own club's real region plays, complete with a real table (LEAGUE TABLE tab) and a scheduled fixture list. RESERVE XI PREFERENCES (on the Club screen) lets you tick a fringe man or a ground-staff boy to make him a standing pick, ahead of the automatic priority list -- the actual decision this used to lack. A good showing still nudges a man's form, and a ground-staff boy who plays develops faster (see GROUND-STAFF). Run-outs go first to your own starred picks, then younger reserves and anyone working back from injury, excluding anyone genuinely unavailable (injured, suspended, on international duty).", "A ground-staff pipeline is used (see the GROUND-STAFF note below) : there was no formal academy-style youth setup at this level in 1946 (the FA Youth Cup didn't launch until the 1952-53 season), but the real schoolboy-forms/ground-staff system long predates it.", "The Secretary-Manager's name and age are whatever you set at the start (or after NEW GAME) : purely a profile. Manager Reputation is a real stat now, rising with good results (promotion, a strong cup run) and falling with a bad run, but sackings mid-season were genuinely rare in this era (unlike the modern game) : the board's patience runs deep, and only a truly dire, sustained collapse carries any real risk, which is deliberately tuned to be very hard to trigger.", "JOB OFFERS: a strong reputation and a good run of form can draw a genuine approach from a higher division (Second Division or First Division), following the real period convention of asking your own board's permission first rather than approaching you directly. This models the approach and how you handle it with your own board, not an actual move to manage a different club : Aldershot's ground, colours and history here are all specifically built for Aldershot, and an honest \"you now manage Cardiff City\" would be a much bigger rebuild than a single pass.", "Club History and Season Record below are real for the founding/League-entry facts (1926, 1932) and for anything you've actually played; season summaries accumulate as you complete each campaign."],
   transfers: ["No attribute sheets exist in 1946 : just a public playing record and a scout's own prose opinion. His word is only as good as his trust rating.", "Pro targets are negotiated with a transfer fee. Amateur and schoolboy targets are signed by invitation to a trial instead : no club to buy them out from.", "Listing a player tells the division he's available: rivals are more likely to come in for him, though possibly below his true worth.", "Rivals buy and sell among themselves too, for real : the man named in that news genuinely leaves one club's actual squad and joins the other's, not just a cash adjustment with an invented name stuck on the headline. That news, and any transfer-listed player worth a look, appears in your weekly board news and can turn up here as a target. Names, fees and records are generated, not real transfer history.", "Scouted targets aren't a one-off list : your scouts keep bringing fresh names in over the season, on top of anything spotted through the transfer market. This first batch, and every later tip, is randomised : a new game won't hand you the same men to sign.", "INSTRUCT THE SCOUTS lets you put out a standing brief for a position, optionally with a trait you want him strong in : it raises the odds your scouts turn up the right sort of man (not a guarantee, they still work off what they actually see), and a signing that matches the brief really does come out a little stronger in that trait, not just in the write-up.", "THE BLACK BOOK is for a man you rate but aren't ready to move for : filing him there gets him out of your active list (and its nine-name cap) without losing the file on him for good. Bring him back into play any time.", "SCOUTING NETWORK: each contact costs a modest weekly retainer, deducted like any other wage (Manchester United's own scouts of this era, Louis Rocca and Joe Armstrong, worked through informal, part-paid networks of contacts rather than a formal salaried department; a dedicated chief scout was rare below the top two divisions). A specialist contact raises the odds of a tip from his own country, on top of the real historical skew already built into the pool (English football recruited far more heavily from Scotland than Wales, N. Ireland or Ireland put together, which the odds now reflect). A scout's STANDING moves at the end of each season based on how the men he's actually found have gone on at the club -- rot in some ground, and it shows.", "A HANDFUL OF REAL SCOTTISH/WELSH/N.IRISH/IRISH PLAYERS can turn up as a scout's tip, same as any other target, never as a browsable squad (those clubs have no squad list here). These are specific, sourced, real cases, not a general real roster : most Scottish/Irish names in the market are still generated, since no rosters for these clubs survive online the way the English/Welsh League ones do via 11v11.com.", "GROUND-STAFF: signing a schoolboy no longer puts him straight in the squad. He joins the ground-staff on schoolboy forms instead -- too young to be picked, developing quietly on a modest weekly wage -- and only becomes a full professional, added to the squad proper, when you choose SIGN PROFESSIONAL FORMS once he turns 17. You can release him instead if he hasn't come on : not every boy on the books made the grade, then or now."],
@@ -36888,7 +37203,7 @@ var helpTexts = {
   intl: ["INTERNATIONALS are followed, not managed : every result here is the REAL one, from the actual 1946-50 record, UNLESS one of your own players has been capped for England, Scotland, Wales or Ireland in that match (a BREAKTHROUGH) : then it is no longer the real team, the match is played out, and the result is marked with *. They reach you the way they reached a club manager of the day, through the papers : a result is reported at the first news stop after the match was actually played (the report always gives the real date).", "Covered: every full international played by England, Scotland, Wales and Ireland from the first post-war Home Championship match (Ireland 2-7 England, 28 September 1946) to the end of May 1950 : all four Home Championships and each nation's friendlies and summer tours. The 1949-50 Championship was also World Cup qualifying Group 1 -- whoever finishes top two of the 1949-50 table here goes to Brazil, not necessarily the sides that went in 1950. The World Cup finals themselves have their own page now : see WORLD CUP, also under OTHER.", "NAMES: 'Ireland' is the IFA side from Belfast, as it was officially called then; 'Eire' is the FAI side from Dublin. Scorers are shown only where the research actually names them, which is a handful of matches : the rest are left blank, not invented.", "Your own players' squad call-ups (see LINEUP) are tied to these real fixture dates : the chance only rolls in the week of a genuine fixture for that player's nation, once per man per fixture, rather than firing on an independent weekly roll with no connection to the real calendar.", "TEAM NEWS: most weeks within about a week of a fixture involving a Home Nation, a TEAM NEWS item names that nation's regular side for the era (the same incumbents list the breakthrough mechanic itself checks a club player against) : an honest best-known XI for the period, not a confirmed real team sheet for that specific match, which isn't a record that survives for most of these games. The World Cup opener for a Home Nation gets its own distinct SQUAD NAMED line instead of the routine wording."],
   worldcup: ["The 1950 World Cup finals, Brazil -- the first the Home Nations ever entered, and (per FIFA's own entry rules of the day) only ever open to whoever finishes top two of the Home Championship, run that season as World Cup Qualifying Group 1. See HOME CHAMPIONSHIP (also under OTHER) for that qualifying table. Which two nations actually go to Brazil depends on how that table finishes here, not necessarily the sides that went in 1950 (England and Scotland) -- see the news when qualification was decided.", "Every match that was really played, by every nation, IS here with its real score and venue (research file Part C), EXCEPT a Home Nation's own group games if it didn't qualify : those don't appear, because a side that never went cannot have played them. Only the Home Nations' own matches are followed, not a full bracket for everyone else.", "NO KNOCKOUT DRAW : the 1950 finals had no knockout stage at all -- four groups, then the four group winners played a FINAL ROUND, a straight league table, not a bracket. The last game of that final round, Uruguay v Brazil at the Maracana, settled the whole tournament.", "GOALSCORERS: shown only where the research actually names a scorer, which is a handful of matches (England's three, and a few others) : the rest are left blank, not invented.", "If ENGLAND qualify, their three real Group 2 matches are the famous ones : beating Chile, losing to the USA (one of the great shocks in the game's history), then losing to Spain -- unless one of your own players has broken into the real side by then (see HOME CHAMPIONSHIP's own BREAKTHROUGH note), in which case that match is played out fresh rather than read from the record books."],
   transferhistory: ["Every completed transfer in this save is listed here, newest first and grouped by week: the date, the player, the clubs and the fee. A deal involving your own club is highlighted. Moves between other clubs, dated real-life transfers that fell after this save began, foreign signings and your own sales and purchases are all included. A save started before this page existed does not invent earlier fees; those totals start at zero."],
-  match: ["The clock runs itself once you kick off : pause any time, or sim straight to full-time. Commentary reflects your chosen formation and approach.", "TOUCHLINE INSTRUCTIONS let you change approach (attacking/balanced/defensive) or switch the tactical wrinkle on or off mid-match : real touchline influence of the day, a shout or a runner reaching the captain between passages of play, short of a substitution you couldn't make. It takes effect from the very next passage of play, not just the next match.", "Pitch condition is a seasonal pattern, not a per-match record : firm in August/September, cutting up in winter, muddiest in January/February. It has a small, genuine effect on chances created. WEATHER is a separate, one-off roll for the day itself (nobody's actual 1946-47 matchday weather survives as a record), flavour with a small effect of its own, distinct from the seasonal pitch pattern. TODAY'S REFEREE is named at kick-off, likewise a plausible period name rather than a sourced fact for any specific fixture.", "The day's attendance is announced over the tannoy partway through the SECOND half, same figure the gate finances use : shot counts aren't given, because nobody was compiling that statistic for a match like this in 1946-47.", "Stoppage time is played, and the referee's added minutes are announced, even though no board existed in this era to tell the crowd a figure.", "THE HALF-TIME TALK offers a small, honest choice at the break : rally a struggling side, calm a rattled one down, or say nothing. It's a modest nudge for the second half, never a guarantee, and overdoing the rousing speech when already well ahead can even backfire a little.", "Corners and penalties are resolved in commentary, not just implied : a corner is taken and something specific happens (a header in, over, or cleared), and a penalty (rarer, as a foul actually given inside the box should be) is taken and saved, scored, or missed, roughly matching how often a real spot-kick is actually converted. General play commentary is also richer : a through-ball or a cross names both the provider and the intended finisher, a last-ditch tackle credits the defender who made it, and the odd line recognises whoever's genuinely bossing the middle of the park or shutting up shop at the back that afternoon.", "PROGRAMME opens a period-style match card before kick-off : both sides' probable lineups by shirt number, each in its real, researched 1946-47 shirt colour (not always today's : several clubs have changed since), a directors'-box note, a look at the table, and a next-home-fixture reminder, in the real conventions of a thin, rationed-paper 1946-47 programme. The wording, adverts and the opposition's printed lineup are invented, not a surviving real programme."]
+  match: ["The clock runs itself once you kick off : pause any time, or sim straight to full-time. Commentary reflects your chosen formation and approach.", "TOUCHLINE INSTRUCTIONS let you change approach (attacking/balanced/defensive) or switch a plan on or off mid-match : real touchline influence of the day, a shout or a runner reaching the captain between passages of play, short of a substitution you couldn't make. It takes effect from the very next passage of play, not just the next match.", "Pitch condition is a seasonal pattern, not a per-match record : firm in August/September, cutting up in winter, muddiest in January/February. It has a small, genuine effect on chances created. WEATHER is a separate, one-off roll for the day itself (nobody's actual 1946-47 matchday weather survives as a record), flavour with a small effect of its own, distinct from the seasonal pitch pattern. TODAY'S REFEREE is named at kick-off, likewise a plausible period name rather than a sourced fact for any specific fixture.", "The day's attendance is announced over the tannoy partway through the SECOND half, same figure the gate finances use : shot counts aren't given, because nobody was compiling that statistic for a match like this in 1946-47.", "Stoppage time is played, and the referee's added minutes are announced, even though no board existed in this era to tell the crowd a figure.", "THE HALF-TIME TALK offers a small, honest choice at the break : rally a struggling side, calm a rattled one down, or say nothing. It's a modest nudge for the second half, never a guarantee, and overdoing the rousing speech when already well ahead can even backfire a little.", "Corners and penalties are resolved in commentary, not just implied : a corner is taken and something specific happens (a header in, over, or cleared), and a penalty (rarer, as a foul actually given inside the box should be) is taken and saved, scored, or missed, roughly matching how often a real spot-kick is actually converted. General play commentary is also richer : a through-ball or a cross names both the provider and the intended finisher, a last-ditch tackle credits the defender who made it, and the odd line recognises whoever's genuinely bossing the middle of the park or shutting up shop at the back that afternoon.", "PROGRAMME opens a period-style match card before kick-off : both sides' probable lineups by shirt number, each in its real, researched 1946-47 shirt colour (not always today's : several clubs have changed since), a directors'-box note, a look at the table, and a next-home-fixture reminder, in the real conventions of a thin, rationed-paper 1946-47 programme. The wording, adverts and the opposition's printed lineup are invented, not a surviving real programme."]
 };
 function showHelp(){
   var texts = (typeof eraHelpTexts==='function' ? eraHelpTexts(currentView) : (helpTexts[currentView] || ["No notes for this screen."]));
@@ -50542,9 +50857,11 @@ function v401RenderStylePanels(){
   var defs = (typeof eraDefStylesForYear==='function') ? eraDefStylesForYear(year) : [];
   var atks = (typeof eraAtkStylesForYear==='function') ? eraAtkStylesForYear(year) : [];
   function chips(list, cur, kind){
+    var form = tactics && tactics.formation;
     return list.map(function(o){
       var on = cur===o.key ? ' primary' : '';
-      return '<button type="button" class="im-chip v401-style'+on+'" data-style-kind="'+kind+'" data-style-key="'+o.key+'">'+(o.label||o.key)+'</button>';
+      var off = (o.fits && !o.fits(form)) || (o.key==='offsidetrap' && typeof v427SweeperShape==='function' && v427SweeperShape(form)); /* v427 : a style that does not suit the shape cannot be called mid-match */
+      return '<button type="button" class="im-chip v401-style'+on+'" data-style-kind="'+kind+'" data-style-key="'+o.key+'"'+(off && !on ? ' disabled aria-disabled="true" title="Not with this shape."' : '')+'>'+(o.label||o.key)+'</button>';
     }).join(' ');
   }
   var defCur = tactics && tactics.defStyle, atkCur = tactics && tactics.atkStyle;
@@ -50559,7 +50876,7 @@ function v401BindStylePanels(hold){
     btn.addEventListener('click', function(ev){
       ev.preventDefault();
       var kind = btn.getAttribute('data-style-kind'), key = btn.getAttribute('data-style-key');
-      if (!tactics || !key) return;
+      if (!tactics || !key || btn.disabled) return;
       if (kind==='def'){ if (tactics.defStyle===key) return; tactics.defStyle = key; }
       else { if (tactics.atkStyle===key) return; tactics.atkStyle = key; }
       renderInMatchBox();
@@ -51415,9 +51732,9 @@ function renderInMatchBox(){
   if (typeof rmWrModern==='function' && rmWrModern()){ sel.hidden = true; sel.style.setProperty('display','none','important'); rmImWrinkleRender(); return; }
   sel.hidden = false; sel.style.removeProperty('display');
   var imOld = document.getElementById('im-wr-mod'); if (imOld) imOld.remove();
-  var imRow = document.getElementById('im-wrinkle-row'); if (imRow && imRow.firstChild && imRow.firstChild.nodeType===3) imRow.firstChild.nodeValue = 'Tactical wrinkle: ';
+  var imRow = document.getElementById('im-wrinkle-row'); if (imRow && imRow.firstChild && imRow.firstChild.nodeType===3) imRow.firstChild.nodeValue = 'Plan: ';
   var wrinkleOpts = (typeof wrinkleOptionsForEra==='function') ? wrinkleOptionsForEra() : wrinkleSlotOptions;
-  var opts = '<option value="">None — play it straight</option>' + wrinkleOpts.map(function(o){
+  var opts = '<option value="">None, play it straight</option>' + wrinkleOpts.map(function(o){
     return '<option value="'+o.slot+'"'+(tacticalWrinkle && tacticalWrinkle.slot===o.slot?' selected':'')+'>'+(o.label||o.slot)+'</option>';
   }).join('');
   sel.innerHTML = opts;
@@ -51483,22 +51800,23 @@ function giveHalfTimeTalk(kind){
 var rmImWrNote = '';
 function rmImWrinkleRender(){
   var row = document.getElementById('im-wrinkle-row'); if (!row) return;
-  if (row.firstChild && row.firstChild.nodeType===3) row.firstChild.nodeValue = 'Tactical wrinkles: ';
+  if (row.firstChild && row.firstChild.nodeType===3) row.firstChild.nodeValue = 'Plans: ';
   var hold = document.getElementById('im-wr-mod');
   if (!hold){ hold = document.createElement('span'); hold.id = 'im-wr-mod'; row.appendChild(hold); }
   var shape = rmWrUsShape(), opts = rmWrOptions(shape);
   if (wrinkleSets && wrinkleSets[shape]) rmWrSet(shape, wrinkleSets[shape]);
   var nm = (typeof ERA_SHAPE_NAME!=='undefined' && ERA_SHAPE_NAME[shape]) || '';
   if (!opts.length){ hold.innerHTML = '<span class="im-wr-none">none worked out for '+nm+', so the shape is played straight.</span>'; return; }
-  var act = rmWrActive(shape);
+  var act = rmWrActive(shape), PV = (typeof v427PlanPreview==='function') ? v427PlanPreview(shape) : {}, P427 = (typeof v427PlanSide==='function') ? v427PlanSide('us') : {pts:0};
   var esc = function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
   var h = '<span class="im-wr-shape" data-nocase="1">'+esc(nm)+'</span> ';
   h += '<button type="button" class="im-chip im-wr-opt'+(act.length?'':' primary')+'" data-imwr="" aria-pressed="'+(act.length?'false':'true')+'">Play it straight</button>';
   opts.forEach(function(o){
     var on = act.indexOf(o) >= 0;
     var rival = o.ex ? opts.filter(function(x){ return x.ex===o.ex && x.k!==o.k; }).map(function(x){ return x.l; }) : [];
-    h += '<button type="button" class="im-chip im-wr-opt'+(on?' primary':'')+'" data-imwr="'+esc(o.k)+'" aria-pressed="'+(on?'true':'false')+'" title="'+esc((o.d||'')+(rival.length?' Not with: '+rival.join(', ')+'.':''))+'">'+esc(o.l)+'</button>';
+    h += '<button type="button" class="im-chip im-wr-opt'+(on?' primary':'')+'" data-imwr="'+esc(o.k)+'" aria-pressed="'+(on?'true':'false')+'" title="'+esc((o.d||'')+(PV[o.k] ? ' On its own '+v427PtsText(PV[o.k].pts)+'. '+PV[o.k].note+'.' : '')+(rival.length?' Not with: '+rival.join(', ')+'.':''))+'">'+esc(o.l)+'</button>';
   });
+  if (act.length) h += '<span class="im-wr-note">Together '+esc(v427PtsText(P427.pts))+'.</span>';
   if (rmImWrNote) h += '<span class="im-wr-note">'+esc(rmImWrNote)+'</span>';
   rmImWrNote = '';
   hold.innerHTML = h;
@@ -51506,7 +51824,7 @@ function rmImWrinkleRender(){
     b.addEventListener('click', function(ev){
       if (ev && ev.preventDefault) ev.preventDefault();
       var k = b.getAttribute('data-imwr') || '', o = opts.filter(function(x){ return x.k===k; })[0], off = null, msg;
-      if (!k){ if (!rmWrActive(shape).length) return; rmWrSet(shape, []); msg = 'play it straight, no wrinkles.'; }
+      if (!k){ if (!rmWrActive(shape).length) return; rmWrSet(shape, []); msg = 'play it straight, no plans.'; }
       else {
         var wasOn = rmWrActive(shape).some(function(x){ return x.k===k; });
         off = rmWrToggle(shape, k);
@@ -54570,8 +54888,13 @@ function aiTacticalExtrasPts(club){
   var style = (typeof seededRand==='function') ? seededRand(seed) : 0.5;
   var cap = (typeof TACTICAL_EXTRAS_CAP==='number') ? TACTICAL_EXTRAS_CAP : 3.5;
   /* v392 : AI managers get marking plans and team talks at similar strength to the player, under the same cap */
+  /* v427 : from 1966 (when plans exist) the computer's free extras were 1.8-3.5 points, more than any human plan or talk is worth; its plans now count through v427PlanSide as ours do, so from 1981 the extras are trimmed to 1.3-2.9. Before 1981 they stay as tuned : the 840-game check showed any trim there cost 2-3% of goals a game in 1975 */
+  if (typeof isEightiesTacticsYear==='function' && isEightiesTacticsYear()){
+    var raw7 = 1.6 + Math.max(0, Math.min(1, (s-40)/60))*0.85 + 0.22*Math.max(0, Math.min(1, years/6)) + 0.45*(style-0.35);
+    return Math.max(1.3, Math.min(Math.min(cap, 2.9), raw7));
+  }
   var raw = 2.2 + Math.max(0, Math.min(1, (s-40)/60))*0.9 + 0.25*Math.max(0, Math.min(1, years/6)) + 0.5*(style-0.35);
-  return Math.max(1.8, Math.min(cap, raw));
+  return Math.max(1.8, Math.min(cap, raw)); 
 }
 function aiSideModifiers(oppName, oppSquad){
   var xi = oppSquad || [];
@@ -54598,7 +54921,7 @@ function oppStrengthAvg(){
        the general prep bonus. Ticked without that groundwork, it backfires --
        a man pulled out of his own game to shadow a threat the side hasn't
        actually been shown, loosening the rest of the shape for nothing. */
-    delta += prepped ? -(base * 0.95 * 0.07) : (base * 0.03);
+    delta += prepped ? -(base * 0.95 * 0.07 * (typeof v427MarkStyleMult==='function' ? v427MarkStyleMult() : 1)) : (base * 0.03); /* v427 : man-markers do it best, a zonal side least */
   }
   if (delta < -cap) delta = -cap;
   if (delta > cap) delta = cap;
@@ -54909,8 +55232,9 @@ function formationEffects(xi){
   } else if (ek==='catenaccio'){
     /* the opposite instinct entirely : built on defending, not passing, so based on the XI's tackling rather
        than its technique (xiTacklingIndex, added alongside xiTechIndex/xiStaminaIndex). Low-risk, low-reward
-       in open play, but the real system's whole reputation was shutting up shop once ahead -- trailGf (read
-       the same way metodo's own, smaller version of this already is) drops hard once in front. */
+       in open play, and the real system's whole reputation was shutting up shop : so it is poor at chasing a game.
+       trailGf (read the same way as metodo's smaller version) cuts the goal rate hard once BEHIND (v427 : the old
+       comment said "once in front", which was never what the code did). */
     e.skill = clamp((xiTacklingIndex(xi)-72)/14, 0, 1); e.u = e.skill*a*continentalEraFactor();
     e.gf = 0.84 + 0.06*e.u; e.ga = 0.96 - 0.22*e.u; e.trailGf = 0.74;
   } else if (ek==='433'){
@@ -55000,9 +55324,10 @@ function drawMatchTempo(){
 function engineGoalScale(){
   var cal = (typeof eraGoalCalib==='function') ? eraGoalCalib() : 1;
   if (!live) return ENGINE_GOAL_SCALE * cal;
-  if (typeof live.tempo !== 'number'){
-    live.tempo = drawMatchTempo();
-    if (typeof styleTempoTighten==='function') live.tempo = 1 + (live.tempo-1)*styleTempoTighten();
+  if (typeof live.tempoRaw !== 'number') live.tempoRaw = (typeof live.tempo === 'number' && live.tempoMin == null) ? live.tempo : drawMatchTempo();
+  if (live.tempoMin !== live.minute){ /* v427 : sitting deep or patient possession picked mid-match tightens the game from the next passage, not only at kick-off */
+    live.tempoMin = live.minute;
+    live.tempo = 1 + (live.tempoRaw-1)*((typeof styleTempoTighten==='function') ? styleTempoTighten() : 1);
   }
   return ENGINE_GOAL_SCALE * live.tempo * cal;
 }
@@ -55025,6 +55350,7 @@ function blockGoalRates(){
     seOpp = styleGoalRates(ost, (typeof styleCtxForOpp==='function')?styleCtxForOpp(ost):{});
   }
   var fGf = fe.gf * seUs.gf * seOpp.ga * (live.usScore < live.oppScore ? fe.trailGf : 1), fGa = fe.ga * seUs.ga * seOpp.gf; /* v110 : formationEffects ; v397 both sides' styles combine, capped */
+  if (typeof v427PlanSide==='function'){ var plU = v427PlanSide('us'), plO = v427PlanSide('opp'); fGf *= plU.gf * plO.ga; fGa *= plU.ga * plO.gf; } /* v427 : plans, each side's own cap */
   var usRate = T*usOdds*ours.gf*theirs.ga*fGf, oppRate = T*(1-usOdds)*ours.ga*theirs.gf*fGa;
   return {usOdds:usOdds, usRate:usRate, oppRate:oppRate, total:usRate+oppRate, usMult:ours.gf*theirs.ga*fGf, oppMult:ours.ga*theirs.gf*fGa};
 }
@@ -55189,6 +55515,7 @@ function simulateMinuteBlock(skipHalfPause){
     live.stoppage2Announced = true;
     addLine('', live.refName+' signals there\'ll be a little more time played at the end of this half too.');
   }
+  if (typeof v427AiApproachUpdate==='function' && typeof isEightiesTacticsYear==='function' && isEightiesTacticsYear()) v427AiApproachUpdate();
   var gr = blockGoalRates();
   /* FIXED A REAL BUG HERE: this was a flat linear ratio, usCA/(usCA+oppCA) --
      the same shape of bug already fixed for the background Cup field in
@@ -55238,7 +55565,7 @@ function simulateMinuteBlock(skipHalfPause){
       (usScores ? live.usGoals : live.oppGoals).push({n:ownScorer.n+' (OG)', min:live.minute, og:true});
       addLine('goal', fill(pickFresh(bank.ownGoal), team, ownScorer.n));
     } else {
-      var scorerObj = scorerFor(team);
+      var scorerObj = v427GoalScorer(team);
       if (usScores) live.scorers.push(scorerObj.n);
       (usScores ? live.usGoals : live.oppGoals).push({n:scorerObj.n, min:live.minute});
       /* most goals now credit some kind of build-up rather than just naming the
@@ -55343,7 +55670,7 @@ function simulateMinuteBlock(skipHalfPause){
        innovation), so rather than invent a fake period citation, this is openly a simplified house mechanic :
        3 cautions in a season earns a 1-match ban, the same way a real accumulation system works in spirit,
        with the tally reset once the ban is served. */
-    var cardTeam = Math.random()<0.5 ? ourClubName : live.f.opp;
+    var cardTeam = Math.random()<v427CardShareUs() ? ourClubName : live.f.opp; /* v427 : pressing and man-marking sides give away more of the fouls */
     var cardPool = (cardTeam===ourClubName ? live.ourXI : live.oppSquad).filter(function(p){return p.slot!=='GK';});
     var cardedObj = cardPool.length ? pick(cardPool) : scorerFor(cardTeam);
     var isRedCard = Math.random() < 0.05; /* sendings-off were rare, notable events in this era -- about 1 in 20 of all cards shown */
@@ -55400,7 +55727,7 @@ function simulateMinuteBlock(skipHalfPause){
        match, ever. That's the same hole as v190, just in the one place a player would actually notice it.
        Fixed the same honest way as the card/penalty/free-kick events just above and below this one already
        are: a straight 50/50 coin flip on WHICH side's man goes down, before anything else happens. */
-    var injTeam = Math.random()<0.5 ? ourClubName : live.f.opp;
+    var injTeam = Math.random()<v427InjuryShareUs() ? ourClubName : live.f.opp; /* v427 : a pressing side, a tired one, or one being kicked by man-markers takes more of the knocks */
     if (injTeam === ourClubName){
     var injured = scorerFor(ourClubName);
     var onPInj = (typeof peekLiveSub === 'function') ? peekLiveSub() : ((live.subPlayer && !live.subUsed) ? live.subPlayer : null);
@@ -55521,11 +55848,11 @@ function simulateMinuteBlock(skipHalfPause){
        formation/style-flavoured backdrop lines. */
     var bTeam = Math.random() < attackShare ? ourClubName : live.f.opp;
     var flavourRoll = Math.random();
-    if (flavourRoll < (typeof sideHasCounters==="function" && sideHasCounters(bTeam) ? 0.20 : 0.13)){
+    if (flavourRoll < v427TbEnd(bTeam)){
       /* a through-ball is a real chance now, not just a flavour line : it
          always resolves to a stated outcome, same discipline as the corner
          and free-kick sequences below (a shot, a goal, a save, or offside). */
-      var tPair = twoDistinctAttackers(bTeam, 'through');
+      var tPair = v427PlanPair(bTeam, twoDistinctAttackers(bTeam, 'through'), 'through');
       if (bTeam===ourClubName) live.shotsUs++; else live.shotsOpp++;
       addLine('', fill(pickFresh(bank.throughBallSetup), bTeam, tPair[0].n, tPair[1].n));
       var tbOdds = bTeam===ourClubName ? usOdds : (1-usOdds);
@@ -55548,7 +55875,7 @@ function simulateMinuteBlock(skipHalfPause){
       }
     } else if (flavourRoll < 0.26){
       /* a cross-and-header chance, resolved the same explicit way. */
-      var cPair = twoDistinctAttackers(bTeam, 'cross');
+      var cPair = v427PlanPair(bTeam, twoDistinctAttackers(bTeam, 'cross'), 'cross');
       if (bTeam===ourClubName) live.shotsUs++; else live.shotsOpp++;
       addLine('', fill(pickFresh(bank.crossSetup), bTeam, cPair[0].n, cPair[1].n));
       var crOdds = bTeam===ourClubName ? usOdds : (1-usOdds);
@@ -59298,7 +59625,7 @@ function finishMatch(){
          said ONCE per opponent (wrinkleCottonedOn), not every week after. */
     var seenBefore = wrinkleFamiliarity[f.opp] || 0;
     var bonusToday = wrinkleBonusFor(f.opp);
-    var wrinkleLabel = (wrinkleSlotOptions.find(function(o){return o.slot===tacticalWrinkle.slot;})||{}).label || 'The wrinkle';
+    var wrinkleLabel = (wrinkleSlotOptions.find(function(o){return o.slot===tacticalWrinkle.slot;})||{}).label || 'The plan';
     var wrinkleManId = (lineupSlots.find(function(s){ return s.slot===tacticalWrinkle.slot; })||{}).playerId;
     var wrinkleMan = squad.find(function(p){ return p.id===wrinkleManId; });
     var wrinkleManGoals = wrinkleMan ? live.usGoals.filter(function(g){ return g.n===wrinkleMan.n; }).length : 0;
@@ -59990,7 +60317,7 @@ function v405ShowProfile(id, targetId){
   if (typeof v408WireSpread==='function') v408WireSpread(el);
 }
 
-var RETROMATCH_VERSION = 'v426'; /* v418 : World Cup screen is the approved wallchart (real results as they stand on the save date, finals and bracket filling in as played, buttons only, single title); Mick Harford's hair corrected to dark from a photo source. */ /* v417 : urgent home-page fix. Every blue or underlined link is now a button (yellow chips with a selected state on the 80s skin), no spaced colons on screen, the team-sheet deadline reads off the real match date and kick-off, and the 1981-82 League Cup First Round uses the real ties and byes. */ /* v416 : Phase 3 continue. Scotland 1975-76 and 1970-71 squads filled from sourced appearance lists, Wikipedia season/career-span pages and Wikidata P54/P413; 1970 and 1975 stay Coming later. */ /* v414 : Phase 3 continue. England 1970-71 Divisions 2-4 remaining 32 all-generated or near-all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1970-71 season page exists). 1970 and 1975 stay Coming later. */ /* v413 : Phase 3 continue. England 1975-76 Divisions 2-4 remaining 63 all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1975-76 season page exists). 1975 stays Coming later. */ /* v412 : Phase 3 start. England 1975-76 position retags (QPR, Luton, Hereford, Spurs, Forest) and real First Division squads for Birmingham, Wolves, Burnley and Sheffield United, sourced from Wikipedia season pages, 11v11 and Neil Brown (Wayback). England 1970-71 0-GK dumps replaced with sourced squads (Everton, West Bromwich Albion, Oxford, Orient, Halifax, Rotherham, Wrexham, Barnsley) and Luton 1970 junk rows removed. 1975 stays Coming later (Scotland not ready). Existing 1975/1970 saves keep the squads they were opened with. No engine change, no start-screen era opened. v411 : 1981-82 historical league fixtures for all four English divisions (played dates; FIXTURES_1981_82.md). No engine change. v410 : tidy-up: other-league tables in 1980s saves (WORLD_SEEDS for 1981-82 and 1986-87, one division per screen, missing countries hidden); formation wrinkles count in matches (4-4-2 in the hole, midfield-three two-holding / one-holding) as small capped effects within TACTICAL_EXTRAS_CAP 3.5, same rules for AI; 1981-82 regional scout slots filled with retired real players who have a sourced nationality, else generated and flagged in data only; sourced 1980s keeper shirts where found. No new v396 preview shipped live. v409 : United and Luton Town opening-squad league career tables to the save cut (29 Aug 1981 / 23 Aug 1986), current-spell apps counted through the previous complete season. No match-engine change. v408 : 1980s Action File centrepiece on the Squad screen, wired to live attributes, caps, personality and league careers (no invented careers); Data tab and unsourced wording removed; formation wrinkles on the pitch are visual only; transfers and league tables use section buttons; styles show the selected pair and point to the week's training. No match-engine change. v407 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v427'; /* v418 : World Cup screen is the approved wallchart (real results as they stand on the save date, finals and bracket filling in as played, buttons only, single title); Mick Harford's hair corrected to dark from a photo source. */ /* v417 : urgent home-page fix. Every blue or underlined link is now a button (yellow chips with a selected state on the 80s skin), no spaced colons on screen, the team-sheet deadline reads off the real match date and kick-off, and the 1981-82 League Cup First Round uses the real ties and byes. */ /* v416 : Phase 3 continue. Scotland 1975-76 and 1970-71 squads filled from sourced appearance lists, Wikipedia season/career-span pages and Wikidata P54/P413; 1970 and 1975 stay Coming later. */ /* v414 : Phase 3 continue. England 1970-71 Divisions 2-4 remaining 32 all-generated or near-all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1970-71 season page exists). 1970 and 1975 stay Coming later. */ /* v413 : Phase 3 continue. England 1975-76 Divisions 2-4 remaining 63 all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1975-76 season page exists). 1975 stays Coming later. */ /* v412 : Phase 3 start. England 1975-76 position retags (QPR, Luton, Hereford, Spurs, Forest) and real First Division squads for Birmingham, Wolves, Burnley and Sheffield United, sourced from Wikipedia season pages, 11v11 and Neil Brown (Wayback). England 1970-71 0-GK dumps replaced with sourced squads (Everton, West Bromwich Albion, Oxford, Orient, Halifax, Rotherham, Wrexham, Barnsley) and Luton 1970 junk rows removed. 1975 stays Coming later (Scotland not ready). Existing 1975/1970 saves keep the squads they were opened with. No engine change, no start-screen era opened. v411 : 1981-82 historical league fixtures for all four English divisions (played dates; FIXTURES_1981_82.md). No engine change. v410 : tidy-up: other-league tables in 1980s saves (WORLD_SEEDS for 1981-82 and 1986-87, one division per screen, missing countries hidden); formation wrinkles count in matches (4-4-2 in the hole, midfield-three two-holding / one-holding) as small capped effects within TACTICAL_EXTRAS_CAP 3.5, same rules for AI; 1981-82 regional scout slots filled with retired real players who have a sourced nationality, else generated and flagged in data only; sourced 1980s keeper shirts where found. No new v396 preview shipped live. v409 : United and Luton Town opening-squad league career tables to the save cut (29 Aug 1981 / 23 Aug 1986), current-spell apps counted through the previous complete season. No match-engine change. v408 : 1980s Action File centrepiece on the Squad screen, wired to live attributes, caps, personality and league careers (no invented careers); Data tab and unsourced wording removed; formation wrinkles on the pitch are visual only; transfers and league tables use section buttons; styles show the selected pair and point to the week's training. No match-engine change. v407 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
