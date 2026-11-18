@@ -6363,7 +6363,10 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
   };
 
   /* ======================================================================================== engine */
-  function mkRng(seed) { var s = seed >>> 0 || 1; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+  function mkRngOld(seed) { var s = seed >>> 0 || 1; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+  function mkRng(seed) { /* v426 : the seed is mixed first (nearby seeds used to give near-identical first picks, so the same line came round match after match) */
+    var a = ((seed >>> 0) || 1) ^ 0x9E3779B9; a = Math.imul(a ^ (a >>> 16), 0x85ebca6b); a = Math.imul(a ^ (a >>> 13), 0xc2b2ae35); a = (a ^ (a >>> 16)) >>> 0;
+    return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function surname(n) { var p = String(n).replace(/\s+(Jr\.?|Sr\.?)$/i, '').split(/\s+/); return p[p.length - 1]; }
   function initials(n) { var p = String(n).split(/\s+/); if (p.length < 2) return n; return p[0].charAt(0) + '. ' + surname(n); }
   function lowerPos(p) { return p ? String(p).split('/')[0].trim().toLowerCase() : 'player'; }
@@ -6453,6 +6456,7 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
       else if (/^(A |[A-Z][A-Z' .-]+ ?(A |W|C|S|[A-Z]).*)?(CHASTENING|SOLID|NARROW|COMFORTABLE|DISAPPOINTING|FULL VALUE|HARD-FOUGHT)/.test(t) && !f && e.cls === '' && e.raw >= 90 && /[A-Z]{4}/.test(t) && !/CANNOT|SENT/.test(t) && t === t.toUpperCase()) o.type = 'verdict';
       else if (cat === 'redCard') { o.type = 'orderedOff'; }
       else if ((cat === 'card' || cat === 'cardYellow') && !f) { o.type = 'nameTaken' + cardKind(t); var cf = find(t); o.P = cf[0] || null; o.side = o.P ? o.P.team : 'us'; }
+      else if (e.cls === 'card' && (m = t.match(/^([A-Z][^.]*?) replaces ([A-Z][^.]*?)\.?$/))) { o.type = 'subOn'; o.P = p(m[2]); o.P2 = p(m[1]); o.side = (o.P && o.P.team) || 'opp'; }
       else if (/IS DOWN INJURED AND CANNOT CONTINUE -- .* IS SENT ON/.test(t)) { o.type = 'subOn'; var sf = find(t); o.P = sf[0]; o.P2 = sf[1]; o.side = 'us'; }
       else if (/CANNOT CONTINUE AND HAS TO GO OFF/.test(t)) { o.type = 'goOff'; var gf = find(t); o.P = gf[0]; o.side = gf[0] ? gf[0].team : 'us'; }
       else if (cat === 'injury' || /CARRY ON/.test(t)) { o.type = 'hobble'; var hf = find(t); o.P = hf[0]; o.side = hf[0] ? hf[0].team : 'us'; }
@@ -6486,7 +6490,7 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
 
   function render(cap, era, opts) {
     opts = opts || {};
-    var evs = normalise(cap), meta = cap.meta, E = ERAS[era].bank, rng = mkRng((opts.seed || 1) * 7919 + parseInt(era, 10));
+    var evs = normalise(cap), meta = cap.meta, E = ERAS[era].bank, rng = (era === '1981' ? mkRng : mkRngOld)((opts.seed || 1) * 7919 + parseInt(era, 10)); /* v426 : mixed seed for the 1980s voice only */
     var dupSn = {}; (function () { var c = {}; meta.who.forEach(function (p) { var q = surname(p.n); c[q] = (c[q] || 0) + 1; }); Object.keys(c).forEach(function (q) { if (c[q] > 1) dupSn[q] = true; }); })();
     var used = {}, rareUsed = {}, seen = {}, formSeen = {}, goalsBy = {}, lines = [], homeName = meta.home ? shortOf(meta.club, meta.opp) : shortOf(meta.opp, meta.club), awayName = meta.home ? shortOf(meta.opp, meta.club) : shortOf(meta.club, meta.opp);
     function pick(key, ev) { var arr = E[key]; if (ev && ev.kind) { var kk = key.replace(/^buildupP$/, 'bp').replace(/^buildupTeam$/, 'bt') + '_' + ev.kind; if (E[kk]) { arr = E[kk]; key = kk; } } if (!arr || !arr.length) return null; if (ev) { var ok = arr.filter(function (x) { return !((/\{P\}/.test(x) && !ev.P) || (/\{P2\}/.test(x) && !ev.P2) || (/\{K\}/.test(x) && !ev.K)); }); if (ok.length) arr = ok; } var form = (meta && meta.formation) || ''; var eraYear = parseInt(era, 10) || 0; if (typeof filterCommentaryPool === 'function' && eraYear >= 1966) { var filtered = filterCommentaryPool(arr, form, eraYear); if (filtered && filtered.length) arr = filtered; } var u = used[key] || (used[key] = []); var cand = arr.filter(function (x, i) { return u.indexOf(i) < 0 && !(typeof eraSeenRecently === 'function' && eraSeenRecently(x)); }); if (!cand.length) { cand = arr.filter(function (_, i) { return u.indexOf(i) < 0; }); } if (!cand.length) { if (RARE_FLAVOUR[key]) return null; u.length = 0; cand = arr.slice(); } var i = arr.indexOf(cand[Math.floor(rng() * cand.length)]); u.push(i); if (typeof eraNoteFinish === 'function' && arr[i]) eraNoteFinish(key, arr[i]); return arr[i]; }
@@ -6513,7 +6517,14 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
       if (!e.P && /\{P\}/.test(tpl)) { var fp = sideMan(atkSide, salt, [e.P2 && e.P2.n].filter(Boolean)); if (fp) e = Object.assign({}, e, { P: fp }); }
       if (!e.P2 && /\{P2\}/.test(tpl)) { var fp2 = sideMan(atkSide, salt + 13, [e.P && e.P.n].filter(Boolean)); if (fp2) e = Object.assign({}, e, { P2: fp2 }); }
       if (!e.K && /\{K\}/.test(tpl)) { var fk = keeperOf(defSide); if (fk) e = Object.assign({}, e, { K: fk }); }
-      var rep = { A: A, O: O, P: e.P ? nm(e.P) : 'a ' + A + ' forward', P2: e.P2 ? nm(e.P2) : 'a teammate', K: e.K ? nmK(e.K) : 'the goalkeeper', pos: lowerPos(e.P && e.P.pos), pos2: lowerPos(e.P2 && e.P2.pos), sc: scoreStr(e.us, e.opp), m: ordWord(e.mnum != null ? Math.min(90, Math.max(1, e.mnum)) : (e.raw > 90 ? 90 : Math.max(1, e.raw))), ref: meta.ref, ground: meta.groundName, weather: meta.weatherText, pitch: meta.pitchText, n: e.n || '', session: meta.session || 'Afternoon', tod: meta.tod || 'afternoon', lights: meta.lights || '' };
+      var dName = '';
+      if (/\{D\}/.test(tpl)) { /* v426 : the defender is named, never 'a defender' */
+        var dAll = (meta.who || []).filter(function (x) { return x && x.n && x.team === defSide && x.slot !== 'GK' && !/goalkeeper/i.test(x.pos || '') && [e.P && e.P.n, e.P2 && e.P2.n].indexOf(x.n) < 0; });
+        var dBack = dAll.filter(function (x) { return x.slot === 'DEF' || /back|centre-half|centre half|defend|sweeper|stopper|libero/i.test(x.pos || ''); });
+        var dL = dBack.length ? dBack : dAll;
+        if (dL.length) dName = surname(dL[Math.abs(((salt + 29) * 2654435761) | 0) % dL.length].n);
+      }
+      var rep = { D: dName || ('the ' + O + ' defence'), compA: meta.compA || 'a League', A: A, O: O, P: e.P ? nm(e.P) : 'a ' + A + ' forward', P2: e.P2 ? nm(e.P2) : 'a teammate', K: e.K ? nmK(e.K) : 'the goalkeeper', pos: lowerPos(e.P && e.P.pos), pos2: lowerPos(e.P2 && e.P2.pos), sc: scoreStr(e.us, e.opp), m: ordWord(e.mnum != null ? Math.min(90, Math.max(1, e.mnum)) : (e.raw > 90 ? 90 : Math.max(1, e.raw))), ref: meta.ref, ground: meta.groundName, weather: meta.weatherText, pitch: meta.pitchText, n: e.n || '', session: meta.session || 'Afternoon', tod: meta.tod || 'afternoon', lights: meta.lights || '' };
       Object.keys(extra || {}).forEach(function (k) { rep[k] = extra[k]; });
       return tpl.replace(/\{(\w+)\}/g, function (_, k) { return rep[k] !== undefined ? rep[k] : '{' + k + '}'; });
     }
@@ -6525,6 +6536,16 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
       var hs = (meta && meta.home) ? e.us : e.opp, asv = (meta && meta.home) ? e.opp : e.us;
       var score = (hs != null && asv != null) ? (hs + '-' + asv) : '';
       return fillT(tpl, { side: side, us: e.us, opp: e.opp, raw: e.raw, mnum: e.mnum }, { lead: words(Math.abs(d)), goals: words(ownUs), score: score });
+    }
+    /* v426 : hashed from the match seed and the event, never the sim's dice : the sim's outcome (a miss, a block, a save...) is kept, only the words change */
+    function v426Variant(key, e) {
+      var V = { chanceOff: ['woodShot', 160], cornerOver: ['woodCorner', 160], crOver: ['woodCross', 160], tbOver: ['woodTb', 200], fkOver: ['woodFk', 140],
+        chanceSaved: ['kpErr', 70], saveHold: ['kpErr', 70], saveDive: ['kpErr', 50], chanceBlocked: ['lineClear', 260],
+        cornerClear: ['noGoalFoul', 90], crClear: ['noGoalFoul', 90], tbOffside: ['noGoalOffside', 300], lastDitch: ['penAppeal', 220] }[key];
+      if (!V || !E[V[0]] || !E[V[0]].length) return key;
+      var h = 2166136261 >>> 0, str = (opts.seed || 1) + '|' + (e.idx || 0) + '|' + (e.raw || 0) + '|' + key;
+      for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+      return (h % 1000) < V[1] ? V[0] : key;
     }
     function pickG(kind) { var arr = E.gp[kind]; var u = used['gp' + kind] || (used['gp' + kind] = []); var c = arr.filter(function (_, i) { return u.indexOf(i) < 0; }); if (!c.length) { u.length = 0; c = arr.slice(); } var i = arr.indexOf(c[Math.floor(rng() * c.length)]); u.push(i); return arr[i]; }
     meta.groundName = (meta.ground || '').replace(/^.*?:\s*/, '').replace(/\s*\([^)]*\)/g, ''); meta.groundName = meta.groundName.split(',').map(function (s) { return s.trim().toLowerCase().replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }).join(', '); (function () { var hn = (meta.home ? meta.club : meta.opp).toLowerCase(), pp = meta.groundName.split(', '); if (pp.length > 1 && hn.indexOf(pp[pp.length - 1].toLowerCase()) >= 0) { pp.pop(); meta.groundName = pp.join(', '); } })();
@@ -6566,6 +6587,7 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
         }
         if (key === 'goOff' && e.side === 'opp') { /* uses {A} for the side the man plays for */ }
         if (/^buildupFormation/.test(key)) { var fk = key + ':' + (e.side || '?'); if (formSeen[fk]) return; formSeen[fk] = true; }
+        if (era === '1981') key = v426Variant(key, e);
         var tp = pick(key, e); if (!tp) return;
         text = cap1(fillT(tp, e, {}));
       }
@@ -6574,9 +6596,18 @@ html body:not(.theme-match) .rmx.rmx a.go:hover{background: rgba(0,0,0,.08) !imp
     });
     return { lines: lines, events: evs, meta: meta };
   }
-  function cap1(s) { s = String(s||''); if (!s) return s; s = s.charAt(0).toUpperCase() + s.slice(1); return s.replace(/([.!?\u2014]\s+)([a-z])/g, function(_,p,c){ return p + c.toUpperCase(); }); }
+  function cap1(s) { s = String(s||''); if (!s) return s; s = s.charAt(0).toUpperCase() + s.slice(1); return capSentences(s); }
+  /* v426 : a new sentence after . ! ? or a dash gets its capital, but not after an ellipsis (a pause inside one sentence) or after a dotted abbreviation (Q.P.R., Mr., St.) */
+  function capSentences(s) {
+    return String(s || '').replace(/([.!?\u2014])(\s+)([a-z])/g, function (m, p, sp, c, off, all) {
+      var before = all.slice(0, off + 1);
+      if (/\.\.\.$|\u2026$/.test(before)) return m;
+      if (/(?:^|[\s(])(?:[A-Z]\.){2,}$/.test(before) || /(?:^|\s)(?:Mr|Mrs|St|Dr|No)\.$/.test(before)) return m;
+      return p + sp + c.toUpperCase();
+    });
+  }
 
-  var api = { render: render, report: reportFor, normalise: normalise, SHORT: SHORT, shortOf: shortOf, BANKS: { '1946': B46L, '1950': B50L, '1946past': B46, '1959': B59, '1966': B66, '1970': B70, '1981': B81 }, words: words };
+  var api = { render: render, report: reportFor, normalise: normalise, SHORT: SHORT, shortOf: shortOf, capSentences: capSentences, BANKS: { '1946': B46L, '1950': B50L, '1946past': B46, '1959': B59, '1966': B66, '1970': B70, '1981': B81 }, words: words };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.RETRO_ERA_COMMENTARY = api;
 })(typeof window !== 'undefined' ? window : this);
 
@@ -11340,7 +11371,17 @@ function pickPreseasonOpponent(kind, used){
     return pickPreseasonOpponent('nonleague', used);
   }
   if (!names.length) return null;
-  return names[Math.floor(Math.random()*names.length)];
+  return v426FriendlyName(names[Math.floor(Math.random()*names.length)]);
+}
+var V426_NONLEAGUE_80S = {'Scunthorpe & Lindsey United':'Boston United', 'Guildford City':'Maidstone United', 'Tufnell Park':'Hendon', 'Romford':'Harrow Borough',
+  'Leytonstone':'Enfield', 'Ilford':'Barking', 'Bradford Park Avenue Reserves':'Gainsborough Trinity', 'Millwall Reserves':'Kettering Town', 'Exeter City Reserves':'Weymouth',
+  'Grimsby Town Reserves':'Frickley Athletic', 'Nottingham Forest Reserves':'Worksop Town', 'Barnsley Reserves':'Goole Town', 'York City Reserves':'North Shields'};
+function v426FriendlyName(n){
+  var y = (typeof seasonStartYear==='function') ? seasonStartYear() : ((typeof seasonLabel==='string') ? parseInt(seasonLabel, 10) : 0);
+  if (y >= 1980 && V426_NONLEAGUE_80S[n]) return V426_NONLEAGUE_80S[n];
+  if (y >= 1983 && n === 'Bedford Town') return 'Nuneaton Borough';
+  if (y >= 1967 && n === 'Third Lanark') return 'Clydebank'; /* Third Lanark folded in 1967 */
+  return n;
 }
 function buildOrganisedFriendlies(){
   var avgCA = Math.round((squad||[]).reduce(function(s,p){return s+(p.ca||50);},0) / Math.max(1,(squad||[]).length));
@@ -16663,7 +16704,24 @@ function refereeSeasonKey(){
   return best;
 }
 function refereeListNow(){ if (isCont() && scoEraDef() && scoEraDef().refs && scoEraDef().refs.length) return scoEraDef().refs; var c = isScoOnly() ? 'SCO' : 'ENG'; return REFEREE_DATA.lists[c][refereeSeasonKey()].refs; }
-function refereeFor(seed){ return pick2(refereeListNow(), seed); }
+function refereeFor(seed){ return v426RefName(pick2(refereeListNow(), seed)); }
+/* v426 : the referee lists carry middle initials ("Tony R Glasson", "Bill R. Campbell") : on screen he is "Tony Glasson". Same pick, display only. */
+function v426RefName(n){ if (typeof n !== 'string') return n; return n.replace(/^([A-Z][a-z'\-]+)\s+(?:[A-Z]\.?\s+)+([A-Z][A-Za-z'\-]+.*)$/, '$1 $2'); }
+/* v426 : the competition as the commentator says it : "a Second Division", "an FA Cup", "a Milk Cup", "a pre-season" */
+function v426CompA(f){
+  try {
+    var nm = '';
+    if (!f) return '';
+    if (f.isFriendly || f.isTrial) nm = 'pre-season';
+    else if (f.isPlayOff) nm = 'play-off';
+    else if (f.isEuroCup || f.isCWC || f.isFairs) nm = 'European';
+    else if (f.isLCup) nm = (typeof currentLeagueCupName==='function') ? currentLeagueCupName() : 'League Cup';
+    else if (f.isCup) nm = (typeof currentFaCupName==='function') ? currentFaCupName() : 'FA Cup';
+    else nm = (typeof v421DivisionNameFor==='function') ? v421DivisionNameFor(ourClubName) : '';
+    if (!nm) nm = 'League';
+    return (/^[AEIOU]|^FA\b|^F\.A\./.test(nm) ? 'an ' : 'a ') + nm;
+  } catch(e){ return 'a League'; }
+}
 
 /* ---------- FA CUP: the real 1946-47 rounds and dates (Wikipedia, cross-
    checked against Arsenal's dated fixture list, and re-confirmed against
@@ -27967,6 +28025,7 @@ function newspaperSurname(n){
 }
 function newspaperGoalMinute(g){
   var m = (g && (g.min != null ? g.min : g.minute));
+  if (typeof m === 'number' && m > 90) m = 90; /* v426 */
   var mark = '';
   if (g && g.pen) mark = ' pen';
   else if (g && (g.og || /\(OG\)/i.test(String(g.n||g.name||g.scorer||'')))) mark = ' og';
@@ -38962,9 +39021,9 @@ var bank = {
   hatTrick:["HAT-TRICK! {P} completes a memorable treble for the afternoon -- the crowd knows it, too.",
     "HAT-TRICK! Three goals now for {P} -- a day he'll be telling people about for years.",
     "HAT-TRICK! {P} has his name on the match ball after a quite brilliant personal performance."],
-  milestoneGoals:["That's {N} for the season now from {P} -- a real purple patch in front of goal.",
-    "{P} reaches {N} league and cup goals for the campaign -- a fine return.",
-    "A landmark of sorts there -- {N} goals on the season for {P}."],
+  milestoneGoals:["That's {N} for the season now from {P}. A real purple patch in front of goal.",
+    "{P} reaches {N} league and cup goals for the campaign. A fine return.",
+    "A landmark of sorts there. {N} goals on the season for {P}."],
   goalAssisted:["GOAL : {A}! {P2} squares it across the face of goal and {P} taps home from close range.",
     "GOAL : {A}! A slide-rule pass from {P2} sends {P} clear to finish with real composure.",
     "GOAL : {A}! {P2} wins the ball back in midfield and feeds {P}, who makes no mistake.",
@@ -50504,7 +50563,7 @@ function v401BindStylePanels(hold){
       if (kind==='def'){ if (tactics.defStyle===key) return; tactics.defStyle = key; }
       else { if (tactics.atkStyle===key) return; tactics.atkStyle = key; }
       renderInMatchBox();
-      if (live) addLine('', 'MESSAGE FROM THE BENCH: a change of style — '+(btn.textContent||key).toLowerCase()+'.');
+      if (live) addLine('', 'MESSAGE FROM THE BENCH: '+v426StyleCall(key, btn.textContent));
     });
   });
 }
@@ -51382,6 +51441,15 @@ function renderInMatchBox(){
    a rattled side down trades a little attacking edge for solidity at the
    back. Saying nothing changes nothing, which is itself a real, valid
    choice most of the time. */
+/* v426 : what the bench shouts for each style, in words (was "a change of style — long ball / direct.") */
+function v426StyleCall(key, label){
+  var M = {longball:'get it forward early, long ball.', passmove:'pass and move, keep it on the deck.', counters:'sit in and hit them on the break.', possession:'keep the ball, make them chase.',
+    pressing:'close them down, all over the pitch.', offsidetrap:'push up and catch them offside.', manmark:'pick up your man, everyone.', zonal:'hold your areas, zonal marking.',
+    sitting:'sit deep, keep it tight.', catenaccio:'lock it up at the back.', wm:'stick to your positions.'};
+  if (M[key]) return M[key];
+  var l = String(label || key || '').replace(/\s*\/\s*/g, ', ').replace(/\s*[\u2014\u2013]\s*/g, ', ').trim().toLowerCase();
+  return 'change it, ' + l + '.';
+}
 function giveHalfTimeTalk(kind){
   if (!live || live.teamTalkGiven) return;
   live.teamTalkGiven = true;
@@ -51389,12 +51457,12 @@ function giveHalfTimeTalk(kind){
   var msg;
   if (kind === 'rally'){
     if (leadOrTrail >= 2){ live.teamTalkAtk = 0.97; msg = 'A rousing word, but with the game seemingly won already, it risks a little complacency rather than lifting anyone further.'; }
-    else { live.teamTalkAtk = 1.06; msg = 'A few sharp words get the desired reaction : heads up, ready to go again.'; }
+    else { live.teamTalkAtk = 1.06; msg = 'A few sharp words get the desired reaction. Heads up, ready to go again.'; }
   } else if (kind === 'calm'){
     live.teamTalkDef = 0.93; live.teamTalkAtk = 0.98;
-    msg = 'A calmer word : shape first, don\'t chase the game. Tighter at the back for it, if a shade less threatening going forward.';
+    msg = 'A calmer word. Shape first, and don\'t chase the game. Tighter at the back for it, if a shade less threatening going forward.';
   } else {
-    msg = 'Nothing much said : sometimes the team just needs the ten minutes\' rest, not a lecture.';
+    msg = 'Nothing much said. Sometimes the team just needs the ten minutes\' rest, not a lecture.';
   }
   document.getElementById('ht-chosen').textContent = msg.toUpperCase();
   addLine('', 'DRESSING ROOM: '+msg);
@@ -51512,7 +51580,7 @@ function eraStart(f){
     /* v385-corner-banks */
     var meta = {era:gameEra, seasonLabel:seasonLabel, club:ourClubName, opp:f.opp, home:f.home, comp:(f.isCup?'cup':f.isLCup?'leaguecup':f.isFriendly?'friendly':'league'), roundName:f.roundName||null,
       ground:document.getElementById('match-sub').textContent, ref:live.refName, weather:live.weather.label, pitch:pitchConditionFor(currentDate).label, date:isoOf(currentDate), dow:currentDate.getDay(),
-      kickoff:kickoffTimeFor(currentDate), fixtureIdx:fixtureIdx, division:currentDivisionLabel, subs:subsAllowed(), subAny:subAnyReasonAllowed(), cards:cardsInUseNow(), formation:tactics.formation, who:who, subPlayer:live.subPlayer?live.subPlayer.n:null};
+      kickoff:kickoffTimeFor(currentDate), fixtureIdx:fixtureIdx, compA:(typeof v426CompA==='function'?v426CompA(f):''), division:currentDivisionLabel, subs:subsAllowed(), subAny:subAnyReasonAllowed(), cards:cardsInUseNow(), formation:tactics.formation, who:who, subPlayer:live.subPlayer?live.subPlayer.n:null};
     eraCap = {key:key, seed:fixtureIdx*7 + 3, liveRef:live, cap:{events:[], meta:meta, final:null}};
     var r = RETRO_ERA_COMMENTARY.render(eraCap.cap, key, {seed:eraCap.seed});
     if (typeof eraResetReveal === 'function') eraResetReveal();
@@ -51539,7 +51607,7 @@ function eraFallback(ev){
   var t = ev.orig || '', m;
   if ((m = t.match(/^DRESSING ROOM: (.*)$/))) return {label:'HT', text:m[1]};
   if ((m = t.match(/^MESSAGE FROM THE BENCH: (.*)$/))) return {label:null, text:'A message from the bench: '+m[1]};
-  if (ev.cat === 'milestoneGoals') return {label:null, text:t};
+  if (ev.cat === 'milestoneGoals'){ var mw = (typeof RETRO_ERA_COMMENTARY!=='undefined' && RETRO_ERA_COMMENTARY.words) ? RETRO_ERA_COMMENTARY.words : null; var tt = mw ? t.replace(/\b(\d{1,2})\b/g, function(_, d){ return mw(parseInt(d, 10)); }) : t; tt = tt.replace(/\s+--\s+/g, '. '); if (RETRO_ERA_COMMENTARY.capSentences) tt = RETRO_ERA_COMMENTARY.capSentences(tt.charAt(0).toUpperCase() + tt.slice(1)); return {label:null, text:tt}; }
   if (/^A CHANGE :/.test(t)) return {label:null, text:t.charAt(0)+t.slice(1).toLowerCase()};
   /* v424 : our own substitution was never announced in the era commentary (the pattern above missed "A CHANGE FROM THE BENCH :") */
   if ((m = t.match(/^A CHANGE FROM THE BENCH : (.+?) COMES ON FOR (.+?)\.?$/))) return {label:null, text:'A change from the bench: '+rmNameCase(m[1])+' comes on for '+rmNameCase(m[2])+'.'};
@@ -51822,6 +51890,7 @@ function eraFtWrapCopy(key, ctx, seed){
   }
   var closeTpl = eraFtPickFresh(eraFtClosePool(ctx, key), eraFtRecentClose, seed, 31, 12);
   var p2 = (starText ? starText + ' ' : '') + eraFtFillClose(closeTpl, ctx);
+  if (ctx.evening) p2 = p2.replace(/\bafternoon\b/g, 'evening'); /* v426 : an evening kick-off is not 'a lively afternoon' */
   var hed = (key === '1959') ? 'Newsreel sign-off' : (key === '1970') ? 'From the terraces' : (key === '1981') ? 'Full time' : 'Highlights summary';
   return {hed:hed, p1:picked.text, p2:p2, template:picked.template, starTemplate:starTpl, closeTemplate:closeTpl, pool:picked.pool};
 }
@@ -52117,6 +52186,9 @@ function eraEventProviderName(ev){
   if (n && s && n === s) return '';
   return n;
 }
+/* v426 : a well-mixed 0..1 from a small integer seed (display picks only) */
+function rmEighties(){ return typeof isEightiesMatchSheet === 'function' && isEightiesMatchSheet(); }
+function rmMix01(n){ var a = (Math.round(n) | 0) ^ 0x9E3779B9; a = Math.imul(a ^ (a >>> 16), 0x85ebca6b); a = Math.imul(a ^ (a >>> 13), 0xc2b2ae35); a = (a ^ (a >>> 16)) >>> 0; return a / 4294967296; }
 function eraFillBuild(tpl, ev){
   var meta = eraCap && eraCap.cap && eraCap.cap.meta;
   var provider = eraEventProviderName(ev);
@@ -52133,8 +52205,10 @@ function eraFillBuild(tpl, ev){
   /* v385 / v390 : the named man is the provider when the event has one (so "a long diagonal towards Gidman"
      is followed by Gidman's cross, never a third teammate). Crosser and scorer stay different. Both come
      from the scoring side's event, never a random pick from the other eleven. Own goals stay generic. */
-  if (ev && ev.type === 'goalOwn'){
-    P = 'a colleague';
+  if (ev && ev.type === 'goalOwn' && meta && meta.who){ /* v426 : a real man from the side that gains the goal (was "a colleague") */
+    var ogSide = ev.scoredFor || ev.side || 'us';
+    var ogPool = meta.who.filter(function(x){ return x && x.n && x.team === ogSide && x.slot !== 'GK' && !/goalkeeper/i.test(x.pos||''); });
+    if (ogPool.length) P = ogPool[Math.abs((((ev.idx||0)+3) * 2654435761 + (ev.raw||0)) | 0) % ogPool.length].n;
   }
   if (P && /^[A-Z].*\s+[A-Z]/.test(P) && eraCap && (eraCap.key === '1946' || eraCap.key === '1950' || eraCap.key === '1959')){
     P = P.split(/\s+/).pop();
@@ -52146,7 +52220,7 @@ function eraFillBuild(tpl, ev){
   if (!A && meta) A = meta.club;
   var ref = meta && meta.ref ? meta.ref : 'the referee';
   var s = String(tpl).replace(/\{P\}/g, P).replace(/\{A\}/g, A).replace(/\{ref\}/g, ref);
-  s = s.replace(/([.!?]\s+)([a-z])/g, function(_,p,c){ return p + c.toUpperCase(); });
+  s = (typeof RETRO_ERA_COMMENTARY !== 'undefined' && RETRO_ERA_COMMENTARY.capSentences) ? RETRO_ERA_COMMENTARY.capSentences(s) : s.replace(/([.!?]\s+)([a-z])/g, function(_,p,c){ return p + c.toUpperCase(); }); /* v426 : not after ... or Q.P.R. */
   s = s.charAt(0).toUpperCase() + s.slice(1); /* v423 */
   return s;
 }
@@ -52166,7 +52240,7 @@ function eraPickBuild(pool){
     if (!fresh.length) fresh = arr.slice();
   }
   var seed = ((eraCap && eraCap.seed) || 1) + ((eraCap && eraCap.usedBuild) ? eraCap.usedBuild.length * 17 : 0) + (live ? live.minute * 3 : 0);
-  var rng = ((seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  var rng = rmEighties() ? rmMix01(seed) : ((seed * 1664525 + 1013904223) >>> 0) / 4294967296; /* v426 : 1980s only, older eras keep their picks */
   var tpl = fresh[Math.floor(rng * fresh.length)];
   if (eraCap) eraCap.usedBuild.push(tpl);
   return tpl;
@@ -52334,6 +52408,7 @@ var ERA_CONTEXT_BUILD = {
   ]
 };
 function eraPickContext(ev){
+  var ERA_CONTEXT_BUILD = (rmEighties() && window.ERA_CONTEXT_BUILD_80) || window.ERA_CONTEXT_BUILD; /* v426 : the 1980s pools */
   var meta = eraCap && eraCap.cap && eraCap.cap.meta;
   var min = (ev && (ev.mnum != null ? ev.mnum : ev.min != null ? ev.min : ev.raw)) || (live && live.minute) || 0;
   min = parseInt(min, 10) || 0;
@@ -52359,7 +52434,7 @@ function eraPickContext(ev){
   if (!fresh.length) fresh = pools.filter(function(t){ return used.indexOf(t)<0 && !(typeof ERA_SPOILER_RE!=='undefined' && ERA_SPOILER_RE.test(t)); });
   if (!fresh.length) fresh = pools.slice();
   var seed = ((eraCap && eraCap.seed) || 1) + used.length * 19 + min * 5;
-  var rng = ((seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  var rng = rmEighties() ? rmMix01(seed) : ((seed * 1664525 + 1013904223) >>> 0) / 4294967296; /* v426 : 1980s only, older eras keep their picks */
   var tpl = fresh[Math.floor(rng * fresh.length)];
   if (eraCap && tpl) eraCap.usedContext.push(tpl);
   return tpl;
@@ -52372,7 +52447,7 @@ function eraShotShape(ev){
   /* v392 : 1 line (finish only), 2 (build + finish), or 3 (context + build + finish). Seeded per event. */
   var min = (ev && (ev.min != null ? ev.min : ev.raw)) || 0;
   var seed = ((eraCap && eraCap.seed) || 1) + (min * 13) + (((ev && ev.idx) || 0) * 29) + ((eraCap && eraCap.usedBuild) ? eraCap.usedBuild.length * 7 : 0);
-  var rng = ((seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  var rng = rmEighties() ? rmMix01(seed) : ((seed * 1664525 + 1013904223) >>> 0) / 4294967296; /* v426 : 1980s only, older eras keep their picks */
   if (rng < 0.26) return 1;
   if (rng < 0.74) return 2;
   return 3;
@@ -52564,8 +52639,11 @@ function rmPopFill(tpl, c){
 }
 /* a stage that fills with real names, or the next one in the bank that does : never a gap */
 function rmPopStage(bank, c, tag){
-  var start = rmPopRoll(tag) % bank.length;
-  for (var i = 0; i < bank.length; i++){ var s = rmPopFill(bank[(start + i) % bank.length], c); if (s) return s.charAt(0).toUpperCase() + s.slice(1); }
+  /* v426 : an even pick among the lines that fill with real names (walking on from a line that could not fill favoured its neighbour), and never the same opening words twice running */
+  var roll = rmPopRoll(tag), head = RM_POP.lastHead || '', ok = [], fresh = [];
+  for (var i = 0; i < bank.length; i++){ var s = rmPopFill(bank[i], c); if (!s) continue; ok.push(s); if (!head || s.split(/\s+/).slice(0, 2).join(' ').toLowerCase() !== head) fresh.push(s); }
+  var L = fresh.length ? fresh : ok;
+  if (L.length){ var pickS = L[roll % L.length]; RM_POP.lastHead = pickS.split(/\s+/).slice(0, 2).join(' ').toLowerCase(); return pickS.charAt(0).toUpperCase() + pickS.slice(1); }
   return bank === RM_POP_OPEN ? 'Play builds...' : 'Still going...';
 }
 function rmPopItem(base, text, extra){
@@ -52627,22 +52705,27 @@ function rmPopAugment(seq){
     return;
   }
   if (eraIsPenaltyResolve(t)){
-    var pk = [rmPopItem(last, rmPopFill(RM_POP_PEN[0], c) || 'The ball is on the spot...')];
-    if (c.K && T >= 3) pk.push(rmPopItem(last, rmPopFill(RM_POP_PEN[1], c)));
-    pk.push(rmPopItem(last, rmPopFill(RM_POP_PEN[2], c) || 'The run-up...'));
+    var P0 = (typeof RM_POP_PEN0 !== 'undefined') ? RM_POP_PEN0 : [RM_POP_PEN[0]], P1 = (typeof RM_POP_PEN1 !== 'undefined') ? RM_POP_PEN1 : [RM_POP_PEN[1]], P2 = (typeof RM_POP_PEN2 !== 'undefined') ? RM_POP_PEN2 : [RM_POP_PEN[2]];
+    var pk = [rmPopItem(last, rmPopStage(P0, c, 'p0' + seq) || 'The ball is on the spot...')];
+    if (c.K && T >= 3) pk.push(rmPopItem(last, rmPopStage(P1, c, 'p1' + seq)));
+    pk.push(rmPopItem(last, rmPopStage(P2, c, 'p2' + seq) || 'The run-up...'));
     before(last, pk);
     return;
   }
   if (t === 'penSet' || ev.cat === 'penaltySetup'){
-    before(first, [rmPopItem(first, rmPopStage(RM_POP_OPEN, c, 'po' + seq)), rmPopItem(first, 'Into the box...')]);
+    var pso = [rmPopItem(first, rmPopStage(RM_POP_OPEN, c, 'po' + seq))]; /* v426 : 2-4 stages, like any other attack (was always 2) */
+    if (T >= 3) pso.push(rmPopItem(first, rmPopStage(RM_POP_DEV, c, 'pd' + seq)));
+    if (T >= 4) pso.push(rmPopItem(first, rmPopStage(RM_POP_ANY, c, 'pa' + seq)));
+    pso.push(rmPopItem(first, 'Into the box...'));
+    before(first, pso);
     return;
   }
-  if (last.popNothing) T = 2 + (rmPopRoll('Tn' + seq) % 2);
-  var need = Math.max(0, T - builds), moment = (need > 0 && !last.popNothing) ? 1 : 0, openers = Math.min(2, need - moment);
+  var need = Math.max(0, T - builds), moment = (need > 0 && !last.popNothing) ? 1 : 0, openers = Math.min(3, need - moment); /* v426 : a tackle, block or lost ball gets 2-4 stages too (was never 4) */
   var header = /\bhead|header|nod/i.test(last.text || '');
   var ops = [];
   if (openers >= 1) ops.push(rmPopItem(first, rmPopStage(RM_POP_OPEN, c, 'o' + seq)));
   if (openers >= 2) ops.push(rmPopItem(first, rmPopStage(RM_POP_DEV, c, 'd' + seq)));
+  if (openers >= 3) ops.push(rmPopItem(first, rmPopStage(RM_POP_DEV, c, 'e' + seq)));
   if (ops.length) before(first, ops);
   if (moment) before(last, [rmPopItem(last, rmPopStage((eraIsShotType(t) && !header) ? RM_POP_SHOT : RM_POP_ANY, c, 'm' + seq))]);
 }
@@ -52672,7 +52755,11 @@ function rmPopLabel(item){
   if (item.disp === 'KO') return 'KICK-OFF';
   if (t === 'half') return 'HALF-TIME';
   if (t === 'full' || t === 'manOfMatch' || t === 'verdict' || item.disp === 'FT') return 'FULL-TIME';
-  if (/^stoppage/.test(t)) return 'ADDED TIME';
+  if (/^stoppage/.test(t)) return 'INJURY TIME';
+  if (/\bno goal\b|disallowed|ruled out|rules it out|chalked off/i.test(x)) return 'NO GOAL';
+  if (/appeals? for a penalty|want a penalty|shout for a penalty|penalty, say|no penalty|waves play on|gives nothing|says it was fair|not interested/i.test(x)) return 'NO PENALTY';
+  if (/off the line|on the line to/i.test(x)) return 'CLEARED';
+  if (/(foot|inside|outside|base) of the (post|upright|bar|crossbar)|(hits|strikes|clips|smacks|thumps|rattles|shakes) the (post|bar|upright|crossbar|woodwork)|(cannons|comes back|rebounds|bounces|spins) (off|out off|back off) the (post|bar|upright|crossbar)|off the (post|bar|upright|crossbar|woodwork)|hits the (post|bar|upright|crossbar|woodwork)|against the (post|bar|upright|crossbar|woodwork)|rattles the crossbar|clips the top of the crossbar/i.test(x)) return 'WOODWORK';
   if (t === 'attendance' || /attendance/i.test(x)) return 'ATTENDANCE';
   if (t === 'orderedOff' || /sent off|sending-off|red card|marching orders|for an early bath/i.test(x)) return 'SENT OFF';
   if (/^nameTaken/.test(t) || /\bbook(ed|ing)?\b|yellow/i.test(x) && item.cls === 'card') return 'BOOKED';
@@ -52687,9 +52774,9 @@ function rmPopLabel(item){
   if (/Clear$/.test(t)) return 'CLEARED';
   if (eraIsShotType(t)){
     if (/off the (post|bar|upright)|hits the (post|bar|upright)|crossbar|woodwork|the upright|against the (post|bar)/i.test(x)) return 'WOODWORK';
-    if (/wall|block/i.test(x) || t === 'fkWall') return 'BLOCKED';
-    if (/over the bar|over the top|flies over|goes over|high|over\b/i.test(x)) return 'OVER';
-    if (/wide|past the post|the wrong side of the post|off target/i.test(x)) return 'WIDE';
+    if (/\bwall\b|\bblock/i.test(x) || t === 'fkWall') return 'BLOCKED'; /* v426 : word edges, so a keeper called Wallington is not a block */
+    if (/over the bar|over the top|flies over|goes over|\bhigh\b|\bover\b/i.test(x)) return 'OVER';
+    if (/\bwide\b|past the post|the wrong side of the post|off target/i.test(x)) return 'WIDE';
     var kk = ev.K && ev.K.n ? rmPopSur(ev.K.n) : '';
     if (kk && x.indexOf(kk) >= 0) return 'SAVE';
     if (/save|saves|saved|safe|holding|catch|clutch|parr|beats it away|keeps it out|deny|denying|stop|tips|turns it|gathers|holds|smother|claims|keeper|punch/i.test(x) || /Save/.test(t)) return 'SAVE';
@@ -52700,8 +52787,8 @@ function rmPopLabel(item){
 function rmPopKind(lab){
   if (lab === 'LIVE') return 'live';
   if (lab === 'GOAL') return 'goal';
-  if (/^(CHANCE|SAVE|WIDE|OVER|WOODWORK|BLOCKED|MISSED|PENALTY)$/.test(lab)) return 'chance';
-  if (/^(KICK-OFF|HALF-TIME|FULL-TIME|ADDED TIME)$/.test(lab)) return 'whistle';
+  if (/^(CHANCE|SAVE|WIDE|OVER|WOODWORK|BLOCKED|MISSED|PENALTY|NO GOAL|NO PENALTY)$/.test(lab)) return 'chance';
+  if (/^(KICK-OFF|HALF-TIME|FULL-TIME|ADDED TIME|INJURY TIME)$/.test(lab)) return 'whistle';
   if (/^(BOOKED|SENT OFF)$/.test(lab)) return 'card';
   return 'other';
 }
@@ -52775,6 +52862,327 @@ function rmPopDeferFinish(){
   if (rmPopActive() && !eraReveal.instant && !RM_POP.finishing && eraReveal.queue.length){ RM_POP.pendingFinish = true; return true; }
   return false;
 }
+
+/* ---------- v426 : 1980s commentary review fixes (display only). Bigger banks so a line comes round far less often, era wording
+   (injury time, the linesman, no modern terms), keepers and defenders named, outcomes that land after a long build-up, and the
+   things 1980s football had that the bank lacked : the woodwork, a goal-line clearance, a goalkeeping error, a goal ruled out and a
+   penalty appeal turned down. All of these re-word an outcome the sim already decided (a miss, a block, a save, an offside, a
+   tackle) : nothing here touches the dice, the score or the stats. Picks are hashed, never Math.random. */
+(function v426Banks(){
+  if (typeof RETRO_ERA_COMMENTARY === 'undefined' || !RETRO_ERA_COMMENTARY.BANKS) return;
+  var B = RETRO_ERA_COMMENTARY.BANKS['1981']; if (!B) return;
+  /* short club names the commentators used (the table had gaps : "Wycombe Wanderers are pressing...") ; only names not already there */
+  var SH = RETRO_ERA_COMMENTARY.SHORT || {};
+  var add = {'Wycombe Wanderers':'Wycombe', 'Bolton Wanderers':'Bolton', 'Wolverhampton Wanderers':'Wolves', 'Blackburn Rovers':'Blackburn', 'Tottenham Hotspur':'Spurs',
+    'West Bromwich Albion':'West Brom', 'Nottingham Forest':'Forest', 'Newcastle United':'Newcastle', 'West Ham United':'West Ham', 'Leeds United':'Leeds',
+    'Birmingham City':'Birmingham', 'Cambridge United':'Cambridge', 'Hereford United':'Hereford', 'Hartlepool United':'Hartlepool', 'Wigan Athletic':'Wigan',
+    'Bradford City':'Bradford', 'Swansea City':'Swansea', 'Aston Villa':'Villa', 'Partick Thistle':'Partick', 'Dundee United':'Dundee United',
+    'Maidstone United':'Maidstone', 'Boston United':'Boston', 'Kettering Town':'Kettering', 'Nuneaton Borough':'Nuneaton', 'Enfield':'Enfield', 'Barnet':'Barnet'};
+  Object.keys(add).forEach(function(k){ if (!SH[k]) SH[k] = add[k]; });
+  /* always a fresh array, so a bank B81 shares with an older era by reference is never changed for that era */
+  function put(key, arr){ B[key] = arr.slice(); }
+  function grow(key, drop, arr){ var base = (B[key] || []).filter(function(x){ return (drop || []).indexOf(x) < 0; }); arr.forEach(function(x){ if (base.indexOf(x) < 0) base.push(x); }); B[key] = base; }
+
+  put('kickoff', [
+    '{session} at {ground}{lights}, and {compA} game is under way. {weather}, the pitch {pitch}, and {ref} is in charge.',
+    'Welcome to {ground}{lights} for {compA} match this {tod}. {weather}, the pitch {pitch}. {ref} has the whistle, and we are off.',
+    '{ground}, {compA} {tod}{lights}. {weather}, the pitch {pitch}. {ref} is the referee, and the ball is rolling.',
+    'We are at {ground} for {compA} {tod}. {weather}, the pitch {pitch}, and {ref} gets it started.',
+    'It is {compA} {tod} at {ground}{lights}. {weather}, and the pitch {pitch}. {ref} blows, and away we go.',
+    'Good {tod} from {ground}, and it is {compA} fixture. {weather}, the pitch {pitch}. {ref} is the man in the middle, and {A} kick off.'
+  ]);
+  put('attendance', ['The attendance here is {n}.', 'The crowd is given as {n}.', 'We are told {n} are in the ground.', 'The gate this {tod} is {n}.',
+    'There are {n} here, according to the club.', 'A crowd of {n} at {ground}.', 'The official figure is {n}.']);
+  put('stoppage1', ['{ref} has had a few things to look at, and there will be a little injury time at the end of the half.',
+    'A few stoppages, and {ref} will play on a minute or two at the end of the half.', 'There was that hold-up for the injury, so a little time to be added on before the break.',
+    '{ref} glances at his watch. There will be some injury time in this half.', 'One or two knocks in the half, and {ref} will add them on.',
+    'We are into injury time at the end of the first half.']);
+  put('stoppage2', ['{ref} will add a little on at the end of this one.', 'There will be some injury time at the end, from {ref}.',
+    'The ninety minutes are up, and we are into injury time.', '{ref} is looking at his watch. Injury time now.',
+    'A minute or two of injury time to be played.', 'Into injury time, and the crowd are whistling for the end.']);
+  put('half', ['Half-time at {ground}, {sc}.', 'That is the break. {sc}, and there is more in this.', 'Half-time, and it is {sc}.',
+    '{ref} blows for half-time. {sc}.', 'The players go off for the interval. {sc}.', 'Half-time at {ground}, and it stands at {sc}.',
+    'So, the half-time whistle. {sc}, and plenty to talk about.']);
+
+  grow('buildupP', [], ['{P} picks it up for {A} and looks around him.', '{P} is finding space for {A} in the middle of the park.',
+    '{P} lays it off neatly and moves on for {A}.', '{P} is getting through a lot of work for {A} today.']);
+  grow('buildupTeam', [], ['{A} are passing it about at the back, waiting for an opening.', 'A lot of the play is going through the middle now.',
+    'Neither side can get a proper grip on it.', 'The ball is pinging about in midfield, with nobody keeping it for long.']);
+  put('buildupAttack', ['{A} are pushing forward, with more men up.', '{A} have pushed the full-backs on now.', '{A} are committing men forward.', 'More bodies forward for {A} now.']);
+  put('buildupDefence', ['{A} are happy to sit back and let the game come to them.', '{A} have dropped deep, and they are inviting the pressure.',
+    '{A} are getting men behind the ball.', '{A} are content to soak it up for the moment.']);
+  put('halfBack', ['{P} is the dominant figure in midfield for {A}, setting the tempo.', 'In midfield, {P} is winning the tackles and starting most of the {A} moves.',
+    'Much of {A}\'s best work begins with {P}.', '{P} is running the midfield for {A}.', 'Everything good from {A} seems to go through {P}.',
+    '{P} is having a fine game in the middle of the park for {A}.', '{P} wins it, gives it, and goes again. A big influence for {A}.']);
+  put('noPast', ['Nothing is getting past {P}. A very solid game from the {A} {pos}.', '{P} has shut the door on that side.', 'Another attack stopped by {P}.',
+    '{P} mops up again for {A}.', '{P} snuffs out another attack.', 'Another attack is broken up by {P}.', '{P} is reading everything this {tod}, and he mops up again.']);
+  put('lastDitch', ['Excellent tackle from {P}! {P2} had a clear sight of goal.', '{P} gets back to stop {P2} just as he shaped to shoot.', '{P} slides in, and takes the ball off {P2}.',
+    'A perfectly timed tackle by {P}, and {P2} is stopped in his tracks.', '{P2} is through... no, {P} gets a foot in. Superb defending.',
+    '{P} recovers to block {P2} on the edge of the area.', '{P} makes a saving tackle on {P2}, right on the edge of the six-yard box.',
+    '{P2} is past one man, but {P} is there to take it off his toe.', 'Last-ditch from {P}. {P2} was ready to pull the trigger.']);
+
+  grow('chanceSaved', ['{P} lets fly... and {K} makes a proper stop.'], ['{P} lets fly... and {K} gets down well to it.', '{P} has a dig from the edge of the area, and {K} is down to save.',
+    '{P} turns and shoots, and {K} gathers at the second attempt.']);
+  grow('chanceOff', [], ['{P} gets his shot away, but it is high and wide.', '{P} tries the shot on the turn. Wide of the far post.', '{P} skies it over from twelve yards. He should have done better.',
+    '{P} has the goal at his mercy and puts it over. The crowd cannot believe it.']);
+  grow('chanceBlocked', ['{P} hits it, and it comes off a defender.', '{P} hits it, and a defender gets in the way.'], ['{P} hits it, and {D} blocks it.', '{P} hits it, and {D} gets in the way to block.',
+    '{D} throws himself in front of {P}\'s shot to block it.', '{P} tries his luck, but {D} blocks it on the edge of the area.']);
+  put('chanceGeneric', ['{P} gets a shot away for {A}, but {K} watches it all the way into his arms.', '{A} work it to {P}, and {D} gets the vital touch.',
+    '{P} shapes to shoot, but {D} is across to put in a block.', '{P} has a half-chance for {A}, and his shot is deflected wide by {D}.',
+    'A sniff for {P}, but {D} recovers to nick it off him.', '{P} tries to bend one in, and {K} gets across to gather.',
+    '{P} lets fly from distance, and it is comfortable for {K}.', 'Promising from {A}, but {P} takes one touch too many and {D} clears.',
+    '{P} gets in a shot on the turn, and it skids past the post.']);
+  put('chanceLosing', ['{A} are behind and pushing forward. {P} has a shot, and {K} turns it round the post.', '{A} throw men forward, and {P} sees his effort blocked by {D}.',
+    '{A} need a goal, and {P} tries his luck from thirty yards. Over the bar.', '{A} throw men forward, and {D} heads it away from under the nose of {P}.',
+    '{P} has a go as {A} chase it, and {K} holds on.', 'A hurried effort from {P}, with {A} needing a goal. It is wide.',
+    '{A} are camped in their half now. {P} shoots, and {D} gets in the way.', '{P} hits it first time, desperate for a goal for {A}, and it flies over.']);
+  grow('saveDive', ['A proper stop from {K}, to deny {P}.', '{K} palming it away from {P}. A proper save.'], ['A fine stop from {K}, to deny {P}.', '{K} palms it away from {P}. A smashing save.',
+    '{K} dives to his right to keep out {P}\'s drive.']);
+  grow('saveCorner', ['{K} tips {P}\'s shot round the upright.'], ['{K} tips {P}\'s shot round for a corner.']);
+  grow('goalStar', ['A finish of real quality from {P}: he opens his body and curls it beyond the keeper\'s reach. {gp}.', 'That is a finish of real quality from {P}. {gp}.'],
+    ['A marvellous finish from {P}. He opens his body and curls it beyond the keeper\'s reach. {gp}.', 'What a goal from {P}! {gp}.', '{P} beats two men and buries it. A goal fit to win any match. {gp}.']);
+  grow('goalDeflect', ['{P} has a drive, it comes off a defender, and the keeper is left stranded as it loops in. {gp}.'], ['{P} has a drive, it comes off {D}, and {K} is left stranded as it loops in. {gp}.']);
+  grow('goalScrappy', ['It is scrappy, but {P} is there to poke it in as the keeper and a defender collide. {gp}.'], ['It is scrappy, but {P} is there to poke it in as {K} and {D} collide. {gp}.']);
+  grow('savePunch', ['{K} punches it clear, with {P} pressing.'], ['{K} punches it clear, with {P} closing in.']);
+  put('cornerSet', ['A corner for {A}, and {P} will take it.', '{P} places the ball for the corner.', '{P} stands over the corner flag for {A}.',
+    'Corner to {A}. {P} jogs across to take it.', '{A} win a corner, and the big men go up.', '{P} takes his time over the corner. Everybody up for {A}.',
+    'Another corner for {A}. {P} to take.', '{P} sets the ball down by the flag.', 'A corner, and {P} waves his men forward.']);
+  grow('cornerGoal', ['{P2}\'s corner, and {P} rises... {gp}.'], ['{P2}\'s corner, and {P} rises above everybody to head it in. {gp}.']);
+  put('cornerGoal_header', ['{P2} swings the corner in, and {P} heads it in. {gp}.', '{P} gets up highest to {P2}\'s corner and powers a header into the net. {gp}.',
+    'A towering header from {P}, from {P2}\'s corner, and it is in. {gp}.']);
+  put('cornerClear', ['The corner from {P} is cleared.', 'Nothing comes of {P}\'s corner.', '{K} punches out {P}\'s corner.', '{P}\'s corner is headed clear by {D}.',
+    'Nothing comes of {P}\'s corner. {D} deals with it.', '{K} claims {P}\'s corner comfortably.', '{D} gets his head to {P}\'s corner, and it is away.']);
+  put('cornerClear_edge', ['Nothing comes of {P}\'s corner. It is cleared to the edge of the box.', '{P}\'s corner is half-cleared, only as far as the edge of the area.',
+    '{D} heads {P}\'s corner out, and it drops to the edge of the box.', 'The corner from {P} is cleared, but only to the edge of the penalty area.']);
+  put('cornerClear_punch', ['{K} punches out {P}\'s corner.', '{K} comes through a crowd of bodies and punches {P}\'s corner away.', '{K} gets a fist to {P}\'s corner.',
+    'A good strong punch from {K} to clear {P}\'s corner.']);
+  put('cornerClear_def', ['The defence deals with {P}\'s corner comfortably.', '{D} heads {P}\'s corner well clear.', '{D} is first to {P}\'s corner and clears.',
+    '{P}\'s corner is too close to {D}, who hooks it away.']);
+  put('cornerOver_Over', ['{P2}\'s corner finds {P}\'s head, but it goes over the bar.', '{P} meets {P2}\'s corner, and heads it over.', '{P} gets above his man from {P2}\'s corner, but heads over the bar.']);
+  put('cornerOver_Wide', ['A good flick from {P} off {P2}\'s corner, but just wide.', '{P} glances {P2}\'s corner just wide of the far post.', '{P2} finds {P} with the corner, and the header is wide.']);
+  put('cornerOver_Weak', ['{P2}\'s corner is dangerous, but {P}\'s header has no power in it.', '{P} gets a touch to {P2}\'s corner, but cannot direct it.', '{P} can only get the top of his head to {P2}\'s corner.']);
+  put('fkSet', ['A free-kick to {A} in a useful spot, and {P} will take it.', '{P} stands over the free-kick for {A}.', 'A foul on the edge of the box, and {P} is going to have a go.',
+    'Free-kick to {A}, twenty-five yards out. {P} fancies this.', '{P} is pushed over, and {A} have a free-kick within range.', 'The wall lines up, and {P} steps back for {A}.',
+    '{ref} paces out the ten yards. {P} waits for {A}.', 'A free-kick in a dangerous place for {A}. {P} over it.', '{P} and {P2} stand over the ball for {A}.']);
+  put('fkSave', ['{K} turns {P}\'s free-kick behind for a corner.', '{P}\'s free-kick is straight at {K}.', '{K} gets across to keep out {P}\'s free-kick.', '{K} gathers {P}\'s free-kick at the second attempt.']);
+  put('fkSave_corner', ['{K} turns {P}\'s free-kick behind for a corner.', '{K} tips {P}\'s free-kick round the post.', '{K} gets a hand to {P}\'s free-kick and turns it over the bar.']);
+  put('fkSave_held', ['{P}\'s free-kick is well hit, but straight at {K}.', '{K} holds {P}\'s free-kick.', '{K} gets his body behind {P}\'s free-kick.', 'Comfortable for {K}, from {P}\'s free-kick.']);
+  grow('fkWall', [], ['{P}\'s free-kick smacks into the wall.', '{P} tries to drive it through the wall, and it is charged down.']);
+  put('fkOver_stand', ['{P}\'s free-kick flies high into the crowd.', '{P} blazes the free-kick high over the bar and into the terraces.', '{P} gets right under the free-kick, and it flies over into the crowd.']);
+  put('fkOver_bar', ['{P}\'s free-kick goes well over the bar.', '{P} curls the free-kick high over the bar.', '{P}\'s free-kick clears everybody, the bar included.']);
+  put('penSet', ['Penalty to {A}. {ref} points straight to the spot, and {P} will take it.', 'A spot-kick to {A}. {P} places the ball.',
+    'Penalty! {ref} has given it, and {P} picks up the ball for {A}.', '{ref} has no hesitation. Penalty to {A}, and {P} will take it.', 'A penalty for {A}. {P} has the job.']);
+  grow('penSet_foul', [], ['{ref} gives a penalty for a trip in the area. {P} to take it for {A}.', 'Brought down in the box, and {ref} points to the spot. {P} for {A}.']);
+  grow('penSet_handball', [], ['Handball, says {ref}, and it is a penalty to {A}. {P} will take it.', 'The ball strikes a hand in the area. Penalty to {A}, and {P} steps up.']);
+  grow('penSet_clumsy', [], ['A rash challenge in the area, and {ref} points to the spot. {P} for {A}.', 'That was clumsy, and it is a penalty. {P} has the ball for {A}.']);
+  put('penSave', ['Saved by {K}! A huge stop from {P}\'s penalty.', '{K} saves the penalty from {P}!', '{K} goes the right way and keeps out {P}\'s penalty!',
+    '{P} hits it well enough, but {K} gets down to save!', 'A great save by {K}, and {P}\'s penalty is kept out.']);
+  grow('penMiss_Wide', [], ['{P} drags the penalty wide of the post.', '{P} puts the penalty past the post. A bad miss.']);
+  grow('penMiss_Bar', [], ['{P} hits the bar with the penalty!']);
+  grow('penMiss_Over', [], ['{P} blazes the penalty over the bar.', '{P} leans back, and the penalty sails over.']);
+  put('tbSet', ['{P} plays it through for {P2}, behind the defence.', 'A lovely ball from {P} puts {P2} clear.', '{P} threads it through, and {P2} is running at the keeper.',
+    '{P} slides the ball through for {P2}.', 'A long ball over the top from {P}, and {P2} is chasing it.', '{P} picks out {P2} with a perfect pass.',
+    '{P2} has gone on the run, and {P} has found him.', '{P} clips it over the full-back for {P2}.', 'A one-two between {P} and {P2}, and {P2} is in.',
+    '{P} sees the run of {P2} and plays the ball into his path.']);
+  put('tbOffside', ['The linesman\'s flag goes up for offside against {P2}.', '{P2} is offside, and the goal is chalked off.', 'Offside. {P2} went too soon, and the flag is up.',
+    '{P2} is flagged offside. The defence stepped up well.', 'The linesman says {P2} was offside. He did not look happy about it.', '{P2} is caught offside by a yard.']);
+  put('tbSave', ['{P2} is through, but {K} saves.', '{K} comes out and smothers {P2}\'s shot.', '{K} spreads himself, and {P2} shoots against him.', '{P2} is clean through, and {K} saves with his legs.',
+    '{K} is off his line quickly to smother the ball at {P2}\'s feet.', '{P2} tries to go round {K}, but the keeper gets a hand to it.']);
+  put('tbOver_Over', ['{P2} is through on goal, and he puts it over the bar.', '{P2} only has {K} to beat, and he lifts it over the bar.', '{P2} tries to chip {K}, and it goes over the top.']);
+  put('tbOver_Wide', ['{P2} had only the keeper to beat, and puts it wide.', '{P2} is clean through, and he drags it past the post.', '{P2} goes round {K}, but he has taken it too wide and it rolls past the post.']);
+  put('crSet', ['{P} crosses, and {P2} goes up for it.', 'A cross from {P}, and {P2} is arriving at the far post.', '{P}, down the wing, pulls it back for {P2}.',
+    '{P} gets to the bye-line and crosses. {P2} is waiting.', '{P} whips it in, and {P2} is attacking the near post.', 'A high ball in from {P}, and {P2} is up for it.',
+    '{P} curls a cross towards {P2}.', '{P} looks up and chips it into the box for {P2}.', 'A centre from {P}. {P2} is in there.']);
+  put('crOver', ['{P2}\'s header goes over the bar.', '{P2}\'s header is wide of the far post.', '{P2} meets {P}\'s cross but heads over.', '{P2} gets to {P}\'s cross, and nods it wide.']);
+  put('crOver_Over', ['{P2}\'s header goes over the bar.', '{P2} gets up to {P}\'s cross, but the header goes over.', '{P2} heads {P}\'s centre over the top.']);
+  put('crOver_Wide', ['{P2}\'s header is wide of the far post.', '{P2} glances {P}\'s cross past the post.', '{P2} cannot direct {P}\'s cross, and it is wide.']);
+  put('crSave', ['{K} saves {P2}\'s header from {P}\'s cross.', '{K} punches clear as {P2} challenges.', '{K} comes for {P}\'s cross and holds it, with {P2} closing in.', '{K} gets down to {P2}\'s header and gathers.']);
+  put('crSave_punch', ['{K} punches clear as {P2} challenges.', '{K} gets a fist to {P}\'s cross ahead of {P2}.', '{K} comes off his line and punches {P}\'s cross away from {P2}.']);
+  put('crClear', ['{D} clears {P}\'s cross before {P2} can reach it.', '{D} cuts out {P}\'s cross.', '{D} heads {P}\'s centre away from {P2}.',
+    '{P}\'s cross is cleared by {D}.', '{D} gets in front of {P2} and heads it clear.', '{P}\'s cross is too long for {P2}, and {D} clears.']);
+  put('bp_freekick', ['{A} win a free-kick, and {P} lines it up.', '{P} is fouled, and {A} have a free-kick.', '{P} goes down under a challenge, and {A} get a free-kick.', '{P} wins a free-kick for {A} in midfield.']);
+  put('bp_deep', ['{P} drops deep for {A} to take the ball from midfield.', '{P} comes short to collect for {A}.', '{P} drops into midfield looking for the ball.', '{P} comes deep to get on the ball for {A}.']);
+  put('bp_robust', ['A hard challenge from {P}, and the crowd roars.', '{P} goes in hard, and there is a bit of a flare-up.', '{P} puts his foot in, and the crowd enjoy that.', 'A crunching tackle from {P}. That will be felt.']);
+  put('bp_throwin', ['{P} wins a throw-in for {A}, deep in {O} territory.', '{P} chases it down and wins a throw for {A}.', '{P} forces a throw-in for {A}, well up the field.', 'A throw-in to {A}, won by {P}.']);
+  put('bp_release', ['{P} tries to find a team-mate down the wing for {A}, but it is cut out.', '{P} looks for the runner on the flank, but it is intercepted.',
+    '{P} sends it wide for {A}, but it is cut out.', '{P} tries the long pass down the line, and it is cut out.']);
+  put('bp_control', ['{P} brings a long ball down out of the air very neatly.', '{P} kills a high ball with one touch.', '{P} takes the long ball down on his chest.', 'Lovely control from {P}, from a long ball.']);
+  put('bp_switch', ['{P} switches the play with a long diagonal, but it runs through to {K}.', '{P} tries to switch it, but it runs through to {K}.',
+    '{P} hits the long diagonal, and it runs out of play.', '{P} goes for the long cross-field ball, but it is too long and runs through to {K}.']);
+  put('bp_header', ['{P} wins a good header in midfield for {A}.', '{P} gets up well in midfield for {A}.', '{P} wins the ball in the air for {A}.', '{P} is winning everything in the air for {A}.']);
+  put('bp_booed', ['{P} is booed by the away supporters every time he gets the ball.', 'The away end are giving {P} some stick.', '{P} gets the treatment from the away supporters whenever he touches it.',
+    'Whistles from the away end every time {P} has the ball.']);
+  put('bp_recycle', ['{P} checks back, finds no way through, and gives it back to his full-back.', '{P} turns back and plays it to his full-back.',
+    '{P} cannot find an opening, and plays it back.', '{P} looks for a way through, finds none, and goes back to his defence.']);
+  put('bt_passing', ['{A} string some passes together in midfield.', '{A} work the ball patiently from the back.', '{A} are passing it around nicely now.',
+    '{A} are knocking it about with some confidence.', 'Neat stuff from {A}, keeping the ball on the floor.']);
+  put('bt_quiet', ['A quiet spell. Both sides are feeling for an opening.', 'The game is simmering, with neither side making much headway.', 'Not a great deal happening at the moment.',
+    'A lull in the game. Neither goalkeeper has been troubled for a while.', 'It has gone a little flat. Lots of midfield, and not much else.', 'Very little goalmouth action in this spell.',
+    'A rather scrappy period. Both sides keep giving the ball away.', 'The game has gone quiet, and so has the crowd.']);
+  put('bt_air', ['The ball is spending more time in the air than on the ground.', 'Up and under, and up and under again.', 'It is very much a long-ball game at the moment.', 'Plenty of head tennis in the middle of the park.']);
+  put('bt_solid', ['The midfield are doing a good job in front of the {A} defence.', '{A}\'s midfield have a lot of work to get through.', '{A} look well organised at the back.',
+    '{A} are not giving much away.', 'It is tight and compact from {A}.']);
+  put('bt_niggle', ['A lot of niggle here, fouls both ways, and nothing is settling.', '{ref} has a word with both captains after some niggle.', 'Tempers are getting a little frayed.',
+    'Another foul, and {ref} is starting to lose patience.', 'There is a bit of needle creeping into this.']);
+  put('bt_pitch', ['The pitch is cutting up badly, and the ball is holding up in the mud.', 'It is heavy going out there. The ball is not running at all.',
+    'The surface is making life very difficult for both sides.', 'The players are struggling to keep their feet on this pitch.']);
+  put('bt_crowd', ['The home crowd gives a slow handclap, urging {A} on.', 'The crowd are getting restless.', 'A chant goes up from the home end.', 'The home supporters are trying to lift {A}.']);
+  put('bt_scrap', ['A loose ball in midfield, scrapped over by three or four players, until {A} come away with it.', 'A real tussle in midfield, and {A} win it.',
+    'Bodies flying in from all sides, and {A} come out with the ball.', 'A fifty-fifty, and {A} come away with it.']);
+  put('nameTakenGeneric', ['Yellow. {P} goes into the book.', 'That is a booking for {P}.', '{ref} takes the name of {P}.', '{P} is booked.']);
+  put('nameTakenTackle', ['Yellow for {P}, a late tackle.', '{P} is booked for a late challenge.', '{P} goes into the book for that tackle.', 'A late one from {P}, and {ref} books him.']);
+  put('nameTakenDissent', ['Yellow for {P}, for dissent.', '{P} is booked for dissent.', '{P} had too much to say, and {ref} books him.', '{P} argues, and he is in the book.']);
+  put('orderedOff', ['He is off! {P} is sent off. Ten men for {A}.', 'Red card. {ref} goes to the pocket. {P} is walking, and {A} are down to ten.', '{P} has been sent off! {A} will have to play with ten.',
+    '{ref} sends {P} off, and {A} are down to ten men.']);
+  put('hobble', ['{P} is down, and it looks a problem, but he stays on.', 'A knock for {P}. He is still on the field.', '{P} needs treatment, but he is going to carry on.',
+    'The trainer is on for {P}. He gets up, limping.', '{P} took a kick there. He will run it off.']);
+  put('goOff', ['{P} cannot continue, and has to go off.', '{P} has gone down and cannot go on.', '{P} is helped off. He cannot carry on.', 'That is the end of {P}\'s afternoon. He has to come off.']);
+  put('subOn', ['{A} make a change. {P2} comes on, and {P} is the man to make way.', 'Here comes {P2}, replacing {P}.', '{P} goes off, and {P2} comes on for {A}.',
+    'A substitution for {A}. {P2} on, {P} off.', '{P2} is on for {A}, in place of {P}.']);
+  put('hatTrick', ['That is {P}\'s third, and he has a hat-trick.', 'A hat-trick for {P}.', '{P} has his hat-trick!', 'That is three for {P}.']);
+
+  /* new banks : display-only re-wordings of an outcome the sim already decided */
+  put('woodShot', ['{P} lets fly, and it cracks against the post!', '{P} hits the bar! So close.', '{P} curls it round {K}, and it comes back off the post.',
+    'Off the woodwork! {P} so nearly had it.', '{P} smashes it against the crossbar.', '{P} beats {K}, but the ball comes back off the post.']);
+  put('woodCorner', ['{P} heads {P2}\'s corner against the bar!', '{P2}\'s corner, and {P} thumps a header off the post.', '{P} meets {P2}\'s corner, and it rattles the crossbar.', 'From {P2}\'s corner, {P} heads against the woodwork.']);
+  put('woodCross', ['{P2} heads {P}\'s cross against the post!', '{P}\'s cross, and {P2} hits the bar with the header.', '{P2} meets {P}\'s centre, and it comes back off the upright.', '{P2} volleys {P}\'s cross against the crossbar.']);
+  put('woodTb', ['{P2} goes round {K}, and his shot hits the post!', '{P2} is through, and he clips the top of the crossbar.', '{P2} tries to slip it past {K}, and it comes back off the post.', '{P2} is clean through, and hits the woodwork.']);
+  put('woodFk', ['{P}\'s free-kick clips the top of the crossbar!', '{P} curls the free-kick against the post.', '{P} bends it over the wall, and it comes back off the crossbar.', '{P}\'s free-kick beats {K}, and it hits the post.']);
+  put('kpErr', ['{K} lets {P}\'s shot squirm out of his hands, and has to dive on it again.', '{K} fumbles {P}\'s shot, but recovers it at the second attempt.',
+    '{K} spills {P}\'s drive, and is relieved to get back to it.', 'A bad moment for {K}. He drops {P}\'s shot, but gathers before anyone can follow up.',
+    '{K} juggles with {P}\'s effort before he holds it.', '{K} lets {P}\'s shot slip through his hands, and scrambles back to it on the line.']);
+  put('lineClear', ['{P}\'s shot is going in, but {D} clears it off the line!', '{D} is on the line to head away {P}\'s effort!', '{P} beats {K}, but {D} hooks it off the line.',
+    'Cleared off the line by {D}! {P} thought he had scored.', '{D} gets back to clear {P}\'s shot off the line.', '{P} gets it past {K}, and {D} is on the line to clear.']);
+  put('noGoalFoul', ['{P2} bundles it in, but {ref} has already blown for a push on {K}. No goal.', 'It is in the net, but {ref} gives a foul against {P2}. No goal.',
+    '{P2} heads it in, but {ref} has spotted a push. The goal is disallowed.', 'The ball is in the net, but {ref} gives a free-kick for a foul on {K}. No goal.',
+    '{P2} puts it away, but {ref} rules it out for a foul in the build-up.']);
+  put('noGoalOffside', ['{P2} slots it past {K}, but the linesman\'s flag is up. No goal.', '{P2} puts it in the net, but he was offside. No goal.',
+    'It is in, but the flag is up against {P2}. The goal is disallowed.', '{P2} finishes, but the linesman has flagged for offside. No goal.',
+    '{P2} has it in the net, but {ref} rules it out. Offside.']);
+  put('penAppeal', ['{P2} goes down under {P}\'s challenge, and the crowd want a penalty. {ref} waves play on.', '{P2} goes over in the area, and there are appeals for a penalty. {ref} is not interested.',
+    'Penalty, say the {O} players, after {P} takes {P2}\'s legs. {ref} says no.', '{P2} is down in the box after {P}\'s tackle. Strong appeals, but no penalty.',
+    '{P} gets the ball, and {P2} goes down. {ref} gives nothing.', 'A shout for a penalty as {P2} goes down under {P}\'s challenge. {ref} says it was fair.']);
+
+  /* v426 : the last one- and two-line banks */
+  grow('buildupFormation235', [], ['{A} line up in the old 2-3-5, five forwards across the front.', 'It is the pyramid for {A}, two backs and three half-backs behind a forward line of five.']);
+  grow('buildupFormationWM', [], ['{A} play the W-M, the centre-half sitting between the full-backs.', 'Three at the back for {A} in the W-M, with the inside men coming deep for the ball.']);
+  grow('saveLevel', [], ['{K} keeps out {P}, and it stays level.', 'Good hands from {K} to stop {P}, and still nothing between the sides.']);
+  grow('tbOver', [], ['{P2} is clean through on {K}, and he drags it past the post.', '{P2} has the chance, one against one with {K}, and puts it over.']);
+  grow('fkGoal_deflect', ["{P}'s free-kick takes a deflection off the wall and beats the goalkeeper. {gp}."], ['{P} hits the free-kick into the wall, it takes a wicked deflection, and {K} is wrong-footed! {gp}!', 'A deflection off the wall from {P}\'s free-kick, and it loops over {K}! {gp}!', '{P}\'s free-kick clips {D} in the wall, changes direction, and it is in! {gp}!']);
+  grow('fkGoal_wall', [], ['Over the wall from {P}, and {K} cannot reach it! {gp}!', '{P} curls the free-kick round the wall and in! {gp}!']);
+  grow('fkGoal_top', [], ['{P} whips the free-kick into the top corner, and {K} has no chance! {gp}!', 'What a free-kick from {P}, right in the top corner! {gp}!']);
+  grow('penMiss_Bar', [], ['{P} hits the penalty against the crossbar, and it is scrambled away!', '{P} goes for power from the spot, and it smacks the bar!']);
+  grow('crGoal_head', [], ['{P} crosses, {P2} gets up above {D}, and heads it in! {gp}!', 'A lovely centre from {P}, and {P2} heads it past {K}! {gp}!']);
+  grow('crGoal_foot', [], ['{P} pulls it back, and {P2} side-foots it past {K}! {gp}!', 'The cross from {P}, {P2} is there at the far post, and he volleys it in! {gp}!']);
+  grow('goalAssist_square', [], ['{P2} rolls it across to {P}, and he cannot miss! {gp}!', 'Unselfish from {P2}, who squares it for {P} to walk it in! {gp}!']);
+  grow('goalAssist_slide', [], ['{P2} slides the ball through, {P} goes past {D}, and buries it! {gp}!', 'A defence-splitting pass from {P2}, and {P} slots it past {K}! {gp}!']);
+  grow('goalAssist_win', [], ['{P2} nicks it off {D}, {P} takes it on, and scores! {gp}!', 'A tackle from {P2} in the middle of the park, and {P} finishes the job! {gp}!']);
+  grow('goalAssist_flank', [], ['{P2} gets to the byline, cuts it back, and {P} scores! {gp}!', 'Down the wing goes {P2}, and {P} is waiting in the middle to finish it! {gp}!']);
+  grow('goalAssist_layback', [], ['{P2} tees it up for {P}, and he hits it on the half-volley past {K}! {gp}!', 'A little lay-off from {P2}, and {P} lets fly! {gp}!']);
+  grow('goalAssist_onetwo', [], ['{P} plays the one-two with {P2}, goes past {D}, and scores! {gp}!', 'Give and go between {P} and {P2}, and {P} finishes it off! {gp}!']);
+  grow('goalAssist_press', [], ['{P2} hustles {D} off the ball, and {P} makes them pay! {gp}!', '{P2} chases it down, wins it, and {P} puts it away! {gp}!']);
+  grow('goalAssist_fk', [], ['{P2} floats the free-kick in, and {P} gets the vital touch! {gp}!', 'From {P2}\'s free-kick, {P} gets in front of {D} and turns it in! {gp}!']);
+})();
+
+/* v426 : bigger pop-up stage banks (the review found a stage line came round 25-28 times a season), "Here is" kept to one bank,
+   the penalty stages split so each step has its own small pool. Same hashed picks as v424. */
+RM_POP_OPEN = ['{V} picks it up in midfield...', '{V} wins it back for {A}...', '{A} on the attack now...', 'Here is {V}...', '{V} carries it forward...',
+  '{A} break quickly...', '{V} down the left...', '{V} down the right...', 'Long ball forward from {V}...', '{V} brings it out of defence...',
+  '{A} knock it about, looking for a way through...', 'Good work from {V}...', '{V} gets away from his man...', 'Now {A} come forward...', '{V} on the ball...',
+  '{V} intercepts for {A}...', '{V} nicks it off {D}...', '{V} heads it down for {A}...', '{V} plays it short...', '{V} strides forward...',
+  'Quick throw from {V}...', '{V} finds a little space...', '{V} goes past {D}...', '{V} looks up...', '{A} switch it to the right...',
+  '{A} switch it to the left...', '{V} breaks out of midfield...', '{V} with a neat flick...', '{A} have numbers going forward...', '{V} takes on {D}...',
+  '{V} skips past a challenge...', '{K} rolls it out to {V}...', 'Long throw from {V}...', '{V} comes inside...', '{V} lays it back...',
+  '{A} pass their way forward...', '{V} chests it down...', '{V} wins the header in midfield...', '{V} turns away from {D}...', '{V} feeds it forward...',
+  '{V} wriggles free...', '{A} pour forward...', '{V} keeps it in play...', 'A long ball forward from {V}...', '{V} picks out a team-mate...',
+  '{V} bursts through the middle...', 'Back comes {A}...', '{V} has time on the ball...'];
+RM_POP_DEV = ['Looking for {F}...', 'Into {F}...', '{F} makes the run...', 'Into the area for {F}...', '{F} has a yard on his man...', 'He looks up...',
+  'Plays it inside to {F}...', '{F} turns...', 'Knocked on for {F}...', '{F} is in space...', 'Across to {F}...', 'Through to {F}...',
+  '{F} is on the move...', 'Out wide to {F}...', '{F} gets goal-side of {D}...', 'One-two with {F}...', '{F} holds off {D}...', 'Cut back for {F}...',
+  'It falls to {F}...', '{F} drifts in at the far post...', 'Flicked on to {F}...', '{F} gets in front of {D}...', 'Now {F}...', '{F} on the edge of the area...',
+  'Laid off to {F}...', '{F} beats one man...', '{F} cuts inside...', 'A ball into the area for {F}...', '{F} gets a yard on {D}...', 'Square to {F}...',
+  '{F} spins away from {D}...', 'Played into the path of {F}...', '{F} peels off to the far post...', 'Chipped forward for {F}...', '{F} has run beyond {D}...',
+  'Back-heeled to {F}...', '{F} is clear of {D}...', 'Threaded through for {F}...', '{F} comes short, then turns...', 'Nodded down for {F}...'];
+RM_POP_SHOT = ['{F} shoots...', '{F} lets fly...', '{F} goes for goal...', '{F} hits it...', '{F}...', '{F} has a go...', '{F} strikes it...', '{F} hits it first time...',
+  '{F} tries his luck...', '{F} pulls the trigger...', '{F} with a drive...', '{F} winds up...', '{F} has a dig...', '{F} tries a curler...', '{F} goes for the far corner...',
+  '{F} goes for the near post...', '{F} with the low shot...', '{F} takes aim...', '{F} on the half-volley...', '{F} lashes at it...', '{F} with the right foot...',
+  '{F} with the left foot...', '{F} has a crack...', '{F} steadies himself...'];
+RM_POP_ANY = ['{F} shapes to shoot...', '{F} gets there first...', '{F}...', '{F} has a sight of goal...', '{F} is in there...', '{F} gets on the end of it...',
+  '{F} rises...', '{F} and {D} go up together...', '{F} gets in ahead of {D}...', '{F} is lurking...', 'It drops for {F}...', '{F} meets it...',
+  '{F} is first to it...', '{F} with a chance...', '{F} is free...', '{F} goes for it...'];
+RM_POP_CORNER = ['Corner to {A}...', '{A} have a corner on the left...', '{A} have a corner on the right...', '{V} trots over to take it...', '{V} sets the ball down by the flag...',
+  'Corner for {A}. The big men go up...', '{V} takes the corner...', '{A} win a corner...', '{V} waves his men forward...', 'Another corner to {A}...'];
+RM_POP_FK = ['Free-kick to {A}...', '{V} is brought down...', 'The whistle goes. {V} was fouled...', '{V} is tripped...', 'Free-kick, twenty-five yards out...',
+  '{D} brings down {V}...', 'Free-kick to {A} on the edge of the area...', '{V} stands over it...', 'The wall lines up...', '{V} is pulled back by {D}...'];
+RM_POP_SETM = ['In it comes...', 'Here it comes...', 'He swings it in...', 'Bodies in the box...', 'He whips it in...', 'He floats it in...', 'Towards the near post...',
+  'Towards the far post...', 'Driven in low...', 'Hung up in the air...', 'A big crowd in the six-yard box...', '{K} comes off his line...', 'Into the mixer...',
+  'Curled in...', 'Played short, then crossed...', 'Delivered into the area...'];
+RM_POP_TBM = ['Only {K} to beat...', '{F} is away...', '{F} bears down on goal...', '{F} is clean through...', '{K} comes out...', '{F} has got away from {D}...',
+  '{F} races clear...', '{D} cannot catch him...', '{F} in on goal...', 'Just {F} and {K} now...'];
+var RM_POP_PEN0 = ['{F} places the ball on the spot...', '{F} picks up the ball...', '{F} will take it...', '{F} puts the ball down...'];
+var RM_POP_PEN1 = ['{K} on his line...', '{K} bounces on his line...', '{K} crouches...', '{K} waits...'];
+var RM_POP_PEN2 = ['{F} runs up...', '{F} steps up...', 'A short run-up from {F}...', '{F} begins his run...'];
+RM_POP_PEN = [RM_POP_PEN0[0], RM_POP_PEN1[0], RM_POP_PEN2[0]];
+RM_POP_NOTHING = [
+  ['CLEARED', '{D} gets across and clears.'], ['CLEARED', '{D} heads it away.'], ['CLEARED', '{D} is first to it and clears his lines.'], ['CLEARED', 'Hacked away by {D}.'],
+  ['CLEARED', '{D} boots it into the stand.'], ['CLEARED', '{D} gets his head to it, and it is away.'], ['CLEARED', '{D} clears it upfield.'], ['CLEARED', '{K} comes out and gathers.'],
+  ['CLEARED', '{K} is off his line to claim it.'],
+  ['TACKLE', '{D} times his tackle and comes away with the ball.'], ['TACKLE', 'A firm challenge from {D}, and that is the end of that.'], ['TACKLE', '{D} slides in and wins it.'],
+  ['TACKLE', '{D} steps in and takes it off {F}.'], ['TACKLE', '{D} gets a foot in.'], ['TACKLE', '{F} is crowded out by {D}.'],
+  ['OFFSIDE', 'The flag goes up. {F} had strayed offside.'], ['OFFSIDE', 'Offside. {F} went too early.'], ['OFFSIDE', 'The linesman flags {F} offside.'],
+  ['OFFSIDE', '{O} step up, and {F} is caught offside.'],
+  ['POSSESSION', '{F} overruns it, and {O} have it back.'], ['POSSESSION', 'A loose pass, and {O} pick it up.'], ['POSSESSION', '{F} loses it, and the move breaks down.'],
+  ['POSSESSION', '{F} takes one touch too many, and {D} nicks it.'], ['POSSESSION', 'The pass is too heavy for {F}.'], ['POSSESSION', '{F} slips at the vital moment.'],
+  ['OUT OF PLAY', 'The final ball is overhit and runs out for a goal-kick.'], ['OUT OF PLAY', '{F} cannot keep it in. Throw-in to {O}.'], ['OUT OF PLAY', 'The cross is too long, and it goes out for a goal-kick.'],
+  ['OUT OF PLAY', '{F} miscontrols it, and it runs out of play.'], ['OUT OF PLAY', 'The ball is overhit, and {K} watches it go out.']];
+RM_POP_ORDINARY = ['{A} keep the ball, passing it about at the back.', 'A spell of head tennis in midfield.', '{V} has a word with the referee.',
+  'A long throw from {V}, but nothing comes of it.', 'The crowd are getting behind {A} now.', '{O} are content to sit back for a while.',
+  'Scrappy stuff in the middle of the park.', '{K} takes his time over the goal-kick.', '{A} are keeping it tight at the moment.', 'A breather while {V} has his boot laces seen to.',
+  '{K} kicks it long, and {V} wins the header.', '{V} plays it back to {K}.', 'A free-kick to {A} in their own half.', '{V} is penalised for a push.',
+  '{V} and {D} have words. The referee steps in.', 'Throw-in to {A} on the halfway line.', '{A} play it square across the back.', 'The ball goes out for a throw. {V} takes it quickly.',
+  '{V} goes down, but the referee waves play on.', 'A goal-kick for {A}. {K} hoofs it upfield.', '{V} shouts for the ball, but it does not come.', '{A} are passing it sideways, looking for a gap.',
+  'The trainer is on, briefly, for {V}.', '{V} is pulled up for a foul on {D}.', '{K} rolls it out to {V}.', 'The ball has gone into the crowd. A short wait.',
+  'A fifty-fifty in midfield, and the ball runs loose.', '{V} is caught in possession, and {O} break up the play.', '{A} are trying to slow it down.', '{D} shepherds it out for a goal-kick.'];
+/* build-up and context pools : modern phrasing out, a fourth-wall line out, more variety */
+(function v426BuildPools(){
+  function fix(arr, from, to){ var i = arr.indexOf(from); if (i >= 0) arr[i] = to; }
+  function more(arr, add){ add.forEach(function(x){ if (arr.indexOf(x) < 0) arr.push(x); }); }
+  if (typeof ERA_SHARED_BUILD !== 'undefined' && ERA_SHARED_BUILD['1981']){
+    var S = ERA_SHARED_BUILD['1981'] = ERA_SHARED_BUILD['1981'].slice();
+    fix(S, '{A} press high. {P} is first to the loose ball.', '{A} close them down quickly. {P} is first to the loose ball.');
+    more(S, ['{P} wins a tackle and sets off for {A}.', 'A neat interchange, and {P} is moving into the area.', '{P} gets away from his marker.',
+      'Down the middle for {A}, and {P} is free.', '{P} turns his man on the edge of the box.', 'A quick free-kick, and {P} is away.',
+      '{P} takes a return pass and moves into space.', 'A long ball in behind, and {P} has made the run.', '{P} nutmegs his man and carries on.',
+      '{A} find a gap down the side, and {P} is in.', 'Played out from the back by {A}. {P} has it now.', '{P} picks up the second ball.',
+      '{A} win it back high up the field, and {P} is on it.', '{P} jinks inside and looks for the target.']);
+  }
+  if (typeof ERA_PROVIDER_BUILD !== 'undefined' && ERA_PROVIDER_BUILD['1981']){
+    var Pv = ERA_PROVIDER_BUILD['1981'] = ERA_PROVIDER_BUILD['1981'].slice();
+    fix(Pv, 'A teasing cross is being prepared by {P}.', '{P} shapes to cross.');
+    fix(Pv, '{P} pulls it back from the byline in his mind, looking for the man.', '{P} gets to the bye-line, looking for the man in the middle.');
+    fix(Pv, '{P} beats the full-back and looks for a colleague in the middle.', '{P} beats the full-back and looks for a team-mate in the middle.');
+    more(Pv, ['{P} gets past his man on the outside.', '{P} has it on the touchline, and nobody is closing him down.', 'Out to {P}, who looks up.',
+      '{P} takes on the full-back again.', 'A nice ball out to {P} on the flank.', '{P} is in acres of space on the wing.', '{P} dummies, and gets to the line.',
+      '{P} works a yard of space for the cross.']);
+  }
+  if (typeof ERA_OFF_BUILD !== 'undefined' && ERA_OFF_BUILD['1981']){
+    var O = ERA_OFF_BUILD['1981'] = ERA_OFF_BUILD['1981'].slice();
+    more(O, ['A nasty challenge, and the players are squaring up.', '{ref} is running over, and he means business.', 'That was a dreadful tackle, and there is a bit of a scuffle.']);
+  }
+  if (typeof ERA_CONTEXT_BUILD !== 'undefined'){
+    var C = window.ERA_CONTEXT_BUILD_80 = JSON.parse(JSON.stringify(ERA_CONTEXT_BUILD)); /* the 1980s copy; older eras keep theirs */
+    C.derby = C.derby.filter(function(x){ return x !== 'You can feel it in a game like this.'; });
+    more(C.derby, ['A real derby atmosphere here.', 'There is no love lost between these two.', 'Local pride at stake, and it shows.']);
+    more(C.late, ['Not long left now.', 'The clock is ticking down.', 'The last few minutes now.']);
+    more(C.early, ['Plenty of early endeavour here.', 'A bright opening to the game.']);
+    more(C.afterHalf, ['A brisk start to the second half.', 'The second half is only a few minutes old.']);
+    more(C.chasing, ['{A} have to come out now.', 'Time for {A} to throw caution to the wind.']);
+    more(C.protecting, ['{A} are keeping it tight now.', '{A} have dropped deeper to hold on.']);
+    more(C.level, ['Very little to choose between them.', 'Honours even so far.']);
+    more(C.weather, ['The wind is playing tricks with the ball.', 'Hard to keep the ball under control in this.']);
+    more(C.crowd, ['The home end are in good voice.', 'The noise is rising around the ground.']);
+  }
+})();
 
 function eraScoreText(us, opp){
   if (!live || !live.f) return (us||0) + ' - ' + (opp||0);
@@ -59582,7 +59990,7 @@ function v405ShowProfile(id, targetId){
   if (typeof v408WireSpread==='function') v408WireSpread(el);
 }
 
-var RETROMATCH_VERSION = 'v425'; /* v418 : World Cup screen is the approved wallchart (real results as they stand on the save date, finals and bracket filling in as played, buttons only, single title); Mick Harford's hair corrected to dark from a photo source. */ /* v417 : urgent home-page fix. Every blue or underlined link is now a button (yellow chips with a selected state on the 80s skin), no spaced colons on screen, the team-sheet deadline reads off the real match date and kick-off, and the 1981-82 League Cup First Round uses the real ties and byes. */ /* v416 : Phase 3 continue. Scotland 1975-76 and 1970-71 squads filled from sourced appearance lists, Wikipedia season/career-span pages and Wikidata P54/P413; 1970 and 1975 stay Coming later. */ /* v414 : Phase 3 continue. England 1970-71 Divisions 2-4 remaining 32 all-generated or near-all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1970-71 season page exists). 1970 and 1975 stay Coming later. */ /* v413 : Phase 3 continue. England 1975-76 Divisions 2-4 remaining 63 all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1975-76 season page exists). 1975 stays Coming later. */ /* v412 : Phase 3 start. England 1975-76 position retags (QPR, Luton, Hereford, Spurs, Forest) and real First Division squads for Birmingham, Wolves, Burnley and Sheffield United, sourced from Wikipedia season pages, 11v11 and Neil Brown (Wayback). England 1970-71 0-GK dumps replaced with sourced squads (Everton, West Bromwich Albion, Oxford, Orient, Halifax, Rotherham, Wrexham, Barnsley) and Luton 1970 junk rows removed. 1975 stays Coming later (Scotland not ready). Existing 1975/1970 saves keep the squads they were opened with. No engine change, no start-screen era opened. v411 : 1981-82 historical league fixtures for all four English divisions (played dates; FIXTURES_1981_82.md). No engine change. v410 : tidy-up: other-league tables in 1980s saves (WORLD_SEEDS for 1981-82 and 1986-87, one division per screen, missing countries hidden); formation wrinkles count in matches (4-4-2 in the hole, midfield-three two-holding / one-holding) as small capped effects within TACTICAL_EXTRAS_CAP 3.5, same rules for AI; 1981-82 regional scout slots filled with retired real players who have a sourced nationality, else generated and flagged in data only; sourced 1980s keeper shirts where found. No new v396 preview shipped live. v409 : United and Luton Town opening-squad league career tables to the save cut (29 Aug 1981 / 23 Aug 1986), current-spell apps counted through the previous complete season. No match-engine change. v408 : 1980s Action File centrepiece on the Squad screen, wired to live attributes, caps, personality and league careers (no invented careers); Data tab and unsourced wording removed; formation wrinkles on the pitch are visual only; transfers and league tables use section buttons; styles show the selected pair and point to the week's training. No match-engine change. v407 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v426'; /* v418 : World Cup screen is the approved wallchart (real results as they stand on the save date, finals and bracket filling in as played, buttons only, single title); Mick Harford's hair corrected to dark from a photo source. */ /* v417 : urgent home-page fix. Every blue or underlined link is now a button (yellow chips with a selected state on the 80s skin), no spaced colons on screen, the team-sheet deadline reads off the real match date and kick-off, and the 1981-82 League Cup First Round uses the real ties and byes. */ /* v416 : Phase 3 continue. Scotland 1975-76 and 1970-71 squads filled from sourced appearance lists, Wikipedia season/career-span pages and Wikidata P54/P413; 1970 and 1975 stay Coming later. */ /* v414 : Phase 3 continue. England 1970-71 Divisions 2-4 remaining 32 all-generated or near-all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1970-71 season page exists). 1970 and 1975 stay Coming later. */ /* v413 : Phase 3 continue. England 1975-76 Divisions 2-4 remaining 63 all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1975-76 season page exists). 1975 stays Coming later. */ /* v412 : Phase 3 start. England 1975-76 position retags (QPR, Luton, Hereford, Spurs, Forest) and real First Division squads for Birmingham, Wolves, Burnley and Sheffield United, sourced from Wikipedia season pages, 11v11 and Neil Brown (Wayback). England 1970-71 0-GK dumps replaced with sourced squads (Everton, West Bromwich Albion, Oxford, Orient, Halifax, Rotherham, Wrexham, Barnsley) and Luton 1970 junk rows removed. 1975 stays Coming later (Scotland not ready). Existing 1975/1970 saves keep the squads they were opened with. No engine change, no start-screen era opened. v411 : 1981-82 historical league fixtures for all four English divisions (played dates; FIXTURES_1981_82.md). No engine change. v410 : tidy-up: other-league tables in 1980s saves (WORLD_SEEDS for 1981-82 and 1986-87, one division per screen, missing countries hidden); formation wrinkles count in matches (4-4-2 in the hole, midfield-three two-holding / one-holding) as small capped effects within TACTICAL_EXTRAS_CAP 3.5, same rules for AI; 1981-82 regional scout slots filled with retired real players who have a sourced nationality, else generated and flagged in data only; sourced 1980s keeper shirts where found. No new v396 preview shipped live. v409 : United and Luton Town opening-squad league career tables to the save cut (29 Aug 1981 / 23 Aug 1986), current-spell apps counted through the previous complete season. No match-engine change. v408 : 1980s Action File centrepiece on the Squad screen, wired to live attributes, caps, personality and league careers (no invented careers); Data tab and unsourced wording removed; formation wrinkles on the pitch are visual only; transfers and league tables use section buttons; styles show the selected pair and point to the week's training. No match-engine change. v407 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
