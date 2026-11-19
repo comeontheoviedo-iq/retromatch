@@ -4722,6 +4722,10 @@ body.theme-match .chip-yellow.rise{background:var(--ink);color:var(--yellow);}
   letter-spacing:0.01em;
 }
 #office-wire-tray .wire-head{font-weight:700;}
+#office-wire-tray .wire-act{margin-top:6px;white-space:normal;text-align:right;font-weight:700;}
+#office-wire-tray .wire-act .btn{font-size:12px;padding:2px 10px;}
+#office-wire-tray .wire-archive summary{cursor:pointer;color:var(--dos-cyan);margin:6px 0;}
+#office-wire-tray .wire-archive-list{max-height:320px;overflow:auto;opacity:.85;}
 #loans-box select, #scout-region-box select{font-size:14px;max-width:220px;}
 </style>
 <style id="v408-chip-skin">
@@ -8586,7 +8590,12 @@ function genOppSquad(clubStrength, seedBase, oppName){
   var centre = oppName ? aiRepCentre(oppName) : 2;
   var pools = null;
   var euStar = (!profile && oppName && typeof euroStarProfile==='function') ? euroStarProfile(oppName) : null; /* v319 : a real foreign club's key players */
-  if (euStar){
+  var v436sco = (!profile && !euStar && oppName && typeof v436ScoSquad==='function') ? v436ScoSquad(oppName) : null;
+  if (v436sco){ /* v436 : a Scottish club in an English save plays its real men */
+    pools = {GK:[], FB:[], HB:[], FWD:[]};
+    v436sco.forEach(function(p, idx){ if (p && p.n && !p.gen) pools[slotFor(p.pos)].push({p:p, idx:idx}); });
+    Object.keys(pools).forEach(function(k){ pools[k].sort(function(a,b){ return (b.p.rep-a.p.rep) || (a.idx-b.idx); }); pools[k] = pools[k].map(function(x){ return x.p; }); });
+  } else if (euStar){
     pools = {GK:[], FB:[], HB:[], FWD:[]};
     var posMap = {G:'GK', B:'FB', H:'HB', F:'FWD'};
     euStar.p.slice().sort(function(a,b){ return b.rep-a.rep; }).forEach(function(p){ pools[posMap[p.pos]||'FWD'].push({n:p.n, pos:null, rep:p.rep}); });
@@ -8614,6 +8623,13 @@ function genOppSquad(clubStrength, seedBase, oppName){
       counter++;
     }
   });
+  if (!profile && oppName && typeof v436ClubNation === 'function' && v436ClubNation(oppName) && v436Pools(v436ClubNation(oppName))){ /* v436 : no two made-up men in one side share a surname (no dice used) */
+    var v436seen = {}, v436sur = function(n){ return String(n).split(' ').slice(1).join(' '); };
+    players.forEach(function(p){ if (!p.gen) v436seen[v436sur(p.n)] = 1; });
+    players.forEach(function(p, i){ if (!p.gen) return; var k = 0;
+      while (v436seen[v436sur(p.n)] && k < 20){ var h = progHash(oppName+'|'+seedBase+'|'+i+'|'+k); p.n = v436ForeignName(v436ClubNation(oppName), (h % 997) / 997, ((h >>> 11) % 991) / 991); k++; }
+      v436seen[v436sur(p.n)] = 1; });
+  }
   return players;
 }
 
@@ -10339,7 +10355,7 @@ var SEASON_RULES = {
     {from:1978, foreignPlayers:'open', foreignPlayerLimit:2, foreignPlayerNote:"Open from 1978-79, after the Football League AGM lifted the 1931 two-year residency rule following the February 1978 EEC freedom-of-movement ruling. From 28 September 1978, Department of Employment work permits for overseas professionals were limited to two established foreign players per club (Hansard, 13 Dec 1978). Home Nations, Ireland and the Commonwealth remain exempt."},
     {from:1960, leagueCupName:'Football League Cup'},
     {from:1981, pointsForWin:3},
-    {from:1982, leagueCupName:'Milk Cup'},
+    {from:1981, leagueCupName:'Milk Cup'}, /* v436 : Wikipedia, 1981-82 Football League Cup : 'known as the Milk Cup for sponsorship reasons' (the first Milk Cup) */
     {from:1985, europeBan:true},
     {from:1986, playOffs:true, subsNamed:2, subsUsedCup:2, leagueCupName:'Littlewoods Cup'},
     {from:1987, subsUsedLeague:2},
@@ -11374,7 +11390,7 @@ function pickPreseasonOpponent(kind, used){
     var scoNames = ['Celtic','Rangers','Hearts','Hibernian','Aberdeen','Dundee United','Dundee','Kilmarnock','Partick Thistle','Motherwell','St Mirren'];
     scoNames.forEach(add);
   } else if (kind==='foreign'){
-    var foreign = ['Juventus','Milan','Internazionale','Torino','Roma','Barcelona','Real Madrid','Atletico Madrid','Valencia','Athletic Bilbao','Hamburger SV','Bayern Munich','Borussia Moenchengladbach','Eintracht Frankfurt','Feyenoord','Ajax','Benfica','Sporting CP','Anderlecht','Standard Liege'];
+    var foreign = ['Juventus','Milan','Internazionale','Torino','Roma','Barcelona','Real Madrid','Atl\u00e9tico Madrid','Valencia','Athletic Bilbao','Hamburger SV','Bayern Munich','Borussia M\u00f6nchengladbach','Eintracht Frankfurt','Feyenoord','Ajax','Benfica','Sporting CP','Anderlecht','Standard Li\u00e8ge']; /* v436 : names as the clubs spell them */
     foreign.forEach(add);
   }
   if (!names.length && kind!=='nonleague'){
@@ -11813,9 +11829,27 @@ function pickOppNamedSubs(oppXI, oppName, seed){
   var pool = [];
   var full = [];
   try { if (typeof ensureClubSquad==='function') full = ensureClubSquad(oppName) || []; } catch (e) { full = []; }
+  if (!full.length && typeof v436ScoSquad === 'function' && v436ScoSquad(oppName)){ /* v436 : the rest of a Scottish club's real squad */
+    var v436av = (oppXI||[]).filter(function(p){ return p && typeof p.ca === 'number'; }), v436a = v436av.length ? v436av.reduce(function(t, p){ return t + p.ca; }, 0) / v436av.length : 60;
+    full = v436ScoSquad(oppName).filter(function(p){ return p && p.n && !p.gen && !/goalkeeper/i.test(p.pos || ''); }).map(function(p, i){ var sl = slotFor(p.pos), ca = Math.round(clamp(v436a - 3, 15, 95));
+      return Object.assign({n:p.n, pos:p.pos, slot:sl, ca:ca, rep:p.rep || 2, apps:0, goalsSeason:0, gen:false}, buildAttributes(ca, sl, (seed||1) * 7 + i * 3.1)); });
+  }
   (full||[]).forEach(function(p){
     if (p && p.n && !used[p.n] && !(typeof unavailableReason==='function' && unavailableReason(p))) pool.push(p);
   });
+  if (pool.length < want && oppName && oppName !== ourClubName){ /* v436 : a side with no researched squad still names its substitutes (made-up, from its own country's names), seeded so the dice are not touched */
+    var v436base = (oppXI||[]).filter(function(p){ return p && typeof p.ca === 'number'; }), v436avg = v436base.length ? v436base.reduce(function(t, p){ return t + p.ca; }, 0) / v436base.length : 60;
+    var v436nat = (typeof v436ClubNation === 'function') ? v436ClubNation(oppName) : null;
+    for (var v436g = 0; pool.length < want && v436g < 6; v436g++){
+      var v436sd = (seed||1) * 31 + v436g * 7 + 7;
+      var v436man = v401WithSeededMath(progHash(oppName + '|' + v436sd), function(){
+        var nm = (v436nat && v436Pools(v436nat)) ? v436ForeignName(v436nat, Math.random(), Math.random()) : pickGeneratedName(v436ScoMaster(oppName) ? 'Scotland' : undefined);
+        var slot = v436g % 2 ? 'FWD' : 'HB', ca = Math.round(clamp(v436avg - 4, 15, 95));
+        return Object.assign({n:nm, pos:null, slot:slot, ca:ca, rep:repNearestCA(ca), age:20 + Math.floor(Math.random() * 10), apps:0, goalsSeason:0, gen:true}, buildAttributes(ca, slot, v436sd));
+      });
+      if (!used[v436man.n]){ used[v436man.n] = 1; pool.push(v436man); }
+    }
+  }
   var out = [], s = (seed||1) * 17;
   while (out.length < want && pool.length){
     s = s * 1.7 + 3;
@@ -15907,7 +15941,10 @@ function dateFromIso(iso){ var p=iso.split('-').map(Number); return new Date(p[0
    the next Tuesday or Wednesday -- the two real weekday replay nights,
    never a Sunday -- is both period-accurate and guarantees a proper few
    days' gap rather than the day immediately following. */
+/* v436 : real FA Cup Final replay dates (1981-82 : Tottenham Hotspur v Queens Park Rangers, Thursday 27 May 1982 at Wembley) */
+var REAL_FA_FINAL_REPLAY = {'1982-05-22':'1982-05-27'};
 function nextMidweekReplayDate(afterDate){
+  try { if (!(typeof isSco === 'function' && isSco())){ var fk = Object.keys(REAL_FA_FINAL_REPLAY); for (var fi = 0; fi < fk.length; fi++){ var fd = dateFromIso(fk[fi]), rd = dateFromIso(REAL_FA_FINAL_REPLAY[fk[fi]]); if (afterDate.getTime() >= fd.getTime() && afterDate.getTime() < rd.getTime()) return rd; } } } catch(e){}
   var d = new Date(afterDate.getTime() + 86400000); /* start looking from the day after the original tie, never the same day */
   while (d.getDay() !== 2 && d.getDay() !== 3) d = new Date(d.getTime() + 86400000); /* 2=Tuesday, 3=Wednesday */
   return d;
@@ -20824,9 +20861,127 @@ var EU_NAME_GROUPS = {
   me:{cc:'TUR GRE CYP ISR MLT', f:'Mehmet Ahmet Mustafa Yannis Nikos Giorgos Kostas Dimitris Mario Joseph Avi Yossi', s:'Yılmaz Kaya Demir Papadopoulos Georgiou Nikolaou Cohen Levi Borg Camilleri Vella Çelik'}
 };
 var EU_CC_OF = null;
+/* v436 : country name pools for computer-made players at foreign clubs with no researched squad (Chris, 19 Nov : realistic made-up
+   names by the club's country, era-plausible, correct diacritics, never English names on a foreign side). Common given names and
+   surnames of each country for men born about 1945-1968. Any pairing that matches a real person in the game's data, or a famous
+   player of the period in V436_FAMOUS, is skipped. Real foreign squads are a later task (WIP_NOTES). */
+var V436_FOREIGN_NAMES = {
+  Italy:{f:'Giuseppe Mario Luigi Franco Giovanni Sergio Renato Alberto Enrico Roberto Massimo Maurizio Claudio Stefano Fabrizio Giorgio Marco Luciano Gianni Alessandro Andrea Silvano Daniele Ivano Walter Fulvio Aldo Elio Ernesto Piero Domenico Vincenzo Salvatore Nicola Antonio Gianfranco Pierluigi Carlo Ugo',
+    s:'Bianchi Ferrari Rinaldi Colombo Galli Moretti Fontana Barbieri Bellini Serra Marchetti Mancini Lombardi Ricci Marino Greco Gallo Testa Villa Martini Farina Cattaneo Pellegrini Palumbo Sartori Fumagalli Brambilla Longoni Crippa Ghezzi Bonfanti Mariani Cerutti Pozzi Rota Arrigoni Bertolini Gatti Valsecchi Monti Orlandi Santoro Fiore Caputo Vitale Ruggiero'},
+  Spain:{f:'José Manuel Antonio Francisco Luis Juan Carlos Pedro Joaquín Fernando Rafael Miguel Ángel Jesús Javier Julio Ramón Enrique Alberto Andrés Vicente Tomás Emilio Ricardo Santiago Ignacio Alfonso Agustín Jaime Félix',
+    s:'García Fernández López Martínez Sánchez Pérez Gómez Ruiz Díaz Torres Navarro Molina Ortega Castro Vidal Morales Iglesias Romero Jiménez Moreno Muñoz Álvarez Gutiérrez Serrano Blanco Ramos Gil Domínguez Vázquez Suárez Prieto Cabrera Lozano Calvo Rubio Herrero Medina Campos Vega Fuentes'},
+  Basque:{f:'José Javier Luis Juan Manuel Andoni Iñaki Ignacio Jesús Joseba Patxi Ángel Aitor Koldo Txema Ricardo Julio Carlos',
+    s:'Echeverría Arrieta Urrutia Etxeberria Aguirre Gorostiza Ibarra Olabarria Zabala Uriarte Bilbao Elorza Garmendia Iturbe Mendizábal Arana Ugarte Lasa Azkue Barrenetxea Olano'},
+  Portugal:{f:'José Manuel António Francisco João Carlos Jorge Fernando Rui Paulo Luís Mário Joaquim Vítor Álvaro Augusto Fernando Henrique Nuno Pedro Armando Diamantino Domingos',
+    s:'Silva Santos Ferreira Pereira Oliveira Costa Rodrigues Martins Sousa Fernandes Gonçalves Gomes Lopes Marques Almeida Ribeiro Pinto Carvalho Teixeira Moreira Correia Mendes Nunes Soares Vieira Monteiro Cardoso Rocha Neves Coelho Cruz Antunes Matos Fonseca Lourenço'},
+  'West Germany':{f:'Hans Karl Heinz Klaus Peter Werner Horst Günter Dieter Jürgen Walter Rolf Manfred Wolfgang Bernd Uwe Thomas Michael Ralf Frank Norbert Holger Rainer Lothar Detlef Harald Volker Gerhard Udo Siegfried',
+    s:'Schmidt Schneider Fischer Weber Wagner Becker Hoffmann Koch Richter Bauer Klein Wolf Schröder Neumann Schwarz Zimmermann Braun Krüger Hofmann Hartmann Lange Werner Krause Lehmann Köhler Herrmann König Walter Mayer Huber Kaiser Fuchs Peters Lang Scholz Möller Jung Hahn Vogel Friedrich Keller Günther'},
+  Austria:{f:'Josef Franz Johann Karl Friedrich Herbert Walter Gerhard Peter Helmut Kurt Ernst Rudolf Günter Robert Reinhard Erich Alfred Heribert',
+    s:'Gruber Huber Bauer Wagner Pichler Steiner Moser Mayer Hofer Leitner Berger Fuchs Eder Fischer Schmid Winkler Weber Schwarz Maier Schneider Reiter Mayr Brunner Wimmer Egger Lang Baumgartner Auer'},
+  Switzerland:{f:'Hans Peter Urs Beat René Marcel Heinz Rolf Kurt Daniel Thomas Martin André Claude Pierre Roger Erich Walter',
+    s:'Müller Meier Schmid Keller Weber Huber Schneider Meyer Steiner Fischer Gerber Brunner Baumann Frei Zimmermann Moser Widmer Wyss Graf Roth Favre Rochat Bonvin'},
+  Netherlands:{f:'Jan Piet Henk Willem Kees Johan Cor Wim Gerrit Hans Jacques Ruud Frank René Ton Theo Rob André Dick Arie Jaap Harry Bert Martin Gert Fred Joop Klaas Erik Hennie',
+    s:'Jansen de_Vries van_den_Berg Bakker Visser Smit Meijer de_Boer Mulder de_Groot Bos Vos Peters Hendriks van_Leeuwen Dekker Brouwer de_Wit Dijkstra Smits de_Graaf van_der_Meer Kok Jacobs de_Haan Vermeulen van_den_Heuvel van_der_Veen Hoekstra Verhoeven Koster Prins Huisman Peeters Kuipers'},
+  'Belgium (Flemish)':{f:'Jan Jef Frans Paul Marc Luc Guido Eddy Willy Rudi Patrick Dirk Erwin Johan Gilbert Pieter Wim Hugo Freddy Raymond',
+    s:'Peeters Janssens Maes Jacobs Mertens Willems Claes Goossens Wouters De_Smet Dubois Hermans Michiels Pauwels Vermeulen Lambrechts Verhoeven Van_Damme De_Backer Martens Aerts Cools Coppens Van_Dyck Verbeke Vandenberghe'},
+  'Belgium (Walloon)':{f:'Jean Pierre Michel André Robert Jacques Christian Philippe Daniel Alain Guy Claude Marc Serge Francis Jean-Pierre Jean-Marie Henri Raymond Alphonse',
+    s:'Dubois Lambert Dupont Martin Simon Laurent Leclercq Renard Lejeune Delvaux Collard Lemaire Wauters Hubert Piron Gilson Thiry Dethier Bodart Mathieu Jacquet Remacle Libert Lecocq Gérard Fontaine'},
+  France:{f:'Jean Pierre Michel André Robert Roger Marcel Jacques René Raymond Gérard Patrick Philippe Alain Bernard Christian Daniel Didier Thierry Gilles Serge Yves Dominique Jean-Luc Jean-Marc Hervé',
+    s:'Martin Bernard Dubois Moreau Laurent Simon Lefebvre Roux Girard Fontaine Mercier Blanc Durand Leroy Morel Fournier Lambert Bonnet Faure Rousseau Guerin Muller Henry Perrin Morin Mathieu Clement Gauthier Chevalier Robin Masson Garnier'},
+  Sweden:{f:'Lars Bengt Sven Olle Erik Anders Kjell Per Göran Thomas Stefan Mats Jan Hans Lennart Ulf Bo Rolf Leif Tommy Björn Peter Magnus Håkan Roger',
+    s:'Andersson Johansson Karlsson Nilsson Eriksson Larsson Olsson Persson Svensson Gustafsson Pettersson Jonsson Jansson Hansson Bengtsson Lindberg Lindqvist Lundgren Berglund Sjöberg Holm Nordin Ström Åberg Lindgren Forsberg Sandberg Hedlund Ekström'},
+  Norway:{f:'Ole Knut Per Arne Tor Svein Jan Odd Rune Geir Terje Kjell Bjørn Trond Erik Hans Tom Stein Harald Øyvind',
+    s:'Hansen Johansen Olsen Larsen Andersen Pedersen Nilsen Kristiansen Jensen Karlsen Johnsen Pettersen Eriksen Berg Haugen Hagen Johannessen Andreassen Jacobsen Halvorsen Lie Dahl Bakke Lund Moen Solberg Strand Holm'},
+  Denmark:{f:'Jens Henning Ole Søren Niels Lars Poul Jørgen Bent Erik Flemming Finn Kim Per Torben Preben John Steen Jesper Allan Carsten Michael',
+    s:'Jensen Nielsen Hansen Pedersen Andersen Christensen Larsen Sørensen Rasmussen Jørgensen Petersen Madsen Kristensen Olsen Thomsen Christiansen Poulsen Johansen Møller Mortensen Knudsen Jakobsen Mikkelsen Frederiksen Laursen Holm Dam'},
+  Finland:{f:'Jari Kari Markku Pekka Timo Juha Mikko Matti Seppo Hannu Jukka Heikki Esa Ari Petri Kimmo Raimo Erkki',
+    s:'Virtanen Korhonen Nieminen Mäkinen Hämäläinen Laine Heikkinen Koskinen Järvinen Lehtonen Lehtinen Saarinen Salminen Heinonen Niemi Heikkilä Kinnunen Salonen Turunen Salo Laitinen Tuominen Rantanen Karjalainen'},
+  Hungary:{f:'László István József János Zoltán Sándor Ferenc Gábor Attila Péter Tibor Lajos Imre György Mihály Károly Béla Tamás Csaba András',
+    s:'Nagy Kovács Tóth Szabó Horváth Varga Kiss Molnár Németh Farkas Balogh Papp Takács Juhász Lakatos Mészáros Oláh Simon Rácz Fekete Szilágyi Török Fehér Balázs Gál Kis Szűcs Kocsis Orsós Pintér'},
+  Czechoslovakia:{f:'Jan Josef Jiří Petr Pavel Jaroslav Miroslav Zdeněk Václav Karel Milan František Ladislav Stanislav Vladimír Ján Peter Jozef Dušan Ľubomír',
+    s:'Novák Svoboda Novotný Dvořák Černý Procházka Kučera Veselý Horák Němec Pokorný Marek Pospíšil Hájek Jelínek Král Růžička Beneš Fiala Sedláček Doležal Zeman Kolář Navrátil Čermák Horváth Kováč Varga Tóth Nagy Baláž Molnár'},
+  Poland:{f:'Józef Tadeusz Jan Andrzej Krzysztof Stanisław Marek Zbigniew Jerzy Ryszard Henryk Wojciech Janusz Piotr Kazimierz Mirosław Roman Waldemar Leszek Dariusz',
+    s:'Nowak Kowalski Wiśniewski Wójcik Kowalczyk Kamiński Lewandowski Zieliński Szymański Woźniak Dąbrowski Kozłowski Jankowski Mazur Kwiatkowski Krawczyk Piotrowski Grabowski Nowakowski Pawłowski Michalski Nowicki Adamczyk Dudek Zając Wieczorek Jabłoński Król Majewski Olszewski'},
+  Yugoslavia:{f:'Dragan Zoran Milan Goran Slobodan Nenad Miroslav Dušan Branko Vladimir Predrag Zlatko Ivica Josip Stjepan Mirko Velimir Safet Edin Ljubomir',
+    s:'Petrović Jovanović Nikolić Marković Đorđević Stojanović Ilić Pavlović Stanković Popović Kovačević Babić Marić Jurić Knežević Horvat Novak Perić Vuković Lukić Radović Tomić Simić Mitrović Hadžić Begić Kolar Božić Šarić Milić'},
+  Bulgaria:{f:'Georgi Ivan Dimitar Nikolay Petar Hristo Stoyan Todor Atanas Krasimir Plamen Valentin Lyubomir Boycho Rumen Angel Kiril Zhivko',
+    s:'Ivanov Georgiev Dimitrov Petrov Nikolov Hristov Stoyanov Todorov Iliev Vasilev Atanasov Angelov Petkov Kolev Marinov Popov Yordanov Mihaylov Tsvetkov Stefanov Kostov Velichkov Penev'},
+  Romania:{f:'Gheorghe Ion Nicolae Constantin Vasile Dumitru Ioan Mihai Marin Florin Adrian Costel Dorin Viorel Cornel Mircea Gabriel Aurel Iosif Sorin',
+    s:'Popescu Ionescu Popa Constantin Stan Stoica Dumitru Munteanu Gheorghe Matei Ciobanu Moldovan Ene Lungu Marin Toma Barbu Dinu Nistor Tudor Rusu Mihai Florea Neagu Dobre Cristea Iordache Sandu Lazăr Bălan'},
+  'Soviet Union':{f:'Aleksandr Sergei Vladimir Viktor Yuri Anatoli Nikolai Oleg Andrei Mikhail Valeri Vitali Igor Gennadi Leonid Boris Vladimir Ivan Pavel Tengiz Ramaz',
+    s:'Ivanov Smirnov Kuznetsov Popov Sokolov Lebedev Kozlov Novikov Morozov Petrov Volkov Solovyov Vasilyev Zaitsev Pavlov Semyonov Golubev Vinogradov Bogdanov Vorobyov Fyodorov Mikhailov Belyaev Tarasov Kovalenko Bondarenko Shevchenko Tkachenko Kravchenko'},
+  Greece:{f:'Giorgos Nikos Kostas Dimitris Yannis Vasilis Christos Panagiotis Thanasis Michalis Stelios Takis Lakis Spyros Manolis Antonis Sotiris Stavros',
+    s:'Papadopoulos Georgiou Nikolaou Dimitriou Papageorgiou Ioannou Vasileiou Konstantinou Christodoulou Antoniou Pappas Oikonomou Karagiannis Alexiou Michailidis Papadakis Theodorou Makris Athanasiou Petridis Stavrou Lambrou'},
+  Turkey:{f:'Mehmet Ahmet Mustafa Ali Hüseyin Hasan İbrahim İsmail Osman Yusuf Murat Erdal Cemil Fatih Kemal Selçuk Tanju Rıza Erol Necati Sedat',
+    s:'Yılmaz Kaya Demir Şahin Çelik Yıldız Yıldırım Öztürk Aydın Özdemir Arslan Doğan Kılıç Aslan Çetin Kara Koç Kurt Özkan Şimşek Polat Korkmaz Erdoğan Güneş Aksoy'},
+  Scotland:null
+};
+/* famous players of the period that a random pairing must never make */
+var V436_FAMOUS = ['bruno conti','paolo rossi','franco baresi','giuseppe baresi','giuseppe bergomi','alessandro altobelli','evaristo beccalossi','gabriele oriali','fulvio collovati',
+ 'claudio gentile','marco tardelli','gaetano scirea','antonio cabrini','dino zoff','roberto bettega','franco causio','giancarlo antognoni','francesco graziani','giuseppe dossena','claudio sala','paolo pulici','giuseppe giannini','roberto pruzzo','carlo ancelotti','roberto mancini','gianluca vialli','walter zenga','giuseppe galderisi','salvatore bagni','mario corso',
+ 'hans müller','hansi müller','karl-heinz rummenigge','karlheinz förster','bernd förster','manfred kaltz','horst hrubesch','felix magath','uli stein','paul breitner','klaus augenthaler','dieter hoeneß','uli hoeneß','lothar matthäus','wolfgang overath','franz beckenbauer','gerd müller','sepp maier','harald schumacher','hans-peter briegel','klaus allofs','thomas allofs','rudi völler','uwe bein','frank mill','uwe reinders','wolfgang kraus','bernd schuster','peter briegel','dieter müller','klaus fischer','thomas berthold','norbert eder','ditmar jakobs','andreas brehme','hans-peter',
+ 'johan cruyff','johan neeskens','ruud krol','wim van hanegem','johnny rep','arie haan','marco van basten','ruud gullit','frank rijkaard','ronald koeman','erwin koeman','wim kieft','willem van hanegem','jan wouters','hans van breukelen','piet keizer','wim suurbier','barry hulshoff','rené van de kerkhof','willy van de kerkhof','jan peters','dick schoenaker','tscheu la ling',
+ 'jean-marie pfaff','jan ceulemans','eric gerets','franky vercauteren','walter meeuws','michel renquin','luc millecamps','erwin vandenbergh','rené vandereycken','enzo scifo','georges grün','paul van himst',
+ 'michel platini','alain giresse','jean tigana','dominique rocheteau','marius trésor','maxime bossis','bernard lacombe','patrick battiston','didier six','jean-luc ettori','gérard janvion',
+ 'josé antonio camacho','juanito','santillana','carlos santillana','luis arconada','miguel ángel','jesús maría zamora','josé ramón alexanko','andoni zubizarreta','emilio butragueño','míchel','rafael gordillo','jesús satrústegui','enrique castro','quini','antonio maceda','ricardo gallego','josé antonio','víctor muñoz','julio alberto','francisco carrasco','lobo carrasco','ángel maría villar','manuel sanchís','rafael alkorta','ricardo arias',
+ 'eusébio','fernando chalana','humberto coelho','manuel bento','nené','fernando gomes','paulo futre','jordão','rui jordão','joão alves','carlos manuel','diamantino miranda','antónio oliveira','jaime pacheco','manuel fernandes','antónio sousa',
+ 'zbigniew boniek','grzegorz lato','władysław żmuda','andrzej szarmach','józef młynarczyk','kazimierz deyna','jan tomaszewski',
+ 'lászló kiss','tibor nyilasi','andrás törőcsik','lajos détári','sándor zámbó',
+ 'dragan stojković','safet sušić','zlatko vujović','zoran vujović','vahid halilhodžić','ivica šurjak','velimir zajec','dragan džajić',
+ 'hristo stoichkov','georgi dimitrov','nasko sirakov','plamen getov',
+ 'gheorghe hagi','helmuth duckadam','marius lăcătuș','ladislau bölöni','rodion cămătaru',
+ 'oleg blokhin','rinat dasayev','aleksandr zavarov','igor belanov','anatoli demyanenko','ramaz shengelia','khoren oganesian','vladimir bessonov',
+ 'preben elkjær','michael laudrup','morten olsen','jesper olsen','søren lerby','allan simonsen','frank arnesen','john sivebæk','klaus berggreen',
+ 'ralf edström','thomas ravelli','glenn hysén','glenn strömberg','robert prytz','torbjörn nilsson','hans eskilsson',
+ 'herbert prohaska','hans krankl','walter schachner','friedrich koncilia','bruno pezzey','erich obermayer',
+ 'anton ondruš','antonín panenka','ladislav vízek','zdeněk nehoda','ivo viktor',
+ 'nikos anastopoulos','thomas mavros','fatih terim'];
+
+var V436_FRIENDLY_CC = {'Juventus':'ITA','AC Milan':'ITA','Inter Milan':'ITA','Torino':'ITA','Roma':'ITA','Barcelona':'ESP','Real Madrid':'ESP','Valencia':'ESP','Athletic Bilbao':'ESP','Hamburg':'FRG','Bayern Munich':'FRG','Eintracht Frankfurt':'FRG','Feyenoord':'NED','Ajax':'NED','Benfica':'POR','Sporting CP':'POR','Anderlecht':'BEL','Internazionale':'ITA','Milan':'ITA','Hamburger SV':'FRG','Atletico Madrid':'ESP','Atlético Madrid':'ESP','Borussia Moenchengladbach':'FRG','Borussia Mönchengladbach':'FRG','Standard Liege':'BEL','Standard Liège':'BEL'};
+var V436_CC_NATION = {ITA:'Italy',ESP:'Spain',POR:'Portugal',FRG:'West Germany',GDR:'West Germany',AUT:'Austria',SUI:'Switzerland',NED:'Netherlands',BEL:'Belgium (Flemish)',FRA:'France',SWE:'Sweden',NOR:'Norway',DEN:'Denmark',FIN:'Finland',HUN:'Hungary',TCH:'Czechoslovakia',POL:'Poland',YUG:'Yugoslavia',BUL:'Bulgaria',ROU:'Romania',URS:'Soviet Union',GRE:'Greece',CYP:'Greece',TUR:'Turkey'};
+var V436_CLUB_NATION = {'Athletic Bilbao':'Basque','Real Sociedad':'Basque','Standard Liège':'Belgium (Walloon)','Standard Liege':'Belgium (Walloon)','RFC Liège':'Belgium (Walloon)','Charleroi':'Belgium (Walloon)','Anderlecht':'Belgium'};
+var V436_STAR_ALIAS = {'Internazionale':'Inter Milan','Milan':'AC Milan','Hamburger SV':'Hamburg'};
+function v436ClubCC(club){
+  if (!club) return null;
+  if (!EU_CC_OF){ EU_CC_OF = {}; EURO_CLUBS.forEach(function(cl){ EU_CC_OF[EU_ALIAS[cl[0]] || cl[0]] = cl[1]; }); }
+  return V436_FRIENDLY_CC[club] || EU_CC_OF[club] || null;
+}
+function v436ClubNation(club){
+  if (!club) return null;
+  if (V436_CLUB_NATION[club]) return V436_CLUB_NATION[club];
+  var cc = v436ClubCC(club); return cc ? (V436_CC_NATION[cc] || null) : null;
+}
+var V436_POOL_CACHE = {}, V436_FAMOUS_SET = null;
+function v436Pools(nation){
+  if (V436_POOL_CACHE[nation]) return V436_POOL_CACHE[nation];
+  var gs = nation === 'Belgium' ? [V436_FOREIGN_NAMES['Belgium (Flemish)'], V436_FOREIGN_NAMES['Belgium (Walloon)']] : [V436_FOREIGN_NAMES[nation]];
+  if (!gs[0]) return null;
+  var P = {f:[], s:[]};
+  gs.forEach(function(g){ P.f = P.f.concat(g.f.split(' ')); P.s = P.s.concat(g.s.split(' ').map(function(x){ return x.replace(/_/g, ' '); })); });
+  return (V436_POOL_CACHE[nation] = P);
+}
+function v436ForeignName(nation, r1, r2){
+  var P = v436Pools(nation); if (!P) return null;
+  if (!V436_FAMOUS_SET){ V436_FAMOUS_SET = {}; V436_FAMOUS.forEach(function(x){ V436_FAMOUS_SET[x] = 1; }); }
+  var real = (typeof realPersonNameSet === 'function') ? realPersonNameSet() : {};
+  var fi = Math.floor(r1 * P.f.length) % P.f.length, si = Math.floor(r2 * P.s.length) % P.s.length, n = '';
+  for (var k = 0; k < P.s.length; k++){
+    n = P.f[(fi + Math.floor(k / P.s.length)) % P.f.length] + ' ' + P.s[(si + k) % P.s.length];
+    var low = n.toLowerCase();
+    if (!real[low] && !V436_FAMOUS_SET[low]) return n;
+  }
+  return n;
+}
+/* v436 : a Scottish club met in an English save (a friendly) turns out its real squad for the season from SCO_ERA_DEFS */
+function v436ScoDef(){ try { if (gameCountry !== 'ENG' || typeof SCO_ERA_DEFS !== 'object') return null; return SCO_ERA_DEFS[String(gameEra)] || null; } catch(e){ return null; } }
+function v436ScoSquad(club){ var d = v436ScoDef(); return (d && d.squads && d.squads[club] && d.squads[club].length) ? d.squads[club] : null; }
+function v436ScoMaster(club){ var d = v436ScoDef(); return (d && d.masters && d.masters[club]) || null; }
+
 function euFillerName(oppName){
   if (!EU_CC_OF){ EU_CC_OF = {}; EURO_CLUBS.forEach(function(cl){ EU_CC_OF[EU_ALIAS[cl[0]] || cl[0]] = cl[1]; }); }
-  var cc = EU_CC_OF[oppName]; if (!cc) return null;
+  var cc = EU_CC_OF[oppName] || V436_FRIENDLY_CC[oppName]; if (!cc) return null;
+  var v436n = v436ClubNation(oppName);
+  if (v436n && v436Pools(v436n)) return v436ForeignName(v436n, Math.random(), Math.random()); /* v436 : the same two dice as before, a country pool of its own */
   for (var k in EU_NAME_GROUPS){
     var g = EU_NAME_GROUPS[k]; if (g.cc.split(' ').indexOf(cc) < 0) continue;
     var fs = g.f.split(' '), ss = g.s.split(/ (?=[A-ZÁÉÍÓÚÜÖÇ])/);
@@ -20836,7 +20991,7 @@ function euFillerName(oppName){
   return null;
 }
 function euroStarProfile(name){
-  var lst = EURO_STARS[name]; if (!lst) return null;
+  var lst = EURO_STARS[name] || EURO_STARS[V436_STAR_ALIAS[name]]; if (!lst) return null; /* v436 : friendly names (Internazionale, Milan, Hamburger SV) find their European data */
   var y = euYear(seasonLabel);
   for (var i=0;i<lst.length;i++) if (y >= lst[i].from && y <= lst[i].to) return lst[i];
   return null;
@@ -23942,10 +24097,13 @@ function fileOfficeWire(opts){
     subject: opts.subject || '',
     body: opts.body || '',
     page: 1,
-    of: 1
+    of: 1,
+    week: (typeof week === 'number') ? week : 0,
+    season: (typeof seasonLabel === 'string') ? seasonLabel : ''
   };
+  if (rec.from === ourClubName && !/^(Formal offer|Asking price) for /.test(rec.subject)) rec.filed = true; /* v437 : our own reply is the matter dealt with */
   officeWireTray.unshift(rec);
-  if (officeWireTray.length>20) officeWireTray = officeWireTray.slice(0,20);
+  if (typeof v437TrimWires === 'function') v437TrimWires(); else if (officeWireTray.length>20) officeWireTray = officeWireTray.slice(0,20);
   return rec;
 }
 function renderOfficeWireSheet(rec){
@@ -23973,7 +24131,20 @@ function renderOfficeWireTray(){
     body.innerHTML = '<p class="sub">NO MESSAGES IN THE TRAY.</p>';
     return;
   }
-  body.innerHTML = officeWireTray.map(renderOfficeWireSheet).join('');
+  /* v437 : only what still needs attention; the rest is filed in a collapsed archive */
+  var v437open = officeWireTray.filter(v437WireOpen), v437shut = officeWireTray.filter(function(r){ return !v437WireOpen(r); });
+  var v437pl = officeWireKind()==='fax' ? 'FAXES' : 'TELEXES';
+  var h = '';
+  if (!v437open.length) h += '<p class="sub">NOTHING AWAITING ATTENTION.</p>';
+  v437open.forEach(function(r){
+    var mt = v437WireMatter(r);
+    var act = mt ? (mt.kind === 'bid' ? '<span class="wire-note">AWAITING OUR ANSWER : SEE TRANSFERS</span>' : '<span class="wire-note">AWAITING THEIR REPLY</span>')
+                 : '<button class="btn wire-file" onclick="v437FileWire('+Number(r.id)+')">FILE</button>';
+    h += renderOfficeWireSheet(r).replace(/<\/div>$/, '<div class="wire-act">'+act+'</div></div>');
+  });
+  if (v437open.filter(function(r){ return !v437WireMatter(r); }).length >= 2) h += '<p><button class="btn wire-file-all" onclick="v437FileWire(\'all\')">FILE ALL READ '+v437pl+'</button></p>';
+  if (v437shut.length) h += '<details class="wire-archive"'+(v437WireArchiveOpen?' open':'')+' ontoggle="v437WireArchiveOpen=this.open"><summary>FILED '+v437pl+' ('+v437shut.length+')</summary><div class="wire-archive-list">'+v437shut.map(renderOfficeWireSheet).join('')+'</div></details>';
+  body.innerHTML = h;
 }
 
 function seasonLoanCount(map, club){
@@ -24238,6 +24409,8 @@ function applyTribunalAsBuyer(t, offer, ask){
   });
   if (!res.ok) return res;
   if (!res.canPay){ if (t) t.pending=false; return res; }
+  var v437ok = v437SigningAllowed(t);
+  if (!v437ok.ok){ t.pending = false; addNews('board', v437BlockText(t, v437ok.reason)+' The fee set by the committee is not paid.'); return {ok:false, blocked:true, award:res.award}; }
   if (typeof adjustUserBank==='function') adjustUserBank(-res.award);
   if (typeof aiAdjustBalance==='function' && (t.club||t._sourceClub)) aiAdjustBalance(t.club||t._sourceClub, res.award);
   t._feePaid = res.award;
@@ -24671,6 +24844,7 @@ function v399SaveFields(){
 }
 function v399LoadFields(s){
   officeWireTray = (s && Array.isArray(s.officeWireTray)) ? s.officeWireTray : [];
+  if (typeof v437WireLegacy === 'function') v437WireLegacy(); /* v437 : older trays : the newest three stay up, the rest are filed */
   nextWireId = (s && s.nextWireId) ? s.nextWireId : 1;
   activeLoans = (s && Array.isArray(s.activeLoans)) ? s.activeLoans : [];
   nextLoanId = (s && s.nextLoanId) ? s.nextLoanId : 1;
@@ -25458,6 +25632,12 @@ function targetClubTier(clubName){
 function makeOffer(multiplier){
   var t = targets.find(function(x){return x._tid===negotiation.tid;});
   if (!t){ negotiation = null; renderTargets(); return; }
+  var v437ok = v437SigningAllowed(t);
+  if (!v437ok.ok){ /* v437 : no offer for a man the League would not register */
+    addNews('board', v437BlockText(t, v437ok.reason)+' No offer has been made.');
+    var v437nb = document.getElementById('negotiation-box'); if (v437nb) v437nb.innerHTML = '<p class="val" style="color:var(--dos-yellow);">'+v399Esc(v437BlockText(t, v437ok.reason).toUpperCase())+' NO OFFER HAS BEEN MADE.</p>';
+    negotiation = null; renderTargets(); return;
+  }
   var fee = (typeof roundFeeToConvention==='function'?roundFeeToConvention(t.price*multiplier):Math.round(t.price*multiplier));
   var tierGap = Math.max(0, targetClubTier(t.club) - divisionTier); /* only a penalty for buying UP -- a bigger club raiding a smaller one isn't the problem this fixes */
   var eliteReluctance = t.rep>=5 ? 0.35 : t.rep===4 ? 0.15 : 0;
@@ -25487,6 +25667,93 @@ function hasValidAttrs(attrs){
   if (!attrs) return false;
   return ['shooting','passing','tackling','heading','pace','stamina'].every(function(k){ return typeof attrs[k]==='number' && !isNaN(attrs[k]); });
 }
+
+/* v437 : one place that says whether the League will register a signing for us (the foreign-player rule), used BEFORE any money moves */
+function v437SigningAllowed(t){
+  if (!t || t._scriptedReal || t.contract === 'schoolboy') return {ok:true};
+  if (typeof gameCountry !== 'undefined' && gameCountry !== 'ENG') return {ok:true};
+  if (typeof canEnglishClubSignForeign !== 'function') return {ok:true};
+  return canEnglishClubSignForeign(t.nation || t.nat || '');
+}
+function v437BlockText(t, reason){
+  var nm = (t && t.n) || 'That player';
+  if (reason === 'ban') return nm+' cannot be registered. Until 1978-79 the Football League two-year residency rule is an effective ban on non-exempt overseas professionals.';
+  return nm+' cannot be registered. The club already has the two permitted overseas players (the work-permit limit from September 1978). Home Nations, Ireland and the Commonwealth do not count.';
+}
+function v437NeedsPermit(t){
+  var nat = String((t && (t.nation || t.nat)) || '').trim();
+  return !!nat && typeof gameCountry !== 'undefined' && gameCountry === 'ENG' && typeof isExemptFromEnglishForeignRule === 'function' && !isExemptFromEnglishForeignRule(nat) && !(t && t._scriptedReal);
+}
+/* v437 : repair for saves where an offer was accepted and paid for but the player never joined (the foreign-quota miscount
+   counted every man with no nationality on file as an overseas player, so signTarget refused AFTER the fee had gone).
+   The deal completes now if the League can register him; if it genuinely cannot, the money comes back. */
+function v437RepairUnfinishedSignings(){
+  if (!Array.isArray(transferHistory) || !Array.isArray(targets) || typeof ourClubName !== 'string') return 0;
+  var done = 0, drop = [];
+  transferHistory.forEach(function(rec, i){
+    if (!rec || rec.to !== ourClubName || rec._v437checked || !rec.player) return;
+    var nm = rec.player;
+    var here = (squad||[]).some(function(p){ return p && p.n === nm; }) || (youthProspects||[]).some(function(p){ return p && p.n === nm; });
+    if (here) return;
+    if (transferHistory.slice(i+1).some(function(r){ return r && r.player === nm && r.from === ourClubName; })) return;
+    var t = targets.find(function(x){ return x && x.n === nm; });
+    if (!t) return;
+    rec._v437checked = true;
+    t.pending = false;
+    if (v437SigningAllowed(t).ok){
+      t._feePaid = rec.fee || 0;
+      var before = squad.length;
+      signTarget(t, (typeof signingWageFor === 'function') ? signingWageFor(t.rep) : (t.wage || 4));
+      if (squad.length > before){
+        done++;
+        addNews('board', 'COMPLETED: The registration of '+nm+' from '+(rec.from || t.club || 'his club')+' has gone through. He joins the squad today. The fee was paid when the offer was accepted, so nothing more is owed.');
+        return;
+      }
+    }
+    var fee = Math.round(Number(rec.fee) || 0), sof = (typeof currentSigningOnFee === 'function') ? currentSigningOnFee() : 0;
+    if (typeof adjustUserBank === 'function') adjustUserBank(fee + sof);
+    if (fee && rec.from && typeof aiAdjustBalance === 'function') aiAdjustBalance(rec.from, -fee);
+    if (typeof finances !== 'undefined' && finances){ finances.seasonTransferOut = Math.max(0, (finances.seasonTransferOut||0) - fee - sof); }
+    drop.push(rec);
+    addNews('board', 'REFUNDED: '+v437BlockText(t, v437SigningAllowed(t).reason)+' The '+(typeof formatFeeDisplay === 'function' ? formatFeeDisplay(fee) : ('£'+fee))+' paid to '+(rec.from || t.club)+' and the signing-on fee have come back to the club.');
+    done++;
+  });
+  if (drop.length) transferHistory = transferHistory.filter(function(r){ return drop.indexOf(r) < 0; });
+  if (done && typeof renderTargets === 'function'){ try { renderTargets(); renderSquad(); renderClub(); } catch(e){} }
+  return done;
+}
+/* v437 : the telex tray only shows what still needs attention. An incoming bid stays until it is answered, our own offer
+   stays until the reply comes, and anything else stays until it is filed (FILE) or two weeks have passed. Everything
+   else goes to a collapsed archive underneath. */
+var v437WireArchiveOpen = false;
+function v437WireMatter(rec){
+  var subj = (rec && rec.subject) || '', m;
+  var named = function(o, nm){ var p = (squad||[]).find(function(x){ return x && x.id === o.playerId; }); return !!(p && p.n === nm); };
+  if ((m = /^Official bid for (.+)$/.exec(subj))) return {kind:'bid', open:(typeof pendingOffers !== 'undefined' && pendingOffers || []).some(function(o){ return o.buyer === rec.from && named(o, m[1]); })};
+  if ((m = /^Asking price for (.+)$/.exec(subj))) return {kind:'bid', open:(typeof pendingOffers !== 'undefined' && pendingOffers || []).some(function(o){ return o.buyer === rec.to && named(o, m[1]); })};
+  if ((m = /^Formal offer for (.+)$/.exec(subj))) return {kind:'wait', open:(typeof pendingNegotiations !== 'undefined' && pendingNegotiations || []).some(function(n){ return !n.trial && n.targetName === m[1] && n.club === rec.to; })};
+  return null;
+}
+function v437WireOpen(rec){
+  if (!rec || rec.filed) return false;
+  var mt = v437WireMatter(rec);
+  if (mt) return mt.open;
+  if (typeof rec.week !== 'number' || rec.season !== seasonLabel) return false;
+  return (week - rec.week) < 2;
+}
+function v437FileWire(id){
+  officeWireTray.forEach(function(r){ if (r && (id === 'all' ? (!v437WireMatter(r)) : r.id === id)) r.filed = true; });
+  renderOfficeWireTray();
+}
+function v437TrimWires(){
+  var open = officeWireTray.filter(v437WireOpen), shut = officeWireTray.filter(function(r){ return !v437WireOpen(r); }).slice(0, 40);
+  officeWireTray = officeWireTray.filter(function(r){ return open.indexOf(r) >= 0 || shut.indexOf(r) >= 0; });
+}
+function v437WireLegacy(){
+  var k = 0;
+  officeWireTray.forEach(function(r){ if (r && typeof r.week !== 'number'){ if (k++ < 3 && !r.filed){ r.week = week; r.season = seasonLabel; } else r.filed = true; } });
+}
+
 function signTarget(t, wage, deferPlay){
   if (t.contract === 'schoolboy'){ signSchoolboyToYouth(t); return; } /* NEW PIPELINE: a schoolboy signs schoolboy forms onto the ground-staff, not straight into the first-team squad -- see youthProspects above for why */
   /* v377 : enforce the English foreign-player rule (pre-1978 ban; two-permit cap once open).
@@ -25497,7 +25764,7 @@ function signTarget(t, wage, deferPlay){
     if (!__fok.ok){
       if (__fok.reason === 'ban') addNews('board', (t.n||'That player')+' cannot be signed. Until 1978-79 the Football League two-year residency rule is an effective ban on non-exempt overseas professionals. Home Nations, Ireland and the Commonwealth are exempt.');
       else if (__fok.reason === 'quota') addNews('board', (t.n||'That player')+' cannot be signed. This club already has the two permitted established foreign players (the work-permit cap from September 1978). Home Nations, Ireland and the Commonwealth do not count toward it.');
-      return;
+      return false;
     }
   }
   var slot = slotFor(t.pos);
@@ -25537,6 +25804,7 @@ function signTarget(t, wage, deferPlay){
     addNews('board', (typeof ourClubName==='string'?ourClubName:'The club')+' have completed the signing of '+t.n+(t.club?(' from '+t.club):'')+'.');
   }
   renderSquad(); renderLineup(); renderLineupCount(); renderClub(); renderTargets();
+  return true;
 }
 /* NEW PIPELINE (see youthProspects above): where signTarget puts a genuine
    pro/amateur signing straight into squad, a schoolboy instead joins
@@ -25684,14 +25952,29 @@ function resolvePendingNegotiations(){
       return false;
     }
     if (Math.random() < neg.chance){
+      var v437ok = v437SigningAllowed(t);
+      if (!v437ok.ok){ /* v437 : the selling club said yes but the League will not register him : no money moves, and the telex says so */
+        t.pending = false;
+        addNews('board', 'NO DEAL: '+neg.club+' accepted '+(typeof formatFeeDisplay==='function'?formatFeeDisplay(neg.fee):('£'+neg.fee))+' for '+t.n+', but '+v437BlockText(t, v437ok.reason).replace(/^.*? cannot be registered\. /, 'the League will not register him. ')+' No fee has been paid.');
+        if (typeof fileOfficeWire==='function') fileOfficeWire({from:'The Football League', to:ourClubName, subject:'Registration of '+t.n, body:'The registration of '+t.n+' from '+neg.club+' cannot be accepted. '+v437BlockText(t, v437ok.reason).replace(/^.*? cannot be registered\. /, '')+' No transfer has taken place.'});
+        return false;
+      }
+      var v437permit = v437NeedsPermit(t);
       adjustUserBank(-neg.fee);
       adjustUserBank(-(typeof currentSigningOnFee==='function' ? currentSigningOnFee() : SIGNING_ON_FEE));
       aiAdjustBalance(neg.club, neg.fee); /* v118 : the selling club banks the fee */
       t._feePaid = neg.fee;
       if (typeof recordUserPurchase==='function') recordUserPurchase({player:t.n, from:neg.club, fee:neg.fee, signingOn:(typeof currentSigningOnFee==='function' ? currentSigningOnFee() : SIGNING_ON_FEE)});
-      signTarget(t, signingWageFor(t.rep));
-      addNews('board', 'ACCEPTED: '+neg.club+' have accepted '+(typeof formatFeeDisplay==='function'?formatFeeDisplay(neg.fee):('£'+neg.fee))+' for '+t.n+'. He signs this week, plus the customary £'+(typeof currentSigningOnFee==='function' ? currentSigningOnFee() : SIGNING_ON_FEE)+' signing-on fee.');
-      if (typeof fileOfficeWire==='function') fileOfficeWire({from:neg.club, to:ourClubName, subject:'Acceptance of offer for '+t.n, body:neg.club+' accept your offer of '+(typeof formatFeeDisplay==='function'?formatFeeDisplay(neg.fee):('£'+neg.fee))+' for the registration of '+t.n+'. The transfer may proceed.'});
+      var v437signed = signTarget(t, signingWageFor(t.rep));
+      if (v437signed === false){ /* v437 : belt and braces : if he still could not be registered, the money goes back */
+        adjustUserBank(neg.fee + (typeof currentSigningOnFee==='function' ? currentSigningOnFee() : SIGNING_ON_FEE)); aiAdjustBalance(neg.club, -neg.fee);
+        if (Array.isArray(transferHistory)) for (var v437h = transferHistory.length-1; v437h >= 0; v437h--){ if (transferHistory[v437h] && transferHistory[v437h].player === t.n && transferHistory[v437h].to === ourClubName){ transferHistory.splice(v437h, 1); break; } }
+        t.pending = false;
+        addNews('board', 'NO DEAL: '+t.n+' could not be registered, so the fee and signing-on money have come back to the club.');
+        return false;
+      }
+      addNews('board', 'ACCEPTED: '+neg.club+' have accepted '+(typeof formatFeeDisplay==='function'?formatFeeDisplay(neg.fee):('£'+neg.fee))+' for '+t.n+'. He signs this week and joins the squad, plus the customary £'+(typeof currentSigningOnFee==='function' ? currentSigningOnFee() : SIGNING_ON_FEE)+' signing-on fee.'+(v437permit ? ' As an overseas player he needs a Department of Employment work permit; he takes one of the club\'s two permitted places ('+squadForeignQuotaUsed(squad)+' of '+englishForeignQuotaLimit()+' now used).' : ''));
+      if (typeof fileOfficeWire==='function') fileOfficeWire({from:neg.club, to:ourClubName, subject:'Acceptance of offer for '+t.n, body:neg.club+' accept your offer of '+(typeof formatFeeDisplay==='function'?formatFeeDisplay(neg.fee):('£'+neg.fee))+' for the registration of '+t.n+'. The transfer may proceed'+(v437permit?', subject to a work permit':'')+'.'});
     } else {
       t.pending = false;
       addNews('board', 'REJECTED: '+neg.club+' have turned down our '+(typeof formatFeeDisplay==='function'?formatFeeDisplay(neg.fee):('£'+neg.fee))+' offer for '+t.n+'.');
@@ -28509,7 +28792,7 @@ function renderFixtures(){
     if (typeof seasonStartYear==='function' && seasonStartYear()===1981 && typeof isSco==='function' && !isSco()) rn = rn.replace(/Milk Cup/ig, (typeof currentLeagueCupName==='function' ? currentLeagueCupName() : 'Football League Cup'));
     if (typeof fixtureOppRoundLabel==='function') rn = fixtureOppRoundLabel(f, rn);
     var oppLabel = f.opp.toUpperCase() + ((f.isCup||f.isLCup) && rn ? ' ('+rn.toUpperCase()+')' : '');
-    var compLabel = f.isCup ? String(typeof currentFaCupName==='function' ? currentFaCupName() : (typeof FACUP_NAME==='string' && FACUP_NAME ? FACUP_NAME : 'FA Cup')).toUpperCase() : f.isLCup ? String(typeof LCUP_NAME==='string' ? LCUP_NAME : (typeof currentLeagueCupName==='function' ? currentLeagueCupName() : 'League Cup')).toUpperCase() : f.isTrial ? 'TRIAL' : f.isFriendly ? 'FRIENDLY' : 'LEAGUE';
+    var compLabel = f.isCup ? String(typeof currentFaCupName==='function' ? currentFaCupName() : (typeof FACUP_NAME==='string' && FACUP_NAME ? FACUP_NAME : 'FA Cup')).toUpperCase() : f.isLCup ? String(v437LcName() || 'League Cup').toUpperCase() : f.isTrial ? 'TRIAL' : f.isFriendly ? 'FRIENDLY' : 'LEAGUE';
     var d = fixtureDate(i);
     var resPlain = f.played ? String(f.res==null ? '--' : f.res).replace(/ \((H|A)\)$/,'') : '';
     var scorersText = (f.played && f.scorers && f.scorers.length) ? formatScorersList(f.scorers, f.penScorers) : (f.played ? '--' : '');
@@ -34938,6 +35221,7 @@ function isExemptFromEnglishForeignRule(nation){
   return isHomeNationsOrIreland(nation) || isCommonwealthExemptNation(nation);
 }
 function countsAgainstEnglishForeignQuota(nation){
+  if (!String(nation||'').trim()) return false; /* v437 : a man with no nationality on file is domestic, as canEnglishClubSignForeign already says; counting him blocked every signing for clubs with unsourced squads (Luton 1981 read 7 of 2) */
   return !isExemptFromEnglishForeignRule(nation);
 }
 function englishForeignMarketIsOpen(date){
@@ -38135,6 +38419,9 @@ function applyLoadedState(s, silent){
     if (typeof v414Migrate==='function') v414Migrate();
     if (typeof v415Migrate==='function') v415Migrate();
     if (typeof v416Migrate==='function') v416Migrate();
+    if (typeof v437RepairUnfinishedSignings==='function') v437RepairUnfinishedSignings(); /* v437 : accepted-and-paid deals whose player never joined */
+    try { if (typeof elcMaybeRemakeFormat==='function') elcMaybeRemakeFormat(); } catch(e){} /* v437 : moved from lcMigrateOnLoad, see there */
+    try { if (typeof refreshLeagueCupName==='function') refreshLeagueCupName(); } catch(e){} /* v437 : the cup's name follows the loaded save, not the last game */
     if (typeof squad!=='undefined' && squad && typeof ensurePlayerFormMorale==='function'){
       squad.forEach(ensurePlayerFormMorale);
     }
@@ -38711,7 +38998,18 @@ function rmEraCountries(eraYear){
   /* v341 : 1970-71 is England + Scotland only (continental 1970s shelved) */
   return out;
 }
+function v437ResetPerSave(){
+  /* v437 : a new game starts with nothing from the last one : the telex tray, loans, scout regions, pending deals and bids, the news */
+  officeWireTray = []; nextWireId = 1; activeLoans = []; nextLoanId = 1; seasonLoanInsByClub = {}; seasonLoanOutsByClub = {};
+  scoutRegionAssignments = emptyScoutRegions(); v399CloseSeasonPrepared = false;
+  if (typeof v437WireArchiveOpen !== 'undefined') v437WireArchiveOpen = false;
+  SCOUT_HIRE_POOL = SCOUT_HIRE_TEMPLATES.map(function(t){ return {id:t.id, name:t.fallbackName, specialty:t.specialty, wage:t.wage, blurb:t.blurb, laterBlurb:t.laterBlurb, gen:true}; }); /* the last game's candidates were being kept off the new list */
+  nextTargetId = 1;
+}
+/* v437 : the League Cup's name is read when the fixture is made, not left over from whatever was loaded last (a 1986-87 list read 'Milk Cup' after a 1981 game, 'Football League Cup' from cold) */
+function v437LcName(){ try { var n = currentLeagueCupName(); if (n){ LCUP_NAME = n; return n; } } catch(e){} return LCUP_NAME; }
 function beginNewGameWithEraCountry(eraYear, country){
+  v437ResetPerSave();
   deuRegion = null; DEU_PICKING = false;
   var y = String(eraYear);
   country = country || 'ENG';
@@ -49290,6 +49588,7 @@ function progShapeName(shape){ return ERA_SHAPE_NAME[shape] || shape; }
 function progOfficialClubName(name){
   var n = String(name||'').trim();
   if (!n) return '';
+  if (typeof V436_OFFICIAL !== 'undefined' && V436_OFFICIAL[n] && gameCountry === 'ENG') return V436_OFFICIAL[n]; /* v436 */
   if (/football club\b|\bF\.?C\.?$/i.test(n)) return n;
   return n + ' Football Club';
 }
@@ -49343,7 +49642,7 @@ function progHomeStyle(name, era){
   } catch(e){ return ''; }
 }
 function progColours(name){
-  var c = (clubProfiles[name] && clubProfiles[name].colours) || (typeof clubColours1946!=='undefined' && clubColours1946[name]) || null;
+  var c = (clubProfiles[name] && clubProfiles[name].colours) || (typeof clubColours1946!=='undefined' && clubColours1946[name]) || (typeof V436_FOREIGN_COLOURS!=='undefined' && V436_FOREIGN_COLOURS[name]) || (function(){ try { var d = v436ScoDef(); return d && d.facts && d.facts[name] && d.facts[name].colours; } catch(e){ return null; } })() || null; /* v436 : a foreign host's real colours, not grey */
   return c ? progTitle(c) : null;
 }
 function progSortedTable(){
@@ -49763,7 +50062,7 @@ function progPortraits(c, rng){
 function progVisitors(c, rng){
   var E='66', f=c.f, opp=c.opp, byUs = !f.home, team = byUs ? c.us : opp;
   var P = byUs ? clubProfiles[c.us] : c.oppProf, R = byUs ? null : c.rival, shape = byUs ? c.ourShape : c.oppShape;
-  var mgr = byUs ? (manager && manager.name && manager.name!=='Manager' ? manager.name : null) : (R && R.mgr);
+  var mgr = byUs ? (manager && manager.name && manager.name!=='Manager' ? manager.name : null) : ((R && R.mgr) || (typeof v436ForeignMgr === 'function' ? v436ForeignMgr(opp) : null) || ((typeof v436ScoMaster === 'function' && v436ScoMaster(opp)) ? v436ScoMaster(opp).mgr : null));
   var cap = progEsc(team)+(P&&P.founded?' · Founded '+P.founded:'')+(P&&P.nickname?' · '+progEsc(P.nickname):'');
   var S = []; try { S = byUs ? squad : (ensureClubSquad(opp) || []); } catch(e){}
   var sents = [];
@@ -50250,6 +50549,10 @@ function v401WithSeededMath(seed, fn){
   return out;
 }
 function v401ClubProgrammeTitle(host){
+  if (typeof v436IsForeignHost === 'function' && v436IsForeignHost(host)){ /* v436 : the home club's own language */
+    var nt = v436ClubNation(host);
+    return /Italy/.test(nt) ? 'Programma ufficiale' : /Spain|Basque/.test(nt) ? 'Programa oficial' : /Portugal/.test(nt) ? 'Programa oficial' : /Germany|Austria/.test(nt) ? 'Stadionheft' : /Netherlands|Flemish/.test(nt) ? 'Officieel programma' : /Walloon|France|Belgium/.test(nt) ? 'Programme officiel' : 'Official Programme';
+  }
   return host === 'Manchester United' ? 'United Review' : 'Official Programme';
 }
 function v401PlayerNames(arr){
@@ -50266,7 +50569,7 @@ function v401HostSubName(c){
     var rest = (c.hostSquad||[]).filter(function(p){ return p && p.n && !used[p.n] && !/goalkeeper/i.test(p.pos||''); });
     if (rest[0]) return rest[0].n;
   }
-  return '';
+  return (typeof v436ProgSub === 'function') ? v436ProgSub(c.host, c) : ''; /* v436 : every side names a 12 */
 }
 function v401GuestSubName(c){
   if (c.f && !c.f.home && typeof namedSubstitutePlayers==='function'){
@@ -50283,7 +50586,7 @@ function v401GuestSubName(c){
     var rest = pool.filter(function(p){ return p && p.n && !xi[p.n] && !/goalkeeper/i.test(p.pos||''); });
     if (rest[0]) return rest[0].n;
   } catch(e){}
-  return '';
+  return (typeof v436ProgSub === 'function') ? v436ProgSub(c.guest, c) : ''; /* v436 : every side names a 12 */
 }
 function progLists12HTML(c, homeNames, awayNames, hTitle, aTitle, hSub, aSub){
   function li(arr, sub){
@@ -50336,8 +50639,129 @@ function v401ShirtNames(c, hostSide){
     if (awayOurs.filter(function(n){ return n && n!=='—'; }).length>=11) return awayOurs;
     names = v401PlayerNames(c.xi);
     if (names.filter(function(n){ return n && n!=='—'; }).length>=11) return names;
+    return []; /* v436 : our side not yet picked prints blanks, never the home side's names */
   }
   try { return (progOppXI(c.f) || []).map(function(n){ return n && (n.n||n); }); } catch(e){ return []; }
+}
+
+/* ===== v436 : FOREIGN AND FRIENDLY PROGRAMMES (Chris, 19 Nov). A programme is always the HOME club's : a foreign host
+   prints its own official name, colours, ground, manager (where sourced) and no English shop adverts or sterling price.
+   Every side names a number 12. The manager's notes are written in his own voice : the visitors, our form, the injury
+   list and a word to the supporters, read from the save. Foreign managers : Wikipedia season articles (infobox, manager at
+   the start of the season); clubs with no sourced name print the notes as 'A word from the club'. ===== */
+var V436_OFFICIAL = {'Juventus':'Juventus F.C.','Milan':'A.C. Milan','AC Milan':'A.C. Milan','Internazionale':'F.C. Internazionale Milano','Inter Milan':'F.C. Internazionale Milano',
+  'Torino':'Torino Calcio','Roma':'A.S. Roma','Barcelona':'F.C. Barcelona','Real Madrid':'Real Madrid C.F.','Atlético Madrid':'Club Atlético de Madrid','Valencia':'Valencia C.F.',
+  'Athletic Bilbao':'Athletic Club','Hamburger SV':'Hamburger S.V.','Hamburg':'Hamburger S.V.','Bayern Munich':'F.C. Bayern München','Borussia Mönchengladbach':'Borussia VfL Mönchengladbach',
+  'Eintracht Frankfurt':'Eintracht Frankfurt','Feyenoord':'Feyenoord','Ajax':'AFC Ajax','Benfica':'Sport Lisboa e Benfica','Sporting CP':'Sporting Clube de Portugal',
+  'Anderlecht':'R.S.C. Anderlecht','Standard Liège':'R. Standard de Liège'};
+var V436_FOREIGN_COLOURS = {'Juventus':'Black & White Stripes','Milan':'Red & Black Stripes','AC Milan':'Red & Black Stripes','Internazionale':'Blue & Black Stripes','Inter Milan':'Blue & Black Stripes',
+  'Torino':'Maroon','Roma':'Dark Red & Orange','Barcelona':'Blue & Claret Stripes','Real Madrid':'White','Atlético Madrid':'Red & White Stripes','Valencia':'White, Black Shorts',
+  'Athletic Bilbao':'Red & White Stripes','Hamburger SV':'White, Red Shorts','Hamburg':'White, Red Shorts','Bayern Munich':'Red','Borussia Mönchengladbach':'White, Black Shorts',
+  'Eintracht Frankfurt':'Red & Black Stripes','Feyenoord':'Red & White Halves','Ajax':'White & Red','Benfica':'Red','Sporting CP':'Green & White Hoops','Anderlecht':'Purple & White','Standard Liège':'Red'};
+var V436_CITY = {'Juventus':'Torino','Torino':'Torino','Milan':'Milano','AC Milan':'Milano','Internazionale':'Milano','Inter Milan':'Milano','Roma':'Roma','Barcelona':'Barcelona','Real Madrid':'Madrid',
+  'Atlético Madrid':'Madrid','Valencia':'Valencia','Athletic Bilbao':'Bilbao','Hamburger SV':'Hamburg','Hamburg':'Hamburg','Bayern Munich':'München','Borussia Mönchengladbach':'Mönchengladbach',
+  'Eintracht Frankfurt':'Frankfurt','Feyenoord':'Rotterdam','Ajax':'Amsterdam','Benfica':'Lisboa','Sporting CP':'Lisboa','Anderlecht':'Bruxelles','Standard Liège':'Liège'};
+var V436_GROUND = {'Juventus':'the Stadio Comunale','Torino':'the Stadio Comunale','Milan':'San Siro','Internazionale':'San Siro','Roma':'the Stadio Olimpico','Barcelona':'the Nou Camp',
+  'Real Madrid':'the Estadio Santiago Bernabéu','Atlético Madrid':'the Estadio Vicente Calderón','Valencia':'the Estadio Luis Casanova','Athletic Bilbao':'San Mamés',
+  'Hamburger SV':'the Volksparkstadion','Bayern Munich':'the Olympiastadion','Borussia Mönchengladbach':'the Bökelberg','Eintracht Frankfurt':'the Waldstadion','Feyenoord':'De Kuip',
+  'Ajax':'De Meer','Benfica':'the Estádio da Luz','Sporting CP':'the Estádio José Alvalade','Anderlecht':'the Parc Astrid','Standard Liège':'Sclessin'};
+var V436_FOREIGN_MGR = { /* Wikipedia season infoboxes, manager at the start of the season */
+  1981:{'Juventus':'Giovanni Trapattoni','Milan':'Luigi Radice','Internazionale':'Eugenio Bersellini','Barcelona':'Udo Lattek','Real Madrid':'Vujadin Boškov','Atlético Madrid':'Luis Cid Carriega',
+        'Hamburger SV':'Ernst Happel','Eintracht Frankfurt':'Lothar Buchmann','Benfica':'Lajos Baróti'},
+  1986:{'Juventus':'Rino Marchesi','Milan':'Nils Liedholm','Internazionale':'Giovanni Trapattoni','Torino':'Luigi Radice','Roma':'Sven-Göran Eriksson','Barcelona':'Terry Venables',
+        'Real Madrid':'Leo Beenhakker','Bayern Munich':'Udo Lattek','Borussia Mönchengladbach':'Jupp Heynckes','Eintracht Frankfurt':'Dietrich Weise','Hamburger SV':'Ernst Happel',
+        'Ajax':'Johan Cruyff','Benfica':'John Mortimore'}};
+var V436_ADJ = {'Italy':'Italian','Spain':'Spanish','Basque':'Spanish','Portugal':'Portuguese','West Germany':'West German','Austria':'Austrian','Switzerland':'Swiss','Netherlands':'Dutch',
+  'Belgium':'Belgian','Belgium (Flemish)':'Belgian','Belgium (Walloon)':'Belgian','France':'French','Sweden':'Swedish','Norway':'Norwegian','Denmark':'Danish','Finland':'Finnish',
+  'Hungary':'Hungarian','Czechoslovakia':'Czechoslovak','Poland':'Polish','Yugoslavia':'Yugoslav','Bulgaria':'Bulgarian','Romania':'Romanian','Soviet Union':'Soviet','Greece':'Greek','Turkey':'Turkish'};
+function v436IsForeignHost(club){ return !!(club && club !== ourClubName && gameCountry === 'ENG' && typeof v436ClubNation === 'function' && v436ClubNation(club)); }
+function v436ForeignMgr(club){ var y = (typeof progSeasonYear === 'function') ? progSeasonYear() : 0; var t = V436_FOREIGN_MGR[y] || {}; if (t[club]) return t[club]; var m = (typeof v436ScoMaster === 'function') ? v436ScoMaster(club) : null; return (m && m.mgr) || null; }
+function v436ProgSub(club, c){
+  if (!club) return '';
+  if (club === ourClubName){ var xs = (typeof namedSubstitutePlayers === 'function') ? namedSubstitutePlayers() : []; return (xs && xs[0] && xs[0].n) ? xs[0].n : ''; }
+  try {
+    var names = progOppXI(c.f) || [];
+    var subs = pickOppNamedSubs(names.map(function(n){ return {n:(n && (n.n || n))}; }), club, fixtureIdx);
+    return (subs && subs[0] && subs[0].n) ? subs[0].n : '';
+  } catch(e){ return ''; }
+}
+function v436MgrNotes(c, rng){
+  var f = c.f, us = c.us, opp = c.opp, home = c.host, away = c.guest, ourHome = !!(f && f.home);
+  function one(a){ return progPickOne(rng, a); }
+  var ground = ourHome ? ((c.usProf && c.usProf.ground) || 'the ground') : (V436_GROUND[home] || (c.hostProf && c.hostProf.ground) || ((v436ScoMaster(home) || {}).ground) || 'our ground');
+  var guestNat = v436ClubNation(away), adj = guestNat ? V436_ADJ[guestNat] : null;
+  var gMgr = ourHome ? ((c.rival && c.rival.mgr) || v436ForeignMgr(away) || (c.oppProf && c.oppProf.mgr) || null) : ((typeof manager !== 'undefined' && manager && manager.name && manager.name !== 'Manager') ? manager.name : null);
+  var out = [];
+  /* 1. the visitors */
+  var EN = {'Milano':'Milan','Torino':'Turin','Roma':'Rome','München':'Munich','Lisboa':'Lisbon','Bruxelles':'Brussels'};
+  var city = V436_CITY[away] ? (EN[V436_CITY[away]] || V436_CITY[away]) : null, cityTxt = (city && away.indexOf(city) < 0 && !/Madrid|Milan|Barcelona|Valencia|Hamburg|Frankfurt|Bilbao/.test(away)) ? ' of '+city : '';
+  if (c.kind === 'friendly' && adj){
+    out.push(one(['A warm welcome to the players, officials and supporters of '+away+cityTxt+'. It is not every summer that a club of their standing comes to '+ground+', and we are grateful to them for making the trip.',
+                  'It is a real pleasure to welcome '+away+cityTxt+(gMgr?' and their manager, '+gMgr+',':'')+' to '+ground+'. Clubs like theirs do not come our way very often.'])
+      + ' ' + one([adj+' sides are as hard to play against as any in Europe, so this is a proper test before the League starts.', 'Their football is quick, clever and well organised, and the players will learn a lot from ninety minutes against them.']));
+  } else if (c.kind === 'friendly' && !ourHome && v436IsForeignHost(home)){
+    out.push(one(['We are delighted to welcome '+us+(gMgr?' and their manager, '+gMgr+',':'')+' from England. English football is known all over Europe for its pace and its spirit, and our supporters always enjoy an English visit.',
+                  'Today we welcome '+us+' from England'+(gMgr?', with their manager '+gMgr:'')+'. A game against English opposition is always a good test of our preparations.']));
+  } else if (c.kind === 'friendly'){
+    out.push(one(['Welcome to '+away+(gMgr?' and their manager, '+gMgr:'')+'. Results in pre-season count for very little on their own; what matters is that the work done on the training ground is carried into a match.',
+                  'A warm welcome to '+away+' and their supporters. A friendly is about fitness and sharpness as much as the score, and it gives everyone in the squad the chance to stake a claim.']));
+  } else if (c.kind === 'league'){
+    var grow = c.rows.find(function(r){ return r.name === away; });
+    var st = (grow && grow.p > 0) ? ' They come here '+progOrd(c.rank[away], c.era)+' in the table with '+progPl(grow.pts, 'point')+' from '+progPl(grow.p, 'game')+', so we know what to expect.' : ' It is early days, and every point counts the same now as it will in April.';
+    out.push('Welcome to '+away+(gMgr?' and their manager, '+gMgr:'')+'.'+st);
+  } else if (c.kind === 'cup' || c.kind === 'lcup'){
+    out.push(one(['Cup football is a different game. '+away+' will come here with nothing to lose, and we will have to earn the right to play.', 'Welcome to '+away+' for this '+(f.roundName ? f.roundName.replace(/\s*\(.*\)\s*$/,'') : 'tie')+'. In the Cup the form book counts for nothing, and we will treat them with respect.']));
+  } else if (c.kind === 'euro'){
+    out.push('A special welcome to '+away+(adj ? ', our '+adj+' visitors,' : '')+' and to everyone who has travelled with them. Nights like this are what every player wants to be part of.');
+  } else {
+    out.push('Welcome to '+away+(gMgr?' and their manager, '+gMgr:'')+'.');
+  }
+  /* 2. form (always ours, the save's own results) */
+  var res = c.res || [], lr = res[res.length - 1];
+  var who = ourHome ? 'we' : us, whoC = ourHome ? 'We' : us;
+  if (lr){
+    var how = lr.o === 'W' ? 'win' : lr.o === 'D' ? 'draw' : 'defeat';
+    var run = 0; for (var i = res.length - 1; i >= 0 && res[i].o !== 'L'; i--) run++;
+    var s2 = (ourHome ? 'Our ' : us+'\u2019s ')+'last game was a '+lr.us+'\u2013'+lr.them+' '+how+' '+(lr.home ? 'at home to ' : 'away to ')+lr.opp+'.';
+    if (run >= 3) s2 += ' '+(ourHome ? 'We have' : us+' have')+' gone '+progNum(run, c.era)+' games without defeat'+(ourHome ? ', and I want that run to continue.' : '.');
+    else if (lr.o === 'L' && ourHome) s2 += ' '+one(['The players know that was not good enough, and I expect a response today.', 'We have talked about it, put it right on the training ground, and moved on.']);
+    else if (lr.o === 'W' && ourHome) s2 += ' '+one(['The pleasing thing was the way the side kept going for the full ninety minutes.', 'Nobody is getting carried away, but it was a good afternoon\u2019s work.']);
+    var ur = c.rows.find(function(r){ return r.name === us; });
+    if (c.kind === 'league' && ur && ur.p > 0) s2 += ' '+whoC+' '+(ourHome ? 'go into today ' : 'arrive ')+progOrd(c.rank[us], c.era)+' in the table.';
+    out.push(s2);
+  } else if (ourHome){
+    out.push(one(['This is the first chance many of you will have had to see the side since the summer, and I hope you like what you see.', 'The players reported back for training in good shape, and today is another step towards the opening day.']));
+  }
+  /* 3. injuries (our own list; a computer side's treatment room is not known) */
+  if (ourHome){
+    var sq = (typeof squad !== 'undefined' && squad) ? squad : [];
+    var inj = sq.filter(function(p){ return p && ((typeof playerIsInjured === 'function') ? playerIsInjured(p) : (p.injuredWeeks || 0) > 0); });
+    var sus = sq.filter(function(p){ return p && ((typeof playerIsServingSuspension === 'function') ? playerIsServingSuspension(p) : (p.suspendedMatches || 0) > 0); });
+    if (inj.length){
+      var p0 = inj[0], wk = p0.injuredWeeks || 0;
+      var t3 = p0.n+' is still '+(p0.injuryName ? 'out with '+String(p0.injuryName).toLowerCase() : 'on the treatment table')+(wk ? ' and should be back in '+(wk === 1 ? 'about a week' : 'about '+progPl(wk, 'week')) : '')+'.';
+      if (inj.length > 1) t3 += ' '+inj.slice(1, 3).map(function(p){ return p.n; }).join(' and ')+(inj.length > 2 ? ' are' : ' is')+' also with the physio.';
+      out.push(t3);
+    } else out.push(one(['I am glad to say we have no new injuries, so I have a full squad to choose from.', 'The treatment room is empty this week, which gives me some selection problems of the right kind.']));
+    if (sus.length) out.push(sus[0].n+' is suspended'+(sus.length > 1 ? ', as is '+sus[1].n : '')+', so '+(sus.length > 1 ? 'they miss' : 'he misses')+' out today.');
+  }
+  /* 4. a word to the supporters */
+  out.push(ourHome ? one(['Thank you, as always, for your support. Get behind the lads from the first whistle; it makes more difference than you might think.',
+                          'Please help us keep '+ground+' a place where families feel welcome, and enjoy the game.',
+                          'Your support has been magnificent, and the players know it. Enjoy the game and have a safe journey home.'])
+                   : one(['We hope our visitors and their supporters enjoy their stay, and that everyone sees a good game of football.', 'Enjoy the match, and give our guests the welcome they deserve.']));
+  var signer = ourHome ? ((typeof manager !== 'undefined' && manager && manager.name && manager.name !== 'Manager') ? manager.name : '')
+                       : (v436ForeignMgr(home) || (c.hostProf && c.hostProf.mgr) || (function(){ try { var r = (rivals || []).find(function(x){ return x.n === home; }); return r && r.mgr; } catch(e){ return ''; } })() || '');
+  return {paras:out, signer:signer, ours:ourHome};
+}
+function v436ForeignAds(era, club){
+  var nt = v436ClubNation(club), T = progEsc(V436_CITY[club] || ''), R = progRng(progHash('ads'+era+'|'+club)), list = null;
+  if (!T) return '';
+  if (/Italy/.test(nt) && typeof progAdsIta === 'function') list = progAdsIta(T, R, era);
+  else if (/Spain|Basque/.test(nt) && typeof progAdsEsp === 'function') list = progAdsEsp(T, R, era);
+  else if (/Germany/.test(nt) && typeof progAdsDeu === 'function') list = progAdsDeu(T, R, era);
+  if (!list || !list.length) return ''; /* no local adverts for this country in the game : the section is left out rather than printing English shops */
+  return '<div class="ads" data-town="'+T+'">'+list.map(function(x){ return '<div class="ad '+x[0]+'">'+x[1]+'</div>'; }).join('')+'</div>';
 }
 
 function progBuild80s(c, rng, F, era){
@@ -50347,7 +50771,8 @@ function progBuild80s(c, rng, F, era){
     home = f && f.home ? ourClubName : (f ? f.opp : '');
     away = f && f.home ? f.opp : ourClubName;
   }
-  var price = progPrice(c);
+  var v436foreign = v436IsForeignHost(home);
+  var price = v436foreign ? '' : progPrice(c); /* v436 : no sterling price on a foreign club's programme */
   var title = v401ClubProgrammeTitle(home);
   var homeNames = v401ShirtNames(c, true);
   var awayNames = v401ShirtNames(c, false);
@@ -50366,32 +50791,24 @@ function progBuild80s(c, rng, F, era){
   if (welcome && welcome.k) avoidNotes.push(welcome.k);
   var mgrFacts = progChoose(F||[], rng, 3, ['form','lastres','unbeaten','wins','stand','goals','oppstand','oppmgr','round','remain','leader'], avoidNotes);
   var notes = [];
-  (mgrFacts||[]).forEach(function(it){ if (it && it.t && notes.length<3) notes.push(it.t); });
+  var v436n = v436MgrNotes(c, rng); notes = v436n.paras; /* v436 : the manager's own notes, not a list of facts */
   var pens = [];
   try { pens = progPortraits(c, rng) || []; } catch(e){ pens = []; }
   var table = '';
   try { table = (c.kind==='league') ? progTableHTML(c, 8, true) : ''; } catch(e){}
   var fixturesH = '';
-  try { fixturesH = progFixturesHTML(c); } catch(e){}
-  var mgr = '';
-  if (f && f.home && typeof manager!=='undefined' && manager && manager.name && manager.name!=='Manager') mgr = manager.name;
-  else if (c.hostProf && c.hostProf.mgr) mgr = c.hostProf.mgr;
-  else {
-    try {
-      var hostRow = (typeof rivals!=='undefined' && rivals) ? rivals.find(function(r){ return r.n===home; }) : null;
-      if (hostRow && hostRow.mgr) mgr = hostRow.mgr;
-    } catch(e){}
-  }
+  try { if (!f || f.home) fixturesH = progFixturesHTML(c); } catch(e){} /* v436 : an away programme does not print our fixtures as the home club's */
+  var mgr = v436n.signer || '';
   var close = (typeof progCloseHTML==='function') ? progCloseHTML() : '';
   var toPitch = '<button type="button" class="v401-to-pitch" data-prog-close="1">To the pitch</button>';
   var burstFill = (era==='86') ? '#ffe27a' : '#e8c56b';
   var o = '<article class="p'+era+'" data-era="'+era+'" data-kind="'+(c.kind||'')+'" data-home="'+progEsc(home)+'"'+progHomeStyle(home, era)+'><header class="cover"><div class="op"></div><div class="op2"></div>'
-   + '<div class="bar"><span>'+progEsc(title)+'</span><b>'+progEsc(price)+'</b></div>'
+   + '<div class="bar"><span>'+progEsc(title)+'</span>'+(price?'<b>'+progEsc(price)+'</b>':'')+'</div>'
    + '<div class="mast"><h1'+progFitStyle(home,0.5,104)+'>'+progEsc(home).replace(/ (\S+)$/,'<br><span>$1</span>')+'</h1><span class="strap">'+progEsc(progStrapText(f, home))+'</span></div>'
    + '<div class="burst"><svg viewBox="0 0 100 100"><polygon fill="'+burstFill+'" stroke="#111" stroke-width="2.5" points="50,2 58,20 76,8 76,28 96,28 84,46 98,60 78,64 82,84 62,78 54,98 44,80 26,94 26,74 6,70 18,54 4,38 24,36 20,16 40,22"/></svg><span>'+burst[0]+(burst[1]?'<b>'+burst[1]+'</b>':'')+'</span></div>'
-   + '<div class="match"><div><div class="a">'+progDateLong(d)+' · '+progEsc(ko)+'</div><div class="b">'+progEsc(home)+' <em>v</em> '+progEsc(away)+'</div><div class="a" style="font-size:.8em">'+progEsc(progCompLabel(f))+'</div></div><div class="p"><small>PRICE</small>'+progEsc(price)+'</div></div></header><div class="stripe"></div><div class="body">'
+   + '<div class="match"><div><div class="a">'+progDateLong(d)+' · '+progEsc(ko)+'</div><div class="b">'+progEsc(home)+' <em>v</em> '+progEsc(away)+'</div><div class="a" style="font-size:.8em">'+progEsc(progCompLabel(f))+'</div></div>'+(price?'<div class="p"><small>PRICE</small>'+progEsc(price)+'</div>':'')+'</div></header><div class="stripe"></div><div class="body">'
    + (welcome ? '<div class="sec"><div class="welcome" data-k="'+welcome.k+'">'+progEsc(welcome.t)+'</div></div>' : '')
-   + '<div class="sec manager"><h2>From the manager</h2>'+(mgr?'<p class="mgrname">'+progEsc(mgr)+'</p>':'')
+   + '<div class="sec manager"><h2>'+((mgr || v436n.ours)?'From the manager':'A word from the club')+'</h2>'+(mgr?'<p class="mgrname">'+progEsc(mgr)+'</p>':'')
    + notes.map(function(t){ return '<p class="notes">'+progEsc(t)+'</p>'; }).join('') + '</div>'
    + '<div class="sec"><h2>Line-ups</h2>'
    + (progPlainList() ? '' : '<div class="field"><div class="ttl"><span>'+progEsc(home)+(hc?' ('+progEsc(hc)+')':'')+'</span><span>'+progEsc(away)+(ac?' ('+progEsc(ac)+')':'')+'</span></div>'+progPitchHTML(c)+'</div>')
@@ -50420,7 +50837,9 @@ function progBuild80s(c, rng, F, era){
     o += '<div class="sec"><h2>Fixtures to come</h2>'+fixturesH+'</div>';
   }
   if (groups) o += '<div class="sec"><h2>Half-time scores <i>letters A\u2013z</i></h2>'+progKeyHTML(c, groups, era)+'</div>';
-  o += '<div class="sec adsec"><h2>Around the town</h2>'+progAdsHTML(era, home)+'</div>'
+  var v436ads = v436foreign ? v436ForeignAds(era, home) : progAdsHTML(era, home);
+  if (v436ads) o += '<div class="sec adsec"><h2>Around the town</h2>'+v436ads+'</div>';
+  o += ''
     + '<div class="foot"><span class="n">'+(nh?'Next home match: v. '+progEsc(nh.opp)+' \u00b7 '+progEsc(progDateShort(nh.d)):'')+'</span>'+toPitch+close+'</div></div></article>';
   return o;
 }
@@ -57337,7 +57756,7 @@ function lcOurGroup(){ if (!leagueCup.groups) return null; return leagueCup.grou
 function lcFixtureFor(m, g, iso){
   var oppName = m.h===ourClubName ? m.a : m.h;
   var oppObj = lcClubObj(oppName);
-  return {opp:oppName, s:oppObj.s, home:m.h===ourClubName, played:false, res:null, isLCup:true, lcStage:'group', lcG:g.id, lcMd:m.md, roundName:LCUP_NAME+', '+lcGroupName(g)};
+  return {opp:oppName, s:oppObj.s, home:m.h===ourClubName, played:false, res:null, isLCup:true, lcStage:'group', lcG:g.id, lcMd:m.md, roundName:v437LcName()+', '+lcGroupName(g)};
 }
 /* ---------- setup ---------- */
 function lcSetup(startYear, label){
@@ -57436,7 +57855,7 @@ function lcScheduleOurLeg(t, li){
   var leg = t.legs[li];
   var oppName = t.a.n===ourClubName ? t.b.n : t.a.n, opp = lcClubObj(oppName);
   var neutral = leagueCup.fmt==='eng' ? elcIsNeutral(t, leg) : (t.stage==='sf' || t.stage==='fin' || leg.kind==='decider' || leg.kind==='replay' || leg.kind==='replay2');
-  var label = LCUP_NAME+', '+t.roundName+(t.kind==='two' && leg.kind==='leg1' ? ' (Leg 1)' : leg.kind==='leg2' ? ' (Leg 2)' : leg.kind==='decider' ? ' (Deciding Match)' : lcLegLabelOrdinal(t, leg));
+  var label = v437LcName()+', '+t.roundName+(t.kind==='two' && leg.kind==='leg1' ? ' (Leg 1)' : leg.kind==='leg2' ? ' (Leg 2)' : leg.kind==='decider' ? ' (Deciding Match)' : lcLegLabelOrdinal(t, leg));
   var f = {opp:oppName, s:opp.s, home:leg.h===ourClubName, played:false, res:null, isLCup:true, lcStage:t.stage, lcTie:t.id, lcLeg:li, roundName:label};
   if (neutral){ f.neutralVenue = lcVenueFor(t, leg); if (f.neutralVenue){ f.home = true; } }
   leg.fixtureRef = true;
@@ -57779,7 +58198,7 @@ function renderLeagueCupBox(){
 }
 function lcMigrateOnLoad(s){
   if (s && s.leagueCup && s.leagueCup.active) leagueCup = s.leagueCup; else leagueCup = {active:false};
-  try { if (typeof elcMaybeRemakeFormat==='function') elcMaybeRemakeFormat(); } catch(e){}
+  /* v437 : the format check (elcMaybeRemakeFormat) now runs at the end of the load, once this save's era, divisions and fixtures are in; run here it judged the save against whatever game was open before, and redrew a 1986-87 League Cup when loaded from a 1946 game */
 }
 function elcMaybeRemakeFormat(){
   if (!(leagueCup && leagueCup.active && leagueCup.fmt==='eng')) return;
@@ -57895,12 +58314,14 @@ var ELC_OFFSETS = {r1:[25,39], r2:[46,60], r3:[67,81], r4:[88,102], r5:[116,130]
    R3 11 Nov, R4 2 Dec, R5 18 Jan, SF 3/10 Feb, Final Saturday 13 March 1982 at Wembley, 3.00pm.
    First Division clubs have a bye to R2. The 1981-82 competition was still the unsponsored Football League Cup (Milk Cup from 1982-83). */
 var ELC_REAL_DATES = {
-  '1981-82': {r1:['1981-09-01','1981-09-15'], r2:['1981-10-07','1981-10-28'], r3:['1981-11-11'], r4:['1981-12-02'], r5:['1982-01-18'], sf:['1982-02-03','1982-02-10'], fin:['1982-03-13']}
+  '1981-82': {r1:['1981-09-01','1981-09-15'], r2:['1981-10-07','1981-10-28'], r3:['1981-11-11'], r4:['1981-12-02'], r5:['1982-01-18'], sf:['1982-02-03','1982-02-10'], fin:['1982-03-13']},
+  /* v436 : 1986-87 Littlewoods Cup (Wikipedia, 1986-87 Football League Cup round tables, the main midweek of each round): R1 26 Aug / 2 Sep, R2 23 Sep / 7 Oct, R3 29 Oct, R4 18 Nov, quarter-finals 21 Jan, semi-finals 11 / 25 Feb, Final Sunday 5 April 1987 at Wembley */
+  '1986-87': {r1:['1986-08-26','1986-09-02'], r2:['1986-09-23','1986-10-07'], r3:['1986-10-29'], r4:['1986-11-18'], r5:['1987-01-21'], sf:['1987-02-11','1987-02-25'], fin:['1987-04-05']}
 };
 var ELC_STAGES = ['r1','r2','r3','r4','r5','sf','fin'];
 var ELC_NAMES = {r1:'First Round', r2:'Second Round', r3:'Third Round', r4:'Fourth Round', r5:'Fifth Round', sf:'Semi-Final', fin:'Final'};
 /* real refusals (kept to what is documented : Manchester United 1968-69 and Everton 1970-71 declined to enter) */
-var ELC_DECLINED = {'1967':['Manchester United'], '1968':['Manchester United'], '1970':['Everton']};
+var ELC_DECLINED = {'1967':['Manchester United'], '1968':['Manchester United'], '1970':['Everton'], '1986':['Luton Town']}; /* v436 : Luton Town were thrown out of the 1986-87 Littlewoods Cup for refusing to admit Cardiff City supporters (Wikipedia, 1986-87 Football League Cup); Cardiff had a bye */
 function elcOn(){ return !!(leagueCup && leagueCup.active && leagueCup.fmt==='eng'); }
 function elcTieKind(stage, year){
   year = (year!=null) ? year : ((leagueCup && leagueCup.year!=null) ? leagueCup.year : ((typeof seasonStartYear==='function')?seasonStartYear():0));
@@ -61183,7 +61604,7 @@ function v405ShowProfile(id, targetId){
   if (typeof v408WireSpread==='function') v408WireSpread(el);
 }
 
-var RETROMATCH_VERSION = 'v436'; /* v436 : 1980s commentary step 1 (Chris 19 Nov): the men on the pitch named, set-piece takers kept, labels from the event, man of the match read out, the clock with the line, injury time played, shots and corners on the board counted from the commentary. Display only, no match-engine change. */ /* v435 : Phase 2 batch B. 1980s commentary (display only): cards worded by the rules of the day (none in English domestic football 1981-82 to 1986-87), sendings-off built up in stages, back-passes, keeper-error goals, pitch wording, club initials, build-up lines kept in the full commentary behind a button. No match-engine change. */ /* v434 : Phase 2 batch 1. Caps for seven men from RSSSF and match lists; Scottish club histories; real 1986-87 FA Cup dates (fixes own-division clubs ending short); hardened injury-parity check. No match-engine change. */ /* v433 : Phase 1 batch 6. Six more English home shirts (1981-82 Colchester, Blackpool, Mansfield, Northampton; 1986-87 Darlington, Lincoln) and Scottish League dates of birth, nationalities and caps from Wikipedia. No match-engine change. */ /* v432 : Phase 1 batch 5. English League dates of birth (761), nationalities (972) and caps (20) for 1981-82 and 1986-87 from 11v11; one build-up line reworded so it no longer reads as a spoiler. No match-engine change. */ /* v431 : Phase 1 batch 4. Scottish League home shirts for 1981-82 (34 of 38 clubs) and 1986-87 (36 of 38), read from Historical Football Kits drawings. No match-engine change. */ /* v430 : Phase 1 batch 3. Real Scottish League fixtures for 1981-82 and 1986-87 (londonhearts.com); a Scottish club now plays its real 36, 39 or 44 games (three or four meetings from 1975-76), not a 22- or 18-game double round robin. No engine change. */ /* v429 : Phase 1 batch 2. Real 1986-87 Football League fixtures for all 92 clubs (11v11 played dates), on the 1981-82 model. No engine change. */ /* v428 : Phase 1 batch 1. Scotland 1981-82 squads filled from match line-ups (Arbroath, Sons, Arab and Bankies archives): every club has a keeper and at least 16 real men; eight more 1980s home shirts (Preston, Bournemouth, Aldershot, Stockport in both eras) from Historical Football Kits drawings; Scottish Action Files no longer re-word Scottish Second Division as Premier. No engine change. */ /* v418 : World Cup screen is the approved wallchart (real results as they stand on the save date, finals and bracket filling in as played, buttons only, single title); Mick Harford's hair corrected to dark from a photo source. */ /* v417 : urgent home-page fix. Every blue or underlined link is now a button (yellow chips with a selected state on the 80s skin), no spaced colons on screen, the team-sheet deadline reads off the real match date and kick-off, and the 1981-82 League Cup First Round uses the real ties and byes. */ /* v416 : Phase 3 continue. Scotland 1975-76 and 1970-71 squads filled from sourced appearance lists, Wikipedia season/career-span pages and Wikidata P54/P413; 1970 and 1975 stay Coming later. */ /* v414 : Phase 3 continue. England 1970-71 Divisions 2-4 remaining 32 all-generated or near-all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1970-71 season page exists). 1970 and 1975 stay Coming later. */ /* v413 : Phase 3 continue. England 1975-76 Divisions 2-4 remaining 63 all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1975-76 season page exists). 1975 stays Coming later. */ /* v412 : Phase 3 start. England 1975-76 position retags (QPR, Luton, Hereford, Spurs, Forest) and real First Division squads for Birmingham, Wolves, Burnley and Sheffield United, sourced from Wikipedia season pages, 11v11 and Neil Brown (Wayback). England 1970-71 0-GK dumps replaced with sourced squads (Everton, West Bromwich Albion, Oxford, Orient, Halifax, Rotherham, Wrexham, Barnsley) and Luton 1970 junk rows removed. 1975 stays Coming later (Scotland not ready). Existing 1975/1970 saves keep the squads they were opened with. No engine change, no start-screen era opened. v411 : 1981-82 historical league fixtures for all four English divisions (played dates; FIXTURES_1981_82.md). No engine change. v410 : tidy-up: other-league tables in 1980s saves (WORLD_SEEDS for 1981-82 and 1986-87, one division per screen, missing countries hidden); formation wrinkles count in matches (4-4-2 in the hole, midfield-three two-holding / one-holding) as small capped effects within TACTICAL_EXTRAS_CAP 3.5, same rules for AI; 1981-82 regional scout slots filled with retired real players who have a sourced nationality, else generated and flagged in data only; sourced 1980s keeper shirts where found. No new v396 preview shipped live. v409 : United and Luton Town opening-squad league career tables to the save cut (29 Aug 1981 / 23 Aug 1986), current-spell apps counted through the previous complete season. No match-engine change. v408 : 1980s Action File centrepiece on the Squad screen, wired to live attributes, caps, personality and league careers (no invented careers); Data tab and unsourced wording removed; formation wrinkles on the pitch are visual only; transfers and league tables use section buttons; styles show the selected pair and point to the week's training. No match-engine change. v407 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
+var RETROMATCH_VERSION = 'v437'; /* v437 : Cup dates (Chris 19 Nov): 1981-82 League Cup named the Milk Cup, real 1986-87 Littlewoods Cup dates, the real 1982 FA Cup Final replay date (27 May), Luton Town out of the 1986-87 Littlewoods Cup. Friendly programmes: foreign sides with no researched squad get made-up names from their own country, every side names a number 12, the manager writes his own notes, a foreign host prints its own name, colours and language. Transfers: accepted offers complete (a man with no nationality on file no longer counts as an overseas player), the League rule is checked before money moves, old saves with a paid-but-missing signing complete on load. The telex tray shows only what still needs attention. */ /* v436 : 1980s commentary step 1 (Chris 19 Nov): the men on the pitch named, set-piece takers kept, labels from the event, man of the match read out, the clock with the line, injury time played, shots and corners on the board counted from the commentary. Display only, no match-engine change. */ /* v435 : Phase 2 batch B. 1980s commentary (display only): cards worded by the rules of the day (none in English domestic football 1981-82 to 1986-87), sendings-off built up in stages, back-passes, keeper-error goals, pitch wording, club initials, build-up lines kept in the full commentary behind a button. No match-engine change. */ /* v434 : Phase 2 batch 1. Caps for seven men from RSSSF and match lists; Scottish club histories; real 1986-87 FA Cup dates (fixes own-division clubs ending short); hardened injury-parity check. No match-engine change. */ /* v433 : Phase 1 batch 6. Six more English home shirts (1981-82 Colchester, Blackpool, Mansfield, Northampton; 1986-87 Darlington, Lincoln) and Scottish League dates of birth, nationalities and caps from Wikipedia. No match-engine change. */ /* v432 : Phase 1 batch 5. English League dates of birth (761), nationalities (972) and caps (20) for 1981-82 and 1986-87 from 11v11; one build-up line reworded so it no longer reads as a spoiler. No match-engine change. */ /* v431 : Phase 1 batch 4. Scottish League home shirts for 1981-82 (34 of 38 clubs) and 1986-87 (36 of 38), read from Historical Football Kits drawings. No match-engine change. */ /* v430 : Phase 1 batch 3. Real Scottish League fixtures for 1981-82 and 1986-87 (londonhearts.com); a Scottish club now plays its real 36, 39 or 44 games (three or four meetings from 1975-76), not a 22- or 18-game double round robin. No engine change. */ /* v429 : Phase 1 batch 2. Real 1986-87 Football League fixtures for all 92 clubs (11v11 played dates), on the 1981-82 model. No engine change. */ /* v428 : Phase 1 batch 1. Scotland 1981-82 squads filled from match line-ups (Arbroath, Sons, Arab and Bankies archives): every club has a keeper and at least 16 real men; eight more 1980s home shirts (Preston, Bournemouth, Aldershot, Stockport in both eras) from Historical Football Kits drawings; Scottish Action Files no longer re-word Scottish Second Division as Premier. No engine change. */ /* v418 : World Cup screen is the approved wallchart (real results as they stand on the save date, finals and bracket filling in as played, buttons only, single title); Mick Harford's hair corrected to dark from a photo source. */ /* v417 : urgent home-page fix. Every blue or underlined link is now a button (yellow chips with a selected state on the 80s skin), no spaced colons on screen, the team-sheet deadline reads off the real match date and kick-off, and the 1981-82 League Cup First Round uses the real ties and byes. */ /* v416 : Phase 3 continue. Scotland 1975-76 and 1970-71 squads filled from sourced appearance lists, Wikipedia season/career-span pages and Wikidata P54/P413; 1970 and 1975 stay Coming later. */ /* v414 : Phase 3 continue. England 1970-71 Divisions 2-4 remaining 32 all-generated or near-all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1970-71 season page exists). 1970 and 1975 stay Coming later. */ /* v413 : Phase 3 continue. England 1975-76 Divisions 2-4 remaining 63 all-generated clubs filled from 11v11 + Neil Brown (+ wiki where a real 1975-76 season page exists). 1975 stays Coming later. */ /* v412 : Phase 3 start. England 1975-76 position retags (QPR, Luton, Hereford, Spurs, Forest) and real First Division squads for Birmingham, Wolves, Burnley and Sheffield United, sourced from Wikipedia season pages, 11v11 and Neil Brown (Wayback). England 1970-71 0-GK dumps replaced with sourced squads (Everton, West Bromwich Albion, Oxford, Orient, Halifax, Rotherham, Wrexham, Barnsley) and Luton 1970 junk rows removed. 1975 stays Coming later (Scotland not ready). Existing 1975/1970 saves keep the squads they were opened with. No engine change, no start-screen era opened. v411 : 1981-82 historical league fixtures for all four English divisions (played dates; FIXTURES_1981_82.md). No engine change. v410 : tidy-up: other-league tables in 1980s saves (WORLD_SEEDS for 1981-82 and 1986-87, one division per screen, missing countries hidden); formation wrinkles count in matches (4-4-2 in the hole, midfield-three two-holding / one-holding) as small capped effects within TACTICAL_EXTRAS_CAP 3.5, same rules for AI; 1981-82 regional scout slots filled with retired real players who have a sourced nationality, else generated and flagged in data only; sourced 1980s keeper shirts where found. No new v396 preview shipped live. v409 : United and Luton Town opening-squad league career tables to the save cut (29 Aug 1981 / 23 Aug 1986), current-spell apps counted through the previous complete season. No match-engine change. v408 : 1980s Action File centrepiece on the Squad screen, wired to live attributes, caps, personality and league careers (no invented careers); Data tab and unsourced wording removed; formation wrinkles on the pitch are visual only; transfers and league tables use section buttons; styles show the selected pair and point to the week's training. No match-engine change. v407 : 1980s squad screens and player files, cut-date caps, sourced nationality, personality, GK attribute spreads, opening-squad date fixes, and a 1986-87 home-edge tweak (12.50). v404 : per-player morale and form (rolling last-five marks), shared cap with tactical extras, match captain when the skipper is out, press line after big games, cuttings otherwise, left-out talks with real squad men, and a Wants a rise flag. v403 : 1981-82 and 1986-87 programmes restore the full 66 layout, restyled for the early and late 80s (United Review only for United; Official Programme otherwise). v402 : live and AI engines share one sourced era goal target (RSSSF Football League Division 1 goals-per-game and home/draw/away, interpolated between offered seasons). v401 : 1980s match day (programme first, live possession, mid-match styles, full-time talk). v400 : contracts sheet shows listed and term chips together; committee letterheads do not take an F.C. suffix. v399 : 1980s transfers and scouting (freedom of contract from 1978, tribunal, loans, telex/fax tray, regional scouts). v398 : 1980s tactics extras from the preview (named XI on the pitch, per-player familiarity pips, informational clash warnings, opposition preview, qualitative freshness, and set-piece takers). No engine retune. Penalty, corner and free-kick nominations feed the existing taker functions when that man is in the eleven. v397 : small capped match effects for the v396 cosmetic styles (pass-and-move, quick counters, patient possession, deep/sitting, set-pieces training), combined defensive and attacking styles within TACTICAL_EXTRAS_CAP 3.5, and the same styles for AI clubs. v396 : 1980s tactics and training core (era formation list, split styles, training foci, pitch orientation) built live from the preview, with no engine retune. v395 : Club Office overhaul from the preview (Finances / Ground / Staff chips, one bank figure, our transfer history, staff hire and sack, held-back development chips) and sourced 1981-82 First Division ground capacities. v394 : FA Cup Final (and other cup finals) stay on the calendar after the last league match, with a Final tab, status, news and Vidiprinter on the day; midweek catch-ups are spread with a weekly cap, a games-in-hand run-in, and no spaced colons on the cup header or season-over line. v393 : AI league home edge restored after the v392 flatten (BG/ENGINE_HOME_EDGE 10, BG_GOALS_PER_GAME 2.25, scale stays 55) and the 1981-82 fixtures/cups pass (league opens 29 Aug, 42 games, no First Division league on FA Cup R3 or Final day, sourced League Cup dates, Charity Shield news). v392 : match engine balance, vidiprinter type/speed/font, era picker, scouting re-watch. v391 : discipline, injuries and vidiprinter typing. v390 : the youth panel is era-specific (ground-staff in the 1940s-50s, apprentices from the 1960s, apprentices/associate schoolboys in the 1980s with the YTS from 1983), with sourced 1981 apprentice pay of £25 a week, short in-world copy, the correct reserve league, and no unexplained * Rep markers. Also: 1981 commentary uses mid-60s positional vocabulary (midfield, full-backs, centre-backs, front men, wide men), weights chance pairings so defenders rarely finish except at set pieces, and keeps the build-up actor as the goal-line provider on every attack. Also: 1981-82 League Cup R2 (and R1) stay two-legged — level after the second leg goes to extra time, then away goals, then penalties (Stoke v Manchester City 1981-82); a mid-save one-leg R2 with a pending replay is converted on load into the second leg, venue reversed, with an aggregate. Also: era-correct programme prices (pre-decimal d/s until Decimal Day, sourced p after; 1981-82 United 25p, red11.org), 1940s leftover tokens swept off 1981 screens, sourced 4% League levy (3% from 1985) with the away share abolished from 1983-84, one user-bank source of truth (status bar, Club Office, board, transfers) with Club Office refreshed on view and the ground-line spaced colon removed. Also: League Cup page from 1960-61 (era-named, 1981-82 format: Div 1 enter R2 two legs, R3-R5 single with midweek replays, semis two legs, Wembley final), club-name capitals swept via era-case (EURO_CLUBS), UEFA Cup dates as '16 September 1981' with full country names and 'are not involved' / two-leg final wording, World Cup page follows the save date (1982 Spain qualifying and finals, real results only up to the current date), European Championship page under Other from 1960 (unsourced editions show no fixtures yet), subtitle loses double colons, status 'Next v Swansea City'. Also: goal-count wording uses the post-goal score (not the margin), build-up names the actual crosser/passer, richer 1981 goal copy, thousands commas on every pound render, era-gated formations (no WM/2-3-5 in the 1980s; out-of-era shapes migrate on load), sourced skin tones on player cards, status-bar spacing, varied full-time/MOTM wrap-ups, no visible dagger on generated names, and kick-off/weather/pitch follow the real time of day and UK month. v388 : 1981 (and 1970/75/86) stubs reapplied on load, so AI clubs first opened after a reload keep their sourced era squads (Watford: Barnes, Blissett, ...) rather than falling back to 1946; a cached wrong-era AI squad is repaired without touching the user's team. Club panel: no 'after duty' once Entertainments Duty has ended, thousands commas on money, implausibly low last home gates recomputed from sourced 1981 figures. v387 : Two Elevens on-the-day rows add up (show concede/shape/home terms; no hidden AI boost). 1981 leftover WM no longer labels era-typical sides. v386 : AI clubs get Two Elevens modifiers (training, formation familiarity, positional fit, tactical extras, injuries) in both the table and the match engine. v385 : CTA prominence, vidiprinter contrast, on-pitch commentary names, sourced 1981-82 league gates and half-time crowd call, varied build-up and distinct corner/cross scorers, 1980s wrinkle and formation-order labels, compact injury tag, no historic intl news dump on a new save, era-scaled match bonuses and a 1981 money floor, era-styled generated staff and scout names. v384 : sourced Home Championship 1966-84, era-correct positions from the 1970s, match/function-bar contrast, match-day commentary/subs, dated Club News. v383 : real named assistants where sourced; vacant post and advertised applicants otherwise. v382 : era-scaled ground upkeep, travel and signing-on fees (no leftover 1946 £18 weekly bill in the 1980s). v381 : 80s contrast (Action File card, Two Elevens, theme-match WCAG sweep) and strip player-facing developer notes. v380 : remove fourth-wall wording from foreign, what-if and pre-emption news. v379 : what-if offers for sourced foreign players who never joined a British club 1978-89. v378 : expand sourced English foreign arrivals 1978-89 and wire Scotland (no SFA residency ban; dated Scottish arrivals + the same pre-emption mechanic). v377 : 1978 English foreign-player unlock (enforced pre-1978 ban, two-permit cap, sourced real arrivals, pre-emption offers). v376 : 80s commentary contrast (goals/minutes readable on cream) and heavy Anton MATCH! masthead. v375 : punchy 1980s in-game skin (Barlow body, readable LEAGUE PLAYED, finished status bar). v374 : era-correct substitutes (match-day wording and UI), trialist/free/youth/generated wages from ERA_ECONOMICS, era-appropriate generated names. v373 : real 1981-82 Scotland opening squads; specific 1981/1986 Scotland positions; season-keyed sourced ground capacities (SCO 1975/81/86, ENG 81/86); wiki winger/wide labels never fall back to Centre Midfielder (Chris Waddle). v372 : country-and-season-keyed cup names (Milk/Littlewoods vs Bell's/Skol), even 80s menubar, club-and-era-scoped DOBs (Colin Gibson), specific 1981/1986 ENG positions. v371 : league position hidden until a league match is played; non-league headings follow nonLeaguePyramidName() by season. v370 : embed Anton/Alfa display faces, align DATA, sourced 81/86 full-back sides, drop unsourced masthead prices. v369 : era leftover chrome + 1980s/70s type pass. v368 : 1960s-on scouting finds real Football League (and Scottish) gems from the save, scaled to division. v367 : sided positions and matching 4-4-2-era lineup slots. v366 : assistant manager staff post. v365 : era-relevant formations and styles. v364 : sourced positions and era vocabulary. v363 : Home Championship ends 1983-84; player cards follow the current season with 70s/80s skins; nav data link matches menubar type; staff titles map by season. v362 : start-up lists are one item per row, punchy headings, short notes, no default blue underlines; also v361 : punchy start-up screen (title, era, country, club, load) with compact text links; era skins take over once a save starts or loads; also v360 : 1981-82 ENG Fourth Division real opening squads; also v359: era economics (wages, bank, gates, fees, non-league caps), pre-season friendlies from 1961-62, era-aware youth/amateur language, compact UI type scale; also v358 : 1981-82 ENG Third Division real opening squads; era-aware manager job title (secretary-manager only to 1958-59); also v357: 1981-82 ENG Second Division real opening squads; also v356: 1981-82 ENG First Division real opening squads; also v355: 1986-87 sourced DOBs, sourced 1970-86 referees, ENG 3rd/4th picker, SCO Second Division picker/table, Spain Grupo II label, era-true non-league lists, snapshot uses the live era's clubs. v354 : snapshot/audit hook real DOBs and referee pools (coverage + thin/pool-only flags). v353 : season rules calendar, snapshot loader, data audit tool. v352 : quick data-audit + history-audit fixes (no new players/managers). v351 : staged era commentary, season-auto voices, tension layer. v350 : Turnstile and Programme masthead season lines follow the save's current season (Pink has no fixed season line in the masthead; the status bar already uses seasonLabel); v349 : 1986-87 England + Scotland brought up to the 1946-47 standard — real sourced squads and a real sourced opening manager for all 130 clubs (92 ENG + 38 SCO), no 1975/1981 name reuse, no generated pads; v348 : 1986-87 England + Scotland (first Football League play-offs, including one top-flight club in the Second Division play-offs; English clubs banned from Europe after Heysel; Littlewoods Cup / Skol Cup; SCO Premier 12 / First 12 / Second 14; ENG 3pts, SCO 2pts, one League substitute); v347 : Match (1980s) skin adopted from 1981-82 by current season (masthead + all screens, compact text links); v346 : 1981-82 England + Scotland (ENG 3pts, SCO 2pts, GD, Shoot! until Match skin approved); v345 : 1975-76 England + Scotland (Premier Division begins; ENG goal average 1975-76, GD from 1976-77; Shoot! via season skin); v344 : skin / programme chrome / commentary voice follow CURRENT season (pink..1958, turnstile 1959-65, programme 1966-69, Shoot! 1970-80; 1981+ stays Shoot until 1980s skin approved); plain XI already season-based from 1969; v343 : 1970s Shoot! / Goal magazine theme adopted for 1970-71 (ENG+SCO); 1975-76 era un-paused for next version; v342 : 1970-71 gap fill (real squads Wikipedia/Wikidata, managers, colours, grounds audit); v341 : 1970-71 England + Scotland start (existing programme theme; Shoot! preview not adopted); plain numbered XI via progEra fallback; v340 : new-game flow is ERA then COUNTRY then CLUB (compact text links); existing saves still load ; v339 : person and club names are never re-cased by the era sentence-case layer (Fosco Risorti, not Fosco risorti); Team Selection VIEW is a small text link ; v338 : the matchday programme is always the HOME club's (home colours, notes, pen pictures; we appear as the visitors on away days) ; v337 : foreign club names keep their real capitals in tables (Hellas Verona, Serie B) ; v326 : REAL sourced referees per era and country (no more invented pool / misattributed name); era commentary built into the game (1946/1950 present-tense wireless + past-tense newspaper report at full time, 1959 floodlit newsreel, 1966 highlights voice), every line driven by a sim event; short club names (Wolves, Spurs, Forest...) with the full name on first mention in the report; clock shown cleanly (HT/FT, 46 after the interval, 45+n, 90+n); 8 more real players' dates of birth sourced. v325 : real players' ages worked out from real dates of birth (the squad was being built against a stale season label, so 1950/1959/1966 starts showed real men as 15) ; v324 : era matchday programmes (1946/1950 folded sheet with a plain numbered list and half-time key, 1959 two-colour with pen portraits, 1966 glossy with Today's Visitors and a pitch in each side's real formation), all read from the save and different every match ;  v323a : every number on a player card (attributes, ability, reputation, wage) is rounded to a whole number at display ; v323 : era player cards (1946 cigarette card, 1959 gum card, 1966 sticker) in the Player File, drawn from the save's own data ; the Scottish status bar shows the real division (DIV A / DIV B before 1955-56, DIV 1 / DIV 2 after) instead of the English DIV 1 ; v322 : (merged on v321b)  Scotland in 1946, 1950 and 1959 (Division A/B/C, real clubs, managers, squads, League Cup and Scottish Cup, the 1955 enlargement) ; v321b : sentence-case layer cases a word split by hot-letter spans as one word, commentary name case, scorer spacing ; v321a : modal boxes cap at 90vh and scroll ; v321 : League Cup ties settled by the rules of the day (extra time, second replays, penalties, play-offs) ; v320 : Europe polish (calibrated nations, sourced venues and editions, League Cup route) ; v319 : European competitions ; v318 : Scottish League Cup (1966-67 sectional format), job offers and cross-border moves in Scotland ; v317 : Scotland 1966-67 (Division One + Two, real clubs/managers/squads, Scottish Cup, start at a Scottish club); v316 : era-accurate formation timeline (adoption by date, novelty cost, AI clubs adopt gradually, true pitch shapes for 4-4-2/4-2-4/4-3-3/sweeper); v315 : 1966-67 events, real signings on their dates, manager changes, corrected start squads; v314 : Div 2-4 1966-67 squads + managers, all four 1966 tiers playable */
 function showHomeScreen(){
   beginRetroStartup();
   var existing = document.getElementById('home-screen-overlay'); if (existing) existing.remove();
